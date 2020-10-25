@@ -1,0 +1,129 @@
+{
+"Actor": {
+  "types": ["character"],
+  "templates": {
+    "common": {
+      "age": 0,
+      "destinyPoints": 0,
+      "derivedStats": {
+        "intrigueDefense": {
+          "value": 0,
+          "modifier": 0
+        },
+        "composure": {
+          "value": 0,
+          "modifier": 0,
+          "current": 0
+        },
+        "combatDefense": {
+          "value": 0,
+          "modifier": 0
+        },
+        "health": {
+          "value": 0,
+          "modifier": 0,
+          "current": 0
+        },
+        "armorRating": {
+          "value": 0,
+          "modifier": 0
+        }
+      },
+      "damage": 0,
+      "injuries": 0
+   },
+    "character-common": {
+      "ancestries": [],
+      "gender": "",
+      "house": "",
+      "height": 1.72,
+      "weight": "70",
+      "eyeColor": "",
+      "hairColor": "",
+      "mannerisms": "",
+      "distinguishingFeatures": "",
+      "wounds": [],
+      "personalHistory": "",
+      "owned": {
+        "equipments": [],
+        "weapons": [],
+        "armors": [],
+        "qualities": [],
+        "drawbacks": [],
+        "abilities": [],
+        "powers": []
+      },
+      "allies": "",
+      "enemies": "",
+      "oaths": "",
+      "heraldry": "",
+      "portrait": "",
+      "motto": "",
+      "coins": ""
+    }
+  },
+  "character": {
+    "templates": ["common", "character-common"]
+  }
+},
+"Item": {
+  "types": ["armor", "weapon", "poison", "ability", "equipment"],
+  "templates": {
+    "physicalItem": {
+      "quantity": 1,
+      "weight": 0,
+      "cost": ""
+    },
+    "itemDescription": {
+      "description": "",
+      "type": ""
+    }
+  },
+  "armor": {
+    "templates": [
+      "itemDescription",
+      "physicalItem"
+    ],
+    "armorRating": 0,
+    "armorPenalty": 0,
+    "bulk": 0
+  },
+  "weapon": {
+    "templates": [
+      "itemDescription",
+      "physicalItem"
+    ],
+    "specialty": "",
+    "training": 0,
+    "damage": "",
+    "qualities": ""
+  },
+  "poison": {
+    "templates": [
+      "itemDescription",
+      "physicalItem"
+    ],
+    "delivery": "",
+    "virulence": "",
+    "frequency": "",
+    "toxicity": 0,
+    "diagnosis": 0,
+    "effects": "",
+    "recovery": ""
+  },
+  "ability": {
+    "templates": [
+      "itemDescription"
+    ],
+    "rating": 2,
+    "modifier": 0,
+    "specialties": []
+  },
+  "equipment": {
+    "templates": [
+      "itemDescription",
+      "physicalItem"
+    ]
+  }
+}
+}

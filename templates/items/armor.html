@@ -1,0 +1,56 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Item Sheet Header --}} {{>
+    "systems/chroniclesystem/templates/items/partials/header.html"}}
+    <main class="sheet-body flexrow">
+        <section class="item-stats">
+            <header class="header-field">
+                <span>Details</span>
+            </header>
+            <div class="form-group">
+                <label for="data.armorRating">Rating:</label>
+                <span class="form-fields">
+                  <input
+                          class="small-field"
+                          name="data.armorRating"
+                          type="text"
+                          value="{{item.data.armorRating}}"
+                          placeholder="Rating"
+                          data-dtype="Number"
+                  />
+                </span>
+            </div>
+            <div class="form-group">
+                <label for="data.armorPenalty">Penalty</label>
+                <span class="form-fields">
+                  <input
+                          class="small-field"
+                          name="data.armorPenalty"
+                          type="text"
+                          value="{{item.data.armorPenalty}}"
+                          placeholder="Penalty"
+                          data-dtype="Number"
+                  />
+                </span>
+            </div>
+            <div class="form-group">
+                <label for="data.bulk">Bulk</label>
+                <span class="form-fields">
+                  <input
+                          class="small-field"
+                          name="data.bulk"
+                          type="text"
+                          value="{{item.data.bulk}}"
+                          placeholder="Bulk"
+                          data-dtype="Number"
+                  />
+                </span>
+            </div>
+            {{>
+            "systems/chroniclesystem/templates/items/partials/physical-item.html"}}
+        </section>
+        <section class="description">
+            {{>
+            "systems/chroniclesystem/templates/items/partials/description.html"}}
+        </section>
+    </main>
+</form>

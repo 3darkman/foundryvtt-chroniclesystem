@@ -1,0 +1,359 @@
+.worldbuilding {
+  /* Sheet Tabs */
+  /* Items List */
+  /* Attributes */
+}
+.worldbuilding .window-content {
+  height: 100%;
+  padding: 5px 10px 5px 5px;
+  overflow-y: hidden;
+  background: #DCE2EF;
+}
+
+.chroniclesystem.sheet.item .header-fields .itemname {
+  vertical-align: middle;
+  height: 100%;
+}
+
+.chroniclesystem.sheet.item h1.itemname input {
+  width: 100%;
+  vertical-align: middle;
+  margin: 0;
+}
+
+.chroniclesystem.sheet.item .sheet-header {
+  overflow: hidden;
+  flex-wrap: nowrap;
+  flex: 0 0 72px;
+  height: 72px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-bottom: 5px;
+  color:white;
+  vertical-align: middle;
+}
+
+.chroniclesystem.sheet.item .profile-img-container {
+  position: relative;
+  width: 64x;
+  max-width: 64px;
+  height: 64x;
+  margin: 5px;
+}
+.worldbuilding .sheet-header h1.charname {
+  height: 50px;
+  padding: 0px;
+  margin: 5px 0 0 0;
+  border-bottom: 0;
+}
+.worldbuilding .sheet-header h1.charname input {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.chroniclesystem .small-field {
+  width: 50px;
+}
+
+.chroniclesystem .medium-field {
+  width: 100px;
+}
+
+.chroniclesystem .big-field {
+  width: 150px;
+}
+
+.worldbuilding .resource {
+  height: 40px;
+  text-align: center;
+}
+.worldbuilding .resource input {
+  height: 28px;
+}
+
+.chroniclesystem input {
+  background: white;
+  border: white 0px;
+}
+
+.chroniclesystem.sheet textarea {
+  background: white;
+  border: white 0px;
+}
+
+.worldbuilding .tabs {
+  height: 40px;
+  border-top: 1px solid #AAA;
+  border-bottom: 1px solid #AAA;
+}
+
+.worldbuilding .tabs .item {
+  line-height: 40px;
+  font-weight: bold;
+}
+
+.worldbuilding .tabs .item.active {
+  text-decoration: underline;
+  text-shadow: none;
+}
+
+.chroniclesystem.sheet.item .sheet-body {
+  height: auto;
+}
+
+.worldbuilding .sheet-body .tab {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.chroniclesystem.sheet.item .header-fields {
+  display: flex;
+}
+
+.chroniclesystem.sheet.actor .header-fields .complements {
+  margin: 5px -5px 5px 0px;
+}
+
+.chroniclesystem.sheet.actor .header-fields .complements input {
+  height: 27px;
+  margin: 0 5px;
+}
+
+.chroniclesystem.sheet.actor .abilities .header-field {
+  margin-left:0px;
+  margin-right: 8px;
+}
+
+.chroniclesystem.sheet .header-field {
+  background: #005390;
+  color: white;
+  padding: 5px;
+  margin: 5px 0 0 5px;
+  text-align: center;
+}
+
+.chroniclesystem.sheet .derived-statistics .form-group {
+  margin: 5px 0 0 5px;
+  align-items: stretch;
+  align-self: stretch;
+}
+
+.chroniclesystem.sheet .derived-statistics input {
+  text-align: center;
+  height: 100%;
+}
+
+.chroniclesystem.sheet .derived-statistics label {
+  margin-right: 5px;
+}
+
+.chroniclesystem.sheet .derived-statistics b {
+  text-align: center;
+}
+
+.chroniclesystem.sheet.item .sheet-body .description .editor {
+  min-height: 300px;
+  padding: 0 3px;
+  background: white;
+  border: white 0px;
+}
+
+.chroniclesystem.sheet.item .sheet-body .poison .editor {
+  min-height: 150px;
+  padding: 0 3px;
+  background: white;
+  border: white 0px;
+}
+
+.chroniclesystem.sheet-item .sheet-body  {
+  align-items: stretch;
+
+}
+
+.chroniclesystem.sheet.item .form-group {
+  margin: 5px 0 0 5px;
+}
+
+.chroniclesystem.sheet label {
+  background: #005390;
+  color: white;
+  padding: 5px;
+}
+
+.chroniclesystem.sheet input:read-only {
+  color:gray;
+}
+
+.chroniclesystem.sheet.item .form-group input {
+  margin: 0 0 0 5px;
+  height: 34px;
+}
+
+.chroniclesystem.sheet.item .sheet-body .item-stats {
+  flex-grow: 1;
+}
+
+.chroniclesystem.sheet.item .sheet-body .description {
+  flex-grow: 2.5;
+}
+
+.chroniclesystem.sheet.item .sheet-body .poison {
+  flex-grow: 2;
+}
+
+.worldbuilding .item-list {
+  list-style: none;
+  margin: 7px 0;
+  padding: 0;
+  overflow-y: auto;
+}
+.worldbuilding .item-list .item {
+  height: 30px;
+  line-height: 24px;
+  padding: 3px 0;
+  border-bottom: 1px solid #BBB;
+}
+.worldbuilding .item-list .item img {
+  flex: 0 0 24px;
+  margin-right: 5px;
+}
+.worldbuilding .item-list .item-name {
+  margin: 0;
+}
+
+.chroniclesystem.sheet.item .sheet-header .item-control {
+  flex: 0 0 36px;
+  margin-left: 10px;
+  align-self: center;
+  align-items: center;
+  color: black;
+  line-height: normal;
+}
+
+.worldbuilding .attributes-header {
+  padding: 5px;
+  margin: 5px 0;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid #AAA;
+  border-radius: 2px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.worldbuilding .attributes-header .attribute-label {
+  flex: 1.5;
+}
+.worldbuilding .attributes-header .attribute-control {
+  flex: 0 0 20px;
+}
+.chroniclesystem .abilities-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: scroll;
+  height: 100%;
+}
+
+.tab[data-tab].active {
+  height: 100%;
+}
+
+.chroniclesystem main {
+  height: 100%;
+}
+
+.chroniclesystem .abilities-list a.attribute-control {
+  flex: 0 0 20px;
+  text-align: center;
+  line-height: 28px;
+  border: none;
+
+}
+.worldbuilding.sheet.actor {
+  min-width: 560px;
+  min-height: 420px;
+}
+.worldbuilding.sheet.item {
+  min-width: 460px;
+  min-height: 400px;
+}
+
+.chroniclesystem .ability-value {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  background: white;
+  flex: 0.2;
+  margin: 3px;
+}
+.chroniclesystem .ability-value a {
+  font-size: 16px;
+  text-align: center;
+  flex: 1;
+}
+
+.chroniclesystem li .ability {
+  margin: 0 2px;
+}
+
+.chroniclesystem .ability-label {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  background: #005390;
+  margin: 3px;
+  flex: 0.8;
+}
+
+.chroniclesystem .ability-label a {
+  font-size: 10px;
+  text-align: center;
+  flex: 1;
+  margin: 3px;
+  color: white;
+  text-transform: uppercase;
+}
+
+.chroniclesystem .ability-label a:first-letter {
+  font-size: 12px;
+}
+
+.chroniclesystem .ability-specialities {
+  display: table;
+  background: white;
+  height: auto;
+  min-height: 31px;
+  padding: 3px;
+  margin: 3px;
+}
+
+.chroniclesystem.sheet .header-field.header-title {
+  flex: 1.95;
+}
+
+.chroniclesystem.sheet .header-field-add {
+  flex: 0.05;
+}
+
+.chroniclesystem.sheet .specialties-list {
+  align-items: center;
+  padding: 0px;
+  margin: 5px 5px 5px 2px;
+}
+
+.chroniclesystem.sheet .specialties-list .specialty-control {
+  flex: 0.1;
+  align-self: center;
+  margin-left: 2px;
+}
+
+.chroniclesystem.sheet .specialties-list .specialty .big-field {
+  flex: 2;
+}
+
+.chroniclesystem.sheet .specialties-list .specialty input {
+  text-align: center;
+  margin: 3px;
+}

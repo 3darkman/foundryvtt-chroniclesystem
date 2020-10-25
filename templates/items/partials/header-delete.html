@@ -1,0 +1,15 @@
+<header class="sheet-header" data-item-id="{{item._id}}">
+    <div class=" profile-img-container">
+        <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
+    </div>
+    <div class="header-fields">
+        <h1 class="itemname">
+            <input name="name" type="text" value="{{item.name}}" placeholder="Name"
+                   data-dtype="String" />
+        </h1>
+        {{#if item.isOwned}}
+        <a class="item-control item-delete" title="Delete"><i
+                class="fas fa-trash fa-2x"></i></a>
+        {{/if}}
+    </div>
+</header>

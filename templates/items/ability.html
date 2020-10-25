@@ -1,0 +1,85 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Item Sheet Header --}} {{>
+    "systems/chroniclesystem/templates/items/partials/header-delete.html"}}
+    <main class="sheet-body flexrow">
+        {{#if item.isOwned}}
+        <section class="item-stats">
+            <header class="header-field">
+                <span>Details</span>
+            </header>
+            <div class="form-group">
+                <label for="data.rating">Rating:</label>
+                <span class="form-fields">
+                  <input
+                          class="small-field"
+                          name="data.rating"
+                          type="text"
+                          value="{{item.data.rating}}"
+                          placeholder="Rating"
+                          data-dtype="Number"
+                  />
+                </span>
+            </div>
+            <div class="form-group">
+                <label for="data.rating">Modifier:</label>
+                <span class="form-fields">
+                  <input
+                          class="small-field"
+                          name="data.modifier"
+                          type="text"
+                          value="{{item.data.modifier}}"
+                          placeholder="Modifier"
+                          data-dtype="Number"
+                  />
+                </span>
+            </div>
+        </section>
+        {{/if}}
+        <section class="description">
+            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+            {{#if item.isOwned}}
+            <header class="header-field flexrow">
+                <div class="header-title">
+                    <span>Specialties</span>
+                </div>
+                <div class="header-field-add">
+                    <a class="specialty-create" data-type="skill"><i class="fa fa-plus"></i></a>
+                </div>
+            </header>
+            <ol class="specialties-list resizable" data-base-size="150">
+
+                {{#each data.specialties as |specialty id|}}
+                    {{log id}}
+                    <li class="specialty flexrow" data-item-id="{{id}}">
+                        <input
+                                class="big-field"
+                                type="text"
+                                name="data.specialties.{{id}}.name"
+                                value="{{specialty.name}}"
+                                placeholder="Specialty Name"
+                                data-dtype="String"
+                        />
+                        <input
+                                class="small-field"
+                                type="text"
+                                name="data.specialties.{{id}}.rating"
+                                value="{{specialty.rating}}"
+                                placeholder="Rating"
+                                data-dtype="Number"
+                        />
+                        <input
+                                class="small-field"
+                                type="text"
+                                name="data.specialties.{{id}}.modifier"
+                                value="{{specialty.modifier}}"
+                                placeholder="Modifier"
+                                data-dtype="Number"
+                        />
+                        <a class="specialty-control" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                    </li>
+                {{/each}}
+            </ol>
+        </section>
+        {{/if}}
+    </main>
+</form>

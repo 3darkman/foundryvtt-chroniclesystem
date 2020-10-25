@@ -1,0 +1,68 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Item Sheet Header --}} {{>
+    "systems/chroniclesystem/templates/items/partials/header.html"}}
+    <main class="sheet-body flexrow">
+        <section class="item-stats">
+            <header class="header-field">
+                <span>Details</span>
+            </header>
+            <div class="form-group">
+                <label for="data.specialty">Specialty:</label>
+                <span class="form-fields">
+                  <input
+                          class="small-field"
+                          name="data.specialty"
+                          type="text"
+                          value="{{item.data.specialty}}"
+                          placeholder="Specialty"
+                          data-dtype="String"
+                  />
+                </span>
+            </div>
+            <div class="form-group">
+                <label for="data.training">Training:</label>
+                <span class="form-fields">
+                  <input
+                          class="small-field"
+                          name="data.training"
+                          type="text"
+                          value="{{item.data.training}}"
+                          placeholder="Training"
+                          data-dtype="Number"
+                  />
+                </span>
+            </div>
+            <div class="form-group">
+                <label for="data.damage">Damage:</label>
+                <span class="form-fields">
+                  <input
+                          class="small-field"
+                          name="data.damage"
+                          type="text"
+                          value="{{item.data.damage}}"
+                          placeholder="Damage"
+                          data-dtype="String"
+                  />
+                </span>
+            </div>
+            {{> "systems/chroniclesystem/templates/items/partials/physical-item.html"}}
+            <header class="header-field">
+                <span>Qualities</span>
+            </header>
+            <div class="form-group">
+                  <span class="form-fields">
+                  <textarea
+                          style="height: 72px"
+                          name="data.qualities"
+                          type="text"
+                          placeholder="qualities"
+                          data-dtype="String"
+                  >{{item.data.qualities}}</textarea>
+                </span>
+            </div>
+        </section>
+        <section class="description">
+            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+        </section>
+    </main>
+</form>

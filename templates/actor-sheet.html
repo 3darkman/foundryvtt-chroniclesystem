@@ -1,0 +1,30 @@
+<form class="{{cssClass}}" autocomplete="off">
+
+    {{!-- Sheet Header --}}
+    <header class="sheet-header">
+        <div class="header-fields">
+            <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+            <div class="complements flexrow">
+                <label  class="attribute-label"> Ancestry: </label>
+                <input  class="medium-field flex2" type="text"  name="data.house"  value="{{data.house}}"  data-dtype="String"/>
+                <label  class="attribute-label"> Age: </label>
+                <input  class="small-field"  type="text"  name="data.age"  value="{{data.age}}"  data-dtype="Number"/>
+                <label  class="attribute-label"> Gender: </label>
+                <input  class="medium-field"  type="text"  name="data.gender"  value="{{data.gender}}"  data-dtype="String"/>
+            </div>
+        </div>
+    </header>
+
+    {{!-- Sheet Tab Navigation --}}
+    <nav  class="flexrow tabs"  data-group="primary">
+        <a  class="item"  data-tab="abilities">Abilities</a>
+        <a  class="item"  data-tab="qualities">Qualities</a>
+    </nav>
+
+    <main class=”sheet-body”>
+        {{> "systems/chroniclesystem/templates/actors/partials/abilities-tab.html"}}
+        <div  class="tab qualities"  data-group="primary"  data-tab="qualities">
+            Qualities
+        </div>
+    </main>
+</form>
