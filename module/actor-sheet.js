@@ -27,7 +27,6 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   /** @override */
   getData() {
     const data = super.getData();
-    console.log(data);
     data.dtypes = ["String", "Number", "Boolean"];
 
     data.itemsByType = {};
@@ -122,12 +121,22 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     let data;
     try {
       data = JSON.parse(event.dataTransfer.getData('text/plain'));
-      console.log(data);
     }
     catch (err) {
       return;
     }
     return super._onDrop(event);
+  }
+
+  async _onDropItemCreate(itemData) {
+    const item = this.actor.items.find(i => i.name === itemData.name);
+    let embeddedItem;
+    if (item === null) {
+      embeddedItem = this.actor.createEmbeddedEntity("OwnedItem", itemData);
+    } else {
+      embeddedItem = this.actor.getEmbeddedEntity("OwnedItem", item._id);
+    }
+    return embeddedItem;
   }
 
 }
