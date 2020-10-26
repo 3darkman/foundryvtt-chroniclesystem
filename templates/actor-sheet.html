@@ -15,16 +15,16 @@
         </div>
     </header>
 
+
     {{!-- Sheet Tab Navigation --}}
-    <nav  class="flexrow tabs"  data-group="primary">
+    <nav  class="sheet-tabs flexrow tabs"  data-group="primary">
         <a  class="item"  data-tab="abilities">Abilities</a>
         <a  class="item"  data-tab="qualities">Qualities</a>
     </nav>
 
-    <main class=”sheet-body”>
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+        {{> "systems/chroniclesystem/templates/actors/partials/qualities-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/abilities-tab.html"}}
-        <div  class="tab qualities"  data-group="primary"  data-tab="qualities">
-            Qualities
-        </div>
-    </main>
+    </section>
 </form>
