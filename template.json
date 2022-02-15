@@ -51,7 +51,8 @@
         "qualities": [],
         "drawbacks": [],
         "abilities": [],
-        "powers": []
+        "powers": [],
+        "benefits": []
       },
       "allies": "",
       "enemies": "",
@@ -67,7 +68,7 @@
   }
 },
 "Item": {
-  "types": ["armor", "weapon", "poison", "ability", "equipment"],
+  "types": ["armor", "weapon", "poison", "ability", "equipment", "benefit", "drawback"],
   "templates": {
     "physicalItem": {
       "quantity": 1,
@@ -118,6 +119,18 @@
     "rating": 2,
     "modifier": 0,
     "specialties": []
+  },
+  "benefit": {
+    "categories": "",
+    "requirements": "",
+    "sorcerousArtAccess": false
+  },
+  "drawback": {
+    "requireSorcerousArt": false,
+    "isAStricture": false,
+    "isAFlaw": false,
+    "flawAttribute": "",
+    "requirements": ""
   },
   "equipment": {
     "templates": [

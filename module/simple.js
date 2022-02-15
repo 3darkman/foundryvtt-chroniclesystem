@@ -5,7 +5,7 @@
  */
 
 // Import Modules
-import { SimpleActor } from "./actor.js";
+import { ChronicleSystemActor } from "./actor.js";
 import { ChronicleSystemItemSheet } from "./item-sheet.js";
 import { ChronicleSystemActorSheet } from "./actor-sheet.js";
 import { preloadHandlebarsTemplates } from "./preloadTemplates.js";
@@ -30,7 +30,7 @@ Hooks.once("init", async function() {
     registerCustomHelpers();
 
 	// Define custom Entity classes
-    CONFIG.Actor.entityClass = SimpleActor;
+    CONFIG.Actor.documentClass = ChronicleSystemActor;
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);

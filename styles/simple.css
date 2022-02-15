@@ -36,9 +36,9 @@
 
 .chroniclesystem.sheet.item .profile-img-container {
   position: relative;
-  width: 64x;
+  width: 64px;
   max-width: 64px;
-  height: 64x;
+  height: 64px;
   margin: 5px;
 }
 .worldbuilding .sheet-header h1.charname {
@@ -154,7 +154,14 @@
 }
 
 .chroniclesystem.sheet.item .sheet-body .description .editor {
-  min-height: 300px;
+  min-height: 200px;
+  max-height: 100%;
+  flex-grow: 1;
+  display: flex;
+  height: 200px;
+  width: 100%;
+  position: relative;
+  word-break: break-word;
   padding: 0 3px;
   background: white;
   border: white 0px;
@@ -355,4 +362,9 @@
 .chroniclesystem.sheet .specialties-list .specialty input {
   text-align: center;
   margin: 3px;
+}
+
+.tox.tox-tinymce {
+  height: 100% !important;
+  width: 100%;
 }

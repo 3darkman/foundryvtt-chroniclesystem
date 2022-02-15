@@ -2,6 +2,8 @@
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
  */
+import { ChronicleSystem } from "./ChronicleSystem.js";
+
 export class ChronicleSystemActorSheet extends ActorSheet {
 
   /** @override */
@@ -39,46 +41,24 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       list.push(item);
     }
 
-    data.data.owned.equipments = this._checkNull(data.itemsByType['equipment']);
-    data.data.owned.weapons = this._checkNull(data.itemsByType['weapon']);
-    data.data.owned.armors = this._checkNull(data.itemsByType['armor']);
-    data.data.owned.edges = this._checkNull(data.itemsByType['quality']);
-    data.data.owned.hindrances = this._checkNull(data.itemsByType['drawback']);
-    data.data.owned.abilities = this._checkNull(data.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
+    let character = data.data.data;
 
-    data.data.derivedStats.intrigueDefense.value = this.calcIntrigueDefense(data);
-    data.data.derivedStats.intrigueDefense.total = data.data.derivedStats.intrigueDefense.value + data.data.derivedStats.intrigueDefense.modifier;
-    data.data.derivedStats.composure.value = this.getAbilityValue(data, "Will") * 3;
-    data.data.derivedStats.composure.total = data.data.derivedStats.composure.value + data.data.derivedStats.composure.modifier;
-    data.data.derivedStats.combatDefense.value = this.calcCombatDefense(data);
-    data.data.derivedStats.combatDefense.total = data.data.derivedStats.combatDefense.value + data.data.derivedStats.combatDefense.modifier;
-    data.data.derivedStats.health.value = this.getAbilityValue(data, "Endurance") * 3;
-    data.data.derivedStats.health.total = data.data.derivedStats.health.value + data.data.derivedStats.health.modifier;
+    character.owned.equipments = this._checkNull(data.itemsByType['equipment']);
+    character.owned.weapons = this._checkNull(data.itemsByType['weapon']);
+    character.owned.armors = this._checkNull(data.itemsByType['armor']);
+    character.owned.edges = this._checkNull(data.itemsByType['quality']);
+    character.owned.hindrances = this._checkNull(data.itemsByType['drawback']);
+    character.owned.abilities = this._checkNull(data.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
 
     return data;
   }
 
-  getAbilityValue(actor, abilityName) {
-    const ability = actor.data.owned.abilities.find((ability) => ability.name === abilityName);
-    return ability !== undefined? ability.data.rating : 2;
-  }
 
-  calcIntrigueDefense(data) {
-    return this.getAbilityValue(data, "Awareness") +
-        this.getAbilityValue(data, "Cunning") +
-        this.getAbilityValue(data, "Status");
-  }
-
-  calcCombatDefense(data) {
-    return this.getAbilityValue(data, "Awareness") +
-        this.getAbilityValue(data, "Agility") +
-        this.getAbilityValue(data, "Athletics");
-  }
 
   /* -------------------------------------------- */
 
   /** @override */
-	activateListeners(html) {
+  activateListeners(html) {
     super.activateListeners(html);
 
     // Everything below here is only needed if the sheet is editable
@@ -87,7 +67,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     // Update Inventory Item
     html.find('.item-edit').click(ev => {
       const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.getOwnedItem(li.data('itemId'));
+      const item = this.actor.items.get(li.data('itemId'));
       item.data.isOwned = true;
       item.sheet.render(true);
     });
@@ -96,7 +76,13 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     html.find('.item-delete').click(ev => {
     });
 
+    html.find('.rollable').click(this._onClickRoll.bind(this))
+
     // Add or Remove Attribute
+  }
+
+  async _onClickRoll(event, targets) {
+    await ChronicleSystem.handleRoll(event, this.actor, targets);
   }
 
   /* -------------------------------------------- */
@@ -131,10 +117,11 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   async _onDropItemCreate(itemData) {
     const item = this.actor.items.find(i => i.name === itemData.name);
     let embeddedItem;
-    if (item === null) {
-      embeddedItem = this.actor.createEmbeddedEntity("OwnedItem", itemData);
+    if (item === null || typeof item === 'undefined') {
+      let data = [ itemData, ];
+      embeddedItem = this.actor.createEmbeddedDocuments("Item", data);
     } else {
-      embeddedItem = this.actor.getEmbeddedEntity("OwnedItem", item._id);
+      embeddedItem = this.actor.getEmbeddedDocument("Item", item.data._id);
     }
     return embeddedItem;
   }
