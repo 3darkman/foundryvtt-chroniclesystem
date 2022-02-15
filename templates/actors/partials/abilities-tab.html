@@ -4,15 +4,17 @@
             <span>Abilities</span>
         </header>
         <ol  class="abilities-list">
-            {{#each data.owned.abilities as |ability key|}}
+            {{#each data.data.owned.abilities as |ability key|}}
                 <li  class="item ability flexrow" data-item-id="{{ability._id}}">
-                    <div class="ability-value">
+                    <div class="ability-value rollable" id="ability:{{ability.name}}">
                         <a>{{ability.data.rating}}d{{modifier ability.data.modifier}}</a>
                     </div>
                     <label class="ability-label item-edit"><a >{{ability.name}}</a></label>
                     <div class="ability-specialities">
                         {{#each ability.data.specialties as |specialty key|}}
-                            <a>{{specialty.name}} {{specialty.rating}}B{{modifier specialty.modifier}}</a>&nbsp;
+                            <div class="rollable" id="specialty:{{specialty.name}}">
+                                <a>{{specialty.name}} {{specialty.rating}}B{{modifier specialty.modifier}}</a>&nbsp;
+                            </div>
                         {{/each}}
                     </div>
                 </li>
@@ -28,7 +30,7 @@
                   <input
                           name="data.derivedStats.intrigueDefense.value"
                           type="text"
-                          value="{{data.derivedStats.intrigueDefense.value}}"
+                          value="{{data.data.derivedStats.intrigueDefense.value}}"
                           placeholder="Value"
                           readonly="readonly"
                           data-dtype="Number"
@@ -37,7 +39,7 @@
                   <input
                           name="data.derivedStats.intrigueDefense.modifier"
                           type="text"
-                          value="{{data.derivedStats.intrigueDefense.modifier}}"
+                          value="{{data.data.derivedStats.intrigueDefense.modifier}}"
                           placeholder="Value"
                           data-dtype="Number"
                   />
@@ -45,7 +47,7 @@
                 <input
                         name="data.derivedStats.intrigueDefense.total"
                         type="text"
-                        value="{{data.derivedStats.intrigueDefense.total}}"
+                        value="{{data.data.derivedStats.intrigueDefense.total}}"
                         placeholder="Total"
                         readonly="readonly"
                         data-dtype="Number"
@@ -60,7 +62,7 @@
                 <input
                       name="data.derivedStats.combatDefense.value"
                       type="text"
-                      value="{{data.derivedStats.combatDefense.value}}"
+                      value="{{data.data.derivedStats.combatDefense.value}}"
                       placeholder="Value"
                       readonly="readonly"
                       data-dtype="Number"
@@ -69,7 +71,7 @@
                 <input
                         name="data.derivedStats.combatDefense.modifier"
                         type="text"
-                        value="{{data.derivedStats.combatDefense.modifier}}"
+                        value="{{data.data.derivedStats.combatDefense.modifier}}"
                         placeholder="Modifier"
                         data-dtype="Number"
                 />
@@ -77,7 +79,7 @@
                 <input
                         name="data.derivedStats.combatDefense.value"
                         type="text"
-                        value="{{data.derivedStats.combatDefense.total}}"
+                        value="{{data.data.derivedStats.combatDefense.total}}"
                         placeholder="Total"
                         readonly="readonly"
                         data-dtype="Number"
@@ -92,7 +94,7 @@
                 <input
                         name="data.derivedStats.composure.value"
                         type="text"
-                        value="{{data.derivedStats.composure.value}}"
+                        value="{{data.data.derivedStats.composure.value}}"
                         placeholder="Value"
                         readonly="readonly"
                         data-dtype="Number"
@@ -101,7 +103,7 @@
                 <input
                         name="data.derivedStats.composure.modifier"
                         type="text"
-                        value="{{data.derivedStats.composure.modifier}}"
+                        value="{{data.data.derivedStats.composure.modifier}}"
                         placeholder="Modifier"
                         data-dtype="Number"
                 />
@@ -109,7 +111,7 @@
                 <input
                         name="data.derivedStats.composure.value"
                         type="text"
-                        value="{{data.derivedStats.composure.total}}"
+                        value="{{data.data.derivedStats.composure.total}}"
                         placeholder="Total"
                         readonly="readonly"
                         data-dtype="Number"
@@ -122,7 +124,7 @@
                 <input
                         name="data.derivedStats.composure.current"
                         type="text"
-                        value="{{data.derivedStats.composure.current}}"
+                        value="{{data.data.derivedStats.composure.current}}"
                         placeholder="Current"
                         data-dtype="Number"
                 />
@@ -136,7 +138,7 @@
                 <input
                         name="data.derivedStats.health.value"
                         type="text"
-                        value="{{data.derivedStats.health.value}}"
+                        value="{{data.data.derivedStats.health.value}}"
                         placeholder="Value"
                         readonly="readonly"
                         data-dtype="Number"
@@ -145,7 +147,7 @@
                 <input
                         name="data.derivedStats.health.modifier"
                         type="text"
-                        value="{{data.derivedStats.health.modifier}}"
+                        value="{{data.data.derivedStats.health.modifier}}"
                         placeholder="Modifier"
                         data-dtype="Number"
                 />
@@ -153,7 +155,7 @@
                 <input
                         name="data.derivedStats.health.value"
                         type="text"
-                        value="{{data.derivedStats.health.total}}"
+                        value="{{data.data.derivedStats.health.total}}"
                         placeholder="Total"
                         readonly="readonly"
                         data-dtype="Number"
@@ -166,7 +168,7 @@
                 <input
                         name="data.derivedStats.health.current"
                         type="text"
-                        value="{{data.derivedStats.health.current}}"
+                        value="{{data.data.derivedStats.health.current}}"
                         placeholder="Current"
                         data-dtype="Number"
                 />

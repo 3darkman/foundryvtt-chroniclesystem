@@ -30,8 +30,8 @@ export class ChronicleSystemItemSheet extends ItemSheet {
 
       html.find('.item-delete').click((ev) => {
           if (this.item.actor) {
-              this.item.actor.deleteOwnedItem(this.item.data._id);
-
+              console.log(this.item.actor);
+              this.item.actor.deleteEmbeddedDocuments("Item", [this.item.data._id,]);
               this.item.sheet.close();
           }
       });

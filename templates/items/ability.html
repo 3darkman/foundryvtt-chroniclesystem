@@ -14,7 +14,7 @@
                           class="small-field"
                           name="data.rating"
                           type="text"
-                          value="{{item.data.rating}}"
+                          value="{{item.data.data.rating}}"
                           placeholder="Rating"
                           data-dtype="Number"
                   />
@@ -27,7 +27,7 @@
                           class="small-field"
                           name="data.modifier"
                           type="text"
-                          value="{{item.data.modifier}}"
+                          value="{{item.data.data.modifier}}"
                           placeholder="Modifier"
                           data-dtype="Number"
                   />
@@ -48,7 +48,7 @@
             </header>
             <ol class="specialties-list resizable" data-base-size="150">
 
-                {{#each data.specialties as |specialty id|}}
+                {{#each data.data.specialties as |specialty id|}}
                     {{log id}}
                     <li class="specialty flexrow" data-item-id="{{id}}">
                         <input
