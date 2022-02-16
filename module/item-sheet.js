@@ -3,7 +3,6 @@
  * @extends {ItemSheet}
  */
 export class ChronicleSystemItemSheet extends ItemSheet {
-
   /** @override */
 	static get defaultOptions() {
 	  return mergeObject(super.defaultOptions, {
@@ -77,6 +76,7 @@ export class ChronicleSystemItemSheet extends ItemSheet {
   getData() {
     const data = super.getData();
     data.dtypes = ["String", "Number", "Boolean"];
+    console.log(this.item.data.data);
     return data;
   }
 

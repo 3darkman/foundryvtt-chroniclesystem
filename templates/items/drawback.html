@@ -1,0 +1,23 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Item Sheet Header --}} {{>
+"systems/chroniclesystem/templates/items/partials/header-delete.html"}}
+    <main class="sheet-body flexrow">
+        <section class="description">
+            <div class="form-group">
+                <label for="data.data.requirements">Requirements:</label>
+                <span class="form-fields">
+                  <input
+                          class="small-field"
+                          name="data.requirements"
+                          type="text"
+                          value="{{item.data.data.requirements}}"
+                          placeholder="Requirements"
+                          data-dtype="String"
+                  />
+                </span>
+            </div>
+            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+
+        </section>
+    </main>
+</form>

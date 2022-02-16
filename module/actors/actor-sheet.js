@@ -2,7 +2,7 @@
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
  */
-import { ChronicleSystem } from "./ChronicleSystem.js";
+import { ChronicleSystem } from "../ChronicleSystem.js";
 
 export class ChronicleSystemActorSheet extends ActorSheet {
 
@@ -42,14 +42,15 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     }
 
     let character = data.data.data;
-
+    this.isOwner = this.actor.isOwner;
     character.owned.equipments = this._checkNull(data.itemsByType['equipment']);
     character.owned.weapons = this._checkNull(data.itemsByType['weapon']);
     character.owned.armors = this._checkNull(data.itemsByType['armor']);
-    character.owned.edges = this._checkNull(data.itemsByType['quality']);
-    character.owned.hindrances = this._checkNull(data.itemsByType['drawback']);
+    character.owned.benefits = this._checkNull(data.itemsByType['benefit']);
+    console.log(character.owned.benefits);
+    character.owned.drawbacks = this._checkNull(data.itemsByType['drawback']);
     character.owned.abilities = this._checkNull(data.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
-
+    console.log(data);
     return data;
   }
 
@@ -70,6 +71,10 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       const item = this.actor.items.get(li.data('itemId'));
       item.data.isOwned = true;
       item.sheet.render(true);
+    });
+
+    html.find('.item .item-name').on('click', (ev) => {
+      $(ev.currentTarget).parents('.item').find('.description').slideToggle();
     });
 
     // Delete Inventory Item
@@ -117,6 +122,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   async _onDropItemCreate(itemData) {
     const item = this.actor.items.find(i => i.name === itemData.name);
     let embeddedItem;
+
     if (item === null || typeof item === 'undefined') {
       let data = [ itemData, ];
       embeddedItem = this.actor.createEmbeddedDocuments("Item", data);

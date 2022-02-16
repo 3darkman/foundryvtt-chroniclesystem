@@ -5,9 +5,9 @@
  */
 
 // Import Modules
-import { ChronicleSystemActor } from "./actor.js";
+import { ChronicleSystemActor } from "./actors/actor.js";
 import { ChronicleSystemItemSheet } from "./item-sheet.js";
-import { ChronicleSystemActorSheet } from "./actor-sheet.js";
+import { ChronicleSystemActorSheet } from "./actors/actor-sheet.js";
 import { preloadHandlebarsTemplates } from "./preloadTemplates.js";
 import { registerCustomHelpers } from "./handlebarsHelpers.js";
 

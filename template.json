@@ -121,11 +121,17 @@
     "specialties": []
   },
   "benefit": {
+    "templates": [
+      "itemDescription"
+    ],
     "categories": "",
     "requirements": "",
     "sorcerousArtAccess": false
   },
   "drawback": {
+    "templates": [
+      "itemDescription"
+    ],
     "requireSorcerousArt": false,
     "isAStricture": false,
     "isAFlaw": false,
