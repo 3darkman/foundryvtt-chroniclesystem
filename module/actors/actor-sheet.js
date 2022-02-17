@@ -7,18 +7,18 @@ import { ChronicleSystem } from "../ChronicleSystem.js";
 export class ChronicleSystemActorSheet extends ActorSheet {
 
   /** @override */
-	static get defaultOptions() {
-	  return mergeObject(super.defaultOptions, {
-  	  classes: ["chroniclesystem", "worldbuilding", "sheet", "actor"],
-  	  template: "systems/chroniclesystem/templates/actor-sheet.html",
+  static get defaultOptions() {
+    return mergeObject(super.defaultOptions, {
+      classes: ["chroniclesystem", "worldbuilding", "sheet", "actor"],
+      template: "systems/chroniclesystem/templates/actor-sheet.html",
       width: 700,
       height: 900,
       tabs: [
-          {
-            navSelector: ".tabs",
-            contentSelector: ".sheet-body",
-            initial: "abilities"
-          }
+        {
+          navSelector: ".tabs",
+          contentSelector: ".sheet-body",
+          initial: "abilities"
+        }
       ],
       dragDrop: [{dragSelector: ".item-list .item", dropSelector: null}]
     });
@@ -47,10 +47,24 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     character.owned.weapons = this._checkNull(data.itemsByType['weapon']);
     character.owned.armors = this._checkNull(data.itemsByType['armor']);
     character.owned.benefits = this._checkNull(data.itemsByType['benefit']);
-    console.log(character.owned.benefits);
     character.owned.drawbacks = this._checkNull(data.itemsByType['drawback']);
     character.owned.abilities = this._checkNull(data.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
-    console.log(data);
+
+
+    character.owned.weapons.forEach((weapon) => {
+      let info = weapon.data.specialty.split(':');
+      if (info.length < 2)
+        return "";
+      let formula = ChronicleSystem.getActorAbilityFormula(data.actor, info[0], info[1]);
+      formula = ChronicleSystem.adjustFormulaByWeapon(data.actor, formula, weapon);
+      let matches = weapon.data.damage.match('@([a-zA-Z]*)([-\+\/\*]*)([0-9]*)');
+      if (matches.length === 4) {
+        let ability = data.actor.getAbilityValue(matches[1]);
+        weapon.damageValue = eval(`${ability}${matches[2]}${matches[3]}`);
+      }
+      weapon.formula = formula;
+    });
+
     return data;
   }
 
@@ -75,10 +89,6 @@ export class ChronicleSystemActorSheet extends ActorSheet {
 
     html.find('.item .item-name').on('click', (ev) => {
       $(ev.currentTarget).parents('.item').find('.description').slideToggle();
-    });
-
-    // Delete Inventory Item
-    html.find('.item-delete').click(ev => {
     });
 
     html.find('.rollable').click(this._onClickRoll.bind(this))

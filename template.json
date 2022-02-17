@@ -97,7 +97,8 @@
     "specialty": "",
     "training": 0,
     "damage": "",
-    "qualities": ""
+    "qualities": [],
+    "reach": ""
   },
   "poison": {
     "templates": [

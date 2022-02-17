@@ -1,0 +1,73 @@
+.chroniclesystem.sheet .ability-specialities {
+    display: table;
+    background: white;
+    height: auto;
+    min-height: 31px;
+    margin: 3px;
+}
+
+.chroniclesystem.sheet .item .quality-label {
+    font-weight: bold;
+    background-color: #4178B7;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.chroniclesystem.sheet.actor .equipment-cost {
+    flex: 0.4;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .equipment-weight {
+    flex: 0.4;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .weapon-damage {
+    flex: 0.3;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .weapon-qualities {
+    flex: 1.6;
+    display: table;
+    height: auto;
+}
+
+.chroniclesystem.sheet.actor .weapon-qualities .weapon-quality {
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.chroniclesystem.sheet.actor .weapon-testdice {
+    flex: 0.5;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .item {
+    margin: 3px;
+    background-color: white;
+    padding: 3px;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .item .field {
+    margin: 2px;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .list-header div {
+    margin: 2px;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .list-header .weapon-qualities div {
+    margin: 0 0 0 8px;
+    padding: 0;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .list-header {
+    font-weight: bold;
+    margin: 3px;
+    padding: 3px;
+    background-color: black;
+    color: white;
+}

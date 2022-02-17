@@ -1,0 +1,33 @@
+<div class="tab flexrow" data-group="primary" data-tab="equipments">
+    <section class="weapons flex4">
+        <header class="header-field">
+            <span>Weapons</span>
+        </header>
+        <ol  class="weapons-list list equipment-list">
+            <li class="list-header flexrow">
+                <div class="weapon-label">Name</div>
+                <div class="weapon-testdice">Test</div>
+                <div class="weapon-damage">Dmg</div>
+                <div class="equipment-weight">Weight</div>
+                <div class="equipment-cost">Cost</div>
+                <div class="weapon-qualities"><div>Qualities</div></div>
+            </li>
+            {{#each data.data.owned.weapons as |weapon index|}}
+                <li  class="item weapon flexrow" data-item-id="{{_id}}">
+                    <div class="weapon-label item-edit field"><a>{{weapon.name}}</a></div>
+                    <div class="weapon-testdice rollable field" id="weapon-test:{{weapon.name}}:{{formulaToStr weapon.formula}}">
+                        <a>{{format-formula weapon.formula}}</a>
+                    </div>
+                    <div class="weapon-damage field"> {{weapon.damageValue}}</div>
+                    <div class="equipment-weight field">{{weapon.data.weight}} lb</div>
+                    <div class="equipment-cost field">{{weapon.data.cost}}</div>
+                    <div class="weapon-qualities field">
+                        {{#each weapon.data.qualities}}
+                            <div class="weapon-quality">{{name}} {{parameter}}</div>
+                        {{/each}}
+                    </div>
+                </li>
+            {{/each}}
+        </ol>
+    </section>
+</div>

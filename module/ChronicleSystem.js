@@ -1,4 +1,5 @@
 import {doRoll} from "./dieroll.js";
+import {DiceRollFormula} from "./diceRollFormula.js";
 
 export const ChronicleSystem ={}
 
@@ -36,21 +37,7 @@ function trim(s) {
 ChronicleSystem.trim = trim
 ChronicleSystem.escapeUnicode = escapeUnicode
 
-// function findAbility(actor, abilityName) {
-//     var t
-//     if (!actor) return t
-//     if (actor instanceof GurpsActor) actor = actor.getChronicleSystemActorData()
-//     sname = makeRegexPatternFrom(sname, false)
-//     let regex = new RegExp(sname, 'i')
-//     recurselist(actor.ads, s => {
-//         if (s.name.match(regex)) {
-//             t = s
-//         }
-//     })
-//     return t
-// }
-
-async function handleRoll(event, actor, targets) {
+async function handleRoll(event, actor) {
     event.preventDefault();
     if (event.ctrlKey)
         console.log("ctrl holding");
@@ -58,34 +45,68 @@ async function handleRoll(event, actor, targets) {
     const roll_definition = rollType.split(':');
     if (roll_definition.length < 2)
         return;
-    let formula = {
-        pool: 0,
-        modifier: 0,
-        bonusDice: 0,
-        drawback: 0,
-        reroll: 0
-    };
+    let formula = new DiceRollFormula();
+
     switch (roll_definition[0]){
         case 'ability':
-            let ability = actor.getAbility(roll_definition[1]);
-
-            formula.pool += ability.data.data.rating;
-            formula.modifier += ability.data.data.modifier;
+            formula = ChronicleSystem.getActorAbilityFormula(actor, roll_definition[1]);
             break;
         case 'specialty':
-            let specialtyAbility = actor.getAbilityBySpecialty(roll_definition[1]);
-            if (specialtyAbility[0] === null || specialtyAbility[0] === undefined) {
-                console.error("current actor does not contain the specialty" +
-                    " {0}", roll_definition[1]);
-                return;
-            }
-            let specialty = specialtyAbility[1];
-            formula.pool += specialtyAbility[0].data.data.rating;
-            formula.modifier += specialtyAbility[0].data.data.modifier + specialty.modifier;
-            formula.bonusDice += specialty.rating;
+            formula = ChronicleSystem.getActorAbilityFormula(actor, roll_definition[2], roll_definition[1]);
+            break;
+        case 'weapon-test':
+            formula = DiceRollFormula.fromStr(roll_definition[2]);
             break;
     }
-    doRoll(actor,formula, roll_definition[1]);
+
+    await doRoll(actor,formula, roll_definition[1]);
 }
 
-ChronicleSystem.handleRoll = handleRoll
+function adjustFormulaByWeapon (actor, formula, weapon) {
+    if (!weapon.data.training)
+        return formula;
+
+    let poolModifier = formula.bonusDice - weapon.data.training;
+
+    if (poolModifier <= 0) {
+        formula.pool += poolModifier;
+        formula.bonusDice = 0;
+    } else {
+        formula.bonusDice = poolModifier;
+    }
+
+    return formula;
+}
+
+function getActorTestFormula(actor, abilityName, specialtyName = null) {
+    console.assert(actor, "actor is invalid!");
+    console.assert(abilityName, "ability name is invalid!");
+    let ability = undefined;
+    let specialty = undefined;
+    if (specialtyName === null) {
+        [ability, specialty] = actor.getAbility(abilityName);
+    } else {
+        [ability, specialty] = actor.getAbilityBySpecialty(abilityName, specialtyName);
+        if (ability === undefined) {
+            [ability, specialty] = actor.getAbility(abilityName);
+        }
+    }
+    let formula = new DiceRollFormula();
+    if (ability !== undefined) {
+        let specValue = 0;
+        let specModifier = 0;
+        if (specialty !== undefined) {
+            specValue = specialty.rating;
+            specModifier = specialty.modifier;
+        }
+        formula.pool = ability.data.data.rating;
+        formula.modifier = ability.data.data.modifier + specModifier;
+        formula.bonusDice = specValue;
+    }
+
+    return formula;
+}
+
+ChronicleSystem.adjustFormulaByWeapon = adjustFormulaByWeapon;
+ChronicleSystem.handleRoll = handleRoll;
+ChronicleSystem.getActorAbilityFormula = getActorTestFormula;

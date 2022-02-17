@@ -50,30 +50,25 @@ Hooks.once("init", async function() {
     await preloadHandlebarsTemplates();
 });
 
-Hooks.on('preCreateItem', (createData, options, userId) => {
-    //Set default image if no image already exists
-    if (!createData.img) {
-        createData.img = `systems/chroniclesystem/assets/icons/${createData.type}.png`;
-    }
+Hooks.on('preCreateItem', (item, data) => {
+    item.data.update({
+        img: `systems/chroniclesystem/assets/icons/${data.type}.png`
+    },{diff:true});
 });
 
-Hooks.on('createActor', async (actor, options, userId) => {
-    /*if (actor.data.type === 'character' && options.renderSheet) {
-        const abilitiesToFind = [
-            'Athletics',
-            'Common Knowledge',
-            'Notice',
-            'Persuasion',
-            'Stealth',
-            'Untrained',
-        ];
-        const abilityIndex = (await game.packs
-            .get('chroniclesystem.abilities')
-            .getContent());
-        actor.createEmbeddedEntity('OwnedItem', abilityIndex.filter((i) => abilitiesToFind.includes(i.data.name)));
-    }*/
-});
-
-Handlebars.registerHelper('notNull', function(value, options) {
-    return value != null;
-});
+// Hooks.on('createActor', async (actor, options, userId) => {
+//     if (actor.data.type === 'character' && options.renderSheet) {
+//         const abilitiesToFind = [
+//             'Athletics',
+//             'Common Knowledge',
+//             'Notice',
+//             'Persuasion',
+//             'Stealth',
+//             'Untrained',
+//         ];
+//         const abilityIndex = (await game.packs
+//             .get('chroniclesystem.abilities')
+//             .getContent());
+//         actor.createEmbeddedEntity('OwnedItem', abilityIndex.filter((i) => abilitiesToFind.includes(i.data.name)));
+//     }
+// });

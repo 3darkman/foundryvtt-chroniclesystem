@@ -1,3 +1,4 @@
+<!--suppress HtmlFormInputWithoutLabel -->
 <div class="tab flexrow" data-group="primary" data-tab="abilities">
     <section class="abilities flex3">
         <header class="header-field">
@@ -12,7 +13,7 @@
                     <label class="ability-label item-edit"><a >{{ability.name}}</a></label>
                     <div class="ability-specialities">
                         {{#each ability.data.specialties as |specialty key|}}
-                            <div class="rollable" id="specialty:{{specialty.name}}">
+                            <div class="rollable" id="specialty:{{specialty.name}}:{{../this.name}}">
                                 <a>{{specialty.name}} {{specialty.rating}}B{{modifier specialty.modifier}}</a>&nbsp;
                             </div>
                         {{/each}}

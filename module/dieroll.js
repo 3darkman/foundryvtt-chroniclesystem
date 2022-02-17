@@ -1,6 +1,6 @@
+// noinspection JSUnusedLocalSymbols
 export async function doRoll(actor, formula, thing, difficulty = 0) {
     const dices = formula.pool + formula.bonusDice;
-
     let dieRoll = new Die({faces: 6, number: dices});
     dieRoll.evaluate({async : false});
 

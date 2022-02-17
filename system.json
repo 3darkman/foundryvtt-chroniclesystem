@@ -8,7 +8,7 @@
   "templateVersion": 2,
   "author": "Kirlian Silvestre",
   "esmodules": ["module/simple.js"],
-  "styles": ["styles/simple.css"],
+  "styles": ["styles/global.css", "styles/item-sheet.css", "styles/actor-sheet.css"],
   "packs": [],
   "languages": [],
   "gridDistance": 5,
