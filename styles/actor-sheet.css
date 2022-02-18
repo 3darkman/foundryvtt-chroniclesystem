@@ -15,12 +15,12 @@
 }
 
 .chroniclesystem.sheet.actor .equipment-cost {
-    flex: 0.4;
+    flex: 0 0 62px;
     text-align: right;
 }
 
 .chroniclesystem.sheet.actor .equipment-weight {
-    flex: 0.4;
+    flex: 0 0 62px;
     text-align: right;
 }
 
@@ -29,13 +29,28 @@
     text-align: center;
 }
 
-.chroniclesystem.sheet.actor .weapon-qualities {
-    flex: 1.6;
+.chroniclesystem.sheet.actor .armor-rating {
+    flex: 0 0 50px;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .armor-penalty {
+    flex: 0 0 50px;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .armor-bulk {
+    flex: 0 0 50px;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .item-qualities {
+    flex: 0 0 230px;
     display: table;
     height: auto;
 }
 
-.chroniclesystem.sheet.actor .weapon-qualities .weapon-quality {
+.chroniclesystem.sheet.actor .item-qualities .item-quality {
     display: inline-block;
     margin-left: 8px;
 }
@@ -59,7 +74,7 @@
     margin: 2px;
 }
 
-.chroniclesystem.sheet.actor .equipment-list .list-header .weapon-qualities div {
+.chroniclesystem.sheet.actor .equipment-list .list-header .item-qualities div {
     margin: 0 0 0 8px;
     padding: 0;
 }

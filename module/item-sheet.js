@@ -40,8 +40,8 @@ export class ChronicleSystemItemSheet extends ItemSheet {
         html.find('.specialty-create').on("click", this._onClickSpecialtyCreate.bind(this));
         html.find(".specialties-list").on("click", ".specialty-control", this._onclickSpecialtyControl.bind(this));
 
-        html.find(".weapon-qualities-control").on("click", this._onClickWeaponQualityControl.bind(this));
-        html.find('.weapon-quality-create').on("click", this._onClickWeaponQualityCreate.bind(this));
+        html.find(".item-qualities-control").on("click", this._onClickItemQualityControl.bind(this));
+        html.find('.item-quality-create').on("click", this._onClickItemQualityCreate.bind(this));
     }
 
     async _onClickSpecialtyCreate(ev) {
@@ -60,7 +60,7 @@ export class ChronicleSystemItemSheet extends ItemSheet {
         }
     }
 
-    async _onClickWeaponQualityCreate(ev) {
+    async _onClickItemQualityCreate(ev) {
         const item = this.item;
         console.log(item);
         let quality = {
@@ -72,7 +72,7 @@ export class ChronicleSystemItemSheet extends ItemSheet {
         item.update({"data.qualities" : newQuality});
     }
 
-    async _onClickWeaponQualityControl(event) {
+    async _onClickItemQualityControl(event) {
         event.preventDefault();
         const a = event.currentTarget;
         const index = parseInt(a.dataset.id);

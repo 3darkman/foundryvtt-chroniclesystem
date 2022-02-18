@@ -10,10 +10,11 @@
                 <label for="data.armorRating">Rating:</label>
                 <span class="form-fields">
                   <input
+                          id="data.armorRating"
                           class="small-field"
                           name="data.armorRating"
                           type="text"
-                          value="{{item.data.armorRating}}"
+                          value="{{item.data.data.armorRating}}"
                           placeholder="Rating"
                           data-dtype="Number"
                   />
@@ -23,10 +24,11 @@
                 <label for="data.armorPenalty">Penalty</label>
                 <span class="form-fields">
                   <input
+                          id="data.armorPenalty"
                           class="small-field"
                           name="data.armorPenalty"
                           type="text"
-                          value="{{item.data.armorPenalty}}"
+                          value="{{item.data.data.armorPenalty}}"
                           placeholder="Penalty"
                           data-dtype="Number"
                   />
@@ -36,10 +38,11 @@
                 <label for="data.bulk">Bulk</label>
                 <span class="form-fields">
                   <input
+                          id="data.bulk"
                           class="small-field"
                           name="data.bulk"
                           type="text"
-                          value="{{item.data.bulk}}"
+                          value="{{item.data.data.bulk}}"
                           placeholder="Bulk"
                           data-dtype="Number"
                   />
@@ -51,6 +54,40 @@
         <section class="description">
             {{>
             "systems/chroniclesystem/templates/items/partials/description.html"}}
+            <header class="header-field flexrow">
+                <div class="header-title">
+                    <span>Qualities</span>
+                </div>
+                <div class="header-field-add">
+                    <a class="item-quality-create" data-type="skill"><i class="fa fa-plus"></i></a>
+                </div>
+            </header>
+            <ol class="qualities-list list resizable" data-base-size="150">
+
+                {{#each data.data.qualities as |quality index|}}
+                    <li class="weapon-quality flexrow" data-item-id="{{index}}">
+                        <!--suppress HtmlFormInputWithoutLabel -->
+                        <input
+                                class="big-field"
+                                type="text"
+                                name="data.qualities.{{index}}.name"
+                                value="{{quality.name}}"
+                                placeholder="Armor Quality Name"
+                                data-dtype="String"
+                        />
+                        <!--suppress HtmlFormInputWithoutLabel -->
+                        <input
+                                class="small-field"
+                                type="text"
+                                name="data.qualities.{{index}}.parameter"
+                                value="{{quality.parameter}}"
+                                placeholder="Parameter"
+                                data-dtype="String"
+                        />
+                        <a class="item-qualities-control item-controls" data-id="{{index}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                    </li>
+                {{/each}}
+            </ol>
         </section>
     </main>
 </form>

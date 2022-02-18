@@ -87,7 +87,8 @@
     ],
     "armorRating": 0,
     "armorPenalty": 0,
-    "bulk": 0
+    "bulk": 0,
+    "qualities": []
   },
   "weapon": {
     "templates": [
