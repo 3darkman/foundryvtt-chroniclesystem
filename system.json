@@ -6,7 +6,7 @@
   "minimumCoreVersion": "9",
   "compatibleCoreVersion": "9",
   "templateVersion": 2,
-  "author": "Kirlian Silvestre",
+  "author": "Kirlian '3darkman' Silvestre",
   "esmodules": ["module/simple.js"],
   "styles": ["styles/global.css", "styles/item-sheet.css", "styles/actor-sheet.css"],
   "packs": [],
@@ -17,6 +17,6 @@
   "secondaryTokenAttribute": "power",
   "url": "https://github.com/3darkman/foundryvtt-chroniclesystem/",
   "manifest": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/system.json",
-  "download": "",
+  "download": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/chroniclesystem.zip",
   "license": "LICENSE.txt"
 }

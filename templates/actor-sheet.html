@@ -1,3 +1,4 @@
+<!--suppress HtmlFormInputWithoutLabel -->
 <form class="{{cssClass}}" autocomplete="off">
 
     {{!-- Sheet Header --}}
@@ -21,6 +22,7 @@
         <a  class="item"  data-tab="abilities">Abilities</a>
         <a  class="item"  data-tab="qualities">Qualities</a>
         <a  class="item"  data-tab="equipments">Equipments</a>
+        <a  class="item"  data-tab="description">Description</a>
     </nav>
 
     {{!-- Sheet Body --}}
@@ -28,5 +30,6 @@
         {{> "systems/chroniclesystem/templates/actors/partials/qualities-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/abilities-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/equipments-tab.html"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/description-tab.html"}}
     </section>
 </form>
