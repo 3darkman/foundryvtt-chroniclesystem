@@ -14,6 +14,11 @@
     padding: 5px;
 }
 
+.chroniclesystem.sheet.actor .equipment-quantity {
+    flex: 0 0 62px;
+    text-align: center;
+}
+
 .chroniclesystem.sheet.actor .equipment-cost {
     flex: 0 0 62px;
     text-align: right;
@@ -85,4 +90,8 @@
     padding: 3px;
     background-color: black;
     color: white;
+}
+
+.chroniclesystem.sheet.actor .item.equipment, .chroniclesystem.sheet.actor .equipment.list-header {
+    flex: 0 0 49%;
 }

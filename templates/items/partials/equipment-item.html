@@ -1,0 +1,28 @@
+{{#if item.isOwned}}
+<div class="form-group">
+    <label for="data.quantity">Quantity:</label>
+    <span class="form-fields">
+          <input
+                  id="data.quantity"
+                  name="data.quantity"
+                  type="text"
+                  value="{{data.data.quantity}}"
+                  placeholder="Quantity"
+                  data-dtype="Number"
+          />
+    </span>
+</div>
+{{/if}}
+<div class="form-group">
+    <label for="data.cost">Cost:</label>
+    <span class="form-fields">
+          <input
+                  id="data.cost"
+                  name="data.cost"
+                  type="text"
+                  value="{{data.data.cost}}"
+                  placeholder="Cost"
+                  data-dtype="String"
+          />
+    </span>
+</div>

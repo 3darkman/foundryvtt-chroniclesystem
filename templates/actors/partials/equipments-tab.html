@@ -61,4 +61,28 @@
             {{/each}}
         </ol>
     </section>
+    <section class="equipments">
+        <header class="header-field">
+            <span>Equipments</span>
+        </header>
+        <ol  class="armors-list list equipment-list flexrow">
+            <li class="list-header equipment flexrow flex3">
+                <div class="equipment-label">Name</div>
+                <div class="equipment-quantity">Quantity</div>
+                <div class="equipment-cost">Cost</div>
+            </li>
+            <li class="list-header equipment flexrow flex3">
+                <div class="equipment-label">Name</div>
+                <div class="equipment-quantity">Quantity</div>
+                <div class="equipment-cost">Cost</div>
+            </li>
+            {{#each data.data.owned.equipments as |equipment index|}}
+                <li  class="item equipment flexrow flex3" data-item-id="{{_id}}">
+                    <div class="equipment-label item-edit field"><a>{{equipment.name}}</a></div>
+                    <div class="equipment-quantity field">{{equipment.data.quantity}}</div>
+                    <div class="equipment-cost field">{{equipment.data.cost}}</div>
+                </li>
+            {{/each}}
+        </ol>
+    </section>
 </div>

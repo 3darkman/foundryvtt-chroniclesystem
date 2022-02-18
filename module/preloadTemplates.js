@@ -4,6 +4,7 @@ export const preloadHandlebarsTemplates = async function () {
         'systems/chroniclesystem/templates/items/partials/header-delete.html',
         'systems/chroniclesystem/templates/items/partials/description.html',
         'systems/chroniclesystem/templates/items/partials/physical-item.html',
+        'systems/chroniclesystem/templates/items/partials/equipment-item.html',
         'systems/chroniclesystem/templates/actors/partials/abilities-tab.html',
         'systems/chroniclesystem/templates/actors/partials/qualities-tab.html',
         'systems/chroniclesystem/templates/actors/partials/equipments-tab.html',
