@@ -1,4 +1,3 @@
-<!--suppress HtmlFormInputWithoutLabel -->
 <form class="{{cssClass}}" autocomplete="off">
 
     {{!-- Sheet Header --}}
@@ -18,17 +17,19 @@
 
 
     {{!-- Sheet Tab Navigation --}}
-    <nav  class="sheet-tabs flexrow tabs"  data-group="primary">
+    <nav  class="sheet-tabs flexrow tabs" data-group="primary">
         <a  class="item"  data-tab="abilities">Abilities</a>
+        <a  class="item"  data-tab="combat-and-intrigue">Combat and Intrigue</a>
         <a  class="item"  data-tab="qualities">Qualities</a>
         <a  class="item"  data-tab="equipments">Equipments</a>
-        <a  class="item"  data-tab="description">Description</a>
+        <a  class="item"  data-tab="actor-description">Description</a>
     </nav>
 
     {{!-- Sheet Body --}}
     <section class="sheet-body">
-        {{> "systems/chroniclesystem/templates/actors/partials/qualities-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/abilities-tab.html"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/combat-and-intrigue-tab.html"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/qualities-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/equipments-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/description-tab.html"}}
     </section>

@@ -1,0 +1,307 @@
+<div class="tab flexrow" data-group="primary" data-tab="combat-and-intrigue">
+    <section class="derived-statistics">
+        <section class="intrigue">
+            <header class="header-field">
+                <span>Intrigue</span>
+            </header>
+            <section class="content flexrow">
+                <section class="stats">
+                    <header class="subheader-field">
+                        <span>Intrigue Defense</span>
+                    </header>
+                    <div class="form-group">
+                        <span class="form-fields">
+                              <input
+                                      name="data.derivedStats.intrigueDefense.value"
+                                      type="text"
+                                      value="{{data.data.derivedStats.intrigueDefense.value}}"
+                                      placeholder="Value"
+                                      readonly="readonly"
+                                      data-dtype="Number"
+                              />
+                            <b>+</b>
+                              <input
+                                      name="data.derivedStats.intrigueDefense.modifier"
+                                      type="text"
+                                      value="{{data.data.derivedStats.intrigueDefense.modifier}}"
+                                      placeholder="Value"
+                                      data-dtype="Number"
+                              />
+                            <b>=</b>
+                            <input
+                                    name="data.derivedStats.intrigueDefense.total"
+                                    type="text"
+                                    value="{{data.data.derivedStats.intrigueDefense.total}}"
+                                    placeholder="Total"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
+                    <header class="subheader-field">
+                        <span>Composure</span>
+                    </header>
+                    <div class="form-group">
+                        <span class="form-fields">
+                            <input
+                                    name="data.derivedStats.composure.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.composure.value}}"
+                                    placeholder="Value"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                            <b>+</b>
+                            <input
+                                    name="data.derivedStats.composure.modifier"
+                                    type="text"
+                                    value="{{data.data.derivedStats.composure.modifier}}"
+                                    placeholder="Modifier"
+                                    data-dtype="Number"
+                            />
+                            <b>=</b>
+                            <input
+                                    name="data.derivedStats.composure.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.composure.total}}"
+                                    placeholder="Total"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label for="data.derivedStats.composure.current">Current</label>
+                        <span class="form-fields">
+                            <input
+                                    name="data.derivedStats.composure.current"
+                                    type="text"
+                                    value="{{data.data.derivedStats.composure.current}}"
+                                    placeholder="Current"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
+                    <header class="subheader-field">
+                        <span>Frustration</span>
+                    </header>
+                    <div class="form-group">
+                        <span class="form-fields">
+                            <input
+                                    name="data.derivedStats.frustration.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.frustration.value}}"
+                                    placeholder="Value"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                            <b>+</b>
+                            <input
+                                    name="data.derivedStats.frustration.modifier"
+                                    type="text"
+                                    value="{{data.data.derivedStats.frustration.modifier}}"
+                                    placeholder="Modifier"
+                                    data-dtype="Number"
+                            />
+                            <b>=</b>
+                                <input
+                                        name="data.derivedStats.frustration.value"
+                                        type="text"
+                                        value="{{data.data.derivedStats.frustration.total}}"
+                                        placeholder="Total"
+                                        readonly="readonly"
+                                        data-dtype="Number"
+                                />
+                            </span>
+                    </div>
+                    <div class="form-group">
+                        <label for="data.derivedStats.frustration.current">Current</label>
+                        <span class="form-fields">
+                            <input
+                                    name="data.derivedStats.frustration.current"
+                                    type="text"
+                                    value="{{data.data.derivedStats.frustration.current}}"
+                                    placeholder="Current"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
+                </section>
+                <section class="disposition">
+                    <header class="subheader-field">
+                        <span>Current Disposition</span>
+                    </header>
+                    <div class="disposition-list">
+                        {{#each dispositions}}
+                            {{#ifEquals this.rating ../data.data.currentDisposition}}
+                                <div class="disposition option selected" data-id="{{this.rating}}">
+                                    {{this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
+                                </div>
+                            {{else}}
+                                <div class="disposition option" data-id="{{this.rating}}">
+                                    {{this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
+                                </div>
+                            {{/ifEquals}}
+                        {{/each}}
+                    </div>
+                </section>
+                <section class="techniques">
+                    <header class="subheader-field">
+                        <span>Techniques</span>
+                    </header>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Technique</th>
+                            <th>Influence</th>
+                            <th>Persuasion</th>
+                            <th>Deception</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each techniques}}
+                        <tr>
+                            <td>{{this.name}}</td>
+                            <td>{{this.influence}}</td>
+                            <td class="rollable" id="persuasion:{{this.name}}:{{formulaToStr this.persuasion}}"><a>{{format-formula this.persuasion}}</a></td>
+                            <td class="rollable" id="deception:{{this.name}}:{{formulaToStr this.deception}}"><a>{{format-formula this.deception}}</a></td>
+                        </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </section>
+            </section>
+        </section>
+        <section class="combat">
+            <header class="header-field">
+                <span>Combat</span>
+            </header>
+            <section class="content flexrow">
+                <section class="stats">
+                    <header class="subheader-field">
+                        <span>Combat Defense</span>
+                    </header>
+                    <div class="form-group">
+                        <span class="form-fields">
+                            <input
+                                    name="data.derivedStats.combatDefense.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.combatDefense.value}}"
+                                    placeholder="Value"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                            <b>+</b>
+                            <input
+                                    name="data.derivedStats.combatDefense.modifier"
+                                    type="text"
+                                    value="{{data.data.derivedStats.combatDefense.modifier}}"
+                                    placeholder="Modifier"
+                                    data-dtype="Number"
+                            />
+                            <b>=</b>
+                            <input
+                                    name="data.derivedStats.combatDefense.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.combatDefense.total}}"
+                                    placeholder="Total"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
+                    <header class="subheader-field">
+                        <span>Health</span>
+                    </header>
+                    <div class="form-group">
+                        <span class="form-fields">
+                            <input
+                                    name="data.derivedStats.health.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.health.value}}"
+                                    placeholder="Value"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                            <b>+</b>
+                            <input
+                                    name="data.derivedStats.health.modifier"
+                                    type="text"
+                                    value="{{data.data.derivedStats.health.modifier}}"
+                                    placeholder="Modifier"
+                                    data-dtype="Number"
+                            />
+                            <b>=</b>
+                            <input
+                                    name="data.derivedStats.health.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.health.total}}"
+                                    placeholder="Total"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label for="data.derivedStats.health.current">Current</label>
+                        <span class="form-fields">
+                            <input
+                                    name="data.derivedStats.health.current"
+                                    type="text"
+                                    value="{{data.data.derivedStats.health.current}}"
+                                    placeholder="Current"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
+                    <header class="subheader-field">
+                        <span>Fatigue</span>
+                    </header>
+                    <div class="form-group">
+                        <span class="form-fields">
+                            <input
+                                    name="data.derivedStats.fatigue.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.fatigue.value}}"
+                                    placeholder="Value"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                            <b>+</b>
+                            <input
+                                    name="data.derivedStats.fatigue.modifier"
+                                    type="text"
+                                    value="{{data.data.derivedStats.fatigue.modifier}}"
+                                    placeholder="Modifier"
+                                    data-dtype="Number"
+                            />
+                            <b>=</b>
+                            <input
+                                    name="data.derivedStats.fatigue.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.fatigue.total}}"
+                                    placeholder="Total"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label for="data.derivedStats.fatigue.current">Current</label>
+                        <span class="form-fields">
+                            <input
+                                    name="data.derivedStats.fatigue.current"
+                                    type="text"
+                                    value="{{data.data.derivedStats.fatigue.current}}"
+                                    placeholder="Current"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
+                </section>
+                <section></section>
+                <section></section>
+            </section>
+        </section>
+    </section>
+</div>

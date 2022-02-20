@@ -1,5 +1,3 @@
-// noinspection JSUnusedLocalSymbols
-
 /**
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
@@ -11,13 +9,6 @@ export class ChronicleSystemItemSheet extends ItemSheet {
             classes: ["worldbuilding","chroniclesystem", "sheet", "item"],
             width: 650,
             height: 500,
-            tabs: [
-                {
-                    navSelector: ".sheet-tabs",
-                    contentSelector: ".sheet-body",
-                    initial: "description"
-                }
-            ]
         });
     }
 

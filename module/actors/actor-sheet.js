@@ -3,6 +3,8 @@
  * @extends {ActorSheet}
  */
 import { ChronicleSystem } from "../ChronicleSystem.js";
+import { Technique } from "../technique.js";
+
 
 export class ChronicleSystemActorSheet extends ActorSheet {
 
@@ -50,6 +52,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     character.owned.drawbacks = this._checkNull(data.itemsByType['drawback']);
     character.owned.abilities = this._checkNull(data.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
 
+    data.dispositions = ChronicleSystem.dispositions;
 
     character.owned.weapons.forEach((weapon) => {
       let info = weapon.data.specialty.split(':');
@@ -64,6 +67,33 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       }
       weapon.formula = formula;
     });
+
+    let cunningValue = data.actor.getAbilityValue("Cunning");
+    let willValue = data.actor.getAbilityValue("Will");
+    let persuasionValue = data.actor.getAbilityValue("Persuasion");
+    let awarenessValue = data.actor.getAbilityValue("Awareness");
+
+    let bluffFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Deception", "Bluff");
+    let actFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Deception", "Act");
+    let bargainFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Bargain");
+    let charmFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Charm");
+    let convinceFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Convince");
+    let inciteFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Incite");
+    let intimidateFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Intimidate");
+    let seduceFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Seduce");
+    let tauntFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Taunt");
+
+    let intimidateDeceptionFormula = actFormula.bonusDice + actFormula.modifier > bluffFormula.bonusDice + bluffFormula.modifier ? actFormula : bluffFormula;
+
+    data.techniques = {
+      bargain: new Technique("Bargain", cunningValue, bargainFormula, bluffFormula),
+      charm: new Technique("Charm", persuasionValue, charmFormula, actFormula),
+      convince: new Technique("Convince", willValue, convinceFormula, actFormula),
+      incite: new Technique("Incite", cunningValue, inciteFormula, bluffFormula),
+      intimidate: new Technique("Intimidate", willValue, intimidateFormula, intimidateDeceptionFormula),
+      seduce: new Technique("Seduce", persuasionValue, seduceFormula, bluffFormula),
+      taunt: new Technique("Taunt", awarenessValue, tauntFormula, bluffFormula)
+    };
 
     return data;
   }
@@ -93,7 +123,14 @@ export class ChronicleSystemActorSheet extends ActorSheet {
 
     html.find('.rollable').click(this._onClickRoll.bind(this))
 
+    html.find('.disposition.option').click(this._dispositionChange.bind(this))
+
     // Add or Remove Attribute
+  }
+
+  async _dispositionChange(event, targets) {
+    this.actor.update({"data.currentDisposition": event.target.dataset.id});
+    console.log(this.actor);
   }
 
   async _onClickRoll(event, targets) {

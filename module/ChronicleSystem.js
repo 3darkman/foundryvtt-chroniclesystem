@@ -1,5 +1,6 @@
 import {doRoll} from "./dieroll.js";
 import {DiceRollFormula} from "./diceRollFormula.js";
+import {Disposition} from "./disposition.js";
 
 export const ChronicleSystem ={}
 
@@ -57,6 +58,10 @@ async function handleRoll(event, actor) {
         case 'weapon-test':
             formula = DiceRollFormula.fromStr(roll_definition[2]);
             break;
+        case 'persuasion':
+        case 'deception':
+            formula = DiceRollFormula.fromStr(roll_definition[2]);
+            break;
     }
 
     await doRoll(actor,formula, roll_definition[1]);
@@ -110,3 +115,13 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
 ChronicleSystem.adjustFormulaByWeapon = adjustFormulaByWeapon;
 ChronicleSystem.handleRoll = handleRoll;
 ChronicleSystem.getActorAbilityFormula = getActorTestFormula;
+
+ChronicleSystem.dispositions = [
+    new Disposition("Affectionate", 1, -2, 5),
+    new Disposition("Friendly", 2, -1, 3),
+    new Disposition("Amiable", 3, 0, 1),
+    new Disposition("Indifferent", 4, 0, 0),
+    new Disposition("Dislike", 5, 1, -2),
+    new Disposition("Unfriendly", 6, 2, -4),
+    new Disposition("Malicious", 7, 3, -6),
+];

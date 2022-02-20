@@ -45,6 +45,10 @@ export class ChronicleSystemActor extends Actor {
     data.derivedStats.combatDefense.total = data.derivedStats.combatDefense.value + data.derivedStats.combatDefense.modifier;
     data.derivedStats.health.value = this.getAbilityValue(data, "Endurance") * 3;
     data.derivedStats.health.total = data.derivedStats.health.value + data.derivedStats.health.modifier;
+    data.derivedStats.frustration.value = this.getAbilityValue(data, "Will");
+    data.derivedStats.frustration.total = data.derivedStats.frustration.value + data.derivedStats.frustration.modifier;
+    data.derivedStats.fatigue.value = this.getAbilityValue(data, "Endurance");
+    data.derivedStats.fatigue.total = data.derivedStats.fatigue.value + data.derivedStats.fatigue.modifier;
   }
 
   getAbilities() {

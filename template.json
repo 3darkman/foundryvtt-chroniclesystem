@@ -18,11 +18,21 @@
           "modifier": 0,
           "current": 0
         },
+        "frustration": {
+          "value": 0,
+          "modifier": 0,
+          "current": 0
+        },
         "combatDefense": {
           "value": 0,
           "modifier": 0
         },
         "health": {
+          "value": 0,
+          "modifier": 0,
+          "current": 0
+        },
+        "fatigue": {
           "value": 0,
           "modifier": 0,
           "current": 0
@@ -33,7 +43,8 @@
         }
       },
       "wounds": 0,
-      "injuries": 0
+      "injuries": 0,
+      "currentDisposition": 4
    },
     "character-common": {
       "ancestries": [],
