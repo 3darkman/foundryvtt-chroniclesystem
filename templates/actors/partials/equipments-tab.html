@@ -1,4 +1,4 @@
-<div class="tab" data-group="primary" data-tab="equipments">
+<div class="tab equipments" data-group="primary" data-tab="equipments">
     <section class="weapons">
         <header class="header-field">
             <span>Weapons</span>
@@ -48,19 +48,23 @@
                 <div class="equipment-weight">Weight</div>
                 <div class="equipment-cost">Cost</div>
                 <div class="item-qualities"><div>Qualities</div></div>
+                <div class="item-controls"></div>
             </li>
             {{#each data.data.owned.armors as |armor index|}}
                 <li  class="item weapon flexrow" data-item-id="{{_id}}">
                     <div class="armor-label item-edit field"><a>{{armor.name}}</a></div>
-                    <div class="armor-rating field"><a>{{armor.data.armorRating}}</a></div>
-                    <div class="armor-penalty field"><a>{{armor.data.armorPenalty}}</a></div>
-                    <div class="armor-bulk field"><a>{{armor.data.Bulk}}</a></div>
+                    <div class="armor-rating field"><a>{{armor.data.rating}}</a></div>
+                    <div class="armor-penalty field"><a>{{armor.data.penalty}}</a></div>
+                    <div class="armor-bulk field"><a>{{armor.data.bulk}}</a></div>
                     <div class="equipment-weight field">{{armor.data.weight}} lb</div>
                     <div class="equipment-cost field">{{armor.data.cost}}</div>
                     <div class="item-qualities field">
                         {{#each armor.data.qualities}}
                             <div class="item-quality">{{name}} {{parameter}}</div>
                         {{/each}}
+                    </div>
+                    <div class="item-controls">
+                        <a class="equipped {{showIfEquals "1" armor.data.equipped "activated"}}" data-item-id="{{_id}}" data-hand="{{showIfEquals "1" armor.data.equipped 0 1}}" data-type="armor"><i class="fas fa-shield-alt"></i></a>
                     </div>
                 </li>
             {{/each}}

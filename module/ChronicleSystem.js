@@ -132,4 +132,18 @@ ChronicleSystem.equippedConstants = {
     MAIN_HAND: 2,
     OFFHAND: 3,
     BOTH_HANDS: 4
+};
+
+ChronicleSystem.defaultMovement = 4;
+
+ChronicleSystem.modifiersConstants = {
+    BULK: "bulk",
+    AGILITY: "agility",
+    DAMAGE_TAKEN: "damage_taken"
+}
+
+ChronicleSystem.keyConstants = {
+    AGILITY: "agility",
+    ATHLETICS: "athletics",
+    BULK: "bulk",
 }

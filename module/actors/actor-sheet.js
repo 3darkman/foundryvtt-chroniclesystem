@@ -125,14 +125,14 @@ export class ChronicleSystemActorSheet extends ActorSheet {
 
     html.find('.rollable').click(this._onClickRoll.bind(this));
 
-    html.find('.disposition.option').click(this._dispositionChange.bind(this));
+    html.find('.disposition.option').click(this._onDispositionChanged.bind(this));
 
-    html.find('.equipped').click(this._equipped.bind(this));
+    html.find('.equipped').click(this._onEquippedStateChanged.bind(this));
 
     // Add or Remove Attribute
   }
 
-  async _equipped(event) {
+  async _onEquippedStateChanged(event) {
     const eventData = event.currentTarget.dataset;
     let documment = this.actor.getEmbeddedDocument('Item', eventData.itemId);
     let collection = [];
@@ -159,18 +159,27 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       }
     }
 
+    this.actor.updateTempModifiers();
+
     tempCollection.forEach((item) => {
       collection.push({_id: item.data._id, "data.equipped": ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED});
+      item.onEquippedChanged(this.actor, false);
     });
 
     collection.push({_id: documment.data._id, "data.equipped": documment.data.data.equipped});
-    console.log(collection);
+    documment.onEquippedChanged(this.actor, documment.data.data.equipped > 0);
+
+    this.actor.saveModifiers();
+
     this.actor.updateEmbeddedDocuments('Item', collection);
   }
 
-  async _dispositionChange(event, targets) {
+  async _onDispositionChanged(event, targets) {
+    if (!ChronicleSystem.dispositions.find((disposition) => disposition.rating === parseInt(event.target.dataset.id))) {
+      console.log("the informed disposition does not exist.");
+      return;
+    }
     this.actor.update({"data.currentDisposition": event.target.dataset.id});
-    console.log(this.actor);
   }
 
   async _onClickRoll(event, targets) {
@@ -207,15 +216,31 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   }
 
   async _onDropItemCreate(itemData) {
-    const item = this.actor.items.find(i => i.name === itemData.name);
-    let embeddedItem;
+    let embeddedItem = [];
+    let itemsToCreate = [];
+    let data = [];
+    data = data.concat(itemData);
+    data.forEach((doc) => {
+      const item = this.actor.items.find((i) => {
+        return i.name === doc.name;
+      });
+      if (item) {
+        embeddedItem.push(this.actor.getEmbeddedDocument("Item", item.data._id));
+      } else {
+        itemsToCreate.push(doc);
+      }
+    });
 
-    if (item === null || typeof item === 'undefined') {
-      let data = [ itemData, ];
-      embeddedItem = this.actor.createEmbeddedDocuments("Item", data);
-    } else {
-      embeddedItem = this.actor.getEmbeddedDocument("Item", item.data._id);
+    if (itemsToCreate.length > 0) {
+      this.actor.createEmbeddedDocuments("Item", itemsToCreate)
+          .then(function(result) {
+            result.forEach((item) => {
+              item.onObtained(item.actor);
+            });
+            embeddedItem.concat(result);
+          });
     }
+
     return embeddedItem;
   }
 

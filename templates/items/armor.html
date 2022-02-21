@@ -1,34 +1,34 @@
 <form class="{{cssClass}}" autocomplete="off">
     {{!-- Item Sheet Header --}} {{>
-    "systems/chroniclesystem/templates/items/partials/header.html"}}
+    "systems/chroniclesystem/templates/items/partials/header-delete.html"}}
     <main class="sheet-body flexrow">
         <section class="item-stats">
             <header class="header-field">
                 <span>Details</span>
             </header>
             <div class="form-group">
-                <label for="data.armorRating">Rating:</label>
+                <label for="data.rating">Rating:</label>
                 <span class="form-fields">
                   <input
-                          id="data.armorRating"
+                          id="data.rating"
                           class="small-field"
-                          name="data.armorRating"
+                          name="data.rating"
                           type="text"
-                          value="{{item.data.data.armorRating}}"
+                          value="{{item.data.data.rating}}"
                           placeholder="Rating"
                           data-dtype="Number"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.armorPenalty">Penalty</label>
+                <label for="data.penalty">Penalty</label>
                 <span class="form-fields">
                   <input
-                          id="data.armorPenalty"
+                          id="data.penalty"
                           class="small-field"
-                          name="data.armorPenalty"
+                          name="data.penalty"
                           type="text"
-                          value="{{item.data.data.armorPenalty}}"
+                          value="{{item.data.data.penalty}}"
                           placeholder="Penalty"
                           data-dtype="Number"
                   />

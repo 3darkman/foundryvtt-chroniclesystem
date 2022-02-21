@@ -44,7 +44,8 @@
       },
       "wounds": 0,
       "injuries": 0,
-      "currentDisposition": 4
+      "currentDisposition": 4,
+      "modifiers": []
    },
     "character-common": {
       "ancestries": [],
@@ -105,8 +106,8 @@
       "itemDescription",
       "physicalItem"
     ],
-    "armorRating": 0,
-    "armorPenalty": 0,
+    "rating": 0,
+    "penalty": 0,
     "bulk": 0,
     "qualities": [],
     "equipped": 0

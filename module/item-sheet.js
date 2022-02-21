@@ -22,9 +22,7 @@ export class ChronicleSystemItemSheet extends ItemSheet {
 
         html.find('.item-delete').click((ev) => {
             if (this.item.actor) {
-                console.log(this.item.actor);
                 this.item.actor.deleteEmbeddedDocuments("Item", [this.item.data._id,]);
-                this.item.sheet.close();
             }
         });
 
@@ -38,7 +36,6 @@ export class ChronicleSystemItemSheet extends ItemSheet {
     async _onClickSpecialtyCreate(ev) {
         const actor = this.item.actor;
         const item = this.item;
-        console.log(item);
         if (actor) {
             let specialty = {
                 name: "",
@@ -53,7 +50,6 @@ export class ChronicleSystemItemSheet extends ItemSheet {
 
     async _onClickItemQualityCreate(ev) {
         const item = this.item;
-        console.log(item);
         let quality = {
             name: "",
             parameter: ""
@@ -100,7 +96,6 @@ export class ChronicleSystemItemSheet extends ItemSheet {
     getData() {
         const data = super.getData();
         data.dtypes = ["String", "Number", "Boolean"];
-        console.log(this.item.data.data);
         return data;
     }
 

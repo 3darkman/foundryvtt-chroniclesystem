@@ -292,11 +292,43 @@
                             />
                         </span>
                     </div>
+                    <header class="subheader-field">
+                        <span>Movement</span>
+                    </header>
+                    <div class="form-group">
+                        <span class="form-fields">
+                            <input
+                                    name="data.movement.base"
+                                    type="text"
+                                    value="{{data.data.movement.base}}"
+                                    placeholder="Base"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                            <b>+</b>
+                            <input
+                                    name="data.derivedStats.combatDefense.modifier"
+                                    type="text"
+                                    value="{{data.data.derivedStats.combatDefense.modifier}}"
+                                    placeholder="Modifier"
+                                    data-dtype="Number"
+                            />
+                            <b>=</b>
+                            <input
+                                    name="data.derivedStats.combatDefense.value"
+                                    type="text"
+                                    value="{{data.data.derivedStats.combatDefense.total}}"
+                                    placeholder="Total"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                        </span>
+                    </div>
                 </section>
                 <section></section>
                 <section class="weapons">
                     <header class="subheader-field">
-                        <span>Equipped Weapons</span>
+                        <span>Current Equipped Weapons</span>
                     </header>
                     <table>
                         <thead>
@@ -315,6 +347,29 @@
                                         <a>{{format-formula weapon.formula}}</a>
                                     </td>
                                     <td> {{weapon.damageValue}}</td>
+                                </tr>
+                            {{/ifDifferent}}
+                        {{/each}}
+                        </tbody>
+                    </table>
+                    <header class="subheader-field">
+                        <span>Current Equipped Armor</span>
+                    </header>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Armor</th>
+                            <th>Rating</th>
+                            <th>Penalty</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each data.data.owned.armors as |armor index|}}
+                            {{#ifDifferent armor.data.equipped ../notEquipped}}
+                                <tr>
+                                    <td>{{armor.name}}</td>
+                                    <td>{{armor.data.rating}}</td>
+                                    <td>{{armor.data.penalty}}</td>
                                 </tr>
                             {{/ifDifferent}}
                         {{/each}}

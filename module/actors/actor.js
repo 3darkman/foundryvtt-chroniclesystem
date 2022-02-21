@@ -2,8 +2,10 @@
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
  */
-export class ChronicleSystemActor extends Actor {
+import {ChronicleSystem} from "../ChronicleSystem.js";
 
+export class ChronicleSystemActor extends Actor {
+  modifiers;
 
   getChronicleSystemActorData() {
     return this.data.data;
@@ -11,6 +13,7 @@ export class ChronicleSystemActor extends Actor {
 
   prepareData() {
     super.prepareData();
+    this.calculateMovementData();
   }
 
   prepareEmbeddedEntities() {
@@ -27,6 +30,7 @@ export class ChronicleSystemActor extends Actor {
   prepareDerivedData() {
     super.prepareDerivedData()
     this.calculateDerivedValues()
+
   }
 
   /** @override */
@@ -49,6 +53,8 @@ export class ChronicleSystemActor extends Actor {
     data.derivedStats.frustration.total = data.derivedStats.frustration.value + data.derivedStats.frustration.modifier;
     data.derivedStats.fatigue.value = this.getAbilityValue(data, "Endurance");
     data.derivedStats.fatigue.total = data.derivedStats.fatigue.value + data.derivedStats.fatigue.modifier;
+    // let weapons = docs.filter()
+    //data.movement.bulk =
   }
 
   getAbilities() {
@@ -58,14 +64,14 @@ export class ChronicleSystemActor extends Actor {
 
   getAbility(abilityName) {
     let items = this.getEmbeddedCollection("Item");
-    const ability = items.find((item) => item.data.name === abilityName && item.type === 'ability');
+    const ability = items.find((item) => item.data.name.toLowerCase() === abilityName.toString().toLowerCase() && item.type === 'ability');
     return [ability, undefined];
   }
 
   getAbilityBySpecialty(abilityName, specialtyName) {
     let items = this.getEmbeddedCollection("Item");
     let specialty = null;
-    const ability = items.filter((item) => item.type === 'ability' && item.name === abilityName).find(function (ability) {
+    const ability = items.filter((item) => item.type === 'ability' && item.name.toLowerCase() === abilityName.toString().toLowerCase()).find(function (ability) {
       if (ability.data.data.specialties === undefined)
         return false;
 
@@ -73,13 +79,42 @@ export class ChronicleSystemActor extends Actor {
       let specialties = ability.data.data.specialties;
       let specialtiesArray = Object.keys(specialties).map((key) => specialties[key]);
 
-      specialty = specialtiesArray.find((specialty) => specialty.name === specialtyName);
+      specialty = specialtiesArray.find((specialty) => specialty.name.toLowerCase() === specialtyName.toString().toLowerCase());
       if (specialty !== null && specialty !== undefined) {
         return true;
       }
     });
 
     return [ability, specialty];
+  }
+
+  addModifier(type, documentId, value, save = false) {
+    if (!this.modifiers[type])
+      this.modifiers[type] = []
+    let index = this.modifiers[type].findIndex((mod) => {
+      return mod._id === documentId
+    });
+    if (index >= 0) {
+      this.modifiers[type][index].mod = value;
+    } else {
+      this.modifiers[type].push({_id: documentId, mod: value});
+    }
+    if (save) {
+      this.update({"modifiers": this.modifiers});
+    }
+  }
+
+  removeModifier(type, documentId, save = false) {
+    if (this.modifiers[type]) {
+      let index = this.modifiers[type].indexOf((mod) => mod._id === documentId);
+      this.modifiers[type].splice(index, 1);
+    }
+    if (save)
+      this.update({"modifiers" : this.modifiers});
+  }
+
+  saveModifiers() {
+    this.update({"data.modifiers" : this.modifiers}, {diff:false});
   }
 
   getAbilityValue(abilityName) {
@@ -97,5 +132,70 @@ export class ChronicleSystemActor extends Actor {
     return this.getAbilityValue("Awareness") +
         this.getAbilityValue("Agility") +
         this.getAbilityValue("Athletics");
+  }
+
+  calculateMovementData() {
+    let data = this.getChronicleSystemActorData();
+    data.movement = {};
+    data.movement.base = ChronicleSystem.defaultMovement;
+    let runFormula = ChronicleSystem.getActorAbilityFormula(this, "Athletics", "Run");
+    data.movement.runBonus = Math.floor(runFormula.bonusDice / 2);
+    let docs = this.items;
+    let weapons = docs.filter((item) => item.type === 'weapon');
+    let armors = docs.filter((item) => item.type === 'armor');
+    let bulk = 0;
+    weapons.forEach((weapon) => {
+      let bulks = Object.values(weapon.data.data.qualities).filter((quality) => quality.name.toLowerCase() === "bulk");
+      if (bulks) {
+        bulks.forEach((quality) => {
+          bulk += parseInt(quality.parameter);
+        })
+      }
+    });
+
+    armors.forEach((armor) => {
+      bulk += parseInt(armor.data.data.bulk);
+    });
+    data.movement.bulk = bulk;
+
+    data.movement.total = data.movement.base + data.movement.runBonus - Math.floor(data.movement.bulk/2);
+    data.movement.total = data.movement.total < 1 ? 1 : data.movement.total;
+  }
+
+  _onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId) {
+    super._onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    this.updateTempModifiers();
+    for (let i = 0; i < documents.length; i++) {
+      documents[i].onDiscardedFromActor(this, result[0]);
+    }
+    this.saveModifiers();
+  }
+
+  _onCreateEmbeddedDocuments(embeddedName, documents, result, options, userId) {
+    super._onCreateEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    this.updateTempModifiers();
+    for (let i = 0; i < documents.length; i++) {
+      documents[i].onObtained(this);
+    }
+
+    this.saveModifiers();
+  }
+
+  _onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId) {
+    super._onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    this.updateTempModifiers();
+    result.forEach((doc) => {
+      let item = this.items.find((item) => item.data._id === doc._id);
+      if (item) {
+        item.onObtained(this);
+        item.onEquippedChanged(this, item.data.data.equipped > 0);
+      }
+    })
+    this.saveModifiers();
+  }
+
+  updateTempModifiers() {
+    let data = this.getChronicleSystemActorData()
+    this.modifiers = data.modifiers;
   }
 }

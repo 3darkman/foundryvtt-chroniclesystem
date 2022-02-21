@@ -269,11 +269,11 @@
     transform: scale(-1, 1);
 }
 
-.chroniclesystem.sheet.actor .weapons .item-controls a  {
+.chroniclesystem.sheet.actor .equipments .item-controls a  {
     color: #AAAAAA;
     padding: 2px;
 }
 
-.chroniclesystem.sheet.actor .weapons .item-controls a.activated {
+.chroniclesystem.sheet.actor .equipments .item-controls a.activated {
     color:#4178B7;
 }
