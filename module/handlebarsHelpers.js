@@ -39,5 +39,22 @@ export const registerCustomHelpers = function () {
     Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
         return arg1 == arg2 ? options.fn(this) : options.inverse(this);
     });
+
+    Handlebars.registerHelper('ifDifferent', function(arg1, arg2, options) {
+        return arg1 != arg2 ? options.fn(this) : options.inverse(this);
+    });
+
+    Handlebars.registerHelper('showIfEquals', function(arg1, arg2, result1, result2 = "", options) {
+        return arg1 == arg2 ? result1 : result2;
+    });
+
+    Handlebars.registerHelper('showIfContains', function(arg1, arg2, result, result2 = "", options) {
+        let array = arg1.split('|');
+        return array.includes(arg2.toString()) ? result : result2;
+    });
+
+    Handlebars.registerHelper('showIfDifferent', function(arg1, arg2, result1, result2 = "", options) {
+        return arg1 != arg2 ? result1 : result2;
+    });
 };
 

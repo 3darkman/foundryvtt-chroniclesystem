@@ -108,7 +108,8 @@
     "armorRating": 0,
     "armorPenalty": 0,
     "bulk": 0,
-    "qualities": []
+    "qualities": [],
+    "equipped": 0
   },
   "weapon": {
     "templates": [
@@ -120,7 +121,8 @@
     "training": 0,
     "damage": "",
     "qualities": [],
-    "reach": ""
+    "reach": "",
+    "equipped": 0
   },
   "poison": {
     "templates": [

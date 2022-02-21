@@ -125,3 +125,11 @@ ChronicleSystem.dispositions = [
     new Disposition("Unfriendly", 6, 2, -4),
     new Disposition("Malicious", 7, 3, -6),
 ];
+
+ChronicleSystem.equippedConstants = {
+    IS_NOT_EQUIPPED: 0,
+    WEARING: 1,
+    MAIN_HAND: 2,
+    OFFHAND: 3,
+    BOTH_HANDS: 4
+}

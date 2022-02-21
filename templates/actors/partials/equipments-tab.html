@@ -11,6 +11,7 @@
                 <div class="equipment-weight">Weight</div>
                 <div class="equipment-cost">Cost</div>
                 <div class="item-qualities"><div>Qualities</div></div>
+                <div class="item-controls"></div>
             </li>
             {{#each data.data.owned.weapons as |weapon index|}}
                 <li  class="item weapon flexrow" data-item-id="{{_id}}">
@@ -25,6 +26,10 @@
                         {{#each weapon.data.qualities}}
                             <div class="item-quality">{{name}} {{parameter}}</div>
                         {{/each}}
+                    </div>
+                    <div class="item-controls">
+                        <a class="equipped {{showIfContains "2|4" weapon.data.equipped "activated"}}" data-item-id="{{_id}}" data-hand="{{showIfContains "2|4" weapon.data.equipped 0 2}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
+                        <a class="equipped off-hand {{showIfContains "3|4" weapon.data.equipped "activated"}}" data-item-id="{{_id}}" data-hand="{{showIfContains "3|4" weapon.data.equipped 0 3}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
                     </div>
                 </li>
             {{/each}}

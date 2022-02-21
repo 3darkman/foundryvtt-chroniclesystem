@@ -54,6 +54,8 @@ export class ChronicleSystemActorSheet extends ActorSheet {
 
     data.dispositions = ChronicleSystem.dispositions;
 
+    data.notEquipped = ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED;
+
     character.owned.weapons.forEach((weapon) => {
       let info = weapon.data.specialty.split(':');
       if (info.length < 2)
@@ -121,11 +123,49 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       $(ev.currentTarget).parents('.item').find('.description').slideToggle();
     });
 
-    html.find('.rollable').click(this._onClickRoll.bind(this))
+    html.find('.rollable').click(this._onClickRoll.bind(this));
 
-    html.find('.disposition.option').click(this._dispositionChange.bind(this))
+    html.find('.disposition.option').click(this._dispositionChange.bind(this));
+
+    html.find('.equipped').click(this._equipped.bind(this));
 
     // Add or Remove Attribute
+  }
+
+  async _equipped(event) {
+    const eventData = event.currentTarget.dataset;
+    let documment = this.actor.getEmbeddedDocument('Item', eventData.itemId);
+    let collection = [];
+    let tempCollection = [];
+
+    let isArmor = parseInt(eventData.hand) === ChronicleSystem.equippedConstants.WEARING;
+    let isUnequipping = parseInt(eventData.hand) === 0;
+
+    if (isUnequipping) {
+      documment.data.data.equipped = 0;
+    } else {
+      if (isArmor) {
+        documment.data.data.equipped = ChronicleSystem.equippedConstants.WEARING;
+        tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.data.data.equipped === ChronicleSystem.equippedConstants.WEARING);
+      } else {
+        let qualities = Object.values(documment.data.data.qualities).filter((quality) => quality.name.toLowerCase() === "two-handed");
+        if (qualities.length > 0) {
+          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.data.data.equipped === ChronicleSystem.equippedConstants.MAIN_HAND || item.data.data.equipped === ChronicleSystem.equippedConstants.OFFHAND || item.data.data.equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
+          documment.data.data.equipped = ChronicleSystem.equippedConstants.BOTH_HANDS;
+        } else {
+          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.data.data.equipped === parseInt(eventData.hand) || item.data.data.equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
+          documment.data.data.equipped = parseInt(eventData.hand);
+        }
+      }
+    }
+
+    tempCollection.forEach((item) => {
+      collection.push({_id: item.data._id, "data.equipped": ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED});
+    });
+
+    collection.push({_id: documment.data._id, "data.equipped": documment.data.data.equipped});
+    console.log(collection);
+    this.actor.updateEmbeddedDocuments('Item', collection);
   }
 
   async _dispositionChange(event, targets) {

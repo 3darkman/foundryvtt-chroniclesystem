@@ -205,12 +205,12 @@
     margin: 3px;
 }
 
-.chroniclesystem.sheet.actor .content section {
-    flex: 0 0 150px;
+.chroniclesystem.sheet.actor .content .techniques {
+    flex: 1;
     margin: 3px;
 }
 
-.chroniclesystem.sheet.actor .content .techniques {
+.chroniclesystem.sheet.actor .content .weapons {
     flex: 1;
     margin: 3px;
 }
@@ -259,4 +259,21 @@
     color: white;
     text-shadow: none;
     border-bottom: none;
+}
+
+.chroniclesystem.sheet.actor .off-hand i {
+    -moz-transform: scale(-1, 1);
+    -webkit-transform: scale(-1, 1);
+    -o-transform: scale(-1, 1);
+    -ms-transform: scale(-1, 1);
+    transform: scale(-1, 1);
+}
+
+.chroniclesystem.sheet.actor .weapons .item-controls a  {
+    color: #AAAAAA;
+    padding: 2px;
+}
+
+.chroniclesystem.sheet.actor .weapons .item-controls a.activated {
+    color:#4178B7;
 }

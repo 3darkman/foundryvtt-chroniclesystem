@@ -133,15 +133,9 @@
                     </header>
                     <div class="disposition-list">
                         {{#each dispositions}}
-                            {{#ifEquals this.rating ../data.data.currentDisposition}}
-                                <div class="disposition option selected" data-id="{{this.rating}}">
+                                <div class="disposition option  {{showIfEquals this.rating ../data.data.currentDisposition "selected"}}" data-id="{{this.rating}}">
                                     {{this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
                                 </div>
-                            {{else}}
-                                <div class="disposition option" data-id="{{this.rating}}">
-                                    {{this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
-                                </div>
-                            {{/ifEquals}}
                         {{/each}}
                     </div>
                 </section>
@@ -300,7 +294,33 @@
                     </div>
                 </section>
                 <section></section>
-                <section></section>
+                <section class="weapons">
+                    <header class="subheader-field">
+                        <span>Equipped Weapons</span>
+                    </header>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Weapon</th>
+                            <th>Test</th>
+                            <th>Damage</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each data.data.owned.weapons as |weapon index|}}
+                            {{#ifDifferent weapon.data.equipped ../notEquipped}}
+                                <tr>
+                                    <td>{{weapon.name}} {{showIfEquals weapon.data.equipped 3 "(Off-hand)" : ""}}</td>
+                                    <td class="rollable" id="weapon-test:{{weapon.name}}:{{formulaToStr weapon.formula}}">
+                                        <a>{{format-formula weapon.formula}}</a>
+                                    </td>
+                                    <td> {{weapon.damageValue}}</td>
+                                </tr>
+                            {{/ifDifferent}}
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </section>
             </section>
         </section>
     </section>
