@@ -78,7 +78,7 @@ export class DiceRollFormula {
             result += ` + ${this.bonusDice}B`
         }
         if (this.modifier !== 0) {
-            result += this.modifier > 0 ? `+ ${this.modifier}` : `- ${-this.modifier}`
+            result += this.modifier > 0 ? ` + ${this.modifier}` : ` - ${-this.modifier}`
         }
         return result;
     }

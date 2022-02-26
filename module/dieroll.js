@@ -1,13 +1,14 @@
 // noinspection JSUnusedLocalSymbols
 export async function doRoll(actor, formula, thing, difficulty = 0) {
-    const dices = formula.pool + formula.bonusDice;
+    const pool = formula.pool - formula.drawback;
+    const dices = pool + formula.bonusDice;
     let dieRoll = new Die({faces: 6, number: dices});
     dieRoll.evaluate({async : false});
 
     let rerollFormula = "r"+formula.reroll+"=1";
     dieRoll.reroll(rerollFormula);
 
-    dieRoll.keep('kh' + (formula.pool - formula.drawback));
+    dieRoll.keep('kh' + (formula.pool));
 
     const plus = new OperatorTerm({operator: "+"});
     plus.evaluate();

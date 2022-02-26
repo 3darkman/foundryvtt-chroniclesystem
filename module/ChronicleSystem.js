@@ -104,8 +104,11 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
             specValue = specialty.rating;
             specModifier = specialty.modifier;
         }
+        let penalties = actor.getPenalty(ability.name.toLowerCase(), false, true);
         formula.pool = ability.data.data.rating;
-        let modifiers = actor.getModifier(ability.name.toLowerCase());
+        formula.drawback = penalties.total;
+
+        let modifiers = actor.getModifier(ability.name.toLowerCase(),false, true);
         formula.modifier = ability.data.data.modifier + specModifier + modifiers.total;
         formula.bonusDice = specValue;
     }
@@ -138,13 +141,31 @@ ChronicleSystem.equippedConstants = {
 ChronicleSystem.defaultMovement = 4;
 
 ChronicleSystem.modifiersConstants = {
-    BULK: "bulk",
+    ALL: "all",
+    PENALTY: "penalty",
+
     AGILITY: "agility",
+    AWARENESS: "awareness",
+    CUNNING: "cunning",
+    STATUS: "status",
+
+    BULK: "bulk",
     DAMAGE_TAKEN: "damage_taken"
 }
 
 ChronicleSystem.keyConstants = {
     AGILITY: "agility",
     ATHLETICS: "athletics",
+    AWARENESS: "awareness",
+    CUNNING: "cunning",
+    ENDURANCE: "endurance",
+    STATUS: "status",
+    WILL: "will",
+
+    RUN: "run",
+
     BULK: "bulk",
+    WOUNDS: "Wounds",
+    INJURY: "Injuries"
+
 }

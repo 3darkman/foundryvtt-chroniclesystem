@@ -45,13 +45,16 @@
       "wounds": [],
       "injuries": [],
       "currentDisposition": 4,
-      "modifiers": [],
+      "modifiers": {},
+      "penalties": {},
       "movement": {
         "base": 4,
         "runBonus": 0,
+        "sprintMultiplier": 4,
         "bulk": 0,
         "modifier": 0,
-        "total": 0
+        "total": 0,
+        "sprintTotal": 0
       }
    },
     "character-common": {
@@ -64,7 +67,6 @@
       "hairColor": "",
       "mannerisms": "",
       "distinguishingFeatures": "",
-      "wounds": [],
       "personalHistory": "",
       "owned": {
         "equipments": [],
@@ -76,25 +78,45 @@
         "powers": [],
         "benefits": []
       },
+      "currentStress": 0,
       "allies": "",
       "enemies": "",
       "oaths": "",
       "heraldry": "",
       "portrait": "",
       "motto": "",
-      "coins": "",
+      "coins": {
+        "coppers": 0,
+        "silvers": 0,
+        "golds": 0
+      },
       "vice": "",
       "virtue": "",
       "motivation": "",
-      "goal": ""
+      "goal": "",
+      "experience": {
+        "spent": 0,
+        "total": 0
+      }
     }
   },
   "character": {
     "templates": ["common", "character-common"]
+  },
+  "house": {
+    "defense":0,
+    "influence": 0,
+    "lands": 0,
+    "law": 0,
+    "population": 0,
+    "power": 0,
+    "wealth": 0,
+    "historicalEvents": [],
+    "motto": ""
   }
 },
 "Item": {
-  "types": ["armor", "weapon", "poison", "ability", "equipment", "benefit", "drawback"],
+  "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback"],
   "templates": {
     "physicalItem": {
       "weight": 0
@@ -119,19 +141,6 @@
     "qualities": [],
     "equipped": 0
   },
-  "weapon": {
-    "templates": [
-      "itemDescription",
-      "physicalItem",
-      "equipmentItem"
-    ],
-    "specialty": "",
-    "training": 0,
-    "damage": "",
-    "qualities": [],
-    "reach": "",
-    "equipped": 0
-  },
   "poison": {
     "templates": [
       "itemDescription",
@@ -144,6 +153,19 @@
     "diagnosis": 0,
     "effects": "",
     "recovery": ""
+  },
+  "weapon": {
+    "templates": [
+      "itemDescription",
+      "physicalItem",
+      "equipmentItem"
+    ],
+    "specialty": "",
+    "training": 0,
+    "damage": "",
+    "qualities": [],
+    "reach": "",
+    "equipped": 0
   },
   "ability": {
     "templates": [

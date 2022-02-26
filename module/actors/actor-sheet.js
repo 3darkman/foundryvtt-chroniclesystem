@@ -96,6 +96,10 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       seduce: new Technique("Seduce", persuasionValue, seduceFormula, bluffFormula),
       taunt: new Technique("Taunt", awarenessValue, tauntFormula, bluffFormula)
     };
+    data.currentInjuries = character.injuries.length;
+    data.currentWounds = character.wounds.length;
+    data.maxInjuries = this.actor.getMaxInjuries();
+    data.maxWounds = this.actor.getMaxWounds();
 
     return data;
   }
@@ -142,8 +146,15 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     const data = this.actor.getChronicleSystemActorData();
     let wound = "";
     let wounds = Object.values(data.wounds);
+    if (wounds.length >= this.actor.getMaxWounds())
+      return;
     wounds.push(wound);
-    this.actor.update({"data.wounds" : wounds});
+    this.actor.updateTempPenalties();
+    this.actor.addPenalty(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.WOUNDS, wounds.length, false);
+    this.actor.update({
+      "data.wounds" : wounds,
+      "data.penalties" : this.actor.penalties
+    });
   }
 
   async _onclickWoundControl(event) {
@@ -156,7 +167,17 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       const data = this.actor.getChronicleSystemActorData();
       let wounds = Object.values(data.wounds);
       wounds.splice(index,1);
-      this.actor.update({"data.wounds" : wounds});
+
+      this.actor.updateTempPenalties();
+      if (wounds.length === 0) {
+        this.actor.removePenalty(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.WOUNDS);
+      } else {
+        this.actor.addPenalty(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.WOUNDS, wounds.length, false);
+      }
+      this.actor.update({
+        "data.wounds" : wounds,
+        "data.penalties" : this.actor.penalties
+      });
     }
   }
 
@@ -164,8 +185,18 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     const data = this.actor.getChronicleSystemActorData();
     let injury = "";
     let injuries = Object.values(data.injuries);
+    if (injuries.length >= this.actor.getMaxInjuries())
+      return;
+
     injuries.push(injury);
-    this.actor.update({"data.injuries" : injuries});
+
+    this.actor.updateTempModifiers();
+    this.actor.addModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.INJURY, -injuries.length, false);
+
+    this.actor.update({
+      "data.injuries" : injuries,
+      "data.modifiers" : this.actor.modifiers
+    });
   }
 
   async _onclickInjuryControl(event) {
@@ -178,7 +209,18 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       const data = this.actor.getChronicleSystemActorData();
       let injuries = Object.values(data.injuries);
       injuries.splice(index,1);
-      this.actor.update({"data.injuries" : injuries});
+
+      this.actor.updateTempModifiers();
+      if (injuries.length === 0) {
+        this.actor.removeModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.INJURY);
+      } else {
+        this.actor.addModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.INJURY, -injuries.length, false);
+      }
+
+      this.actor.update({
+        "data.injuries" : injuries,
+        "data.modifiers" : this.actor.modifiers
+      });
     }
   }
 

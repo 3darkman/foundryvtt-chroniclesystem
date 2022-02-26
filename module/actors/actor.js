@@ -6,6 +6,7 @@ import {ChronicleSystem} from "../ChronicleSystem.js";
 
 export class ChronicleSystemActor extends Actor {
   modifiers;
+  penalties;
 
   getChronicleSystemActorData() {
     return this.data.data;
@@ -43,17 +44,16 @@ export class ChronicleSystemActor extends Actor {
     let data = this.getChronicleSystemActorData();
     data.derivedStats.intrigueDefense.value = this.calcIntrigueDefense();
     data.derivedStats.intrigueDefense.total = data.derivedStats.intrigueDefense.value + parseInt(data.derivedStats.intrigueDefense.modifier);
-    data.derivedStats.composure.value = this.getAbilityValue(data, "Will") * 3;
+    data.derivedStats.composure.value = this.getAbilityValue(ChronicleSystem.keyConstants.WILL) * 3;
     data.derivedStats.composure.total = data.derivedStats.composure.value + parseInt(data.derivedStats.composure.modifier);
     data.derivedStats.combatDefense.value = this.calcCombatDefense();
     data.derivedStats.combatDefense.total = data.derivedStats.combatDefense.value + parseInt(data.derivedStats.combatDefense.modifier);
-    data.derivedStats.health.value = this.getAbilityValue(data, "Endurance") * 3;
+    data.derivedStats.health.value = this.getAbilityValue(ChronicleSystem.keyConstants.ENDURANCE) * 3;
     data.derivedStats.health.total = data.derivedStats.health.value + parseInt(data.derivedStats.health.modifier);
-    data.derivedStats.frustration.value = this.getAbilityValue(data, "Will");
+    data.derivedStats.frustration.value = this.getAbilityValue(ChronicleSystem.keyConstants.WILL);
     data.derivedStats.frustration.total = data.derivedStats.frustration.value + parseInt(data.derivedStats.frustration.modifier);
-    data.derivedStats.fatigue.value = this.getAbilityValue(data, "Endurance");
+    data.derivedStats.fatigue.value = this.getAbilityValue(ChronicleSystem.keyConstants.ENDURANCE);
     data.derivedStats.fatigue.total = data.derivedStats.fatigue.value + parseInt(data.derivedStats.fatigue.modifier);
-
   }
 
   getAbilities() {
@@ -87,7 +87,7 @@ export class ChronicleSystemActor extends Actor {
     return [ability, specialty];
   }
 
-  getModifier(type, includeDetail = false) {
+  getModifier(type, includeDetail = false, includeModifierGlobal = false) {
     this.updateTempModifiers();
 
     let total = 0;
@@ -97,7 +97,25 @@ export class ChronicleSystemActor extends Actor {
       this.modifiers[type].forEach((modifier) => {
         total += modifier.mod;
         if (includeDetail) {
-          let tempItem = this.getEmbeddedDocument('Item', modifier._id);
+          let tempItem = modifier._id;
+          if (modifier.isDocument) {
+            tempItem = this.getEmbeddedDocument('Item', modifier._id);
+          }
+          if (tempItem) {
+            detail.push({docName: tempItem.name, mod: modifier.mod});
+          }
+        }
+      });
+    }
+
+    if (includeModifierGlobal && this.modifiers[ChronicleSystem.modifiersConstants.ALL]) {
+      this.modifiers[ChronicleSystem.modifiersConstants.ALL].forEach((modifier) => {
+        total += modifier.mod;
+        if (includeDetail) {
+          let tempItem = modifier._id;
+          if (modifier.isDocument) {
+            tempItem = this.getEmbeddedDocument('Item', modifier._id);
+          }
           if (tempItem)
             detail.push({docName: tempItem.name, mod: modifier.mod});
         }
@@ -107,33 +125,119 @@ export class ChronicleSystemActor extends Actor {
     return { total: total, detail: detail};
   }
 
-  addModifier(type, documentId, value, save = false) {
-    if (!this.modifiers[type])
-      this.modifiers[type] = []
+  getPenalty(type, includeDetail = false, includeModifierGlobal = false) {
+    this.updateTempPenalties();
+
+    let total = 0;
+    let detail = [];
+
+    if (this.penalties[type]) {
+      this.penalties[type].forEach((penalty) => {
+        total += penalty.mod;
+        if (includeDetail) {
+          let tempItem = penalty._id;
+          if (penalty.isDocument) {
+            tempItem = this.getEmbeddedDocument('Item', penalty._id);
+          }
+          if (tempItem) {
+            detail.push({docName: tempItem.name, mod: penalty.mod});
+          }
+        }
+      });
+    }
+
+    if (includeModifierGlobal && this.penalties[ChronicleSystem.modifiersConstants.ALL]) {
+      this.penalties[ChronicleSystem.modifiersConstants.ALL].forEach((penalty) => {
+        total += penalty.mod;
+        if (includeDetail) {
+          let tempItem = penalty._id;
+          if (penalty.isDocument) {
+            tempItem = this.getEmbeddedDocument('Item', penalty._id);
+          }
+          if (tempItem)
+            detail.push({docName: tempItem.name, mod: penalty.mod});
+        }
+      });
+    }
+
+    return { total: total, detail: detail};
+  }
+
+  addModifier(type, documentId, value, isDocument = true, save = false) {
+    if (!this.modifiers[type]) {
+      this.modifiers[type] = [];
+    }
+
     let index = this.modifiers[type].findIndex((mod) => {
       return mod._id === documentId
     });
     if (index >= 0) {
       this.modifiers[type][index].mod = value;
     } else {
-      this.modifiers[type].push({_id: documentId, mod: value});
+      this.modifiers[type].push({_id: documentId, mod: value, isDocument: isDocument});
     }
+
     if (save) {
-      this.update({"modifiers": this.modifiers});
+      this.update({"data.modifiers": this.modifiers});
+    }
+  }
+
+  addPenalty(type, documentId, value, isDocument = true, save = false) {
+    if (!this.penalties[type]) {
+      this.penalties[type] = [];
+    }
+
+    let index = this.penalties[type].findIndex((mod) => {
+      return mod._id === documentId
+    });
+
+    if (index >= 0) {
+      this.penalties[type][index].mod = value;
+    } else {
+      this.penalties[type].push({
+        _id: documentId,
+        mod: value,
+        isDocument: isDocument
+      });
+    }
+
+    if (save) {
+      this.update({"data.penalties": this.penalties});
     }
   }
 
   removeModifier(type, documentId, save = false) {
     if (this.modifiers[type]) {
-      let index = this.modifiers[type].indexOf((mod) => mod._id === documentId);
-      this.modifiers[type].splice(index, 1);
+        let index = this.modifiers[type].indexOf((mod) => mod._id === documentId);
+        this.modifiers[type].splice(index, 1);
     }
     if (save)
-      this.update({"modifiers" : this.modifiers});
+      this.update({"data.modifiers" : this.modifiers});
+  }
+
+  removePenalty(type, documentId, save = false) {
+    if (this.penalties[type]) {
+        let index = this.penalties[type].indexOf((mod) => mod._id === documentId);
+        this.penalties[type].splice(index, 1);
+    }
+    if (save)
+      this.update({"data.penalties" : this.penalties});
+  }
+
+  getMaxInjuries() {
+    return this.getAbilityValue(ChronicleSystem.keyConstants.ENDURANCE);
+  }
+
+  getMaxWounds() {
+    return this.getAbilityValue(ChronicleSystem.keyConstants.ENDURANCE);
   }
 
   saveModifiers() {
     this.update({"data.modifiers" : this.modifiers}, {diff:false});
+  }
+
+  savePenalties() {
+    this.update({"data.penalties" : this.penalties}, {diff:false});
   }
 
   getAbilityValue(abilityName) {
@@ -142,25 +246,26 @@ export class ChronicleSystemActor extends Actor {
   }
 
   calcIntrigueDefense() {
-    return this.getAbilityValue("Awareness") +
-        this.getAbilityValue("Cunning") +
-        this.getAbilityValue("Status");
+    return this.getAbilityValue(ChronicleSystem.keyConstants.AWARENESS) +
+        this.getAbilityValue(ChronicleSystem.keyConstants.CUNNING) +
+        this.getAbilityValue(ChronicleSystem.keyConstants.STATUS);
   }
 
   calcCombatDefense() {
-    return this.getAbilityValue("Awareness") +
-        this.getAbilityValue("Agility") +
-        this.getAbilityValue("Athletics");
+    return this.getAbilityValue(ChronicleSystem.keyConstants.AWARENESS) +
+        this.getAbilityValue(ChronicleSystem.keyConstants.AGILITY) +
+        this.getAbilityValue(ChronicleSystem.keyConstants.ATHLETICS);
   }
 
   calculateMovementData() {
     let data = this.getChronicleSystemActorData();
     data.movement.base = ChronicleSystem.defaultMovement;
-    let runFormula = ChronicleSystem.getActorAbilityFormula(this, "Athletics", "Run");
+    let runFormula = ChronicleSystem.getActorAbilityFormula(this, ChronicleSystem.keyConstants.ATHLETICS, ChronicleSystem.keyConstants.RUN);
     data.movement.runBonus = Math.floor(runFormula.bonusDice / 2);
     let bulkMod = this.getModifier(ChronicleSystem.modifiersConstants.BULK);
     data.movement.bulk = Math.floor(bulkMod.total/2);
     data.movement.total = Math.max(data.movement.base + data.movement.runBonus - data.movement.bulk + parseInt(data.movement.modifier), 1);
+    data.movement.sprintTotal = data.movement.total * data.movement.sprintMultiplier - data.movement.bulk;
   }
 
   _onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId) {
@@ -198,5 +303,10 @@ export class ChronicleSystemActor extends Actor {
   updateTempModifiers() {
     let data = this.getChronicleSystemActorData()
     this.modifiers = data.modifiers;
+  }
+
+  updateTempPenalties() {
+    let data = this.getChronicleSystemActorData()
+    this.penalties = data.penalties;
   }
 }
