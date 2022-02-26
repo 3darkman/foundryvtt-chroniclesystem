@@ -282,3 +282,35 @@
     flex: 1;
     margin: 3px;
 }
+
+.chroniclesystem.sheet.actor .equipments .currency {
+    margin: 5px 0 0 0;
+}
+
+.chroniclesystem.sheet.actor .equipments .currency .form-group {
+    flex: 0.5;
+    display: inline-flex;
+    margin: 0 3px 0 3px;
+}
+
+.chroniclesystem.sheet.actor .equipments .currency label {
+    flex: 1;
+}
+
+.chroniclesystem.sheet.actor .equipments .currency .small-field {
+    flex: 0 0 50px;
+    margin: 0 3px 0 3px;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .general .experience .form-fields {
+    flex: 0 0 50px;
+    margin: 0 3px 0 3px;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .general .experience .form-group {
+    flex: 0.5;
+    display: inline-flex;
+    margin: 0 3px 0 3px;
+}

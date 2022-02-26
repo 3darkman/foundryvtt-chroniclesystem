@@ -1,6 +1,58 @@
 <div class="tab equipments" data-group="primary" data-tab="equipments">
     <section class="weapons">
         <header class="header-field">
+            <span>Currency</span>
+        </header>
+
+        <section class="currency flexrow">
+            <section class="">
+            </section>
+            <sectionc class="flexrow">
+                <div class="form-group">
+                    <label for="data.coins.coppers">Copper:</label>
+                    <span class="form-fields">
+                      <input
+                              id="data.coins.coppers"
+                              class="small-field"
+                              name="data.coins.coppers"
+                              type="text"
+                              value="{{data.data.coins.coppers}}"
+                              placeholder="Coopers"
+                              data-dtype="Number"
+                      />
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="data.coins.silvers">Silver:</label>
+                    <span class="form-fields">
+                      <input
+                              id="data.coins.silvers"
+                              class="small-field"
+                              name="data.coins.silvers"
+                              type="text"
+                              value="{{data.data.coins.silvers}}"
+                              placeholder="Silvers"
+                              data-dtype="Number"
+                      />
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="data.coins.golds">Gold:</label>
+                    <span class="form-fields">
+                      <input
+                              id="data.coins.golds"
+                              class="small-field"
+                              name="data.coins.golds"
+                              type="text"
+                              value="{{data.data.coins.golds}}"
+                              placeholder="Golds"
+                              data-dtype="Number"
+                      />
+                    </span>
+                </div>
+            </sectionc>
+        </section>
+        <header class="header-field">
             <span>Weapons</span>
         </header>
         <ol  class="weapons-list list equipment-list">

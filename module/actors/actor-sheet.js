@@ -96,15 +96,13 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       seduce: new Technique("Seduce", persuasionValue, seduceFormula, bluffFormula),
       taunt: new Technique("Taunt", awarenessValue, tauntFormula, bluffFormula)
     };
-    data.currentInjuries = character.injuries.length;
-    data.currentWounds = character.wounds.length;
+    data.currentInjuries = Object.values(character.injuries).length;
+    data.currentWounds = Object.values(character.wounds).length;
     data.maxInjuries = this.actor.getMaxInjuries();
     data.maxWounds = this.actor.getMaxWounds();
 
     return data;
   }
-
-
 
   /* -------------------------------------------- */
 
