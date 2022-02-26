@@ -277,6 +277,7 @@
 .chroniclesystem.sheet .item-controls {
   float: right;
   width: content-box;
+  text-align: right;
 }
 
 .chroniclesystem.sheet .item .description {
@@ -325,7 +326,7 @@
 }
 
 .chroniclesystem.sheet .list .item-controls {
-  flex: 0.3;
+  flex: 0.2;
   align-self: center;
   margin-left: 2px;
 }

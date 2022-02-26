@@ -277,3 +277,8 @@
 .chroniclesystem.sheet.actor .equipments .item-controls a.activated {
     color:#4178B7;
 }
+
+.chroniclesystem.sheet.actor .content .healthState {
+    flex: 1;
+    margin: 3px;
+}

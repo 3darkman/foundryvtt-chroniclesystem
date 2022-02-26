@@ -42,19 +42,18 @@ export class ChronicleSystemActor extends Actor {
   calculateDerivedValues() {
     let data = this.getChronicleSystemActorData();
     data.derivedStats.intrigueDefense.value = this.calcIntrigueDefense();
-    data.derivedStats.intrigueDefense.total = data.derivedStats.intrigueDefense.value + data.derivedStats.intrigueDefense.modifier;
+    data.derivedStats.intrigueDefense.total = data.derivedStats.intrigueDefense.value + parseInt(data.derivedStats.intrigueDefense.modifier);
     data.derivedStats.composure.value = this.getAbilityValue(data, "Will") * 3;
-    data.derivedStats.composure.total = data.derivedStats.composure.value + data.derivedStats.composure.modifier;
+    data.derivedStats.composure.total = data.derivedStats.composure.value + parseInt(data.derivedStats.composure.modifier);
     data.derivedStats.combatDefense.value = this.calcCombatDefense();
-    data.derivedStats.combatDefense.total = data.derivedStats.combatDefense.value + data.derivedStats.combatDefense.modifier;
+    data.derivedStats.combatDefense.total = data.derivedStats.combatDefense.value + parseInt(data.derivedStats.combatDefense.modifier);
     data.derivedStats.health.value = this.getAbilityValue(data, "Endurance") * 3;
-    data.derivedStats.health.total = data.derivedStats.health.value + data.derivedStats.health.modifier;
+    data.derivedStats.health.total = data.derivedStats.health.value + parseInt(data.derivedStats.health.modifier);
     data.derivedStats.frustration.value = this.getAbilityValue(data, "Will");
-    data.derivedStats.frustration.total = data.derivedStats.frustration.value + data.derivedStats.frustration.modifier;
+    data.derivedStats.frustration.total = data.derivedStats.frustration.value + parseInt(data.derivedStats.frustration.modifier);
     data.derivedStats.fatigue.value = this.getAbilityValue(data, "Endurance");
-    data.derivedStats.fatigue.total = data.derivedStats.fatigue.value + data.derivedStats.fatigue.modifier;
-    // let weapons = docs.filter()
-    //data.movement.bulk =
+    data.derivedStats.fatigue.total = data.derivedStats.fatigue.value + parseInt(data.derivedStats.fatigue.modifier);
+
   }
 
   getAbilities() {
@@ -86,6 +85,26 @@ export class ChronicleSystemActor extends Actor {
     });
 
     return [ability, specialty];
+  }
+
+  getModifier(type, includeDetail = false) {
+    this.updateTempModifiers();
+
+    let total = 0;
+    let detail = [];
+
+    if (this.modifiers[type]) {
+      this.modifiers[type].forEach((modifier) => {
+        total += modifier.mod;
+        if (includeDetail) {
+          let tempItem = this.getEmbeddedDocument('Item', modifier._id);
+          if (tempItem)
+            detail.push({docName: tempItem.name, mod: modifier.mod});
+        }
+      });
+    }
+
+    return { total: total, detail: detail};
   }
 
   addModifier(type, documentId, value, save = false) {
@@ -136,30 +155,12 @@ export class ChronicleSystemActor extends Actor {
 
   calculateMovementData() {
     let data = this.getChronicleSystemActorData();
-    data.movement = {};
     data.movement.base = ChronicleSystem.defaultMovement;
     let runFormula = ChronicleSystem.getActorAbilityFormula(this, "Athletics", "Run");
     data.movement.runBonus = Math.floor(runFormula.bonusDice / 2);
-    let docs = this.items;
-    let weapons = docs.filter((item) => item.type === 'weapon');
-    let armors = docs.filter((item) => item.type === 'armor');
-    let bulk = 0;
-    weapons.forEach((weapon) => {
-      let bulks = Object.values(weapon.data.data.qualities).filter((quality) => quality.name.toLowerCase() === "bulk");
-      if (bulks) {
-        bulks.forEach((quality) => {
-          bulk += parseInt(quality.parameter);
-        })
-      }
-    });
-
-    armors.forEach((armor) => {
-      bulk += parseInt(armor.data.data.bulk);
-    });
-    data.movement.bulk = bulk;
-
-    data.movement.total = data.movement.base + data.movement.runBonus - Math.floor(data.movement.bulk/2);
-    data.movement.total = data.movement.total < 1 ? 1 : data.movement.total;
+    let bulkMod = this.getModifier(ChronicleSystem.modifiersConstants.BULK);
+    data.movement.bulk = Math.floor(bulkMod.total/2);
+    data.movement.total = Math.max(data.movement.base + data.movement.runBonus - data.movement.bulk + parseInt(data.movement.modifier), 1);
   }
 
   _onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId) {

@@ -42,10 +42,17 @@
           "modifier": 0
         }
       },
-      "wounds": 0,
-      "injuries": 0,
+      "wounds": [],
+      "injuries": [],
       "currentDisposition": 4,
-      "modifiers": []
+      "modifiers": [],
+      "movement": {
+        "base": 4,
+        "runBonus": 0,
+        "bulk": 0,
+        "modifier": 0,
+        "total": 0
+      }
    },
     "character-common": {
       "ancestries": [],

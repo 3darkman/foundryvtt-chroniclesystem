@@ -105,7 +105,8 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
             specModifier = specialty.modifier;
         }
         formula.pool = ability.data.data.rating;
-        formula.modifier = ability.data.data.modifier + specModifier;
+        let modifiers = actor.getModifier(ability.name.toLowerCase());
+        formula.modifier = ability.data.data.modifier + specModifier + modifiers.total;
         formula.bonusDice = specValue;
     }
 

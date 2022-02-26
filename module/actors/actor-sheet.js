@@ -129,7 +129,57 @@ export class ChronicleSystemActorSheet extends ActorSheet {
 
     html.find('.equipped').click(this._onEquippedStateChanged.bind(this));
 
+    html.find('.injury-create').on("click", this._onClickInjuryCreate.bind(this));
+    html.find(".injuries-list").on("click", ".injury-control", this._onclickInjuryControl.bind(this));
+
+    html.find('.wound-create').on("click", this._onClickWoundCreate.bind(this));
+    html.find(".wounds-list").on("click", ".wound-control", this._onclickWoundControl.bind(this));
+
     // Add or Remove Attribute
+  }
+
+  async _onClickWoundCreate(ev) {
+    const data = this.actor.getChronicleSystemActorData();
+    let wound = "";
+    let wounds = Object.values(data.wounds);
+    wounds.push(wound);
+    this.actor.update({"data.wounds" : wounds});
+  }
+
+  async _onclickWoundControl(event) {
+    event.preventDefault();
+    const a = event.currentTarget;
+    const index = parseInt(a.dataset.id);
+    const action = a.dataset.action;
+
+    if ( action === "delete" ) {
+      const data = this.actor.getChronicleSystemActorData();
+      let wounds = Object.values(data.wounds);
+      wounds.splice(index,1);
+      this.actor.update({"data.wounds" : wounds});
+    }
+  }
+
+  async _onClickInjuryCreate(ev) {
+    const data = this.actor.getChronicleSystemActorData();
+    let injury = "";
+    let injuries = Object.values(data.injuries);
+    injuries.push(injury);
+    this.actor.update({"data.injuries" : injuries});
+  }
+
+  async _onclickInjuryControl(event) {
+    event.preventDefault();
+    const a = event.currentTarget;
+    const index = parseInt(a.dataset.id);
+    const action = a.dataset.action;
+
+    if ( action === "delete" ) {
+      const data = this.actor.getChronicleSystemActorData();
+      let injuries = Object.values(data.injuries);
+      injuries.splice(index,1);
+      this.actor.update({"data.injuries" : injuries});
+    }
   }
 
   async _onEquippedStateChanged(event) {
@@ -148,8 +198,8 @@ export class ChronicleSystemActorSheet extends ActorSheet {
         documment.data.data.equipped = ChronicleSystem.equippedConstants.WEARING;
         tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.data.data.equipped === ChronicleSystem.equippedConstants.WEARING);
       } else {
-        let qualities = Object.values(documment.data.data.qualities).filter((quality) => quality.name.toLowerCase() === "two-handed");
-        if (qualities.length > 0) {
+        let twoHandedQuality = Object.values(documment.data.data.qualities).filter((quality) => quality.name.toLowerCase() === "two-handed");
+        if (twoHandedQuality.length > 0) {
           tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.data.data.equipped === ChronicleSystem.equippedConstants.MAIN_HAND || item.data.data.equipped === ChronicleSystem.equippedConstants.OFFHAND || item.data.data.equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
           documment.data.data.equipped = ChronicleSystem.equippedConstants.BOTH_HANDS;
         } else {

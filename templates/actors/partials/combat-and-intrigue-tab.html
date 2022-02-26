@@ -307,17 +307,35 @@
                             />
                             <b>+</b>
                             <input
-                                    name="data.derivedStats.combatDefense.modifier"
+                                    name="data.derivedStats.movement.runBonus"
                                     type="text"
-                                    value="{{data.data.derivedStats.combatDefense.modifier}}"
+                                    value="{{data.data.movement.runBonus}}"
+                                    placeholder="Run Bonus"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                            <b>-</b>
+                            <input
+                                    name="data.movement.bulk"
+                                    type="text"
+                                    value="{{data.data.movement.bulk}}"
+                                    placeholder="Bulk"
+                                    readonly="readonly"
+                                    data-dtype="Number"
+                            />
+                            <b>+</b>
+                            <input
+                                    name="data.movement.modifier"
+                                    type="text"
+                                    value="{{data.data.movement.modifier}}"
                                     placeholder="Modifier"
                                     data-dtype="Number"
                             />
                             <b>=</b>
                             <input
-                                    name="data.derivedStats.combatDefense.value"
+                                    name="data.derivedStats.movement.total"
                                     type="text"
-                                    value="{{data.data.derivedStats.combatDefense.total}}"
+                                    value="{{data.data.movement.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -325,7 +343,56 @@
                         </span>
                     </div>
                 </section>
-                <section></section>
+                <section class="healthState">
+                    <header class="subheader-field flexrow">
+                        <div class="header-title">
+                            <span>Injuries</span>
+                        </div>
+                        <div class="header-field-add">
+                            <a class="injury-create" data-type="skill"><i class="fa fa-plus"></i></a>
+                        </div>
+                    </header>
+                    <ol class="injuries-list list resizable" data-base-size="150">
+                        {{#each data.data.injuries as |injury id|}}
+                            <li class="injury flexrow" data-item-id="{{id}}">
+                                <!--suppress HtmlFormInputWithoutLabel -->
+                                <input
+                                        class="big-field"
+                                        type="text"
+                                        name="data.injuries.{{id}}"
+                                        value="{{injury}}"
+                                        placeholder="Description"
+                                        data-dtype="String"
+                                />
+                                <a class="injury-control item-controls" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                            </li>
+                        {{/each}}
+                    </ol>
+                    <header class="subheader-field flexrow">
+                        <div class="header-title">
+                            <span>Wounds</span>
+                        </div>
+                        <div class="header-field-add">
+                            <a class="wound-create" data-type="skill"><i class="fa fa-plus"></i></a>
+                        </div>
+                    </header>
+                    <ol class="wounds-list list resizable" data-base-size="150">
+                        {{#each data.data.wounds as |wound id|}}
+                            <li class="wound flexrow" data-item-id="{{id}}">
+                                <!--suppress HtmlFormInputWithoutLabel -->
+                                <input
+                                        class="big-field"
+                                        type="text"
+                                        name="data.wounds.{{id}}"
+                                        value="{{wound}}"
+                                        placeholder="Description"
+                                        data-dtype="String"
+                                />
+                                <a class="wound-control item-controls" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                            </li>
+                        {{/each}}
+                    </ol>
+                </section>
                 <section class="weapons">
                     <header class="subheader-field">
                         <span>Current Equipped Weapons</span>
