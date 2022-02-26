@@ -106,7 +106,7 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
         }
         let penalties = actor.getPenalty(ability.name.toLowerCase(), false, true);
         formula.pool = ability.data.data.rating;
-        formula.drawback = penalties.total;
+        formula.dicePenalty = penalties.total;
 
         let modifiers = actor.getModifier(ability.name.toLowerCase(),false, true);
         formula.modifier = ability.data.data.modifier + specModifier + modifiers.total;

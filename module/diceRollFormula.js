@@ -3,14 +3,14 @@ export class DiceRollFormula {
     #bonusDice;
     #reroll;
     #modifier;
-    #drawback;
+    #dicePenalty;
 
     constructor() {
         this.pool = 2;
         this.bonusDice = 0;
         this.reroll = 0;
         this.modifier = 0;
-        this.drawback = 0;
+        this.dicePenalty = 0;
     }
 
     get pool() {
@@ -45,18 +45,18 @@ export class DiceRollFormula {
         this.#modifier = parseInt(value);
     }
 
-    get drawback() {
-        return this.#drawback;
+    get dicePenalty() {
+        return this.#dicePenalty;
     }
 
-    set drawback(value) {
-        this.#drawback = parseInt(value);
+    set dicePenalty(value) {
+        this.#dicePenalty = parseInt(value);
     }
 
 
 
     toStr() {
-        return `${this.pool}|${this.bonusDice}|${this.modifier}|${this.drawback}|${this.reroll}`;
+        return `${this.pool}|${this.bonusDice}|${this.modifier}|${this.dicePenalty}|${this.reroll}`;
     }
 
     static fromStr(str) {
@@ -66,14 +66,15 @@ export class DiceRollFormula {
             formula.pool = data[0];
             formula.bonusDice = data[1];
             formula.modifier = data[2];
-            formula.drawback = data[3];
+            formula.dicePenalty = data[3];
             formula.reroll = data[4];
         }
         return formula;
     }
 
     ToFormattedStr() {
-        let result = `${this.pool - this.drawback}d6`;
+        let pool = Math.max(this.pool - this.dicePenalty, 1);
+        let result = `${pool}d6`;
         if (this.bonusDice > 0) {
             result += ` + ${this.bonusDice}B`
         }
