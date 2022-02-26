@@ -269,6 +269,10 @@
     transform: scale(-1, 1);
 }
 
+.chroniclesystem.sheet.actor .equipments .weapons .item-controls  {
+    flex: 0.3;
+}
+
 .chroniclesystem.sheet.actor .equipments .item-controls a  {
     color: #AAAAAA;
     padding: 2px;
@@ -312,5 +316,24 @@
 .chroniclesystem.sheet.actor .general .experience .form-group {
     flex: 0.5;
     display: inline-flex;
+    margin: 0 3px 0 3px;
+}
+
+.chroniclesystem.sheet.actor .destiny .form-fields {
+    flex: 0 0 50px;
+    margin: 0 3px 0 3px;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .destiny {
+    margin: 5px 0 0 0;
+}
+
+.chroniclesystem.sheet.actor .destiny label {
+    margin: 0;
+}
+
+.chroniclesystem.sheet.actor .destiny .form-group {
+    flex: 0.5;
     margin: 0 3px 0 3px;
 }
