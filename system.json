@@ -18,5 +18,5 @@
   "url": "https://github.com/3darkman/foundryvtt-chroniclesystem/",
   "manifest": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/system.json",
   "download": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/chroniclesystem.zip",
-  "license": "LICENSE.txt"
+  "license": "ISC"
 }
