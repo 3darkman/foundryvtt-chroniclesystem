@@ -1,0 +1,203 @@
+{
+"Actor": {
+  "types": ["character"],
+  "templates": {
+    "common": {
+      "age": 0,
+      "destinyPoints": {
+        "current": 0,
+        "max": 0
+      },
+      "derivedStats": {
+        "intrigueDefense": {
+          "value": 0,
+          "modifier": 0
+        },
+        "composure": {
+          "value": 0,
+          "modifier": 0,
+          "current": 0
+        },
+        "frustration": {
+          "value": 0,
+          "modifier": 0,
+          "current": 0
+        },
+        "combatDefense": {
+          "value": 0,
+          "modifier": 0
+        },
+        "health": {
+          "value": 0,
+          "modifier": 0,
+          "current": 0
+        },
+        "fatigue": {
+          "value": 0,
+          "modifier": 0,
+          "current": 0
+        },
+        "armorRating": {
+          "value": 0,
+          "modifier": 0
+        }
+      },
+      "wounds": [],
+      "injuries": [],
+      "currentDisposition": 4,
+      "modifiers": {},
+      "penalties": {},
+      "movement": {
+        "base": 4,
+        "runBonus": 0,
+        "sprintMultiplier": 4,
+        "bulk": 0,
+        "modifier": 0,
+        "total": 0,
+        "sprintTotal": 0
+      }
+   },
+    "character-common": {
+      "ancestries": [],
+      "gender": "",
+      "house": "",
+      "height": 1.72,
+      "weight": "70",
+      "eyeColor": "",
+      "hairColor": "",
+      "mannerisms": "",
+      "distinguishingFeatures": "",
+      "personalHistory": "",
+      "owned": {
+        "equipments": [],
+        "weapons": [],
+        "armors": [],
+        "qualities": [],
+        "drawbacks": [],
+        "abilities": [],
+        "powers": [],
+        "benefits": []
+      },
+      "currentStress": 0,
+      "allies": "",
+      "enemies": "",
+      "oaths": "",
+      "heraldry": "",
+      "portrait": "",
+      "motto": "",
+      "coins": {
+        "coppers": 0,
+        "silvers": 0,
+        "golds": 0
+      },
+      "vice": "",
+      "virtue": "",
+      "motivation": "",
+      "goal": "",
+      "experience": {
+        "spent": 0,
+        "total": 0
+      }
+    }
+  },
+  "character": {
+    "templates": ["common", "character-common"]
+  },
+  "house": {
+    "defense":0,
+    "influence": 0,
+    "lands": 0,
+    "law": 0,
+    "population": 0,
+    "power": 0,
+    "wealth": 0,
+    "historicalEvents": [],
+    "motto": ""
+  }
+},
+"Item": {
+  "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback"],
+  "templates": {
+    "physicalItem": {
+      "weight": 0
+    },
+    "equipmentItem": {
+      "quantity": 1,
+      "cost": ""
+    },
+    "itemDescription": {
+      "description": "",
+      "type": ""
+    }
+  },
+  "armor": {
+    "templates": [
+      "itemDescription",
+      "physicalItem"
+    ],
+    "rating": 0,
+    "penalty": 0,
+    "bulk": 0,
+    "qualities": [],
+    "equipped": 0
+  },
+  "poison": {
+    "templates": [
+      "itemDescription",
+      "equipmentItem"
+    ],
+    "delivery": "",
+    "virulence": "",
+    "frequency": "",
+    "toxicity": 0,
+    "diagnosis": 0,
+    "effects": "",
+    "recovery": ""
+  },
+  "weapon": {
+    "templates": [
+      "itemDescription",
+      "physicalItem",
+      "equipmentItem"
+    ],
+    "specialty": "",
+    "training": 0,
+    "damage": "",
+    "qualities": [],
+    "reach": "",
+    "equipped": 0
+  },
+  "ability": {
+    "templates": [
+      "itemDescription"
+    ],
+    "rating": 2,
+    "modifier": 0,
+    "specialties": []
+  },
+  "benefit": {
+    "templates": [
+      "itemDescription"
+    ],
+    "categories": "",
+    "requirements": "",
+    "sorcerousArtAccess": false
+  },
+  "drawback": {
+    "templates": [
+      "itemDescription"
+    ],
+    "requireSorcerousArt": false,
+    "isAStricture": false,
+    "isAFlaw": false,
+    "flawAttribute": "",
+    "requirements": ""
+  },
+  "equipment": {
+    "templates": [
+      "itemDescription",
+      "equipmentItem"
+    ]
+  }
+}
+}

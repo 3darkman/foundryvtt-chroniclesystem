@@ -1,0 +1,22 @@
+{
+  "name": "chroniclesystem",
+  "title": "Chronicle System",
+  "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
+  "version": 0.1,
+  "minimumCoreVersion": "9",
+  "compatibleCoreVersion": "9",
+  "templateVersion": 2,
+  "author": "Kirlian '3darkman' Silvestre",
+  "esmodules": ["module/simple.js"],
+  "styles": ["styles/global.css", "styles/item-sheet.css", "styles/actor-sheet.css"],
+  "packs": [],
+  "languages": [],
+  "gridDistance": 5,
+  "gridUnits": "ft",
+  "primaryTokenAttribute": "health",
+  "secondaryTokenAttribute": "power",
+  "url": "https://github.com/3darkman/foundryvtt-chroniclesystem/",
+  "manifest": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/system.json",
+  "download": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/chroniclesystem.zip",
+  "license": "LICENSE.txt"
+}

@@ -1,0 +1,15 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Item Sheet Header --}} {{>
+"systems/chroniclesystem/templates/items/partials/header-delete.html"}}
+    <main class="sheet-body flexrow">
+        <section class="item-stats">
+            <header class="header-field">
+                <span>Details</span>
+            </header>
+            {{> "systems/chroniclesystem/templates/items/partials/equipment-item.html"}}
+        </section>
+        <section class="description">
+            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+        </section>
+    </main>
+</form>

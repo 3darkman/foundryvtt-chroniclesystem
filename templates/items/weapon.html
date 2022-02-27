@@ -1,0 +1,106 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Item Sheet Header --}} {{>
+    "systems/chroniclesystem/templates/items/partials/header-delete.html"}}
+    <main class="sheet-body flexrow">
+        <section class="item-stats">
+            <header class="header-field">
+                <span>Details</span>
+            </header>
+            <div class="form-group">
+                <label for="data.specialty">Specialty:</label>
+                <span class="form-fields">
+                  <input
+                          id="data.specialty"
+                          class="small-field"
+                          name="data.specialty"
+                          type="text"
+                          value="{{data.data.specialty}}"
+                          placeholder="Specialty"
+                          data-dtype="String"
+                  />
+                </span>
+            </div>
+            <div class="form-group">
+                <label for="data.reach">Reach:</label>
+                <span class="form-fields">
+                  <input
+                          id="data.reach"
+                          class="small-field"
+                          name="data.reach"
+                          type="text"
+                          value="{{data.data.reach}}"
+                          placeholder="Reach"
+                          data-dtype="Number"
+                  />
+                </span>
+            </div>
+            <div class="form-group">
+                <label for="data.training">Training:</label>
+                <span class="form-fields">
+                  <input
+                          id="data.training"
+                          class="small-field"
+                          name="data.training"
+                          type="text"
+                          value="{{data.data.training}}"
+                          placeholder="Training"
+                          data-dtype="Number"
+                  />
+                </span>
+            </div>
+            <div class="form-group">
+                <label for="data.damage">Damage:</label>
+                <span class="form-fields">
+                  <input
+                          id="data.damage"
+                          class="small-field"
+                          name="data.damage"
+                          type="text"
+                          value="{{data.data.damage}}"
+                          placeholder="Damage"
+                          data-dtype="String"
+                  />
+                </span>
+            </div>
+            {{> "systems/chroniclesystem/templates/items/partials/physical-item.html"}}
+            {{> "systems/chroniclesystem/templates/items/partials/equipment-item.html"}}
+        </section>
+        <section class="description">
+            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+            <header class="header-field flexrow">
+                <div class="header-title">
+                    <span>Qualities</span>
+                </div>
+                <div class="header-field-add">
+                    <a class="item-quality-create" data-type="skill"><i class="fa fa-plus"></i></a>
+                </div>
+            </header>
+            <ol class="qualities-list list resizable" data-base-size="150">
+
+                {{#each data.data.qualities as |quality index|}}
+                    <li class="weapon-quality flexrow" data-item-id="{{index}}">
+                        <!--suppress HtmlFormInputWithoutLabel -->
+                        <input
+                                class="big-field"
+                                type="text"
+                                name="data.qualities.{{index}}.name"
+                                value="{{quality.name}}"
+                                placeholder="Weapon Quality Name"
+                                data-dtype="String"
+                        />
+                        <!--suppress HtmlFormInputWithoutLabel -->
+                        <input
+                                class="small-field"
+                                type="text"
+                                name="data.qualities.{{index}}.parameter"
+                                value="{{quality.parameter}}"
+                                placeholder="Parameter"
+                                data-dtype="String"
+                        />
+                        <a class="item-qualities-control item-controls" data-id="{{index}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                    </li>
+                {{/each}}
+            </ol>
+        </section>
+    </main>
+</form>

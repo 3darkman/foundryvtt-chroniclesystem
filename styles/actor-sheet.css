@@ -1,0 +1,391 @@
+.chroniclesystem.sheet.actor .ability-value {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    background: white;
+    flex: 0.2;
+    margin: 3px;
+}
+.chroniclesystem.sheet.actor .ability-value a {
+    font-size: 16px;
+    text-align: center;
+    flex: 1;
+}
+
+.chroniclesystem.sheet.actor .ability-label {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    background: #005390;
+    flex: 0.5;
+    margin: 3px;
+}
+
+.chroniclesystem.sheet.actor .ability-label a {
+    font-size: 10px;
+    text-align: center;
+    flex: 1;
+    margin: 3px;
+    color: white;
+    text-transform: uppercase;
+}
+
+.chroniclesystem.sheet.actor .ability-label a:first-letter {
+    font-size: 12px;
+}
+
+.chroniclesystem.sheet .ability-specialities {
+    display: inline-flex;
+    background: white;
+    height: auto;
+    min-height: 31px;
+    margin: 3px;
+    align-self: stretch;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.chroniclesystem.sheet .item .quality-label {
+    font-weight: bold;
+    background-color: #4178B7;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.chroniclesystem.sheet.actor .equipment-quantity {
+    flex: 0 0 62px;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .equipment-cost {
+    flex: 0 0 62px;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .equipment-weight {
+    flex: 0 0 62px;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .weapon-damage {
+    flex: 0.3;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .armor-rating {
+    flex: 0 0 50px;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .armor-penalty {
+    flex: 0 0 50px;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .armor-bulk {
+    flex: 0 0 50px;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .item-qualities {
+    flex: 0 0 230px;
+    display: table;
+    height: auto;
+}
+
+.chroniclesystem.sheet.actor .item-qualities .item-quality {
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.chroniclesystem.sheet.actor .weapon-testdice {
+    flex: 0.5;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .item {
+    margin: 3px;
+    background-color: white;
+    padding: 3px;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .item .field {
+    margin: 2px;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .list-header div {
+    margin: 2px;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .list-header .item-qualities div {
+    margin: 0 0 0 8px;
+    padding: 0;
+}
+
+.chroniclesystem.sheet.actor .equipment-list .list-header {
+    font-weight: bold;
+    margin: 3px;
+    padding: 3px;
+    background-color: black;
+    color: white;
+}
+
+.chroniclesystem.sheet.actor .item.equipment, .chroniclesystem.sheet.actor .equipment.list-header {
+    flex: 0 0 49%;
+}
+
+.chroniclesystem.sheet.actor .tab.description {
+    flex-wrap: wrap;
+}
+
+.chroniclesystem.sheet.actor .tab.description .profile-img-container {
+    height: 300px;
+    overflow: hidden;
+    text-align: center;
+    vertical-align: middle;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    background-color: white;
+}
+
+.chroniclesystem.sheet.actor .tab.description .profile-img {
+    max-width: 100%;
+    max-height: 100%;
+    border: none;
+}
+
+.chroniclesystem.sheet.actor .sheet-body .tab.description .editor {
+    min-height: 200px;
+    max-height: 100%;
+    flex-grow: 1;
+    display: flex;
+    height: 200px;
+    width: 100%;
+    position: relative;
+    word-break: break-word;
+    padding: 0 3px;
+    background: white;
+    border: white 0;
+}
+
+.chroniclesystem.sheet.actor .tab.description section {
+    margin: 5px;
+    flex: 0 0 48%;
+}
+
+.chroniclesystem.sheet.actor .tab.description .general {
+    flex: 0 0 66%;
+}
+
+.chroniclesystem.sheet.actor .tab.description .section-split {
+    margin: 0;
+}
+
+.chroniclesystem.sheet.actor .tab.description .section-split section {
+    margin: 0;
+    flex: 1;
+}
+
+.chroniclesystem.sheet.actor .tab.description .section-split .appearance {
+    margin-right: 8px;
+    flex: 0.7;
+}
+
+.chroniclesystem.sheet.actor .tab.description .profile-picture {
+    flex: 0 0 200px;
+    height: 300px;
+}
+
+.chroniclesystem.sheet.actor .tab.description .concept .form-fields {
+    flex: 6;
+}
+
+.chroniclesystem.sheet.actor .content section {
+    flex: 0 0 150px;
+    margin: 3px;
+}
+
+.chroniclesystem.sheet.actor .content .techniques {
+    flex: 1;
+    margin: 3px;
+}
+
+.chroniclesystem.sheet.actor .content .weapons {
+    flex: 1;
+    margin: 3px;
+}
+
+.chroniclesystem.sheet.actor .subheader-field {
+    background: black;
+    color: white;
+    padding: 5px;
+    margin: 5px 0 0 0;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor .disposition-list .disposition.option {
+    padding: 3px;
+    margin: 5px;
+    background: white;
+    cursor: pointer;
+}
+
+.chroniclesystem.sheet.actor .disposition-list .disposition.option:hover {
+    background: #4178B7;
+    color: white;
+}
+
+.chroniclesystem.sheet.actor .disposition-list .disposition.option.selected {
+    background: #4178B7;
+    color: white;
+}
+
+.chroniclesystem.sheet.actor input:read-only {
+    background: #DCE2EF;
+    color: black;
+    box-shadow: none;
+}
+
+.chroniclesystem.sheet.actor table {
+    margin: 5px 0 0 0;
+    background: transparent;
+    border-bottom: none;
+    color: Black;
+    text-align: center;
+}
+
+.chroniclesystem.sheet.actor table thead {
+    background: black; /**rgba(0, 0, 0, 0.5);**/
+    color: white;
+    text-shadow: none;
+    border-bottom: none;
+}
+
+.chroniclesystem.sheet.actor .off-hand i {
+    -moz-transform: scale(-1, 1);
+    -webkit-transform: scale(-1, 1);
+    -o-transform: scale(-1, 1);
+    -ms-transform: scale(-1, 1);
+    transform: scale(-1, 1);
+}
+
+.chroniclesystem.sheet.actor .equipments .weapons .item-controls  {
+    flex: 0.3;
+}
+
+.chroniclesystem.sheet.actor .equipments .item-controls a  {
+    color: #AAAAAA;
+    padding: 2px;
+}
+
+.chroniclesystem.sheet.actor .equipments .item-controls a.activated {
+    color:#4178B7;
+}
+
+.chroniclesystem.sheet.actor .content .healthState {
+    flex: 1;
+    margin: 3px;
+}
+
+.chroniclesystem.sheet.actor .equipments .currency {
+    margin: 5px 0 0 0;
+}
+
+.chroniclesystem.sheet.actor .equipments .currency .form-group {
+    flex: 0.5;
+    display: inline-flex;
+    margin: 0 3px 0 3px;
+}
+
+.chroniclesystem.sheet.actor .equipments .currency label {
+    flex: 1;
+}
+
+.chroniclesystem.sheet.actor .equipments .currency .small-field {
+    flex: 0 0 50px;
+    margin: 0 3px 0 3px;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .general .experience .form-fields {
+    flex: 0 0 50px;
+    margin: 0 3px 0 3px;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .general .experience .form-group {
+    flex: 0.5;
+    display: inline-flex;
+    margin: 0 3px 0 3px;
+}
+
+.chroniclesystem.sheet.actor .destiny .form-fields {
+    flex: 0 0 50px;
+    margin: 0 3px 0 3px;
+    text-align: right;
+}
+
+.chroniclesystem.sheet.actor .destiny {
+    margin: 5px 0 0 0;
+}
+
+.chroniclesystem.sheet.actor .destiny label {
+    margin: 0;
+}
+
+.chroniclesystem.sheet.actor .destiny .form-group {
+    flex: 0.5;
+    margin: 0 3px 0 3px;
+}
+
+.chroniclesystem.sheet.actor .custom-checkbox {
+    justify-content: center;
+}
+
+.chroniclesystem.sheet.actor .custom-checkbox .square {
+    text-align: center;
+    vertical-align: middle;
+    font-size: smaller;
+    margin:1px;
+    height: 15px;
+    flex: 0 0 15px;
+    background: white;
+    color: black;
+    cursor: pointer;
+}
+
+.chroniclesystem.sheet.actor .custom-checkbox .square.checked {
+    background: black;
+    color: white;
+}
+
+.chroniclesystem.sheet.actor .custom-checkbox .square:not(checked):hover {
+    background: dimgray;
+    color: white;
+}
+
+.chroniclesystem.sheet.actor section.stress .custom-checkbox {
+    margin: 10px 0 0 0;
+    height: fit-content;
+}
+
+.chroniclesystem.sheet.actor .sheet-tabs .item {
+    padding: 3px;
+    background: #BBBBBB;
+    font-weight: normal;
+}
+
+.chroniclesystem.sheet.actor .sheet-tabs .item:hover {
+    text-shadow: none;
+}
+
+.chroniclesystem.sheet.actor .sheet-tabs .item.active {
+    background: #005390;
+    color:white;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.chroniclesystem.sheet.actor .sheet-tabs {
+    padding: 4px;
+}

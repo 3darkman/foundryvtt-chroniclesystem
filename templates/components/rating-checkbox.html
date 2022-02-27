@@ -1,0 +1,5 @@
+<div class="form-group custom-checkbox">
+    {{#for 0 max 1}}
+        <div class="square {{showIfLessEquals index ../currentValue "checked" ""}}" id="{{index}}" data-type="{{../dataType}}">{{index}}</div>
+    {{/for}}
+</div>

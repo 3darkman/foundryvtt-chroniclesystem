@@ -1,0 +1,241 @@
+<div class="tab description flexrow" data-group="primary" data-tab="actor-description">
+    <section class="profile-picture">
+        <div class="profile-img-container flex">
+            <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" alt="{{actor.name}} Picture" />
+        </div>
+    </section>
+    <section class="general">
+        <section class="section-split flexrow">
+            <section class="appearance">
+                <header class="header-field">
+                    <span>Appearance</span>
+                </header>
+                <div class="form-group">
+                    <label for="data.height">Height:</label>
+                    <span class="form-fields">
+                        <input
+                                id="data.height"
+                                class="small-field"
+                                name="data.height"
+                                type="text"
+                                value="{{actor.data.data.height}}"
+                                placeholder="Height"
+                                data-dtype="Number"
+                        />
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="data.weight">Weight:</label>
+                    <span class="form-fields">
+                          <input
+                                  id="data.weight"
+                                  class="small-field"
+                                  name="data.weight"
+                                  type="text"
+                                  value="{{actor.data.data.weight}}"
+                                  placeholder="Weight"
+                                  data-dtype="Number"
+                          />
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="data.eyeColor">Eye Color:</label>
+                    <span class="form-fields">
+                          <input
+                                  id="data.eyeColor"
+                                  class="small-field"
+                                  name="data.eyeColor"
+                                  type="text"
+                                  value="{{actor.data.data.eyeColor}}"
+                                  placeholder="Eye Color"
+                                  data-dtype="String"
+                          />
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="data.hairColor">Hair Color:</label>
+                    <span class="form-fields">
+                          <input
+                                  id="data.hairColor"
+                                  class="small-field"
+                                  name="data.hairColor"
+                                  type="text"
+                                  value="{{actor.data.data.hairColor}}"
+                                  placeholder="Hair Color"
+                                  data-dtype="String"
+                          />
+                    </span>
+                </div>
+            </section>
+            <section class="mannerisms">
+                <section class="experience flexrow">
+                    <div class="form-group">
+                        <label for="data.experience.spent">XP Spent:</label>
+                        <span class="form-fields">
+                          <input
+                                  id="data.experience.spent"
+                                  class="small-field"
+                                  name="data.experience.spent"
+                                  type="text"
+                                  value="{{actor.data.data.experience.spent}}"
+                                  placeholder="Spent"
+                                  data-dtype="Number"
+                          />
+                    </span>
+                    </div>
+                    <div class="form-group">
+                        <label for="data.experience.total">XP Total:</label>
+                        <span class="form-fields">
+                          <input
+                                  id="data.experience.total"
+                                  class="small-field"
+                                  name="data.experience.total"
+                                  type="text"
+                                  value="{{actor.data.data.experience.total}}"
+                                  placeholder="Total"
+                                  data-dtype="Number"
+                          />
+                    </span>
+                    </div>
+                </section>
+                <header class="header-field">
+                    <span>Mannerisms</span>
+                </header>
+
+                <div class="form-group">
+                    <span class="form-fields">
+                        <input
+                                id="data.mannerisms"
+                                class="big-field"
+                                name="data.mannerisms"
+                                type="text"
+                                value="{{actor.data.data.mannerisms}}"
+                                placeholder="Mannerisms"
+                                data-dtype="String"
+                        />
+                    </span>
+                </div>
+                <header class="header-field">
+                    <span>Distinguishing Features</span>
+                </header>
+
+                <div class="form-group">
+                    <span class="form-fields">
+                        <input
+                                id="data.distinguishingFeatures"
+                                class="big-field"
+                                name="data.distinguishingFeatures"
+                                type="text"
+                                value="{{actor.data.data.distinguishingFeatures}}"
+                                placeholder="Distinguishing Features"
+                                data-dtype="String"
+                        />
+                    </span>
+                </div>
+            </section>
+        </section>
+        <section class="concept">
+            <header class="header-field">
+                <span>Concept</span>
+            </header>
+            <div class="form-group">
+                <label for="data.vice">Vice:</label>
+                <span class="form-fields">
+                  <input
+                          id="data.vice"
+                          class="big-field"
+                          name="data.vice"
+                          type="text"
+                          value="{{actor.data.data.vice}}"
+                          placeholder="Vice"
+                          data-dtype="String"
+                  />
+            </span>
+            </div>
+            <div class="form-group">
+                <label for="data.virtue">Virtue:</label>
+                <span class="form-fields">
+                  <input
+                          id="data.virtue"
+                          class="big-field"
+                          name="data.virtue"
+                          type="text"
+                          value="{{actor.data.data.virtue}}"
+                          placeholder="Virtue"
+                          data-dtype="String"
+                  />
+            </span>
+            </div>
+            <div class="form-group">
+                <label for="data.goal">Goal:</label>
+                <span class="form-fields">
+                  <input
+                          id="data.goal"
+                          class="big-field"
+                          name="data.goal"
+                          type="text"
+                          value="{{actor.data.data.goal}}"
+                          placeholder="Goal"
+                          data-dtype="String"
+                  />
+            </span>
+            </div>
+            <div class="form-group">
+                <label for="data.motivation">Motivation:</label>
+                <span class="form-fields">
+                  <input
+                          id="data.motivation"
+                          class="big-field"
+                          name="data.motivation"
+                          type="text"
+                          value="{{actor.data.data.motivation}}"
+                          placeholder="Motivation"
+                          data-dtype="String"
+                  />
+            </span>
+            </div>
+        </section>
+    </section>
+    <section class="personal-history">
+        <header class="header-field">
+            <span>Personal History</span>
+        </header>
+        <div class="form-group">
+            {{log actor}}
+            {{editor content=actor.data.data.personalHistory target="data.personalHistory" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+    <section class="allies">
+        <header class="header-field">
+            <span>Allies</span>
+        </header>
+        <div class="form-group">
+            {{editor content=actor.data.data.allies target="data.allies" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+    <section class="enemies">
+        <header class="header-field">
+            <span>Enemies</span>
+        </header>
+        <div class="form-group">
+            {{editor content=actor.data.data.enemies target="data.enemies" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+    <section class="oaths">
+        <header class="header-field">
+            <span>Oaths</span>
+        </header>
+        <div class="form-group">
+            {{editor content=actor.data.data.oaths target="data.oaths" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+    <section class="motto">
+        <header class="header-field">
+            <span>Motto</span>
+        </header>
+        <div class="form-group">
+            {{editor content=actor.data.data.motto target="data.motto" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+
+</div>
