@@ -147,6 +147,8 @@ ChronicleSystem.modifiersConstants = {
     AGILITY: "agility",
     AWARENESS: "awareness",
     CUNNING: "cunning",
+    DECEPTION: "deception",
+    PERSUASION: "persuasion",
     STATUS: "status",
 
     BULK: "bulk",
@@ -158,6 +160,8 @@ ChronicleSystem.keyConstants = {
     ATHLETICS: "athletics",
     AWARENESS: "awareness",
     CUNNING: "cunning",
+    DECEPTION: "deception",
+    PERSUASION: "persuasion",
     ENDURANCE: "endurance",
     STATUS: "status",
     WILL: "will",
@@ -166,6 +170,9 @@ ChronicleSystem.keyConstants = {
 
     BULK: "bulk",
     WOUNDS: "Wounds",
-    INJURY: "Injuries"
+    INJURY: "Injuries",
+    FRUSTRATION: "Frustrations",
+    STRESS: "Stress",
+    FATIGUE: "Fatigue"
 
 }

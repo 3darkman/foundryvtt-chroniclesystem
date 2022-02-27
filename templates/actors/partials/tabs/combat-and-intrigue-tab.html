@@ -9,34 +9,8 @@
             <section class="">
             </section>
             <section class="flexrow">
-                <div class="form-group">
-                    <label for="data.destinyPoints.current">Current:</label>
-                    <span class="form-fields">
-                      <input
-                              id="data.destinyPoints.current"
-                              class="small-field"
-                              name="data.destinyPoints.current"
-                              type="text"
-                              value="{{data.data.destinyPoints.current}}"
-                              placeholder="Current"
-                              data-dtype="Number"
-                      />
-                    </span>
-                </div>
-                <div class="form-group">
-                    <label for="data.destinyPoints.max">Max:</label>
-                    <span class="form-fields">
-                      <input
-                              id="data.destinyPoints.max"
-                              class="small-field"
-                              name="data.destinyPoints.max"
-                              type="text"
-                              value="{{data.data.destinyPoints.max}}"
-                              placeholder="Max"
-                              data-dtype="Number"
-                      />
-                    </span>
-                </div>
+                {{> (formGroup) labelText="Current:" id="data.destinyPoints.current" value=data.data.destinyPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
+                {{> (formGroup) labelText="Max:" id="data.destinyPoints.max" value=data.data.destinyPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
             </section>
         </section>
         <section class="intrigue">
@@ -48,6 +22,7 @@
                     <header class="subheader-field">
                         <span>Intrigue Defense</span>
                     </header>
+
                     <div class="form-group">
                         <span class="form-fields">
                               <input
@@ -109,62 +84,17 @@
                             />
                         </span>
                     </div>
-                    <div class="form-group">
-                        <label for="data.derivedStats.composure.current">Current</label>
-                        <span class="form-fields">
-                            <input
-                                    name="data.derivedStats.composure.current"
-                                    type="text"
-                                    value="{{data.data.derivedStats.composure.current}}"
-                                    placeholder="Current"
-                                    data-dtype="Number"
-                            />
-                        </span>
-                    </div>
+                    {{> (formGroup) labelText="Current:" id="data.derivedStats.composure.current" value=data.data.derivedStats.composure.current inputCssClass="" placeHolder="Current" dataType="Number" }}
                     <header class="subheader-field">
                         <span>Frustration</span>
                     </header>
-                    <div class="form-group">
-                        <span class="form-fields">
-                            <input
-                                    name="data.derivedStats.frustration.value"
-                                    type="text"
-                                    value="{{data.data.derivedStats.frustration.value}}"
-                                    placeholder="Value"
-                                    readonly="readonly"
-                                    data-dtype="Number"
-                            />
-                            <b>+</b>
-                            <input
-                                    name="data.derivedStats.frustration.modifier"
-                                    type="text"
-                                    value="{{data.data.derivedStats.frustration.modifier}}"
-                                    placeholder="Modifier"
-                                    data-dtype="Number"
-                            />
-                            <b>=</b>
-                                <input
-                                        name="data.derivedStats.frustration.value"
-                                        type="text"
-                                        value="{{data.data.derivedStats.frustration.total}}"
-                                        placeholder="Total"
-                                        readonly="readonly"
-                                        data-dtype="Number"
-                                />
-                            </span>
-                    </div>
-                    <div class="form-group">
-                        <label for="data.derivedStats.frustration.current">Current</label>
-                        <span class="form-fields">
-                            <input
-                                    name="data.derivedStats.frustration.current"
-                                    type="text"
-                                    value="{{data.data.derivedStats.frustration.current}}"
-                                    placeholder="Current"
-                                    data-dtype="Number"
-                            />
-                        </span>
-                    </div>
+                    {{> (ratingCheckbox) max=data.data.derivedStats.frustration.total currentValue=data.data.derivedStats.frustration.current dataType="Frustration" }}
+                    <section class="stress flexrow">
+                    <header class="subheader-field">
+                        <span>Stress</span>
+                    </header>
+                    {{> (ratingCheckbox) max=2 currentValue=data.data.currentStress dataType="Stress" }}
+                    </section>
                 </section>
                 <section class="disposition">
                     <header class="subheader-field">
@@ -290,47 +220,7 @@
                     <header class="subheader-field">
                         <span>Fatigue</span>
                     </header>
-                    <div class="form-group">
-                        <span class="form-fields">
-                            <input
-                                    name="data.derivedStats.fatigue.value"
-                                    type="text"
-                                    value="{{data.data.derivedStats.fatigue.value}}"
-                                    placeholder="Value"
-                                    readonly="readonly"
-                                    data-dtype="Number"
-                            />
-                            <b>+</b>
-                            <input
-                                    name="data.derivedStats.fatigue.modifier"
-                                    type="text"
-                                    value="{{data.data.derivedStats.fatigue.modifier}}"
-                                    placeholder="Modifier"
-                                    data-dtype="Number"
-                            />
-                            <b>=</b>
-                            <input
-                                    name="data.derivedStats.fatigue.value"
-                                    type="text"
-                                    value="{{data.data.derivedStats.fatigue.total}}"
-                                    placeholder="Total"
-                                    readonly="readonly"
-                                    data-dtype="Number"
-                            />
-                        </span>
-                    </div>
-                    <div class="form-group">
-                        <label for="data.derivedStats.fatigue.current">Current</label>
-                        <span class="form-fields">
-                            <input
-                                    name="data.derivedStats.fatigue.current"
-                                    type="text"
-                                    value="{{data.data.derivedStats.fatigue.current}}"
-                                    placeholder="Current"
-                                    data-dtype="Number"
-                            />
-                        </span>
-                    </div>
+                    {{> (ratingCheckbox) max=data.data.derivedStats.fatigue.total currentValue=data.data.derivedStats.fatigue.current dataType="Fatigue" }}
                     <header class="subheader-field">
                         <span>Movement</span>
                     </header>

@@ -56,5 +56,27 @@ export const registerCustomHelpers = function () {
     Handlebars.registerHelper('showIfDifferent', function(arg1, arg2, result1, result2 = "", options) {
         return arg1 != arg2 ? result1 : result2;
     });
-};
 
+    Handlebars.registerHelper('formGroup', function(options) {
+        return "systems/chroniclesystem/templates/actors/partials/form-group.html";
+    });
+
+    Handlebars.registerHelper('ratingCheckbox', function(options) {
+        return "systems/chroniclesystem/templates/components/rating-checkbox.html";
+    });
+
+    Handlebars.registerHelper('for', function (from, to, incr, block) {
+        let accum = '';
+        for (let i = from; i <= to; i += incr)
+            accum += block.fn({index: i});
+        return accum;
+    });
+
+    Handlebars.registerHelper('checked', function (referenceValue, value) {
+        return new Handlebars.SafeString(value <= referenceValue ? "checked='checked'" : "");
+    });
+
+    Handlebars.registerHelper('showIfLessEquals', function(arg1, arg2, result, result2 = "", options) {
+        return new Handlebars.SafeString(arg1 <= arg2 ? result : result2);
+    });
+};

@@ -137,7 +137,71 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     html.find('.wound-create').on("click", this._onClickWoundCreate.bind(this));
     html.find(".wounds-list").on("click", ".wound-control", this._onclickWoundControl.bind(this));
 
+    html.find(".square").on("click", this._onClickSquare.bind(this));
+
     // Add or Remove Attribute
+  }
+
+  async setFrustrationValue(newValue) {
+    let value = Math.max(Math.min(parseInt(newValue), this.actor.getChronicleSystemActorData().derivedStats.frustration.total), 0);
+
+    this.actor.updateTempPenalties();
+
+    if (value > 0) {
+      this.actor.addPenalty(ChronicleSystem.modifiersConstants.DECEPTION, ChronicleSystem.keyConstants.FRUSTRATION, value, false);
+      this.actor.addPenalty(ChronicleSystem.modifiersConstants.PERSUASION, ChronicleSystem.keyConstants.FRUSTRATION, value, false);
+    } else {
+      this.actor.removePenalty(ChronicleSystem.modifiersConstants.DECEPTION, ChronicleSystem.keyConstants.FRUSTRATION);
+      this.actor.removePenalty(ChronicleSystem.modifiersConstants.PERSUASION, ChronicleSystem.keyConstants.FRUSTRATION);
+    }
+
+    this.actor.update({
+      "data.derivedStats.frustration.current" : value,
+      "data.penalties": this.actor.penalties
+    });
+  }
+
+  async setFatigueValue(newValue) {
+    let value = Math.max(Math.min(parseInt(newValue), this.actor.getChronicleSystemActorData().derivedStats.fatigue.total), 0);
+
+    this.actor.updateTempModifiers();
+
+    if (value > 0) {
+      this.actor.addModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.FATIGUE, -value, false);
+    } else {
+      this.actor.removeModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.FATIGUE);
+    }
+
+    this.actor.update({
+      "data.derivedStats.fatigue.current" : value,
+      "data.modifiers": this.actor.modifiers
+    });
+  }
+
+  async setStressValue(newValue) {
+    let value = Math.max(Math.min(parseInt(newValue), this.actor.getChronicleSystemActorData().derivedStats.frustration.total), 0);
+
+    this.actor.updateTempPenalties();
+
+    if (value > 0) {
+      this.actor.addPenalty(ChronicleSystem.modifiersConstants.AWARENESS, ChronicleSystem.keyConstants.STRESS, value, false);
+      this.actor.addPenalty(ChronicleSystem.modifiersConstants.CUNNING, ChronicleSystem.keyConstants.STRESS, value, false);
+      this.actor.addPenalty(ChronicleSystem.modifiersConstants.STATUS, ChronicleSystem.keyConstants.STRESS, value, false);
+    } else {
+      this.actor.removePenalty(ChronicleSystem.modifiersConstants.AWARENESS, ChronicleSystem.keyConstants.STRESS);
+      this.actor.removePenalty(ChronicleSystem.modifiersConstants.CUNNING, ChronicleSystem.keyConstants.STRESS);
+      this.actor.removePenalty(ChronicleSystem.modifiersConstants.STATUS, ChronicleSystem.keyConstants.STRESS);
+    }
+
+    this.actor.update({
+      "data.currentStress" : value,
+      "data.penalties": this.actor.penalties
+    });
+  }
+
+  async _onClickSquare(ev) {
+    let method = `set${ev.currentTarget.dataset.type}Value`;
+    await this[method](ev.currentTarget.id);
   }
 
   async _onClickWoundCreate(ev) {
