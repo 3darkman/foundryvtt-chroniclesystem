@@ -25,3 +25,6 @@ The main things to know about create a weapon are:
 
 
 *P.s.: for now, for the automations to work, everything needs to be registered in English, both the qualities of weapons and armor, as well as abilities and their specialties.*
+
+## Credits
+Although, for now, I'm making the system myself, I've been looking for a lot of inspiration (sometimes I've even copied it, sorry for that) in other existing systems, like **Cyberpunk Red Core**, **Burning Wheel** and **GURPS 4th Ed Game Aid**
