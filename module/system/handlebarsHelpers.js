@@ -16,6 +16,8 @@ export const registerCustomHelpers = function () {
     });
 
     Handlebars.registerHelper('formulaToStr', (formula) => {
+        if (!formula)
+            return "";
         return formula.toStr();
     });
 
@@ -33,6 +35,8 @@ export const registerCustomHelpers = function () {
     });
 
     Handlebars.registerHelper('format-formula', function(formula) {
+        if (!formula)
+            return "";
         return formula.ToFormattedStr();
     });
 
