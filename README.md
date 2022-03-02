@@ -24,4 +24,4 @@ The main things to know about create a weapon are:
 - the **damage** must be informed in the format: **@Ability(+-\*/)number**, *eg: @Athletics+1*
 
 
-*P.s.: for now, for the automations to work, everything needs to be registered in English, both the qualities of weapons and armor, as well as skills and their specialties.*
+*P.s.: for now, for the automations to work, everything needs to be registered in English, both the qualities of weapons and armor, as well as abilities and their specialties.*
