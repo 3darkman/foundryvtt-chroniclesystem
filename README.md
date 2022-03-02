@@ -20,5 +20,5 @@ some of the future implementations include:
 ## How to Create a Weapon
 
 The main things to know about create a weapon are:
-- the **specialty** must be set to the default **Ability:Specialty**, *e.g. Fighting:Axes*
+- the **specialty** must be set to the pattern: **Ability:Specialty**, *e.g. Fighting:Axes*
 - the **damage** must be informed in the format: **@Ability(+-\*/)number**, *eg: @Athletics+1*
