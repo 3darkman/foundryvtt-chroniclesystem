@@ -16,3 +16,9 @@ some of the future implementations include:
 - create a system for items and qualities in which, when registered, they already define their modifiers and penalties.
 - implement localization in the system, currently it is only in English and only works with items (qualities, skills, etc) in English
 - among others (feel free to request new features in the Issues tab of Git Hub)
+
+## How to Create a Weapon
+
+The main things to know about crafting a weapon are:
+- the **specialty** must be set to the default **Ability:Specialty**, *e.g. Fighting:Axes*
+- the **damage** must be informed in the format: **@Ability(+-\*/)number**, *eg: @Athletics+1*
