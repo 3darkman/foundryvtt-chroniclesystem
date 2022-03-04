@@ -6,11 +6,11 @@
             <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
             <div class="complements flexrow">
                 <label  class="attribute-label"> Ancestry: </label>
-                <input  class="medium-field flex2" type="text"  name="data.house"  value="{{data.house}}"  data-dtype="String"/>
+                <input  class="medium-field flex2" type="text"  name="data.ancestries"  value="{{data.data.ancestries}}"  data-dtype="String"/>
                 <label  class="attribute-label"> Age: </label>
-                <input  class="small-field"  type="text"  name="data.age"  value="{{data.age}}"  data-dtype="Number"/>
+                <input  class="small-field"  type="text"  name="data.age"  value="{{data.data.age}}"  data-dtype="Number"/>
                 <label  class="attribute-label"> Gender: </label>
-                <input  class="medium-field"  type="text"  name="data.gender"  value="{{data.gender}}"  data-dtype="String"/>
+                <input  class="medium-field"  type="text"  name="data.gender"  value="{{data.data.gender}}"  data-dtype="String"/>
             </div>
         </div>
     </header>
