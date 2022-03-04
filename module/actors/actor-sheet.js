@@ -12,7 +12,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
       classes: ["chroniclesystem", "worldbuilding", "sheet", "actor"],
-      template: "systems/chroniclesystem/templates/actor-sheet.html",
+      template: "systems/chroniclesystem/templates/actors/characters/character-sheet.html",
       width: 700,
       height: 900,
       tabs: [
