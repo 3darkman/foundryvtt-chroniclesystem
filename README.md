@@ -1,4 +1,4 @@
-# Chronicle System for Foundry VTT
+# Chronicle System (Unofficial) for Foundry VTT
 
 This is a fan-created implementation of **Green Ronin's Chronicle System** for **Foundry VTT**, this system is used in Swords Chronicle RPG and Song of Ice and Fire RPG. 
 
