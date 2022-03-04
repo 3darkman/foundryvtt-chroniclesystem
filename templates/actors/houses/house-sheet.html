@@ -1,0 +1,45 @@
+<form class="{{cssClass}}" autocomplete="off">
+    <header class="sheet-header">
+        <div class="header-fields">
+            <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+            <div class="complements flexrow">
+                {{log data}}
+                <label  class="attribute-label"> {{localize "CS.sheets.house.labels.head"}}: </label>
+                <input  class="size75" type="text"  name="data.head.name"  value="{{data.data.head.name}}"  data-dtype="String" readonly="readonly"/>
+                <label  class="attribute-label"> {{localize "CS.sheets.house.labels.realm"}}: </label>
+                <input  class="size75"  type="text"  name="data.realm"  value="{{data.data.realm}}"  data-dtype="String"/>
+                <label  class="attribute-label"> {{localize "CS.sheets.house.labels.liege"}}: </label>
+                <input  class="size75"  type="text"  name="data.liege"  value="{{data.data.liege}}"  data-dtype="String"/>
+            </div>
+        </div>
+    </header>
+    <section class="sheet-body">
+        <div class="flexrow">
+            <section class="profile-picture">
+                <div class="profile-img-container flex">
+                    <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" alt="{{actor.name}} Picture" />
+                </div>
+            </section>
+            <section class="flex2">
+                <header class="header-field">
+                    <span>{{localize "CS.sheets.house.resources.title"}}</span>
+                </header>
+                <div class="resources-list list">
+                    <div class="resource-item item flexrow">
+                        <label class="resource-label capitalize item-edit"><a>{{localize "CS.sheets.house.resources.defense"}}</a></label>
+                        <div class="resource-value">
+                            <a>{{data.data.defense.startingValue}}</a>
+                        </div>
+                        <div class="ability-specialities">
+                            {{#each ability.data.specialties as |specialty key|}}
+                                <div class="rollable" id="specialty:{{specialty.name}}:{{../this.name}}">
+                                    <a>{{specialty.name}} {{specialty.rating}}B{{modifier specialty.modifier}}</a>&nbsp;
+                                </div>
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</form>

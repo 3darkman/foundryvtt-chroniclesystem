@@ -5,19 +5,23 @@
  */
 
 // Import Modules
-import { ChronicleSystemActor } from "./actors/actor.js";
-import { ChronicleSystemItem } from "./items/chronicleSystemItem.js";
-import { ChronicleSystemItemSheet } from "./item-sheet.js";
-import { ChronicleSystemActorSheet } from "./actors/actor-sheet.js";
+import { ChronicleSystemItem } from "../items/chronicleSystemItem.js";
+import { ChronicleSystemItemSheet } from "../item-sheet.js";
 import { preloadHandlebarsTemplates } from "./preloadTemplates.js";
 import { registerCustomHelpers } from "./handlebarsHelpers.js";
+import actorConstructor from "../actors/actorConstructor.js";
+import registerSystemSettings from "./settings.js";
+import {CSCharacterActorSheet} from "../actors/sheets/csCharacterActorSheet.js";
+import {CSHouseActorSheet} from "../actors/sheets/csHouseActorSheet.js";
+import SystemUtils from "../utils/systemUtils.js";
+import LOGGER from "../utils/logger.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
 /* -------------------------------------------- */
 
 Hooks.once("init", async function() {
-    console.log(`Initializing Simple Worldbuilding System`);
+    LOGGER.log(`Initializing Chronicle System`);
 
 	/**
 	 * Set an initiative formula for the system
@@ -31,24 +35,20 @@ Hooks.once("init", async function() {
     registerCustomHelpers();
 
 	// Define custom Entity classes
-    CONFIG.Actor.documentClass = ChronicleSystemActor;
+    CONFIG.Actor.documentClass = actorConstructor;
     CONFIG.Item.documentClass = ChronicleSystemItem;
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
-    Actors.registerSheet("chroniclesystem", ChronicleSystemActorSheet, { makeDefault: true });
+    Actors.registerSheet("chroniclesystem", CSCharacterActorSheet,
+        { label: SystemUtils.localize("CS.sheets.characterSheet"), types: ["character"], makeDefault: true });
+    Actors.registerSheet("chroniclesystem", CSHouseActorSheet,
+        { label: SystemUtils.localize("CS.sheets.houseSheet"), types: ["house"], makeDefault: true });
+
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("chroniclesystem", ChronicleSystemItemSheet, {makeDefault: true});
 
-    // Register system settings
-    game.settings.register("worldbuilding", "macroShorthand", {
-        name: "Shortened Macro Syntax",
-        hint: "Enable a shortened macro syntax which allows referencing attributes directly, for example @str instead of @attributes.str.value. Disable this setting if you need the ability to reference the full attribute model, for example @attributes.str.label.",
-        scope: "world",
-        type: Boolean,
-        default: true,
-        config: true
-    });
+    registerSystemSettings();
     await preloadHandlebarsTemplates();
 });
 

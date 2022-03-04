@@ -1,0 +1,104 @@
+{
+  "CS": {
+    "dialogs": {
+      "characterRole": {
+        "title": "Select the role of {actorName} in the house."
+      },
+      "actions": {
+        "save": "Save",
+        "cancel": "Cancel"
+      }
+    },
+    "messages": {
+      "nobodyHasBeenChosen": "Nobody has been chosen",
+      "actorDoesntExists": "Actor doesn't exists"
+    },
+    "settings": {
+      "debugLogs": {
+        "name": "Debug Logs",
+        "hint": ""
+      },
+      "traceLogs": {
+        "name": "Trace Logs",
+        "hint": ""
+      }
+    },
+    "sheets": {
+      "house": {
+        "character": {
+          "roles": {
+            "head": "Head",
+            "steward": "Steward",
+            "heir": "Heir",
+            "family": "Family",
+            "retainer": "Retainer",
+            "servant": "Servant"
+          }
+        },
+        "resources": {
+          "defense": "Defense",
+          "influence": "Influence",
+          "lands": "Lands",
+          "law": "Law",
+          "population": "Population",
+          "power": "Power",
+          "wealth": "Wealth",
+          "title": "House Resources"
+        },
+        "labels": {
+          "head": "Head of House",
+          "realm": "Realm",
+          "liege": "Liege",
+          "heirsAndFamily": "Heirs and Family",
+          "retainersAndServants": "Retainers and Servants"
+        }
+      },
+      "character": {
+        "dispositions": {
+          "affectionate": "affectionate",
+          "friendly": "friendly",
+          "amiable": "amiable",
+          "indifferent": "indifferent",
+          "dislike": "dislike",
+          "unfriendly": "unfriendly",
+          "malicious": "malicious"
+        }
+      }
+    },
+    "constants": {
+      "abilities": {
+        "agility": "agility",
+        "athletics": "athletics",
+        "awareness": "awareness",
+        "cunning": "cunning",
+        "deception": "deception",
+        "persuasion": "persuasion",
+        "endurance": "endurance",
+        "status": "status",
+        "will": "will"
+      },
+      "specialties": {
+        "run": "run",
+        "bluff": "bluff",
+        "act": "act",
+        "bargain": "bargain",
+        "charm": "charm",
+        "convince": "convince",
+        "incite": "incite",
+        "intimidate": "intimidate",
+        "seduce": "seduce",
+        "taunt": "taunt"
+      },
+      "qualities": {
+        "bulk": "bulk"
+      },
+      "others": {
+        "wounds": "Wounds",
+        "injuries": "Injuries",
+        "frustrations": "Frustrations",
+        "stress": "Stress",
+        "fatigue": "Fatigue"
+      }
+    }
+  }
+}

@@ -102,8 +102,8 @@
                     </header>
                     <div class="disposition-list">
                         {{#each dispositions}}
-                                <div class="disposition option  {{showIfEquals this.rating ../data.data.currentDisposition "selected"}}" data-id="{{this.rating}}">
-                                    {{this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
+                                <div class="disposition option capitalize {{showIfEquals this.rating ../data.data.currentDisposition "selected"}}" data-id="{{this.rating}}">
+                                    {{localize this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
                                 </div>
                         {{/each}}
                     </div>
@@ -124,7 +124,7 @@
                         <tbody>
                         {{#each techniques}}
                         <tr>
-                            <td>{{this.name}}</td>
+                            <td class="capitalize">{{this.name}}</td>
                             <td>{{this.influence}}</td>
                             <td class="rollable" id="persuasion:{{this.name}}:{{formulaToStr this.persuasion}}"><a>{{format-formula this.persuasion}}</a></td>
                             <td class="rollable" id="deception:{{this.name}}:{{formulaToStr this.deception}}"><a>{{format-formula this.deception}}</a></td>

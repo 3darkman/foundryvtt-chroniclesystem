@@ -1,4 +1,4 @@
-import {ChronicleSystem} from "../ChronicleSystem.js";
+import {ChronicleSystem} from "../system/ChronicleSystem.js";
 
 export class ChronicleSystemItem extends Item {
 
