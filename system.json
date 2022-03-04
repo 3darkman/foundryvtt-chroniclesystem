@@ -1,6 +1,6 @@
 {
   "name": "chroniclesystem",
-  "title": "Chronicle System",
+  "title": "Chronicle System (Unofficial)",
   "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
   "version": "0.1.2",
   "minimumCoreVersion": "9",
