@@ -1,6 +1,6 @@
 {
 "Actor": {
-  "types": ["character"],
+  "types": ["character", "house"],
   "templates": {
     "common": {
       "age": 0,
@@ -104,15 +104,39 @@
     "templates": ["common", "character-common"]
   },
   "house": {
-    "defense":0,
-    "influence": 0,
-    "lands": 0,
-    "law": 0,
-    "population": 0,
-    "power": 0,
-    "wealth": 0,
+    "realm": "",
+    "liege": "",
+    "defense": {
+      "startingValue": 0
+    },
+    "influence": {
+      "startingValue": 0
+    },
+    "lands": {
+      "startingValue": 0
+    },
+    "law": {
+      "startingValue": 0
+    },
+    "population": {
+      "startingValue": 0
+    },
+    "power": {
+      "startingValue": 0
+    },
+    "wealth": {
+      "startingValue": 0
+    },
     "historicalEvents": [],
-    "motto": ""
+    "motto": "",
+    "members": {
+      "head": "",
+      "steward": "",
+      "heirs": [],
+      "family": [],
+      "retainers": [],
+      "servants": []
+    }
   }
 },
 "Item": {

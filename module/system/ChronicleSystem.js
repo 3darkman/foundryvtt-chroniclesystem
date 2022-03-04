@@ -1,6 +1,8 @@
-import {doRoll} from "./dieroll.js";
-import {DiceRollFormula} from "./diceRollFormula.js";
-import {Disposition} from "./disposition.js";
+import {doRoll} from "../dieroll.js";
+import {DiceRollFormula} from "../diceRollFormula.js";
+import {Disposition} from "../disposition.js";
+import LOGGER from "../utils/logger.js";
+import SystemUtils from "../utils/systemUtils.js";
 
 export const ChronicleSystem ={}
 
@@ -9,13 +11,14 @@ window.ChronicleSystem = ChronicleSystem;
 ChronicleSystem.LastActor = null;
 
 ChronicleSystem.SetLastActor = function (actor) {
-    if (actor !== ChronicleSystem.LastActor) console.log('Setting Last Actor:' + actor?.name)
+    if (actor !== ChronicleSystem.LastActor)
+        LOGGER.debug(`Setting Last Actor: ${actor?.name}`);
     ChronicleSystem.LastActor = actor
 }
 
 ChronicleSystem.ClearLastActor = function (actor) {
     if (ChronicleSystem.LastActor === actor) {
-        console.log('Clearing Last Actor:' + ChronicleSystem.LastActor?.name)
+        LOGGER.debug(`Clearing Last Actor: ${ChronicleSystem.LastActor?.name}`);
         ChronicleSystem.LastActor = null
         ChronicleSystem.LastActorName = null
         const tokens = canvas.tokens
@@ -41,7 +44,7 @@ ChronicleSystem.escapeUnicode = escapeUnicode
 async function handleRoll(event, actor) {
     event.preventDefault();
     if (event.ctrlKey)
-        console.log("ctrl holding");
+        LOGGER.debug("ctrl holding");
     const rollType = event.currentTarget.id;
     const roll_definition = rollType.split(':');
     if (roll_definition.length < 2)
@@ -121,13 +124,13 @@ ChronicleSystem.handleRoll = handleRoll;
 ChronicleSystem.getActorAbilityFormula = getActorTestFormula;
 
 ChronicleSystem.dispositions = [
-    new Disposition("Affectionate", 1, -2, 5),
-    new Disposition("Friendly", 2, -1, 3),
-    new Disposition("Amiable", 3, 0, 1),
-    new Disposition("Indifferent", 4, 0, 0),
-    new Disposition("Dislike", 5, 1, -2),
-    new Disposition("Unfriendly", 6, 2, -4),
-    new Disposition("Malicious", 7, 3, -6),
+    new Disposition("CS.sheets.character.dispositions.affectionate", 1, -2, 5),
+    new Disposition("CS.sheets.character.dispositions.friendly", 2, -1, 3),
+    new Disposition("CS.sheets.character.dispositions.amiable", 3, 0, 1),
+    new Disposition("CS.sheets.character.dispositions.indifferent", 4, 0, 0),
+    new Disposition("CS.sheets.character.dispositions.dislike", 5, 1, -2),
+    new Disposition("CS.sheets.character.dispositions.unfriendly", 6, 2, -4),
+    new Disposition("CS.sheets.character.dispositions.malicious", 7, 3, -6),
 ];
 
 ChronicleSystem.equippedConstants = {
@@ -156,23 +159,33 @@ ChronicleSystem.modifiersConstants = {
 }
 
 ChronicleSystem.keyConstants = {
-    AGILITY: "agility",
-    ATHLETICS: "athletics",
-    AWARENESS: "awareness",
-    CUNNING: "cunning",
-    DECEPTION: "deception",
-    PERSUASION: "persuasion",
-    ENDURANCE: "endurance",
-    STATUS: "status",
-    WILL: "will",
+    AGILITY: "CS.constants.abilities.agility",
+    ATHLETICS: "CS.constants.abilities.athletics",
+    AWARENESS: "CS.constants.abilities.awareness",
+    CUNNING: "CS.constants.abilities.cunning",
+    DECEPTION: "CS.constants.abilities.deception",
+    PERSUASION: "CS.constants.abilities.persuasion",
+    ENDURANCE: "CS.constants.abilities.endurance",
+    STATUS: "CS.constants.abilities.status",
+    WILL: "CS.constants.abilities.will",
 
-    RUN: "run",
+    RUN: "CS.constants.specialties.run",
+    BLUFF: "CS.constants.specialties.bluff",
+    ACT: "CS.constants.specialties.act",
+    BARGAIN: "CS.constants.specialties.bargain",
+    CHARM: "CS.constants.specialties.charm",
+    CONVINCE: "CS.constants.specialties.convince",
+    INCITE: "CS.constants.specialties.incite",
+    INTIMIDATE: "CS.constants.specialties.intimidate",
+    SEDUCE: "CS.constants.specialties.seduce",
+    TAUNT: "CS.constants.specialties.taunt",
 
-    BULK: "bulk",
-    WOUNDS: "Wounds",
-    INJURY: "Injuries",
-    FRUSTRATION: "Frustrations",
-    STRESS: "Stress",
-    FATIGUE: "Fatigue"
+    BULK: "CS.constants.qualities.bulk",
+
+    WOUNDS: "CS.constants.others.wounds",
+    INJURY: "CS.constants.others.injuries",
+    FRUSTRATION: "CS.constants.others.frustrations",
+    STRESS: "CS.constants.others.stress",
+    FATIGUE: "CS.constants.others.fatigue"
 
 }

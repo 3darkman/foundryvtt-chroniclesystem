@@ -1,0 +1,82 @@
+.chroniclesystem .capitalize {
+  text-transform: capitalize;
+}
+.chroniclesystem.sheet .sheet-header .header-fields .complements {
+  margin: 5px -5px 5px 0;
+}
+.chroniclesystem.sheet .sheet-header .header-fields .complements input {
+  height: 27px;
+  margin: 0 5px;
+}
+.chroniclesystem.sheet .sheet-header .header-fields .complements .attribute-label {
+  background: #005390;
+  color: white;
+  padding: 5px 8px 5px 8px;
+  flex: 0 0 auto;
+}
+.chroniclesystem.sheet .sheet-header h1.charname {
+  height: 50px;
+  padding: 0;
+  margin: 5px 0 0 0;
+  border-bottom: 0;
+}
+.chroniclesystem.sheet .sheet-header h1.charname input {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.chroniclesystem.sheet .profile-img {
+  max-width: 100%;
+  max-height: 100%;
+  border: none;
+}
+.chroniclesystem.sheet .profile-img-container {
+  height: 300px;
+  overflow: hidden;
+  text-align: center;
+  vertical-align: middle;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  background-color: white;
+}
+.chroniclesystem.sheet input {
+  background: white;
+  border: none;
+}
+.chroniclesystem.sheet input:read-only {
+  background: #DCE2EF;
+  color: gray;
+  box-shadow: none;
+}
+.chroniclesystem.sheet textarea {
+  background: white;
+  border: none;
+}
+.chroniclesystem.sheet .small-field,
+.chroniclesystem.sheet .size50 {
+  width: 50px;
+  flex: 0.5;
+}
+.chroniclesystem.sheet .size75 {
+  width: 75px;
+  flex: 0.75;
+}
+.chroniclesystem.sheet .medium-field,
+.chroniclesystem.sheet .size100 {
+  width: 100px;
+  flex: 1;
+}
+.chroniclesystem.sheet .size125 {
+  width: 125px;
+  flex: 1.25;
+}
+.chroniclesystem.sheet .big-field,
+.chroniclesystem.sheet .size150 {
+  width: 150px;
+  flex: 1.5;
+}
+.chroniclesystem.sheet .biggest-field,
+.chroniclesystem.sheet .size200 {
+  width: 200px;
+  flex: 2;
+}
+/*# sourceMappingURL=global.css.map */

@@ -2,17 +2,20 @@
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
  */
-import { ChronicleSystem } from "../ChronicleSystem.js";
-import { Technique } from "../technique.js";
+import { ChronicleSystem } from "../../system/ChronicleSystem.js";
+import { Technique } from "../../technique.js";
+import {CSActorSheet} from "./csActorSheet.js";
+import LOGGER from "../../utils/logger.js";
+import SystemUtils from "../../utils/systemUtils.js";
 
 
-export class ChronicleSystemActorSheet extends ActorSheet {
+export class CSCharacterActorSheet extends CSActorSheet {
 
   /** @override */
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
       classes: ["chroniclesystem", "worldbuilding", "sheet", "actor"],
-      template: "systems/chroniclesystem/templates/actor-sheet.html",
+      template: "systems/chroniclesystem/templates/actors/characters/character-sheet.html",
       width: 700,
       height: 900,
       tabs: [
@@ -70,38 +73,43 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       weapon.formula = formula;
     });
 
-    let cunningValue = data.actor.getAbilityValue("Cunning");
-    let willValue = data.actor.getAbilityValue("Will");
-    let persuasionValue = data.actor.getAbilityValue("Persuasion");
-    let awarenessValue = data.actor.getAbilityValue("Awareness");
+    this._calculateTechniques(data);
 
-    let bluffFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Deception", "Bluff");
-    let actFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Deception", "Act");
-    let bargainFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Bargain");
-    let charmFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Charm");
-    let convinceFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Convince");
-    let inciteFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Incite");
-    let intimidateFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Intimidate");
-    let seduceFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Seduce");
-    let tauntFormula = ChronicleSystem.getActorAbilityFormula(data.actor, "Persuasion", "Taunt");
-
-    let intimidateDeceptionFormula = actFormula.bonusDice + actFormula.modifier > bluffFormula.bonusDice + bluffFormula.modifier ? actFormula : bluffFormula;
-
-    data.techniques = {
-      bargain: new Technique("Bargain", cunningValue, bargainFormula, bluffFormula),
-      charm: new Technique("Charm", persuasionValue, charmFormula, actFormula),
-      convince: new Technique("Convince", willValue, convinceFormula, actFormula),
-      incite: new Technique("Incite", cunningValue, inciteFormula, bluffFormula),
-      intimidate: new Technique("Intimidate", willValue, intimidateFormula, intimidateDeceptionFormula),
-      seduce: new Technique("Seduce", persuasionValue, seduceFormula, bluffFormula),
-      taunt: new Technique("Taunt", awarenessValue, tauntFormula, bluffFormula)
-    };
     data.currentInjuries = Object.values(character.injuries).length;
     data.currentWounds = Object.values(character.wounds).length;
     data.maxInjuries = this.actor.getMaxInjuries();
     data.maxWounds = this.actor.getMaxWounds();
 
     return data;
+  }
+
+  _calculateTechniques(data) {
+    let cunningValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.CUNNING));
+    let willValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL));
+    let persuasionValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION));
+    let awarenessValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS));
+
+    let bluffFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.DECEPTION), SystemUtils.localize(ChronicleSystem.keyConstants.BLUFF));
+    let actFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.DECEPTION), SystemUtils.localize(ChronicleSystem.keyConstants.ACT));
+    let bargainFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.BARGAIN));
+    let charmFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.CHARM));
+    let convinceFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.CONVINCE));
+    let inciteFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.INCITE));
+    let intimidateFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.INTIMIDATE));
+    let seduceFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.SEDUCE));
+    let tauntFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.TAUNT));
+
+    let intimidateDeceptionFormula = actFormula.bonusDice + actFormula.modifier > bluffFormula.bonusDice + bluffFormula.modifier ? actFormula : bluffFormula;
+
+    data.techniques = {
+      bargain: new Technique(SystemUtils.localize(ChronicleSystem.keyConstants.BARGAIN), cunningValue, bargainFormula, bluffFormula),
+      charm: new Technique(SystemUtils.localize(ChronicleSystem.keyConstants.CHARM), persuasionValue, charmFormula, actFormula),
+      convince: new Technique(SystemUtils.localize(ChronicleSystem.keyConstants.CONVINCE), willValue, convinceFormula, actFormula),
+      incite: new Technique(SystemUtils.localize(ChronicleSystem.keyConstants.INCITE), cunningValue, inciteFormula, bluffFormula),
+      intimidate: new Technique(SystemUtils.localize(ChronicleSystem.keyConstants.INTIMIDATE), willValue, intimidateFormula, intimidateDeceptionFormula),
+      seduce: new Technique(SystemUtils.localize(ChronicleSystem.keyConstants.SEDUCE), persuasionValue, seduceFormula, bluffFormula),
+      taunt: new Technique(SystemUtils.localize(ChronicleSystem.keyConstants.TAUNT), awarenessValue, tauntFormula, bluffFormula)
+    };
   }
 
   /* -------------------------------------------- */
@@ -143,7 +151,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   }
 
   async setFrustrationValue(newValue) {
-    let value = Math.max(Math.min(parseInt(newValue), this.actor.getChronicleSystemActorData().derivedStats.frustration.total), 0);
+    let value = Math.max(Math.min(parseInt(newValue), this.actor.getCSData().derivedStats.frustration.total), 0);
 
     this.actor.updateTempPenalties();
 
@@ -162,7 +170,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   }
 
   async setFatigueValue(newValue) {
-    let value = Math.max(Math.min(parseInt(newValue), this.actor.getChronicleSystemActorData().derivedStats.fatigue.total), 0);
+    let value = Math.max(Math.min(parseInt(newValue), this.actor.getCSData().derivedStats.fatigue.total), 0);
 
     this.actor.updateTempModifiers();
 
@@ -179,7 +187,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   }
 
   async setStressValue(newValue) {
-    let value = Math.max(Math.min(parseInt(newValue), this.actor.getChronicleSystemActorData().derivedStats.frustration.total), 0);
+    let value = Math.max(Math.min(parseInt(newValue), this.actor.getCSData().derivedStats.frustration.total), 0);
 
     this.actor.updateTempPenalties();
 
@@ -205,7 +213,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   }
 
   async _onClickWoundCreate(ev) {
-    const data = this.actor.getChronicleSystemActorData();
+    const data = this.actor.getCSData();
     let wound = "";
     let wounds = Object.values(data.wounds);
     if (wounds.length >= this.actor.getMaxWounds())
@@ -226,7 +234,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     const action = a.dataset.action;
 
     if ( action === "delete" ) {
-      const data = this.actor.getChronicleSystemActorData();
+      const data = this.actor.getCSData();
       let wounds = Object.values(data.wounds);
       wounds.splice(index,1);
 
@@ -244,7 +252,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
   }
 
   async _onClickInjuryCreate(ev) {
-    const data = this.actor.getChronicleSystemActorData();
+    const data = this.actor.getCSData();
     let injury = "";
     let injuries = Object.values(data.injuries);
     if (injuries.length >= this.actor.getMaxInjuries())
@@ -268,7 +276,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
     const action = a.dataset.action;
 
     if ( action === "delete" ) {
-      const data = this.actor.getChronicleSystemActorData();
+      const data = this.actor.getCSData();
       let injuries = Object.values(data.injuries);
       injuries.splice(index,1);
 
@@ -330,7 +338,7 @@ export class ChronicleSystemActorSheet extends ActorSheet {
 
   async _onDispositionChanged(event, targets) {
     if (!ChronicleSystem.dispositions.find((disposition) => disposition.rating === parseInt(event.target.dataset.id))) {
-      console.log("the informed disposition does not exist.");
+      LOGGER.warn("the informed disposition does not exist.");
       return;
     }
     this.actor.update({"data.currentDisposition": event.target.dataset.id});

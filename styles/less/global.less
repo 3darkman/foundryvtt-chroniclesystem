@@ -1,0 +1,103 @@
+@import "./constants.less";
+@import "./house-sheet.less";
+
+.chroniclesystem {
+  .capitalize {
+    text-transform: capitalize;
+  }
+  &.sheet {
+    .sheet-header {
+      .header-fields {
+        .complements {
+          margin: @medium-margin -@medium-margin @medium-margin 0;
+
+          input {
+            height: 27px;
+            margin: 0 @medium-margin;
+          }
+
+          .attribute-label {
+            background: @primary-color;
+            color: white;
+            padding: @medium-margin @biggest-margin @medium-margin @biggest-margin;
+            flex: 0 0 auto;
+          }
+        }
+      }
+
+      h1.charname {
+        height: 50px;
+        padding: 0;
+        margin: @medium-margin 0 0 0;
+        border-bottom: 0;
+
+        input {
+          width: 100%;
+          height: 100%;
+          margin: 0;
+        }
+      }
+    }
+
+    .profile-img {
+      max-width: 100%;
+      max-height: 100%;
+      border: none;
+    }
+
+    .profile-img-container {
+      height: 300px;
+      overflow: hidden;
+      text-align: center;
+      vertical-align: middle;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+      background-color: @field-color;
+    }
+
+    input {
+      background: @field-color;
+      border: none;
+
+      &:read-only {
+        background: @background-color;
+        color: gray;
+        box-shadow: none;
+      }
+    }
+
+    textarea {
+      background: @field-color;
+      border: none;
+    }
+
+    .small-field, .size50 {
+      width: 50px;
+      flex: .5;
+    }
+
+    .size75 {
+      width: 75px;
+      flex: .75;
+    }
+
+    .medium-field, .size100 {
+      width: 100px;
+      flex: 1;
+    }
+
+    .size125 {
+      width: 125px;
+      flex: 1.25;
+    }
+
+    .big-field, .size150 {
+      width: 150px;
+      flex: 1.5;
+    }
+
+    .biggest-field, .size200 {
+      width: 200px;
+      flex: 2;
+    }
+  }
+}
