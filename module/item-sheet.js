@@ -109,6 +109,4 @@ export class ChronicleSystemItemSheet extends ItemSheet {
         sheetBody.css("height", bodyHeight);
         return position;
     }
-
-
 }

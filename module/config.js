@@ -5,7 +5,6 @@
  */
 
 // Import Modules
-import { ChronicleSystemItem } from "../items/chronicleSystemItem.js";
 import { ChronicleSystemItemSheet } from "../item-sheet.js";
 import { preloadHandlebarsTemplates } from "./preloadTemplates.js";
 import { registerCustomHelpers } from "./handlebarsHelpers.js";
@@ -15,6 +14,7 @@ import {CSCharacterActorSheet} from "../actors/sheets/csCharacterActorSheet.js";
 import {CSHouseActorSheet} from "../actors/sheets/csHouseActorSheet.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
+import itemConstructor from "../items/itemConstructor.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -36,7 +36,7 @@ Hooks.once("init", async function() {
 
 	// Define custom Entity classes
     CONFIG.Actor.documentClass = actorConstructor;
-    CONFIG.Item.documentClass = ChronicleSystemItem;
+    CONFIG.Item.documentClass = itemConstructor;
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
