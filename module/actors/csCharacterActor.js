@@ -5,6 +5,7 @@
 import {ChronicleSystem} from "../system/ChronicleSystem.js";
 import {CSActor} from "./csActor.js";
 import SystemUtils from "../utils/systemUtils.js";
+import LOGGER from "../utils/logger.js";
 
 export class CSCharacterActor extends CSActor {
     modifiers;
@@ -162,6 +163,7 @@ export class CSCharacterActor extends CSActor {
     }
 
     addModifier(type, documentId, value, isDocument = true, save = false) {
+        LOGGER.trace(`add ${documentId} modifier to ${type} | csCharacterActor.js`);
         if (!this.modifiers[type]) {
             this.modifiers[type] = [];
         }
@@ -181,6 +183,8 @@ export class CSCharacterActor extends CSActor {
     }
 
     addPenalty(type, documentId, value, isDocument = true, save = false) {
+        LOGGER.trace(`add ${documentId} penalty to ${type} | csCharacterActor.js`);
+
         if (!this.penalties[type]) {
             this.penalties[type] = [];
         }
@@ -205,6 +209,7 @@ export class CSCharacterActor extends CSActor {
     }
 
     removeModifier(type, documentId, save = false) {
+        LOGGER.trace(`remove ${documentId} modifier to ${type} | csCharacterActor.js`);
         if (this.modifiers[type]) {
             let index = this.modifiers[type].indexOf((mod) => mod._id === documentId);
             this.modifiers[type].splice(index, 1);
@@ -214,6 +219,7 @@ export class CSCharacterActor extends CSActor {
     }
 
     removePenalty(type, documentId, save = false) {
+        LOGGER.trace(`remove ${documentId} penalty to ${type} | csCharacterActor.js`);
         if (this.penalties[type]) {
             let index = this.penalties[type].indexOf((mod) => mod._id === documentId);
             this.penalties[type].splice(index, 1);

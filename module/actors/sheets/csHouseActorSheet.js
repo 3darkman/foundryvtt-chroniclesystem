@@ -29,23 +29,13 @@ export class CSHouseActorSheet extends CSActorSheet {
         return data;
     }
 
-    async _onDrop(event) {
-        let data;
-        try {
-            data = JSON.parse(event.dataTransfer.getData('text/plain'));
-            if (data.type === 'Actor') {
-                let actor = game.actors.get(data.id);
-                if (actor) {
-                    await this.showCharacterRoleDialog(actor);
-                } else {
-                    LOGGER.warn("CS.messages.actorDoesntExists");
-                }
-            }
+    async _onDropActor(event, data) {
+        if ( !this.actor.isOwner ) return false;
+
+        let actor = game.actors.get(data.id);
+        if (actor && actor.type === "character") {
+            await this.showCharacterRoleDialog(actor);
         }
-        catch (err) {
-            LOGGER.error(err.message);
-        }
-        return super._onDrop(event);
     }
 
     async showCharacterRoleDialog(actor) {
