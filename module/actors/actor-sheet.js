@@ -63,9 +63,11 @@ export class ChronicleSystemActorSheet extends ActorSheet {
       let formula = ChronicleSystem.getActorAbilityFormula(data.actor, info[0], info[1]);
       formula = ChronicleSystem.adjustFormulaByWeapon(data.actor, formula, weapon);
       let matches = weapon.data.damage.match('@([a-zA-Z]*)([-\+\/\*]*)([0-9]*)');
-      if (matches.length === 4) {
-        let ability = data.actor.getAbilityValue(matches[1]);
-        weapon.damageValue = eval(`${ability}${matches[2]}${matches[3]}`);
+      if (matches) {
+        if (matches.length === 4) {
+          let ability = data.actor.getAbilityValue(matches[1]);
+          weapon.damageValue = eval(`${ability}${matches[2]}${matches[3]}`);
+        }
       }
       weapon.formula = formula;
     });
