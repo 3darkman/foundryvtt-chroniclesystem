@@ -32,7 +32,8 @@
       "itemSheet": "Item Sheet",
       "abilityItemSheet": "Ability Sheet",
       "generalLabels": {
-        "description": "Description"
+        "description": "Description",
+        "details": "Details"
       },
       "house": {
         "character": {
@@ -79,6 +80,15 @@
         "playerChoice": "Is a player choice?",
         "numberOfChoices": "Number of Choices",
         "bonusToChoices": "Bonus to Choices"
+      },
+      "holdingItem": {
+        "features": "Features",
+        "investment": "Investment",
+        "buildTime": "Build Time",
+        "featureName": "Feature Name",
+        "featureCost": "Feature Cost",
+        "resource": "Resource",
+        "canAddFeatureAfter": "You can define specific features of the holding after adding it to a house."
       }
     },
     "constants": {

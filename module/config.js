@@ -17,6 +17,7 @@ import LOGGER from "../utils/logger.js";
 import itemConstructor from "../items/itemConstructor.js";
 import {CSAbilityItemSheet} from "../items/sheets/csAbilityItemSheet.js";
 import {CSEventItemSheet} from "../items/sheets/csEventItemSheet.js";
+import {CSHoldingItemSheet} from "../items/sheets/csHoldingItemSheet.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -49,11 +50,13 @@ Hooks.once("init", async function() {
 
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("chroniclesystem", CSItemSheet,
-        { label: SystemUtils.localize("CS.sheets.itemSheet"), types: ["armor", "weapon", "equipment", "benefit", "drawback", "holding"], makeDefault: true });
+        { label: SystemUtils.localize("CS.sheets.itemSheet"), types: ["armor", "weapon", "equipment", "benefit", "drawback"], makeDefault: true });
     Items.registerSheet("chroniclesystem", CSAbilityItemSheet,
         { label: SystemUtils.localize("CS.sheets.abilityItemSheet"), types: ["ability"], makeDefault: true });
     Items.registerSheet("chroniclesystem", CSEventItemSheet,
         { label: SystemUtils.localize("CS.sheets.eventItemSheet"), types: ["event"], makeDefault: true });
+    Items.registerSheet("chroniclesystem", CSHoldingItemSheet,
+        { label: SystemUtils.localize("CS.sheets.holdingItemSheet"), types: ["holding"], makeDefault: true });
 
     registerSystemSettings();
     await preloadHandlebarsTemplates();

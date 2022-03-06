@@ -1,0 +1,71 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{> "systems/chroniclesystem/templates/items/partials/header-delete.html"}}
+    <main class="sheet-body flexrow">
+        <section class="item-stats">
+            <header class="header-field">
+                <span>{{localize "CS.sheets.generalLabels.details"}}</span>
+            </header>
+            {{> (formGroup)
+                    id="data.investment"
+                    labelText="CS.sheets.holdingItem.investment"
+                    inputCssClass="small-field"
+                    value=data.data.investment
+                    dataType="Number"
+            }}
+            {{> (formGroup)
+                    id="data.buildTime"
+                    labelText="CS.sheets.holdingItem.buildTime"
+                    inputCssClass="big-field"
+                    value=data.data.buildTime
+                    dataType="String"
+            }}
+            {{log resourceChoices}}
+            <div class="form-group">
+                <label for="data.resource">{{localize "CS.sheets.holdingItem.resource"}}</label>
+                <select name="data.resource">
+                    {{selectOptions resourceChoices selected=data.data.resource localize=true}}
+                </select>
+            </div>
+        </section>
+        <section class="description">
+            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+            {{#if item.isOwned}}
+                <header class="header-field flexrow">
+                    <div class="header-title">
+                        <span>{{localize "CS.sheets.holdingItem.features"}}</span>
+                    </div>
+                    <div class="header-field-add">
+                        <a class="item-feature-create" data-type="skill"><i class="fa fa-plus"></i></a>
+                    </div>
+                </header>
+                <ol class="feature-list list resizable" data-base-size="150">
+                    {{#each data.data.features as |feature index|}}
+                        <li class="holding-feature flexrow" data-item-id="{{index}}">
+                            <!--suppress HtmlFormInputWithoutLabel -->
+                            <input
+                                    class="big-field"
+                                    type="text"
+                                    name="data.features.{{index}}.name"
+                                    value="{{feature.name}}"
+                                    placeholder="{{localize "CS.sheets.holdingItem.featureName"}}"
+                                    data-dtype="String"
+                            />
+                            <!--suppress HtmlFormInputWithoutLabel -->
+                            <input
+                                    class="small-field"
+                                    type="text"
+                                    name="data.features.{{index}}.cost"
+                                    value="{{feature.cost}}"
+                                    placeholder="{{localize "CS.sheets.holdingItem.featureCost"}}"
+                                    data-dtype="String"
+                            />
+                            <a class="item-features-control item-controls" data-id="{{index}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                        </li>
+                    {{/each}}
+                </ol>
+            {{else}}
+            <div class="ps">{{localize "CS.sheets.holdingItem.canAddFeatureAfter"}}</div>
+            {{/if}}
+        </section>
+    </main>
+</form>
