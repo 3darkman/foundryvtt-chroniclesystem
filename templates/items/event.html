@@ -1,0 +1,93 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Item Sheet Header --}} {{>
+"systems/chroniclesystem/templates/items/partials/header-delete.html"}}
+    <main class="sheet-body flexrow">
+        <section class="item-stats">
+            <header class="header-field">
+                <span>Details</span>
+            </header>
+            <div class="form-group">
+                <label for="data.playerChoice">{{localize "CS.sheets.eventItem.playerChoice"}}</label>
+                <a class="checkButton size50 {{showIfEquals true data.data.playerChoice "activated" ""}}"><i class="fa fa-check"></i></a>
+            </div>
+            {{#if data.data.playerChoice}}
+                {{> (formGroup)
+                        id="data.numberOfChoices"
+                        labelText="CS.sheets.eventItem.numberOfChoices"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=data.data.numberOfChoices
+                        dataType="Number"
+                }}
+                {{> (formGroup)
+                        id="data.bonusToChoices"
+                        labelText="CS.sheets.eventItem.bonusToChoices"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=data.data.bonusToChoices
+                        dataType="String"
+                }}
+            {{else}}
+                {{> (formGroup)
+                        id="data.formulas.defense"
+                        labelText="CS.sheets.house.resources.defense"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=data.data.formulas.defense
+                        dataType="String"
+                }}
+                {{> (formGroup)
+                        id="data.formulas.influence"
+                        labelText="CS.sheets.house.resources.influence"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=data.data.formulas.influence
+                        dataType="String"
+                }}
+                {{> (formGroup)
+                        id="data.formulas.lands"
+                        labelText="CS.sheets.house.resources.lands"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=data.data.formulas.lands
+                        dataType="String"
+                }}
+                {{> (formGroup)
+                        id="data.formulas.law"
+                        labelText="CS.sheets.house.resources.law"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=data.data.formulas.law
+                        dataType="String"
+                }}
+                {{> (formGroup)
+                        id="data.formulas.population"
+                        labelText="CS.sheets.house.resources.population"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=data.data.formulas.population
+                        dataType="String"
+                }}
+                {{> (formGroup)
+                        id="data.formulas.power"
+                        labelText="CS.sheets.house.resources.power"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=data.data.formulas.power
+                        dataType="String"
+                }}
+                {{> (formGroup)
+                        id="data.formulas.wealth"
+                        labelText="CS.sheets.house.resources.wealth"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=data.data.formulas.law
+                        dataType="String"
+                }}
+            {{/if}}
+        </section>
+        <section class="description">
+            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+        </section>
+    </main>
+</form>

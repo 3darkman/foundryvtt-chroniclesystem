@@ -9,10 +9,9 @@ CSConstants.HouseRoles = {
     SERVANT: "CS.house.character.roles.servant"
 }
 
-
-
 CSConstants.Templates = {
     Dialogs: {
         CHARACTER_ROLE_IN_HOUSE: "systems/chroniclesystem/templates/dialogs/characterRoleInHouse.html",
+        HOUSE_RESOURCE_EDITOR: "systems/chroniclesystem/templates/dialogs/houseResourceEditor.html"
     }
 }

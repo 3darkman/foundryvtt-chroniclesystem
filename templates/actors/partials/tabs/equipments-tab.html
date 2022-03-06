@@ -1,4 +1,4 @@
-<div class="tab equipments" data-group="primary" data-tab="equipments">
+ <div class="tab equipments" data-group="primary" data-tab="equipments">
     <section class="weapons">
         <header class="header-field">
             <span>Currency</span>
@@ -80,8 +80,8 @@
                         {{/each}}
                     </div>
                     <div class="item-controls">
-                        <a class="equipped {{showIfContains "2|4" weapon.data.equipped "activated"}}" data-item-id="{{_id}}" data-hand="{{showIfContains "2|4" weapon.data.equipped 0 2}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
-                        <a class="equipped off-hand {{showIfContains "3|4" weapon.data.equipped "activated"}}" data-item-id="{{_id}}" data-hand="{{showIfContains "3|4" weapon.data.equipped 0 3}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
+                        <a class="checkButton equipped {{showIfContains "2|4" weapon.data.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "2|4" weapon.data.equipped 0 2}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
+                        <a class="checkButton equipped off-hand {{showIfContains "3|4" weapon.data.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "3|4" weapon.data.equipped 0 3}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
                     </div>
                 </li>
             {{/each}}
@@ -116,7 +116,7 @@
                         {{/each}}
                     </div>
                     <div class="item-controls">
-                        <a class="equipped {{showIfEquals "1" armor.data.equipped "activated"}}" data-item-id="{{_id}}" data-hand="{{showIfEquals "1" armor.data.equipped 0 1}}" data-type="armor"><i class="fas fa-shield-alt"></i></a>
+                        <a class="checkButton equipped {{showIfEquals "1" armor.data.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfEquals "1" armor.data.equipped 0 1}}" data-type="armor"><i class="fas fa-shield-alt"></i></a>
                     </div>
                 </li>
             {{/each}}

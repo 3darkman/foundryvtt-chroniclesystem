@@ -147,7 +147,7 @@
     }
   },
   "Item": {
-    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback"],
+    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback", "event", "holding"],
     "templates": {
       "physicalItem": {
         "weight": 0
@@ -230,7 +230,7 @@
         "equipmentItem"
       ]
     },
-    "events": {
+    "event": {
       "description": "",
       "formulas": {
         "defense": "",
@@ -250,10 +250,11 @@
         "power": 0,
         "wealth": 0
       },
-      "playerChoose": false,
-      "amountOfChoices": 0
+      "playerChoice": false,
+      "numberOfChoices": 0,
+      "bonusToChoices": ""
     },
-    "holdings": {
+    "holding": {
       "description": "",
       "investment": 0,
       "buildTime": "",

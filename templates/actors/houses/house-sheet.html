@@ -5,7 +5,7 @@
             <div class="complements flexrow">
                 {{log data}}
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.head"}}: </label>
-                <input  class="size75" type="text"  name="data.head.name"  value="{{data.data.head.name}}"  data-dtype="String" readonly="readonly"/>
+                <label  class="link-field head-name size75" data-id="{{data.data.head.id}}"><a>{{data.data.head.name}}</a></label>
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.realm"}}: </label>
                 <input  class="size75"  type="text"  name="data.realm"  value="{{data.data.realm}}"  data-dtype="String"/>
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.liege"}}: </label>
@@ -25,19 +25,55 @@
                     <span>{{localize "CS.sheets.house.resources.title"}}</span>
                 </header>
                 <div class="resources-list list">
-                    <div class="resource-item item flexrow">
-                        <label class="resource-label capitalize item-edit"><a>{{localize "CS.sheets.house.resources.defense"}}</a></label>
-                        <div class="resource-value">
-                            <a>{{data.data.defense.startingValue}}</a>
-                        </div>
-                        <div class="ability-specialities">
-                            {{#each ability.data.specialties as |specialty key|}}
-                                <div class="rollable" id="specialty:{{specialty.name}}:{{../this.name}}">
-                                    <a>{{specialty.name}} {{specialty.rating}}B{{modifier specialty.modifier}}</a>&nbsp;
-                                </div>
-                            {{/each}}
-                        </div>
-                    </div>
+                    {{> (houseResourceItem)
+                            owner=owner
+                            resourceName="defense"
+                            resourceNameKeyword="CS.sheets.house.resources.defense"
+                            startingValue=data.data.defense.startingValue
+                            description=data.data.defense.description
+                    }}
+                    {{> (houseResourceItem)
+                            owner=owner
+                            resourceName="influence"
+                            resourceNameKeyword="CS.sheets.house.resources.influence"
+                            startingValue=data.data.influence.startingValue
+                            description=data.data.influence.description
+                    }}
+                    {{> (houseResourceItem)
+                            owner=owner
+                            resourceName="lands"
+                            resourceNameKeyword="CS.sheets.house.resources.lands"
+                            startingValue=data.data.lands.startingValue
+                            description=data.data.lands.description
+                    }}
+                    {{> (houseResourceItem)
+                            owner=owner
+                            resourceName="law"
+                            resourceNameKeyword="CS.sheets.house.resources.law"
+                            startingValue=data.data.law.startingValue
+                            description=data.data.law.description
+                    }}
+                    {{> (houseResourceItem)
+                            owner=owner
+                            resourceName="population"
+                            resourceNameKeyword="CS.sheets.house.resources.population"
+                            startingValue=data.data.population.startingValue
+                            description=data.data.population.description
+                    }}
+                    {{> (houseResourceItem)
+                            owner=owner
+                            resourceName="power"
+                            resourceNameKeyword="CS.sheets.house.resources.power"
+                            startingValue=data.data.power.startingValue
+                            description=data.data.power.description
+                    }}
+                    {{> (houseResourceItem)
+                            owner=owner
+                            resourceName="wealth"
+                            resourceNameKeyword="CS.sheets.house.resources.wealth"
+                            startingValue=data.data.wealth.startingValue
+                            description=data.data.wealth.description
+                    }}
                 </div>
             </section>
         </div>

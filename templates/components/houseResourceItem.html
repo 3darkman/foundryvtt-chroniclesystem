@@ -1,0 +1,13 @@
+<div class="resource-item item flexrow">
+    {{#if owner}}
+        <label class="resource-label capitalize resource-edit" data-id="{{resourceName}}" data-name="{{localize resourceNameKeyword}}"><a>{{localize resourceNameKeyword}}</a></label>
+    {{else}}
+        <label class="resource-label capitalize">{{localize resourceNameKeyword}}</label>
+    {{/if}}
+    <div class="resource-value">
+        {{startingValue}}
+    </div>
+    <div class="resource-description">
+        {{description}}
+    </div>
+</div>

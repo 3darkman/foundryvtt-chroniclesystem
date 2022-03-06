@@ -4,7 +4,7 @@ import LOGGER from "../utils/logger.js";
 
 export class CSWeaponItem extends CSItem {
     onEquippedChanged(actor, isEquipped) {
-        LOGGER.trace(`Weapon ${oldId} ${isEquipped? "equipped" : "unequipped" } by the actor ${actor.name} | csWeaponItem.js`);
+        LOGGER.trace(`Weapon ${this.data._id} ${isEquipped? "equipped" : "unequipped" } by the actor ${actor.name} | csWeaponItem.js`);
         super.onEquippedChanged(actor, isEquipped);
         //TODO: implement the onEquippedChanged from CSWeaponItem
     }
