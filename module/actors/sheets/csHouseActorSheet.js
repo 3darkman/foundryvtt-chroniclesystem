@@ -4,6 +4,11 @@ import SystemUtils from "../../utils/systemUtils.js";
 import LOGGER from "../../utils/logger.js";
 
 export class CSHouseActorSheet extends CSActorSheet {
+    itemTypesPermitted = [
+        "event",
+        "holding"
+    ]
+
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             classes: ["chroniclesystem", "sheet", "house"],
@@ -39,6 +44,7 @@ export class CSHouseActorSheet extends CSActorSheet {
     }
 
     async _openResourceEditor(ev) {
+        ev.preventDefault();
         let resourceId = ev.currentTarget.dataset.id;
         let resourceName = ev.currentTarget.dataset.name;
 
@@ -77,13 +83,19 @@ export class CSHouseActorSheet extends CSActorSheet {
     }
 
     _openActorSheet(ev) {
+        ev.preventDefault();
         const id = ev.currentTarget.dataset.id;
         const actor = game.actors.get(id);
         if (actor)
             actor.sheet.render(true);
     }
 
+    isItemPermitted(type) {
+        return this.itemTypesPermitted.includes(type);
+    }
+
     async _onDropActor(event, data) {
+        event.preventDefault();
         if ( !this.actor.isOwner ) return false;
 
         let actor = game.actors.get(data.id);

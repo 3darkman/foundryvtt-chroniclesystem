@@ -129,14 +129,6 @@ export class CSCharacterActorSheet extends CSActorSheet {
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return;
 
-    // Update Inventory Item
-    html.find('.item-edit').click(ev => {
-      const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.items.get(li.data('itemId'));
-      item.data.isOwned = true;
-      item.sheet.render(true);
-    });
-
     html.find('.item .item-name').on('click', (ev) => {
       $(ev.currentTarget).parents('.item').find('.description').slideToggle();
     });
@@ -216,11 +208,13 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   async _onClickSquare(ev) {
+    ev.preventDefault();
     let method = `set${ev.currentTarget.dataset.type}Value`;
     await this[method](ev.currentTarget.id);
   }
 
   async _onClickWoundCreate(ev) {
+    ev.preventDefault();
     const data = this.actor.getCSData();
     let wound = "";
     let wounds = Object.values(data.wounds);
@@ -260,6 +254,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   async _onClickInjuryCreate(ev) {
+    ev.preventDefault();
     const data = this.actor.getCSData();
     let injury = "";
     let injuries = Object.values(data.injuries);
@@ -303,6 +298,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   async _onEquippedStateChanged(event) {
+    event.preventDefault();
     const eventData = event.currentTarget.dataset;
     let documment = this.actor.getEmbeddedDocument('Item', eventData.itemId);
     let collection = [];
@@ -345,6 +341,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   async _onDispositionChanged(event, targets) {
+    event.preventDefault();
     if (!ChronicleSystem.dispositions.find((disposition) => disposition.rating === parseInt(event.target.dataset.id))) {
       LOGGER.warn("the informed disposition does not exist.");
       return;
@@ -375,6 +372,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   async _onDrop(event) {
+    event.preventDefault();
     let data;
     try {
       data = JSON.parse(event.dataTransfer.getData('text/plain'));
@@ -386,34 +384,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
     return super._onDrop(event);
   }
 
-  async _onDropItemCreate(itemData) {
-    let embeddedItem = [];
-    let itemsToCreate = [];
-    let data = [];
-    data = data.concat(itemData);
-    data.forEach((doc) => {
-      const item = this.actor.items.find((i) => {
-        return i.name === doc.name;
-      });
-      if (item) {
-        embeddedItem.push(this.actor.getEmbeddedDocument("Item", item.data._id));
-      } else {
-        if (this.itemTypesPermitted.includes(doc.type))
-          itemsToCreate.push(doc);
-      }
-    });
-
-    if (itemsToCreate.length > 0) {
-      this.actor.createEmbeddedDocuments("Item", itemsToCreate)
-          .then(function(result) {
-            result.forEach((item) => {
-              item.onObtained(item.actor);
-            });
-            embeddedItem.concat(result);
-          });
-    }
-
-    return embeddedItem;
+  isItemPermitted(type) {
+    return this.itemTypesPermitted.includes(type);
   }
 
 }
