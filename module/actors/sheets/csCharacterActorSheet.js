@@ -10,6 +10,14 @@ import SystemUtils from "../../utils/systemUtils.js";
 
 
 export class CSCharacterActorSheet extends CSActorSheet {
+  itemTypesPermitted = [
+      "ability",
+      "weapon",
+      "armor",
+      "equipment",
+      "benefit",
+      "drawback"
+  ]
 
   /** @override */
   static get defaultOptions() {
@@ -370,6 +378,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     let data;
     try {
       data = JSON.parse(event.dataTransfer.getData('text/plain'));
+
     }
     catch (err) {
       return;
@@ -389,7 +398,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
       if (item) {
         embeddedItem.push(this.actor.getEmbeddedDocument("Item", item.data._id));
       } else {
-        itemsToCreate.push(doc);
+        if (this.itemTypesPermitted.includes(doc.type))
+          itemsToCreate.push(doc);
       }
     });
 
