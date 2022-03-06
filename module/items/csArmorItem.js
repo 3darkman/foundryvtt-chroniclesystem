@@ -4,7 +4,7 @@ import LOGGER from "../utils/logger.js";
 
 export class CSArmorItem extends CSItem {
     onEquippedChanged(actor, isEquipped) {
-        LOGGER.trace(`Armor ${oldId} ${isEquipped? "equipped" : "unequipped" } by the actor ${actor.name} | csArmorItem.js`);
+        LOGGER.trace(`Armor ${this.data._id} ${isEquipped? "equipped" : "unequipped" } by the actor ${actor.name} | csArmorItem.js`);
         super.onEquippedChanged(actor, isEquipped);
         if (isEquipped) {
             actor.addModifier(ChronicleSystem.modifiersConstants.AGILITY, this.data._id, this.data.data.penalty);

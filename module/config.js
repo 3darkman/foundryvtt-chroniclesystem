@@ -5,7 +5,7 @@
  */
 
 // Import Modules
-import { ChronicleSystemItemSheet } from "../item-sheet.js";
+import { CSItemSheet } from "../items/sheets/csItemSheet.js";
 import { preloadHandlebarsTemplates } from "./preloadTemplates.js";
 import { registerCustomHelpers } from "./handlebarsHelpers.js";
 import actorConstructor from "../actors/actorConstructor.js";
@@ -15,6 +15,8 @@ import {CSHouseActorSheet} from "../actors/sheets/csHouseActorSheet.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
 import itemConstructor from "../items/itemConstructor.js";
+import {CSAbilityItemSheet} from "../items/sheets/csAbilityItemSheet.js";
+import {CSEventItemSheet} from "../items/sheets/csEventItemSheet.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -46,7 +48,12 @@ Hooks.once("init", async function() {
         { label: SystemUtils.localize("CS.sheets.houseSheet"), types: ["house"], makeDefault: true });
 
     Items.unregisterSheet("core", ItemSheet);
-    Items.registerSheet("chroniclesystem", ChronicleSystemItemSheet, {makeDefault: true});
+    Items.registerSheet("chroniclesystem", CSItemSheet,
+        { label: SystemUtils.localize("CS.sheets.itemSheet"), types: ["armor", "weapon", "equipment", "benefit", "drawback", "holding"], makeDefault: true });
+    Items.registerSheet("chroniclesystem", CSAbilityItemSheet,
+        { label: SystemUtils.localize("CS.sheets.abilityItemSheet"), types: ["ability"], makeDefault: true });
+    Items.registerSheet("chroniclesystem", CSEventItemSheet,
+        { label: SystemUtils.localize("CS.sheets.eventItemSheet"), types: ["event"], makeDefault: true });
 
     registerSystemSettings();
     await preloadHandlebarsTemplates();

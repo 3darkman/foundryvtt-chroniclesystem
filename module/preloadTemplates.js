@@ -14,6 +14,7 @@ export const preloadHandlebarsTemplates = async function () {
         'systems/chroniclesystem/templates/actors/partials/form-group.html',
 
         'systems/chroniclesystem/templates/components/rating-checkbox.html',
+        'systems/chroniclesystem/templates/components/houseResourceItem.html'
     ];
     return loadTemplates(templatePaths);
 };

@@ -14,6 +14,9 @@
   padding: 5px 8px 5px 8px;
   flex: 0 0 auto;
 }
+.chroniclesystem.sheet .sheet-header .link-field {
+  margin: 5px;
+}
 .chroniclesystem.sheet .sheet-header h1.charname {
   height: 50px;
   padding: 0;
@@ -24,6 +27,14 @@
   width: 100%;
   height: 100%;
   margin: 0;
+}
+.chroniclesystem.sheet a.checkButton {
+  color: #AAAAAA;
+  padding: 2px;
+  text-align: right;
+}
+.chroniclesystem.sheet a.checkButton.activated {
+  color: #4178B7;
 }
 .chroniclesystem.sheet .profile-img {
   max-width: 100%;

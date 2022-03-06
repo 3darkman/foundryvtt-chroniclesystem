@@ -29,6 +29,60 @@ export class CSHouseActorSheet extends CSActorSheet {
         return data;
     }
 
+    activateListeners(html) {
+        super.activateListeners(html);
+
+        if (!this.options.editable) return;
+
+        html.find('.head-name').click(this._openActorSheet.bind(this));
+        html.find('.resource-edit').click(this._openResourceEditor.bind(this));
+    }
+
+    async _openResourceEditor(ev) {
+        let resourceId = ev.currentTarget.dataset.id;
+        let resourceName = ev.currentTarget.dataset.name;
+
+        if (!resourceId || !resourceName)
+            return;
+
+        const template = CSConstants.Templates.Dialogs.HOUSE_RESOURCE_EDITOR;
+        const html = await renderTemplate(template, {
+            startingValue: this.actor.data.data[resourceId].startingValue,
+            description: this.actor.data.data[resourceId].description,
+            resourceId: resourceId});
+        return new Promise(resolve => {
+            const data = {
+                title: SystemUtils.format("CS.dialogs.houseResourceEditor.title", {resourceName: resourceName}),
+                content: html,
+                buttons: {
+                    normal: {
+                        label: SystemUtils.localize("CS.dialogs.actions.save"),
+                        callback: html => resolve(this._processResourceEdition(html[0].querySelector("form")))
+                    },
+                    cancel: {
+                        label: SystemUtils.localize("CS.dialogs.actions.cancel"),
+                        callback: html => resolve({cancelled: true})
+                    }
+                },
+                default: "normal",
+                close: () => resolve({cancelled: true})
+            };
+            new Dialog(data, null).render(true);
+        })
+    }
+
+    _processResourceEdition(formData) {
+        this.actor.changeResource(formData.resourceId.value, formData.startingValue.value, formData.description.value);
+        return true;
+    }
+
+    _openActorSheet(ev) {
+        const id = ev.currentTarget.dataset.id;
+        const actor = game.actors.get(id);
+        if (actor)
+            actor.sheet.render(true);
+    }
+
     async _onDropActor(event, data) {
         if ( !this.actor.isOwner ) return false;
 

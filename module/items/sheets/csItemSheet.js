@@ -2,7 +2,7 @@
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
  */
-export class ChronicleSystemItemSheet extends ItemSheet {
+export class CSItemSheet extends ItemSheet {
     /** @override */
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
@@ -26,26 +26,8 @@ export class ChronicleSystemItemSheet extends ItemSheet {
             }
         });
 
-        html.find('.specialty-create').on("click", this._onClickSpecialtyCreate.bind(this));
-        html.find(".specialties-list").on("click", ".specialty-control", this._onclickSpecialtyControl.bind(this));
-
         html.find(".item-qualities-control").on("click", this._onClickItemQualityControl.bind(this));
         html.find('.item-quality-create').on("click", this._onClickItemQualityCreate.bind(this));
-    }
-
-    async _onClickSpecialtyCreate(ev) {
-        const actor = this.item.actor;
-        const item = this.item;
-        if (actor) {
-            let specialty = {
-                name: "",
-                rating: 0,
-                modifier: 0
-            };
-            let newSpec = Object.values(item.data.data.specialties);
-            newSpec.push(specialty);
-            item.update({"data.specialties" : newSpec});
-        }
     }
 
     async _onClickItemQualityCreate(ev) {
@@ -71,21 +53,6 @@ export class ChronicleSystemItemSheet extends ItemSheet {
             let qualities = Object.values(item.data.data.qualities);
             qualities.splice(index,1);
             item.update({"data.qualities" : qualities});
-        }
-    }
-
-    async _onclickSpecialtyControl(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-        const index = parseInt(a.dataset.id);
-        const action = a.dataset.action;
-
-        // Remove existing specialty
-        if ( action === "delete" ) {
-            const item = this.item;
-            let newSpec = Object.values(item.data.data.specialties);
-            newSpec.splice(index,1);
-            item.update({"data.specialties" : newSpec});
         }
     }
 

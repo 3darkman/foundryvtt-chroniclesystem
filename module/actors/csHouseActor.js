@@ -93,6 +93,15 @@ export class CSHouseActor extends CSActor {
             LOGGER.debug(`actor ${actorId} removed from ${role}`);
     }
 
+    changeResource(resourceId, startingValue, description) {
+        let newResourceValue = {
+            startingValue: startingValue,
+            description: description
+        }
+        let key = `data.${resourceId}`;
+        this.update({[key]: newResourceValue});
+    }
+
     addCharacterToHouse(actorId, role) {
         LOGGER.trace("Add Character to House | CSHouseActor | csHouseActor.js");
         let result = this.characterHasRole(actorId, role);

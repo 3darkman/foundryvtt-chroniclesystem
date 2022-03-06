@@ -4,6 +4,9 @@
       "characterRole": {
         "title": "Select the role of {actorName} in the house."
       },
+      "houseResourceEditor": {
+        "title": "{resourceName} Editor"
+      },
       "actions": {
         "save": "Save",
         "cancel": "Cancel"
@@ -24,6 +27,13 @@
       }
     },
     "sheets": {
+      "characterSheet": "Character Sheet",
+      "houseSheet": "House Sheet",
+      "itemSheet": "Item Sheet",
+      "abilityItemSheet": "Ability Sheet",
+      "generalLabels": {
+        "description": "Description"
+      },
       "house": {
         "character": {
           "roles": {
@@ -50,7 +60,8 @@
           "realm": "Realm",
           "liege": "Liege",
           "heirsAndFamily": "Heirs and Family",
-          "retainersAndServants": "Retainers and Servants"
+          "retainersAndServants": "Retainers and Servants",
+          "startingValue": "Starting Value"
         }
       },
       "character": {
@@ -63,6 +74,11 @@
           "unfriendly": "unfriendly",
           "malicious": "malicious"
         }
+      },
+      "eventItem": {
+        "playerChoice": "Is a player choice?",
+        "numberOfChoices": "Number of Choices",
+        "bonusToChoices": "Bonus to Choices"
       }
     },
     "constants": {

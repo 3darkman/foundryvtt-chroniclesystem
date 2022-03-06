@@ -69,15 +69,15 @@ export const registerCustomHelpers = function () {
         return "systems/chroniclesystem/templates/components/rating-checkbox.html";
     });
 
+    Handlebars.registerHelper('houseResourceItem', function(options) {
+        return "systems/chroniclesystem/templates/components/houseResourceItem.html";
+    });
+
     Handlebars.registerHelper('for', function (from, to, incr, block) {
         let accum = '';
         for (let i = from; i <= to; i += incr)
             accum += block.fn({index: i});
         return accum;
-    });
-
-    Handlebars.registerHelper('checked', function (referenceValue, value) {
-        return new Handlebars.SafeString(value <= referenceValue ? "checked='checked'" : "");
     });
 
     Handlebars.registerHelper('showIfLessEquals', function(arg1, arg2, result, result2 = "", options) {

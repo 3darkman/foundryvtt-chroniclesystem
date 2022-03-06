@@ -24,6 +24,9 @@
           }
         }
       }
+      .link-field {
+        margin: @medium-margin;
+      }
 
       h1.charname {
         height: 50px;
@@ -36,6 +39,15 @@
           height: 100%;
           margin: 0;
         }
+      }
+    }
+
+    a.checkButton {
+      color: @disable-color;
+      padding: 2px;
+      text-align: right;
+      &.activated {
+        color: @secondary-color;
       }
     }
 
