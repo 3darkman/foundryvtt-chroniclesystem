@@ -108,31 +108,38 @@
       "liege": "",
       "defense": {
         "startingValue": 0,
-        "description": ""
+        "description": "",
+        "total": 0
       },
       "influence": {
         "startingValue": 0,
-        "description": ""
+        "description": "",
+        "total": 0
       },
       "lands": {
         "startingValue": 0,
-        "description": ""
+        "description": "",
+        "total": 0
       },
       "law": {
         "startingValue": 0,
-        "description": ""
+        "description": "",
+        "total": 0
       },
       "population": {
         "startingValue": 0,
-        "description": ""
+        "description": "",
+        "total": 0
       },
       "power": {
         "startingValue": 0,
-        "description": ""
+        "description": "",
+        "total": 0
       },
       "wealth": {
         "startingValue": 0,
-        "description": ""
+        "description": "",
+        "total": 0
       },
       "historicalEvents": [],
       "motto": "",

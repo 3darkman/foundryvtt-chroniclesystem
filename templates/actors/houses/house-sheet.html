@@ -3,7 +3,6 @@
         <div class="header-fields">
             <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
             <div class="complements flexrow">
-                {{log data}}
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.head"}}: </label>
                 <label  class="link-field head-name size75" data-id="{{data.data.head.id}}"><a>{{data.data.head.name}}</a></label>
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.realm"}}: </label>
@@ -23,55 +22,58 @@
             <section class="flex2">
                 <header class="header-field">
                     <span>{{localize "CS.sheets.house.resources.title"}}</span>
+                    {{#if owner}}
+                        <span class="item-controls regenerate-resources"><a><i class="fas fa-sync"></i></a></span>
+                    {{/if}}
                 </header>
                 <div class="resources-list list">
                     {{> (houseResourceItem)
                             owner=owner
                             resourceName="defense"
                             resourceNameKeyword="CS.sheets.house.resources.defense"
-                            startingValue=data.data.defense.startingValue
+                            startingValue=data.data.defense.total
                             description=data.data.defense.description
                     }}
                     {{> (houseResourceItem)
                             owner=owner
                             resourceName="influence"
                             resourceNameKeyword="CS.sheets.house.resources.influence"
-                            startingValue=data.data.influence.startingValue
+                            startingValue=data.data.influence.total
                             description=data.data.influence.description
                     }}
                     {{> (houseResourceItem)
                             owner=owner
                             resourceName="lands"
                             resourceNameKeyword="CS.sheets.house.resources.lands"
-                            startingValue=data.data.lands.startingValue
+                            startingValue=data.data.lands.total
                             description=data.data.lands.description
                     }}
                     {{> (houseResourceItem)
                             owner=owner
                             resourceName="law"
                             resourceNameKeyword="CS.sheets.house.resources.law"
-                            startingValue=data.data.law.startingValue
+                            startingValue=data.data.law.total
                             description=data.data.law.description
                     }}
                     {{> (houseResourceItem)
                             owner=owner
                             resourceName="population"
                             resourceNameKeyword="CS.sheets.house.resources.population"
-                            startingValue=data.data.population.startingValue
+                            startingValue=data.data.population.total
                             description=data.data.population.description
                     }}
                     {{> (houseResourceItem)
                             owner=owner
                             resourceName="power"
                             resourceNameKeyword="CS.sheets.house.resources.power"
-                            startingValue=data.data.power.startingValue
+                            startingValue=data.data.power.total
                             description=data.data.power.description
                     }}
                     {{> (houseResourceItem)
                             owner=owner
                             resourceName="wealth"
                             resourceNameKeyword="CS.sheets.house.resources.wealth"
-                            startingValue=data.data.wealth.startingValue
+                            startingValue=data.data.wealth.total
                             description=data.data.wealth.description
                     }}
                 </div>

@@ -28,6 +28,53 @@ export class CSHouseActor extends CSActor {
         }
     }
 
+    async regenerateAllStartingResources() {
+        let data = this.getCSData();
+        await this._regenerateResource(data,"defense");
+        await this._regenerateResource(data,"influence");
+        await this._regenerateResource(data,"lands");
+        await this._regenerateResource(data,"law");
+        await this._regenerateResource(data,"population");
+        await this._regenerateResource(data,"power");
+        await this._regenerateResource(data,"wealth");
+
+        this._updateAllResourcesTotal(data);
+    }
+
+    async _regenerateResource(data, resource) {
+        let roll = new Roll("8d6-2d6");
+        await roll.evaluate({async: true});
+        data[resource].startingValue = roll.total;
+    }
+
+    _onCreateEmbeddedDocuments(embeddedName, documents, result, options, userId) {
+        super._onCreateEmbeddedDocuments(embeddedName, documents, result, options, userId);
+
+        let isToUpdate = documents.find((doc)=> doc.type === "event");
+
+        if (isToUpdate)
+            this._updateAllResourcesTotal();
+    }
+
+    _onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId) {
+        super._onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId);
+
+        let isToUpdate = documents.find((doc)=> doc.type === "event");
+
+        if (isToUpdate)
+            this._updateAllResourcesTotal();
+    }
+
+    _onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId) {
+        super._onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId);
+
+        let isToUpdate = documents.find((doc)=> doc.type === "event");
+
+        if (isToUpdate)
+            this._updateAllResourcesTotal();
+    }
+
+
     characterHasRole(actorId, role) {
         LOGGER.trace(`Check if the Character has the Role ${role} | CSHouseActor | csHouseActor.js`);
         let result = {
@@ -94,12 +141,12 @@ export class CSHouseActor extends CSActor {
     }
 
     changeResource(resourceId, startingValue, description) {
-        let newResourceValue = {
-            startingValue: startingValue,
-            description: description
-        }
+        let data = this.getCSData();
+        data[resourceId].startingValue = parseInt(startingValue);
+        data[resourceId].description = description;
+        data[resourceId].total = this._updateResourceTotal(data, resourceId);
         let key = `data.${resourceId}`;
-        this.update({[key]: newResourceValue});
+        this.update({[key]: data[resourceId]});
     }
 
     addCharacterToHouse(actorId, role) {
@@ -159,4 +206,45 @@ export class CSHouseActor extends CSActor {
         }
         return name;
     }
+
+    _updateResourceTotal(data, resource) {
+        data[resource].total = data[resource].startingValue + this._getAllEventModifiers(resource);
+        LOGGER.debug(`the resource ${resource} total is: ${data[resource].total}`);
+        return data[resource].total;
+    }
+
+    _updateAllResourcesTotal(data = undefined) {
+        if (!data)
+            data = this.getCSData();
+
+        this._updateResourceTotal(data, "defense");
+        this._updateResourceTotal(data, "influence");
+        this._updateResourceTotal(data, "lands");
+        this._updateResourceTotal(data, "law");
+        this._updateResourceTotal(data, "population");
+        this._updateResourceTotal(data, "power");
+        this._updateResourceTotal(data, "wealth");
+
+        this.update({
+            "data.defense": data.defense,
+            "data.influence": data.influence,
+            "data.lands": data.lands,
+            "data.law": data.law,
+            "data.population": data.population,
+            "data.power": data.power,
+            "data.wealth": data.wealth
+        });
+    }
+
+    _getAllEventModifiers(resource) {
+        let items = this.getEmbeddedCollection("Item").contents;
+        let events = items.filter((item) => item.type === "event");
+        let modifier = 0;
+        events.forEach((event) => {
+            modifier += event.data.data.modifiers[resource];
+        });
+        return modifier;
+    }
+
+
 }
