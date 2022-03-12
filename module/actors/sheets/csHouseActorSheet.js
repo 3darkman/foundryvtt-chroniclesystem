@@ -41,6 +41,12 @@ export class CSHouseActorSheet extends CSActorSheet {
 
         html.find('.head-name').click(this._openActorSheet.bind(this));
         html.find('.resource-edit').click(this._openResourceEditor.bind(this));
+        html.find('.regenerate-resources').click(this._regenerateResources.bind(this));
+    }
+
+    async _regenerateResources(event) {
+        event.preventDefault();
+        await this.actor.regenerateAllStartingResources();
     }
 
     async _openResourceEditor(ev) {
@@ -102,6 +108,88 @@ export class CSHouseActorSheet extends CSActorSheet {
         if (actor && actor.type === "character") {
             await this.showCharacterRoleDialog(actor);
         }
+    }
+
+    async _onDropItemCreate(itemData) {
+        let embeddedItem = [];
+        let itemsToCreate = [];
+        let data = [];
+
+        let eventsCanGenerateModifiers = [];
+
+        data = data.concat(itemData);
+        for (let i = 0; i < data.length; i++){
+            const doc = data[i];
+            if (this.isItemPermitted(doc.type)) {
+                if (doc.type === "event") {
+                    await this.showAddingEventDialog(doc)
+                        .then((result) => {
+                            if (!result.cancelled) {
+                                let generateData = this._processAddingEvent(result);
+                                if (generateData.canGenerate) {
+                                    eventsCanGenerateModifiers.push({doc: doc.name, choices: generateData.choices});
+                                }
+                                itemsToCreate.push(doc);
+                            }
+                        });
+                } else {
+                    itemsToCreate.push(doc);
+                }
+            }
+        }
+
+        if (itemsToCreate.length > 0) {
+            this.actor.createEmbeddedDocuments("Item", itemsToCreate)
+                .then(function(result) {
+                    result.forEach((item) => {
+                        let event = eventsCanGenerateModifiers.find(ev => ev.doc === item.name);
+                        if (event)
+                            item.generateModifiers(event.choices);
+                        item.onObtained(item.actor);
+                    });
+                    embeddedItem.concat(result);
+                });
+        }
+
+        return embeddedItem;
+    }
+
+
+    async showAddingEventDialog(event) {
+        LOGGER.trace("show adding event dialog | CSHouseActorSheet |" +
+            " csHouseActorSheet.js");
+        const template = CSConstants.Templates.Dialogs.ADDING_HOUSE_EVENT;
+        const html = await renderTemplate(template, {data: event, choices: CSConstants.HouseResources, id: event.id});
+        return new Promise(resolve => {
+            const data = {
+                title: SystemUtils.localize("CS.dialogs.addingHouseEvent.title"),
+                content: html,
+                buttons: {
+                    normal: {
+                        label: SystemUtils.localize("CS.dialogs.actions.save"),
+                        callback: html => resolve({data: html[0].querySelector("form"), event: event})
+                    },
+                    cancel: {
+                        label: SystemUtils.localize("CS.dialogs.actions.cancel"),
+                        callback: html => resolve({cancelled: true})
+                    }
+                },
+                default: "normal",
+                close: () => resolve({cancelled: true})
+            };
+            new Dialog(data, null).render(true);
+        })
+    }
+
+    _processAddingEvent(formData) {
+        if (!formData.data.generateModifiers.checked)
+            return { canGenerate: false };
+
+        let choices = [];
+        for (let i = 1; i <= formData.event.data.numberOfChoices; i++) {
+            choices.push(formData.data[`resource_${i}`].value);
+        }
+        return {canGenerate: true, choices: choices};
     }
 
     async showCharacterRoleDialog(actor) {

@@ -1,6 +1,9 @@
 <form>
-    <input type="hidden" name="characterId" value="{{id}}"/>
-    <select name="characterRole">
-        {{selectOptions choices selected=value localize=true}}
-    </select>
+    <div class="form-group">
+        <input type="hidden" name="characterId" value="{{id}}"/>
+        <label for="characterRole">{{localize "CS.dialogs.characterRole.label"}}</label>
+        <select name="characterRole">
+            {{selectOptions choices selected=value localize=true}}
+        </select>
+    </div>
 </form>

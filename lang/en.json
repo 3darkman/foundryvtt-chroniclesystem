@@ -2,10 +2,19 @@
   "CS": {
     "dialogs": {
       "characterRole": {
-        "title": "Select the role of {actorName} in the house."
+        "title": "Select the role of {actorName} in the house.",
+        "label": "Role: "
       },
       "houseResourceEditor": {
         "title": "{resourceName} Editor"
+      },
+      "addingHouseEvent": {
+        "title": "Should the event generate the modifiers automatically?",
+        "labels": {
+          "generateModifiers": "Generate the modifiers automatically?",
+          "resourcesChoices": "Choose the resources that will receive the modifiers",
+          "resourceNumber": "Resource #{number}:"
+        }
       },
       "actions": {
         "save": "Save",
