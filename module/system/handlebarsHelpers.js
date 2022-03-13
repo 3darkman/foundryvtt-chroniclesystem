@@ -70,7 +70,11 @@ export const registerCustomHelpers = function () {
     });
 
     Handlebars.registerHelper('houseResourceItem', function(options) {
-        return "systems/chroniclesystem/templates/components/houseResourceItem.html";
+        return "systems/chroniclesystem/templates/components/house-resource-item.html";
+    });
+
+    Handlebars.registerHelper('memberListItem', function(options) {
+        return "systems/chroniclesystem/templates/components/member-list-item.html";
     });
 
     Handlebars.registerHelper('for', function (from, to, incr, block) {

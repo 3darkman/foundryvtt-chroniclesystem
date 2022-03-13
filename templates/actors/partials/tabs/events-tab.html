@@ -5,39 +5,38 @@
         </header>
         <ol class="events-list list">
             <li class="list-header flexrow">
-                <p class="event-name">{{localize "CS.sheets.house.events.name"}}</p>
+                <div class="event-name">{{localize "CS.sheets.house.events.name"}}</div>
                 <div class="event-label center size200">
                     <label>{{localize "CS.sheets.house.events.modifiers"}}</label>
                     <div class="flexrow modifiers center">
-                        <p>{{localize "CS.sheets.house.resources.defense"}}</p>
-                        <p>{{localize "CS.sheets.house.resources.influence"}}</p>
-                        <p>{{localize "CS.sheets.house.resources.lands"}}</p>
-                        <p>{{localize "CS.sheets.house.resources.law"}}</p>
-                        <p>{{localize "CS.sheets.house.resources.population"}}</p>
-                        <p>{{localize "CS.sheets.house.resources.power"}}</p>
-                        <p>{{localize "CS.sheets.house.resources.wealth"}}</p>
+                        <div>{{localize "CS.sheets.house.resources.defense"}}</div>
+                        <div>{{localize "CS.sheets.house.resources.influence"}}</div>
+                        <div>{{localize "CS.sheets.house.resources.lands"}}</div>
+                        <div>{{localize "CS.sheets.house.resources.law"}}</div>
+                        <div>{{localize "CS.sheets.house.resources.population"}}</div>
+                        <div>{{localize "CS.sheets.house.resources.power"}}</div>
+                        <div>{{localize "CS.sheets.house.resources.wealth"}}</div>
                     </div>
                 </div>
                 <div class="item-controls"></div>
             </li>
             {{#each data.data.historicalEvents as |event index| }}
                 <li  class="item event" data-item-id="{{_id}}">
-                    {{log event}}
                     <div class="flexrow">
                         {{#if ../owner}}
-                            <p class="event-name item-edit field"><a>{{name}}</a></p>
+                            <div class="event-name item-edit field"><a>{{name}}</a></div>
                         {{else}}
-                            <p class="event-name field">{{name}}</p>
+                            <div class="event-name field">{{name}}</div>
                         {{/if}}
                         <div class="size200 center">
                             <div class="modifiers flexrow center">
-                                <p>{{data.modifiers.defense}}</p>
-                                <p>{{data.modifiers.influence}}</p>
-                                <p>{{data.modifiers.lands}}</p>
-                                <p>{{data.modifiers.law}}</p>
-                                <p>{{data.modifiers.population}}</p>
-                                <p>{{data.modifiers.power}}</p>
-                                <p>{{data.modifiers.wealth}}</p>
+                                <div>{{data.modifiers.defense}}</div>
+                                <div>{{data.modifiers.influence}}</div>
+                                <div>{{data.modifiers.lands}}</div>
+                                <div>{{data.modifiers.law}}</div>
+                                <div>{{data.modifiers.population}}</div>
+                                <div>{{data.modifiers.power}}</div>
+                                <div>{{data.modifiers.wealth}}</div>
                             </div>
                         </div>
                         <div class="item-controls"><a><i class="far fa-caret-square-down"></i></a></div>

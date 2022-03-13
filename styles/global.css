@@ -193,10 +193,6 @@
   margin: 2px 0 2px 0;
 }
 
-.chroniclesystem.sheet .item .description {
-  display: none;
-}
-
 .chroniclesystem.sheet .item.quality {
   margin: 5px;
 }
@@ -223,7 +219,7 @@
   text-align: right;
 }
 
-.chroniclesystem.sheet .item .description {
+.chroniclesystem.sheet.item .description {
   background-color: white;
   padding: 5px;
 }

@@ -42,7 +42,8 @@
       "abilityItemSheet": "Ability Sheet",
       "generalLabels": {
         "description": "Description",
-        "details": "Details"
+        "details": "Details",
+        "name": "Name"
       },
       "house": {
         "character": {

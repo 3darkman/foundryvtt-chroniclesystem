@@ -54,9 +54,23 @@ export class CSHouseActorSheet extends CSActorSheet {
             $(ev.currentTarget).parents('.item').find('.description').slideToggle();
         });
 
-        html.find('.head-name').click(this._openActorSheet.bind(this));
+        html.find(".family-list").on("click", ".item-control", this._onclickFamilyControl.bind(this));
+        html.find('.member-name').click(this._openActorSheet.bind(this));
         html.find('.resource-edit').click(this._openResourceEditor.bind(this));
         html.find('.regenerate-resources').click(this._regenerateResources.bind(this));
+
+    }
+
+    async _onclickFamilyControl(event) {
+        event.preventDefault();
+        const a = event.currentTarget;
+        const actorId = a.dataset.id;
+        const action = a.dataset.action;
+        const role = a.dataset.role;
+
+        if ( action === "delete" ) {
+            this.actor.removeCharacterFromHouse(actorId, role);
+        }
     }
 
     async _regenerateResources(event) {

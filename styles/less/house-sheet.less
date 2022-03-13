@@ -4,7 +4,21 @@
 .chroniclesystem {
   &.sheet {
     &.house {
-      .events-list {
+      .members {
+        & > * {
+          margin-left: @big-margin;
+          &:first-child {
+            margin-left: 0;
+          }
+        }
+        .family-list, & .servants-list {
+          .age {
+            flex: 0 0 30px;
+          }
+        }
+      }
+
+      .list {
         .list-header {
           .event-name {
             padding-top: 12px;
@@ -18,9 +32,14 @@
           flex: 0 0 67px;
           padding: 0 @small-margin;
         }
+        .item {
+          margin: @small-margin;
+          padding: @medium-margin;
+          &:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.2);
+          }
+        }
         .event {
-          margin: 0 @small-margin;
-          padding: 0 @small-margin;
           .description {
             display:none;
           }

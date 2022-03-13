@@ -165,8 +165,11 @@ export class CSHouseActor extends CSActor {
             this.removeCharacterFromHouse(actorId);
         }
         switch (role) {
-            case "STEWARD":
             case "HEAD":
+                if (!description) {
+                    description = SystemUtils.localize("CS.sheets.house.labels.head");
+                }
+            case "STEWARD":
                 let key = `data.members.${[this.roleMap[role]]}`;
                 this.update({[key]: {id: actorId, description: description}});
                 break;
@@ -193,24 +196,28 @@ export class CSHouseActor extends CSActor {
         let membersData = this.getCSData().members[role];
         let members = [];
         if (Array.isArray(membersData)) {
-            membersData.forEach((id, description) => {
-                members.push({"name": this._getCharacterNameById(id), "id": id, "description": description});
+            membersData.forEach((member) => {
+                let actor = this._getCharacterDataById(member.id);
+                members.push({"name": actor.name, "age": actor.age, "id": member.id, "description": member.description});
             })
         } else {
-            members = {"name": this._getCharacterNameById(membersData.id), "id": membersData.id, "description": membersData.description};
+            let actor = this._getCharacterDataById(membersData.id);
+            members = {"name": actor.name, "age": actor.age, "id": membersData.id, "description": membersData.description};
         }
         return members;
     }
 
-    _getCharacterNameById(id) {
+    _getCharacterDataById(id) {
         if (!id)
             return SystemUtils.localize("CS.messages.nobodyHasBeenChosen");
         let actor = game.actors.get(id);
         let name = SystemUtils.localize('CS.messages.actorDoesntExists');
+        let age = 0;
         if (actor) {
             name = actor.name;
+            age = actor.getCSData().age;
         }
-        return name;
+        return {"name": name, "age": age};
     }
 
     _updateResourceTotal(data, resource) {

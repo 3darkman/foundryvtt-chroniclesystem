@@ -22,7 +22,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   /** @override */
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
-      classes: ["chroniclesystem", "worldbuilding", "sheet", "actor"],
+      classes: ["chroniclesystem", "character", "sheet", "actor"],
       template: "systems/chroniclesystem/templates/actors/characters/character-sheet.html",
       width: 700,
       height: 900,

@@ -1,11 +1,11 @@
 <form class="{{cssClass}}" autocomplete="off">
-    {{log data}}
+    {{log actor}}
     <header class="sheet-header">
         <div class="header-fields">
             <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
             <div class="complements flexrow">
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.head"}}: </label>
-                <label  class="link-field head-name size75" data-id="{{data.data.head.id}}"><a>{{data.data.head.name}}</a></label>
+                <label  class="link-field member-name size75" data-id="{{data.data.head.id}}"><a>{{data.data.head.name}}</a></label>
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.realm"}}: </label>
                 <input  class="size75"  type="text"  name="data.realm"  value="{{data.data.realm}}"  data-dtype="String"/>
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.liege"}}: </label>

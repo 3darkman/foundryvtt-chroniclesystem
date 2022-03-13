@@ -1,26 +1,42 @@
-.chroniclesystem.sheet.house .events-list .list-header .event-name {
+.chroniclesystem.sheet.house .members > * {
+  margin-left: 8px;
+}
+.chroniclesystem.sheet.house .members > *:first-child {
+  margin-left: 0;
+}
+.chroniclesystem.sheet.house .members .family-list .age,
+.chroniclesystem.sheet.house .members .servants-list .age {
+  flex: 0 0 30px;
+}
+.chroniclesystem.sheet.house .list .list-header .event-name {
   padding-top: 12px;
   padding-left: 3px;
 }
-.chroniclesystem.sheet.house .events-list .list-header .item-controls {
+.chroniclesystem.sheet.house .list .list-header .item-controls {
   flex: 0 0 12.25px;
 }
-.chroniclesystem.sheet.house .events-list .modifiers p {
+.chroniclesystem.sheet.house .list .modifiers p {
   flex: 0 0 67px;
   padding: 0 3px;
 }
-.chroniclesystem.sheet.house .events-list .event {
-  margin: 0 3px;
-  padding: 0 3px;
+.chroniclesystem.sheet.house .list .item {
+  margin: 3px;
+  padding: 5px;
 }
-.chroniclesystem.sheet.house .events-list .event .description {
+.chroniclesystem.sheet.house .list .item:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.chroniclesystem.sheet.house .list .event .description {
   display: none;
 }
-.chroniclesystem.sheet.house .events-list .event .event-name {
+.chroniclesystem.sheet.house .list .event .event-name {
   padding-left: 3px;
 }
-.chroniclesystem.sheet.house .events-list .event .modifiers {
+.chroniclesystem.sheet.house .list .event .modifiers {
   margin: 0 4px;
+}
+.chroniclesystem.sheet.character .qualities-list .item .description {
+  display: none;
 }
 .chroniclesystem .capitalize {
   text-transform: capitalize;

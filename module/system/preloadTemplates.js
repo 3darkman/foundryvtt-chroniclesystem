@@ -18,7 +18,8 @@ export const preloadHandlebarsTemplates = async function () {
         'systems/chroniclesystem/templates/actors/partials/tabs/members-tab.html',
 
         'systems/chroniclesystem/templates/components/rating-checkbox.html',
-        'systems/chroniclesystem/templates/components/houseResourceItem.html'
+        'systems/chroniclesystem/templates/components/house-resource-item.html',
+        'systems/chroniclesystem/templates/components/member-list-item.html'
     ];
     return loadTemplates(templatePaths);
 };
