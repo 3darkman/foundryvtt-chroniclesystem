@@ -44,15 +44,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     const data = super.getData();
     data.dtypes = ["String", "Number", "Boolean"];
 
-    data.itemsByType = {};
-    for (const item of data.items) {
-      let list = data.itemsByType[item.type];
-      if (!list) {
-        list = [];
-        data.itemsByType[item.type] = list;
-      }
-      list.push(item);
-    }
+    this.splitItemsByType(data);
 
     let character = data.data.data;
     this.isOwner = this.actor.isOwner;
@@ -364,13 +356,6 @@ export class CSCharacterActorSheet extends CSActorSheet {
     const bodyHeight = position.height - 192;
     sheetBody.css("height", bodyHeight);
     return position;
-  }
-
-  _checkNull(items) {
-    if (items && items.length) {
-      return items;
-    }
-    return [];
   }
 
   async _onDrop(event) {

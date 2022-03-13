@@ -22,6 +22,25 @@ export class CSActorSheet extends ActorSheet {
         return true;
     }
 
+    splitItemsByType(data) {
+        data.itemsByType = {};
+        for (const item of data.items) {
+            let list = data.itemsByType[item.type];
+            if (!list) {
+                list = [];
+                data.itemsByType[item.type] = list;
+            }
+            list.push(item);
+        }
+    }
+
+    _checkNull(items) {
+        if (items && items.length) {
+            return items;
+        }
+        return [];
+    }
+
     async _onDropItemCreate(itemData) {
         let embeddedItem = [];
         let itemsToCreate = [];

@@ -13,8 +13,15 @@ export class CSHouseActorSheet extends CSActorSheet {
         return mergeObject(super.defaultOptions, {
             classes: ["chroniclesystem", "sheet", "house"],
             template: "systems/chroniclesystem/templates/actors/houses/house-sheet.html",
-            width: 700,
+            width: 800,
             height: 600,
+            tabs: [
+                {
+                    navSelector: ".tabs",
+                    contentSelector: ".sheet-body",
+                    initial: "resources"
+                }
+            ],
             dragDrop: [{dragSelector: ".item-list .item", dropSelector: null}]
         });
     }
@@ -22,7 +29,11 @@ export class CSHouseActorSheet extends CSActorSheet {
     getData(options) {
         let data =  super.getData(options);
 
+        this.splitItemsByType(data);
+
         let house = data.data.data;
+
+        house.historicalEvents = this._checkNull(data.itemsByType['event']);
 
         house.head = data.actor.getCharactersFromRole(data.actor.roleMap.HEAD);
         house.steward = data.actor.getCharactersFromRole(data.actor.roleMap.STEWARD);
@@ -38,6 +49,10 @@ export class CSHouseActorSheet extends CSActorSheet {
         super.activateListeners(html);
 
         if (!this.options.editable) return;
+
+        html.find('.item .item-controls').on('click', (ev) => {
+            $(ev.currentTarget).parents('.item').find('.description').slideToggle();
+        });
 
         html.find('.head-name').click(this._openActorSheet.bind(this));
         html.find('.resource-edit').click(this._openResourceEditor.bind(this));
@@ -219,7 +234,7 @@ export class CSHouseActorSheet extends CSActorSheet {
     }
 
     _processCharacterRole(formData) {
-        this.actor.addCharacterToHouse(formData.characterId.value, formData.characterRole.value);
+        this.actor.addCharacterToHouse(formData.characterId.value, formData.characterRole.value, formData.description.value);
         return true;
     }
 }

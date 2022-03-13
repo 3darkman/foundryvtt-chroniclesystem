@@ -1,5 +1,33 @@
+.chroniclesystem.sheet.house .events-list .list-header .event-name {
+  padding-top: 12px;
+  padding-left: 3px;
+}
+.chroniclesystem.sheet.house .events-list .list-header .item-controls {
+  flex: 0 0 12.25px;
+}
+.chroniclesystem.sheet.house .events-list .modifiers p {
+  flex: 0 0 67px;
+  padding: 0 3px;
+}
+.chroniclesystem.sheet.house .events-list .event {
+  margin: 0 3px;
+  padding: 0 3px;
+}
+.chroniclesystem.sheet.house .events-list .event .description {
+  display: none;
+}
+.chroniclesystem.sheet.house .events-list .event .event-name {
+  padding-left: 3px;
+}
+.chroniclesystem.sheet.house .events-list .event .modifiers {
+  margin: 0 4px;
+}
 .chroniclesystem .capitalize {
   text-transform: capitalize;
+}
+.chroniclesystem .center {
+  text-align: center;
+  justify-content: center;
 }
 .chroniclesystem.sheet .sheet-header .header-fields .complements {
   margin: 5px -5px 5px 0;
@@ -28,6 +56,23 @@
   height: 100%;
   margin: 0;
 }
+.chroniclesystem.sheet .sheet-tabs {
+  padding: 4px;
+}
+.chroniclesystem.sheet .sheet-tabs .item {
+  padding: 3px;
+  background: #BBBBBB;
+  font-weight: normal;
+}
+.chroniclesystem.sheet .sheet-tabs .item.active {
+  background: #005390;
+  color: white;
+  text-decoration: none;
+  font-weight: normal;
+}
+.chroniclesystem.sheet .sheet-tabs .item:hover {
+  text-shadow: none;
+}
 .chroniclesystem.sheet a.checkButton {
   color: #AAAAAA;
   padding: 2px;
@@ -52,6 +97,22 @@
   vertical-align: middle;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   background-color: white;
+}
+.chroniclesystem.sheet .list {
+  list-style: none;
+  align-items: center;
+  padding: 0;
+  margin: 5px 5px 5px 3px;
+}
+.chroniclesystem.sheet .list .item > * {
+  margin-left: 5px;
+}
+.chroniclesystem.sheet .list .item > *:first-child {
+  margin-left: 0px;
+}
+.chroniclesystem.sheet .list .item .item-controls {
+  flex: 0 0 auto;
+  align-self: center;
 }
 .chroniclesystem.sheet input {
   background: white;
@@ -93,5 +154,15 @@
 .chroniclesystem.sheet .size200 {
   width: 200px;
   flex: 2;
+}
+.chroniclesystem.sheet .list-header {
+  font-weight: bold;
+  margin: 3px;
+  padding: 3px;
+  background-color: black;
+  color: white;
+}
+.chroniclesystem.sheet .list-header div {
+  margin: 2px;
 }
 /*# sourceMappingURL=global.css.map */

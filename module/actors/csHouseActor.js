@@ -84,7 +84,7 @@ export class CSHouseActor extends CSActor {
         switch (role) {
             case "STEWARD":
             case "HEAD":
-                if (this.data.data.members[this.roleMap[role]] === actorId) {
+                if (this.data.data.members[this.roleMap[role]].id === actorId) {
                     result.hasRole = true;
                 }
                 break;
@@ -92,8 +92,7 @@ export class CSHouseActor extends CSActor {
             case "FAMILY":
             case "RETAINER":
             case "SERVANT":
-                let list = this.getCSData().members[this.roleMap[role]];
-                let index = list.indexOf(actorId);
+                let index = this._getMemberIndexIfExists(role, actorId);
                 if (index >= 0) {
                     result.hasRole = true;
                     result.index = index;
@@ -105,6 +104,13 @@ export class CSHouseActor extends CSActor {
         return result;
     }
 
+    _getMemberIndexIfExists(role, id, list = undefined) {
+        if (!list)
+            list = this.getCSData().members[this.roleMap[role]];
+        let index = list.findIndex((member) => member.id === id);
+        return index;
+    }
+
     _removeCharacterFromRole(role, actorId, index = -1) {
         LOGGER.trace("Remove the Character from a Role | CSHouseActor |" +
             " csHouseActor.js");
@@ -112,7 +118,7 @@ export class CSHouseActor extends CSActor {
         switch (role) {
             case "STEWARD":
             case "HEAD":
-                if (this.data.data.members[this.roleMap[role]] === actorId) {
+                if (this.data.data.members[this.roleMap[role]].id === actorId) {
                     let key = `data.members.${[this.roleMap[role]]}`;
                     this.update({[key]: ""});
                     founded = true;
@@ -124,7 +130,7 @@ export class CSHouseActor extends CSActor {
             case "SERVANT":
                 let list = this.getCSData().members[this.roleMap[role]];
                 if (index < 0)
-                    index = list.indexOf(actorId);
+                    index = this._getMemberIndexIfExists(role, actorId, list);
                 if (index >= 0) {
                     list.splice(index);
                     let key = `data.members.${[this.roleMap[role]]}`;
@@ -149,7 +155,7 @@ export class CSHouseActor extends CSActor {
         this.update({[key]: data[resourceId]});
     }
 
-    addCharacterToHouse(actorId, role) {
+    addCharacterToHouse(actorId, role, description) {
         LOGGER.trace("Add Character to House | CSHouseActor | csHouseActor.js");
         let result = this.characterHasRole(actorId, role);
         if (result.hasRole) {
@@ -162,15 +168,15 @@ export class CSHouseActor extends CSActor {
             case "STEWARD":
             case "HEAD":
                 let key = `data.members.${[this.roleMap[role]]}`;
-                this.update({[key]: actorId});
+                this.update({[key]: {id: actorId, description: description}});
                 break;
             case "HEIR":
             case "FAMILY":
             case "RETAINER":
             case "SERVANT":
                 let list = this.getCSData().members[this.roleMap[role]];
-                if (!list.includes(actorId)) {
-                    list.push(actorId);
+                if (this._getMemberIndexIfExists(role, actorId, list) < 0) {
+                    list.push({id: actorId, description: description});
                     let key = `data.members.${[this.roleMap[role]]}`;
                     this.update({
                         [key]: list
@@ -187,11 +193,11 @@ export class CSHouseActor extends CSActor {
         let membersData = this.getCSData().members[role];
         let members = [];
         if (Array.isArray(membersData)) {
-            membersData.forEach((id) => {
-                members.push({"name": this._getCharacterNameById(id), "id": id});
+            membersData.forEach((id, description) => {
+                members.push({"name": this._getCharacterNameById(id), "id": id, "description": description});
             })
         } else {
-            members = {"name": this._getCharacterNameById(membersData), "id": membersData};
+            members = {"name": this._getCharacterNameById(membersData.id), "id": membersData.id, "description": membersData.description};
         }
         return members;
     }

@@ -5,6 +5,10 @@
   .capitalize {
     text-transform: capitalize;
   }
+  .center {
+    text-align: center;
+    justify-content: center;
+  }
   &.sheet {
     .sheet-header {
       .header-fields {
@@ -42,6 +46,24 @@
       }
     }
 
+    .sheet-tabs {
+      padding: 4px;
+      .item {
+        padding: 3px;
+        background: #BBBBBB;
+        font-weight: normal;
+        &.active {
+          background: @primary-color;
+          color:@field-color;
+          text-decoration: none;
+          font-weight: normal;
+        }
+        &:hover {
+          text-shadow: none;
+        }
+      }
+    }
+
     a.checkButton {
       color: @disable-color;
       padding: 2px;
@@ -69,6 +91,25 @@
       vertical-align: middle;
       box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
       background-color: @field-color;
+    }
+
+    .list {
+      list-style: none;
+      align-items: center;
+      padding: 0;
+      margin: @medium-margin @medium-margin @medium-margin @small-margin;
+      .item {
+        & > * {
+          margin-left: @medium-margin;
+          &:first-child {
+            margin-left: 0px;
+          }
+        }
+        .item-controls {
+          flex: 0 0 auto;
+          align-self: center;
+        }
+      }
     }
 
     input {
@@ -115,6 +156,17 @@
     .biggest-field, .size200 {
       width: 200px;
       flex: 2;
+    }
+
+    .list-header {
+      font-weight: bold;
+      margin: 3px;
+      padding: 3px;
+      background-color: black;
+      color: white;
+      div {
+        margin: 2px;
+      }
     }
   }
 }

@@ -1,9 +1,10 @@
 <form>
+    <input type="hidden" name="characterId" value="{{id}}"/>
     <div class="form-group">
-        <input type="hidden" name="characterId" value="{{id}}"/>
         <label for="characterRole">{{localize "CS.dialogs.characterRole.label"}}</label>
         <select name="characterRole">
             {{selectOptions choices selected=value localize=true}}
         </select>
     </div>
+    {{> (formGroup) id="description" inputCssClass="size200" value=description placeHolder="CS.sheets.generalLabels.description" labelText="CS.sheets.generalLabels.description" dataType=String }}
 </form>

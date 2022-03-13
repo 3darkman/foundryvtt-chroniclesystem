@@ -1,4 +1,5 @@
 <form class="{{cssClass}}" autocomplete="off">
+    {{log data}}
     <header class="sheet-header">
         <div class="header-fields">
             <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
@@ -12,72 +13,17 @@
             </div>
         </div>
     </header>
+    {{!-- Sheet Tab Navigation --}}
+    <nav  class="sheet-tabs flexrow tabs" data-group="primary">
+        <a  class="item"  data-tab="resources">{{localize "CS.sheets.house.resources.title"}}</a>
+        <a  class="item"  data-tab="events">{{localize "CS.sheets.house.events.title"}}</a>
+        <a  class="item"  data-tab="members">{{localize "CS.sheets.house.labels.members"}}</a>
+    </nav>
+
+    {{!-- Sheet Body --}}
     <section class="sheet-body">
-        <div class="flexrow">
-            <section class="profile-picture">
-                <div class="profile-img-container flex">
-                    <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" alt="{{actor.name}} Picture" />
-                </div>
-            </section>
-            <section class="flex2">
-                <header class="header-field">
-                    <span>{{localize "CS.sheets.house.resources.title"}}</span>
-                    {{#if owner}}
-                        <span class="item-controls regenerate-resources"><a><i class="fas fa-sync"></i></a></span>
-                    {{/if}}
-                </header>
-                <div class="resources-list list">
-                    {{> (houseResourceItem)
-                            owner=owner
-                            resourceName="defense"
-                            resourceNameKeyword="CS.sheets.house.resources.defense"
-                            startingValue=data.data.defense.total
-                            description=data.data.defense.description
-                    }}
-                    {{> (houseResourceItem)
-                            owner=owner
-                            resourceName="influence"
-                            resourceNameKeyword="CS.sheets.house.resources.influence"
-                            startingValue=data.data.influence.total
-                            description=data.data.influence.description
-                    }}
-                    {{> (houseResourceItem)
-                            owner=owner
-                            resourceName="lands"
-                            resourceNameKeyword="CS.sheets.house.resources.lands"
-                            startingValue=data.data.lands.total
-                            description=data.data.lands.description
-                    }}
-                    {{> (houseResourceItem)
-                            owner=owner
-                            resourceName="law"
-                            resourceNameKeyword="CS.sheets.house.resources.law"
-                            startingValue=data.data.law.total
-                            description=data.data.law.description
-                    }}
-                    {{> (houseResourceItem)
-                            owner=owner
-                            resourceName="population"
-                            resourceNameKeyword="CS.sheets.house.resources.population"
-                            startingValue=data.data.population.total
-                            description=data.data.population.description
-                    }}
-                    {{> (houseResourceItem)
-                            owner=owner
-                            resourceName="power"
-                            resourceNameKeyword="CS.sheets.house.resources.power"
-                            startingValue=data.data.power.total
-                            description=data.data.power.description
-                    }}
-                    {{> (houseResourceItem)
-                            owner=owner
-                            resourceName="wealth"
-                            resourceNameKeyword="CS.sheets.house.resources.wealth"
-                            startingValue=data.data.wealth.total
-                            description=data.data.wealth.description
-                    }}
-                </div>
-            </section>
-        </div>
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/resources-tab.html"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/events-tab.html"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/members-tab.html"}}
     </section>
 </form>

@@ -262,23 +262,6 @@
   flex: 0.05;
 }
 
-.chroniclesystem.sheet .list {
-  align-items: center;
-  padding: 0;
-  margin: 5px 5px 5px 2px;
-}
-
-.chroniclesystem.sheet .list .item-controls {
-  flex: 0.2;
-  align-self: center;
-  margin-left: 2px;
-}
-
-.chroniclesystem.sheet .list input {
-  text-align: center;
-  margin: 3px;
-}
-
 .tox.tox-tinymce {
   height: 100% !important;
   width: 100%;

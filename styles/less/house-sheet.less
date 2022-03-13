@@ -1,1 +1,37 @@
 @import "constants.less";
+
+
+.chroniclesystem {
+  &.sheet {
+    &.house {
+      .events-list {
+        .list-header {
+          .event-name {
+            padding-top: 12px;
+            padding-left: @small-margin;
+          }
+          .item-controls {
+            flex: 0 0 12.25px;
+          }
+        }
+        .modifiers p {
+          flex: 0 0 67px;
+          padding: 0 @small-margin;
+        }
+        .event {
+          margin: 0 @small-margin;
+          padding: 0 @small-margin;
+          .description {
+            display:none;
+          }
+          .event-name {
+            padding-left: @small-margin;
+          }
+          .modifiers {
+            margin: 0 4px;
+          }
+        }
+      }
+    }
+  }
+}

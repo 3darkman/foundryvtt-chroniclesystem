@@ -6,10 +6,7 @@
             <header class="header-field">
                 <span>{{localize "CS.sheets.generalLabels.details"}}</span>
             </header>
-            <div class="form-group">
-                <label for="data.playerChoice">{{localize "CS.sheets.eventItem.playerChoice"}}</label>
-                <a class="checkButton size50 {{showIfEquals true data.data.playerChoice "activated" ""}}"><i class="fa fa-check"></i></a>
-            </div>
+
             {{#if item.isOwned}}
                 {{> (formGroup)
                         id="data.modifiers.defense"
@@ -17,7 +14,7 @@
                         placeHolder="modifier"
                         inputCssClass="small-field"
                         value=data.data.modifiers.defense
-                        dataType="String"
+                        dataType="Number"
                 }}
                 {{> (formGroup)
                         id="data.modifiers.influence"
@@ -25,7 +22,7 @@
                         placeHolder="modifier"
                         inputCssClass="small-field"
                         value=data.data.modifiers.influence
-                        dataType="String"
+                        dataType="Number"
                 }}
                 {{> (formGroup)
                         id="data.modifiers.lands"
@@ -33,7 +30,7 @@
                         placeHolder="modifier"
                         inputCssClass="small-field"
                         value=data.data.modifiers.lands
-                        dataType="String"
+                        dataType="Number"
                 }}
                 {{> (formGroup)
                         id="data.modifiers.law"
@@ -41,7 +38,7 @@
                         placeHolder="modifier"
                         inputCssClass="small-field"
                         value=data.data.modifiers.law
-                        dataType="String"
+                        dataType="Number"
                 }}
                 {{> (formGroup)
                         id="data.modifiers.population"
@@ -49,7 +46,7 @@
                         placeHolder="modifier"
                         inputCssClass="small-field"
                         value=data.data.modifiers.population
-                        dataType="String"
+                        dataType="Number"
                 }}
                 {{> (formGroup)
                         id="data.modifiers.power"
@@ -57,7 +54,7 @@
                         placeHolder="modifier"
                         inputCssClass="small-field"
                         value=data.data.modifiers.power
-                        dataType="String"
+                        dataType="Number"
                 }}
                 {{> (formGroup)
                         id="data.modifiers.wealth"
@@ -65,9 +62,13 @@
                         placeHolder="modifier"
                         inputCssClass="small-field"
                         value=data.data.modifiers.law
-                        dataType="String"
+                        dataType="Number"
                 }}
             {{else}}
+                <div class="form-group">
+                    <label for="data.playerChoice">{{localize "CS.sheets.eventItem.playerChoice"}}</label>
+                    <a class="checkButton size50 {{showIfEquals true data.data.playerChoice "activated" ""}}"><i class="fa fa-check"></i></a>
+                </div>
                 {{#if data.data.playerChoice}}
                     {{> (formGroup)
                             id="data.numberOfChoices"

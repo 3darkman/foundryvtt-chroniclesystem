@@ -55,6 +55,11 @@
             "servant": "Servant"
           }
         },
+        "events": {
+          "title": "Historical Events",
+          "name": "Event",
+          "modifiers": "Effects"
+        },
         "resources": {
           "defense": "Defense",
           "influence": "Influence",
@@ -63,9 +68,10 @@
           "population": "Population",
           "power": "Power",
           "wealth": "Wealth",
-          "title": "House Resources"
+          "title": "Resources"
         },
         "labels": {
+          "members": "Members",
           "head": "Head of House",
           "realm": "Realm",
           "liege": "Liege",

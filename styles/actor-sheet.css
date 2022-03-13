@@ -114,21 +114,9 @@
     margin: 2px;
 }
 
-.chroniclesystem.sheet.actor .equipment-list .list-header div {
-    margin: 2px;
-}
-
 .chroniclesystem.sheet.actor .equipment-list .list-header .item-qualities div {
     margin: 0 0 0 8px;
     padding: 0;
-}
-
-.chroniclesystem.sheet.actor .equipment-list .list-header {
-    font-weight: bold;
-    margin: 3px;
-    padding: 3px;
-    background-color: black;
-    color: white;
 }
 
 .chroniclesystem.sheet.actor .item.equipment, .chroniclesystem.sheet.actor .equipment.list-header {
@@ -337,25 +325,4 @@
 .chroniclesystem.sheet.actor section.stress .custom-checkbox {
     margin: 10px 0 0 0;
     height: fit-content;
-}
-
-.chroniclesystem.sheet.actor .sheet-tabs .item {
-    padding: 3px;
-    background: #BBBBBB;
-    font-weight: normal;
-}
-
-.chroniclesystem.sheet.actor .sheet-tabs .item:hover {
-    text-shadow: none;
-}
-
-.chroniclesystem.sheet.actor .sheet-tabs .item.active {
-    background: #005390;
-    color:white;
-    text-decoration: none;
-    font-weight: normal;
-}
-
-.chroniclesystem.sheet.actor .sheet-tabs {
-    padding: 4px;
 }
