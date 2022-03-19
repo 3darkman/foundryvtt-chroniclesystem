@@ -1,3 +1,5 @@
+import {ChronicleSystem} from "../../system/ChronicleSystem.js";
+
 export class CSActorSheet extends ActorSheet {
 
     activateListeners(html) {
@@ -8,6 +10,11 @@ export class CSActorSheet extends ActorSheet {
 
         // Update Inventory Item
         html.find('.item-edit').click(this._showEmbeddedItemSheet.bind(this));
+        html.find('.rollable').click(this._onClickRoll.bind(this));
+    }
+
+    async _onClickRoll(event, targets) {
+        await ChronicleSystem.handleRoll(event, this.actor, targets);
     }
 
     _showEmbeddedItemSheet(event) {

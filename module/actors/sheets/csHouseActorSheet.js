@@ -2,6 +2,7 @@ import {CSActorSheet} from "./csActorSheet.js";
 import {CSConstants} from "../../system/csConstants.js";
 import SystemUtils from "../../utils/systemUtils.js";
 import LOGGER from "../../utils/logger.js";
+import {ChronicleSystem} from "../../system/ChronicleSystem.js";
 
 export class CSHouseActorSheet extends CSActorSheet {
     itemTypesPermitted = [
@@ -41,6 +42,16 @@ export class CSHouseActorSheet extends CSActorSheet {
         house.family = data.actor.getCharactersFromRole(data.actor.roleMap.FAMILY);
         house.retainers = data.actor.getCharactersFromRole(data.actor.roleMap.RETAINER);
         house.servants = data.actor.getCharactersFromRole(data.actor.roleMap.SERVANT);
+
+        house.fortune = {
+            lawMod: data.actor.getLawModifier(),
+            populationMod: data.actor.getPopulationModifier(),
+            holdingsMod: 0
+        }
+        const steward = game.actors.get(house.steward.id);
+        let stewardshipFormula =  ChronicleSystem.getActorAbilityFormula(steward, SystemUtils.localize(ChronicleSystem.keyConstants.STATUS), SystemUtils.localize(ChronicleSystem.keyConstants.STEWARDSHIP));
+        stewardshipFormula.modifier = stewardshipFormula.modifier + house.fortune.lawMod + house.fortune.populationMod + house.fortune.holdingsMod;
+        house.fortune.formula = stewardshipFormula;
 
         return data;
     }

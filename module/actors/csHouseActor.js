@@ -1,6 +1,8 @@
 import {CSActor} from "./csActor.js";
 import LOGGER from "../utils/logger.js";
 import SystemUtils from "../utils/systemUtils.js";
+import {ChronicleSystem} from "../system/ChronicleSystem.js";
+import {CSConstants} from "../system/csConstants.js";
 
 export class CSHouseActor extends CSActor {
     roleMap = {
@@ -257,6 +259,28 @@ export class CSHouseActor extends CSActor {
             modifier += event.data.data.modifiers[resource];
         });
         return modifier;
+    }
+
+    getPopulationModifier() {
+        let data = this.getCSData();
+        let lastMod;
+        ChronicleSystem.populationModifiers.forEach((mod) => {
+            if (data.population.total >= mod.min) {
+                lastMod = mod.mod;
+            }
+        })
+        return lastMod;
+    }
+
+    getLawModifier() {
+        let data = this.getCSData();
+        let lastMod;
+        ChronicleSystem.lawModifiers.forEach((mod) => {
+            if (data.law.total >= mod.min) {
+                lastMod = mod.mod;
+            }
+        })
+        return lastMod;
     }
 
 

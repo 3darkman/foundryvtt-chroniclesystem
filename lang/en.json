@@ -61,6 +61,15 @@
           "name": "Event",
           "modifiers": "Effects"
         },
+        "fortune": {
+          "title": "House Fortune",
+          "lawModifier": "Law Mod",
+          "populationModifier": "Population Mod",
+          "holdingModifier": "Mods from Holdings"
+        },
+        "holdings": {
+          "title": "Holdings"
+        },
         "resources": {
           "defense": "Defense",
           "influence": "Influence",
@@ -76,6 +85,7 @@
           "head": "Head of House",
           "realm": "Realm",
           "liege": "Liege",
+          "steward": "Steward",
           "heirsAndFamily": "Heirs and Family",
           "retainersAndServants": "Retainers and Servants",
           "startingValue": "Starting Value"
@@ -120,15 +130,16 @@
         "will": "will"
       },
       "specialties": {
-        "run": "run",
-        "bluff": "bluff",
         "act": "act",
         "bargain": "bargain",
+        "bluff": "bluff",
         "charm": "charm",
         "convince": "convince",
         "incite": "incite",
         "intimidate": "intimidate",
+        "run": "run",
         "seduce": "seduce",
+        "stewardship": "stewardship",
         "taunt": "taunt"
       },
       "qualities": {

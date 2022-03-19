@@ -7,6 +7,27 @@
         </section>
         <section class="flex2">
             <header class="header-field">
+                <span>{{localize "CS.sheets.house.fortune.title"}}</span>
+            </header>
+            <ol class="list">
+                <li class="list-header flexrow">
+                    <label class="size75">{{localize "CS.sheets.house.labels.steward"}}</label>
+                    <div class="center">{{localize "CS.sheets.house.fortune.lawModifier"}}</div>
+                    <div class="center">{{localize "CS.sheets.house.fortune.populationModifier"}}</div>
+                    <div class="center">{{localize "CS.sheets.house.fortune.holdingModifier"}}</div>
+                    <div class="center capitalize">{{localize "CS.constants.specialties.stewardship"}}</div>
+                </li>
+                <li class="item flexrow">
+                    <label  class="link-field member-name size75" data-id="{{data.data.steward.id}}"><a>{{data.data.steward.name}}</a></label>
+                    <div class="center">{{data.data.fortune.lawMod}}</div>
+                    <div class="center">{{data.data.fortune.populationMod}}</div>
+                    <div class="center">{{data.data.fortune.holdingsMod}}</div>
+                    <div class="rollable center" id="formula:{{localize "CS.constants.specialties.stewardship"}}:{{formulaToStr data.data.fortune.formula}}">
+                        <a>{{format-formula data.data.fortune.formula}}</a>
+                    </div>
+                </li>
+            </ol>
+            <header class="header-field">
                 <span>{{localize "CS.sheets.house.resources.title"}}</span>
                 {{#if owner}}
                     <span class="item-controls regenerate-resources"><a><i class="fas fa-sync"></i></a></span>

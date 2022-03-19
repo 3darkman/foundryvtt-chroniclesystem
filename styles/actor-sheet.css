@@ -188,13 +188,7 @@
     margin: 3px;
 }
 
-.chroniclesystem.sheet.actor .subheader-field {
-    background: black;
-    color: white;
-    padding: 5px;
-    margin: 5px 0 0 0;
-    text-align: center;
-}
+
 
 .chroniclesystem.sheet.actor .disposition-list .disposition.option {
     padding: 3px;

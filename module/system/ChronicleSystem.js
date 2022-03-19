@@ -63,6 +63,7 @@ async function handleRoll(event, actor) {
             break;
         case 'persuasion':
         case 'deception':
+        case 'formula':
             formula = DiceRollFormula.fromStr(roll_definition[2]);
             break;
     }
@@ -179,6 +180,7 @@ ChronicleSystem.keyConstants = {
     INTIMIDATE: "CS.constants.specialties.intimidate",
     SEDUCE: "CS.constants.specialties.seduce",
     TAUNT: "CS.constants.specialties.taunt",
+    STEWARDSHIP: "CS.constants.specialties.stewardship",
 
     BULK: "CS.constants.qualities.bulk",
 
@@ -189,3 +191,27 @@ ChronicleSystem.keyConstants = {
     FATIGUE: "CS.constants.others.fatigue"
 
 }
+
+ChronicleSystem.lawModifiers = [
+    {min: 0, mod: -20},
+    {min: 1, mod: -10},
+    {min: 11, mod: -5},
+    {min: 21, mod: -2},
+    {min: 31, mod: -1},
+    {min: 41, mod: 0},
+    {min: 51, mod: 1},
+    {min: 61, mod: 2},
+    {min: 71, mod: 5}
+]
+
+ChronicleSystem.populationModifiers = [
+    {min: 0, mod: -10},
+    {min: 1, mod: -5},
+    {min: 11, mod: 0},
+    {min: 21, mod: 1},
+    {min: 31, mod: 3},
+    {min: 41, mod: 1},
+    {min: 51, mod: 0},
+    {min: 61, mod: -5},
+    {min: 71, mod: -10}
+]

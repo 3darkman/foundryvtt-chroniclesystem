@@ -21,23 +21,25 @@
             {{/each}}
         </ol>
     </section>
-    <section class="other-members">
-        <header class="header-field">
-            <span>{{localize "CS.sheets.house.labels.retainersAndServants"}}</span>
-        </header>
-        <ol  class="servants-list list">
-            <li class="list-header flexrow">
-                <div class="field name">{{localize "CS.sheets.generalLabels.name"}}</div>
-                <div class="field age center">Age</div>
-                <div class="field description size150">{{localize "CS.sheets.generalLabels.description"}}</div>
-                <div class="field item-controls">&nbsp;</div>
-            </li>
-            {{#each data.data.retainers as |heir index|}}
-                {{> (memberListItem) listName="servant" id=heir.id age=heir.age name=heir.name description=heir.description role="RETAINER" }}
-            {{/each}}
-            {{#each data.data.servants as |family index|}}
-                {{> (memberListItem) listName="servant" id=family.id age=family.age name=family.name description=family.description role="SERVANT" }}
-            {{/each}}
-        </ol>
+    <section>
+        <section class="other-members">
+            <header class="header-field">
+                <span>{{localize "CS.sheets.house.labels.retainersAndServants"}}</span>
+            </header>
+            <ol  class="servants-list list">
+                <li class="list-header flexrow">
+                    <div class="field name">{{localize "CS.sheets.generalLabels.name"}}</div>
+                    <div class="field age center">Age</div>
+                    <div class="field description size150">{{localize "CS.sheets.generalLabels.description"}}</div>
+                    <div class="field item-controls">&nbsp;</div>
+                </li>
+                {{#each data.data.retainers as |heir index|}}
+                    {{> (memberListItem) listName="servant" id=heir.id age=heir.age name=heir.name description=heir.description role="RETAINER" }}
+                {{/each}}
+                {{#each data.data.servants as |family index|}}
+                    {{> (memberListItem) listName="servant" id=family.id age=family.age name=family.name description=family.description role="SERVANT" }}
+                {{/each}}
+            </ol>
+        </section>
     </section>
 </div>

@@ -127,8 +127,6 @@ export class CSCharacterActorSheet extends CSActorSheet {
       $(ev.currentTarget).parents('.item').find('.description').slideToggle();
     });
 
-    html.find('.rollable').click(this._onClickRoll.bind(this));
-
     html.find('.disposition.option').click(this._onDispositionChanged.bind(this));
 
     html.find('.equipped').click(this._onEquippedStateChanged.bind(this));
@@ -341,10 +339,6 @@ export class CSCharacterActorSheet extends CSActorSheet {
       return;
     }
     this.actor.update({"data.currentDisposition": event.target.dataset.id});
-  }
-
-  async _onClickRoll(event, targets) {
-    await ChronicleSystem.handleRoll(event, this.actor, targets);
   }
 
   /* -------------------------------------------- */
