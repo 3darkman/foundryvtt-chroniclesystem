@@ -12,7 +12,7 @@ export class CSHouseActorSheet extends CSActorSheet {
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            classes: ["chroniclesystem", "sheet", "house"],
+            classes: ["chroniclesystem", "sheet", "house", "actor"],
             template: "systems/chroniclesystem/templates/actors/houses/house-sheet.html",
             width: 800,
             height: 600,
@@ -36,24 +36,57 @@ export class CSHouseActorSheet extends CSActorSheet {
 
         house.historicalEvents = this._checkNull(data.itemsByType['event']);
 
+        this.prepareHoldingData(house, data);
+
+        this.prepareRolesData(house, data);
+
+        this.prepareFortuneData(house, data);
+
+        return data;
+    }
+
+    prepareRolesData(house, data) {
         house.head = data.actor.getCharactersFromRole(data.actor.roleMap.HEAD);
         house.steward = data.actor.getCharactersFromRole(data.actor.roleMap.STEWARD);
         house.heirs = data.actor.getCharactersFromRole(data.actor.roleMap.HEIR);
         house.family = data.actor.getCharactersFromRole(data.actor.roleMap.FAMILY);
         house.retainers = data.actor.getCharactersFromRole(data.actor.roleMap.RETAINER);
         house.servants = data.actor.getCharactersFromRole(data.actor.roleMap.SERVANT);
+    }
 
+    prepareFortuneData(house, data) {
+        if (!house.steward.id)
+            return;
         house.fortune = {
             lawMod: data.actor.getLawModifier(),
             populationMod: data.actor.getPopulationModifier(),
             holdingsMod: 0
         }
         const steward = game.actors.get(house.steward.id);
-        let stewardshipFormula =  ChronicleSystem.getActorAbilityFormula(steward, SystemUtils.localize(ChronicleSystem.keyConstants.STATUS), SystemUtils.localize(ChronicleSystem.keyConstants.STEWARDSHIP));
+        let stewardshipFormula = ChronicleSystem.getActorAbilityFormula(steward, SystemUtils.localize(ChronicleSystem.keyConstants.STATUS), SystemUtils.localize(ChronicleSystem.keyConstants.STEWARDSHIP));
         stewardshipFormula.modifier = stewardshipFormula.modifier + house.fortune.lawMod + house.fortune.populationMod + house.fortune.holdingsMod;
         house.fortune.formula = stewardshipFormula;
+    }
 
-        return data;
+    prepareHoldingData(house, data) {
+        house.holdings = {
+            defense: [],
+            influence: [],
+            lands: [],
+            law: [],
+            population: [],
+            power: [],
+            wealth: []
+        }
+
+        let holdings = this._checkNull(data.itemsByType['holding']);
+        holdings.forEach((holding) => {
+            let doc = this.actor.getEmbeddedDocument('Item', holding._id);
+            house.holdings[holding.data.resource].push(holding);
+            if (!house[holding.data.resource].invested)
+                house[holding.data.resource].invested = 0;
+            house[holding.data.resource].invested += doc.getTotalInvested();
+        });
     }
 
     activateListeners(html) {
@@ -65,14 +98,15 @@ export class CSHouseActorSheet extends CSActorSheet {
             $(ev.currentTarget).parents('.item').find('.description').slideToggle();
         });
 
-        html.find(".family-list").on("click", ".item-control", this._onclickFamilyControl.bind(this));
+        html.find(".family-list").on("click", ".item-control", this._onclickMemberControl.bind(this));
+        html.find(".servants-list").on("click", ".item-control", this._onclickMemberControl.bind(this));
         html.find('.member-name').click(this._openActorSheet.bind(this));
         html.find('.resource-edit').click(this._openResourceEditor.bind(this));
         html.find('.regenerate-resources').click(this._regenerateResources.bind(this));
 
     }
 
-    async _onclickFamilyControl(event) {
+    async _onclickMemberControl(event) {
         event.preventDefault();
         const a = event.currentTarget;
         const actorId = a.dataset.id;

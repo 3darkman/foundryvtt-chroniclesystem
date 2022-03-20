@@ -23,7 +23,8 @@
     },
     "messages": {
       "nobodyHasBeenChosen": "Nobody has been chosen",
-      "actorDoesntExists": "Actor doesn't exists"
+      "actorDoesntExists": "Actor doesn't exists",
+      "notStewardLinked": "No actor has been linked to the house like steward"
     },
     "settings": {
       "debugLogs": {
@@ -43,7 +44,8 @@
       "generalLabels": {
         "description": "Description",
         "details": "Details",
-        "name": "Name"
+        "name": "Name",
+        "total": "Total"
       },
       "house": {
         "character": {
@@ -78,7 +80,9 @@
           "population": "Population",
           "power": "Power",
           "wealth": "Wealth",
-          "title": "Resources"
+          "title": "Resources",
+          "invested": "Invested",
+          "cost": "Cost"
         },
         "labels": {
           "members": "Members",
@@ -88,7 +92,9 @@
           "steward": "Steward",
           "heirsAndFamily": "Heirs and Family",
           "retainersAndServants": "Retainers and Servants",
-          "startingValue": "Starting Value"
+          "startingValue": "Starting Value",
+          "coatOfArms": "Coat of Arms",
+          "motto": "Motto"
         }
       },
       "character": {

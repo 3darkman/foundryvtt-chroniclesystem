@@ -1,2 +1,23 @@
 <div class="tab flexrow holdings" data-group="primary" data-tab="holdings">
+    {{#if data.data.defense.invested}}
+        {{> (resourceHoldings) resourceName="CS.sheets.house.resources.defense" holdings=data.data.holdings.defense resourceTotal=data.data.defense.total resourceInvested=data.data.defense.invested}}
+    {{/if}}
+    {{#if data.data.influence.invested}}
+        {{> (resourceHoldings) resourceName="CS.sheets.house.resources.influence" holdings=data.data.holdings.influence resourceTotal=data.data.influence.total resourceInvested=data.data.influence.invested}}
+    {{/if}}
+    {{#if data.data.law.invested}}
+        {{> (resourceHoldings) resourceName="CS.sheets.house.resources.law"  holdings=data.data.holdings.law resourceTotal=data.data.law.total resourceInvested=data.data.law.invested}}
+    {{/if}}
+    {{#if data.data.lands.invested}}
+        {{> (resourceHoldings) resourceName="CS.sheets.house.resources.lands"  holdings=data.data.holdings.lands resourceTotal=data.data.lands.total resourceInvested=data.data.lands.invested}}
+    {{/if}}
+    {{#if data.data.population.invested}}
+        {{> (resourceHoldings) resourceName="CS.sheets.house.resources.population"  holdings=data.data.holdings.population resourceTotal=data.data.population.total resourceInvested=data.data.population.invested}}
+    {{/if}}
+    {{#if data.data.power.invested}}
+        {{> (resourceHoldings) resourceName="CS.sheets.house.resources.power" holdings=data.data.holdings.power resourceTotal=data.data.power.total resourceInvested=data.data.power.invested}}
+    {{/if}}
+    {{#if data.data.wealth.invested}}
+        {{> (resourceHoldings) resourceName="CS.sheets.house.resources.wealth"  holdings=data.data.holdings.wealth resourceTotal=data.data.wealth.total resourceInvested=data.data.wealth.invested}}
+    {{/if}}
 </div>

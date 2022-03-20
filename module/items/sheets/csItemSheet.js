@@ -8,7 +8,7 @@ export class CSItemSheet extends ItemSheet {
         return mergeObject(super.defaultOptions, {
             classes: ["worldbuilding","chroniclesystem", "sheet", "item"],
             width: 650,
-            height: 500,
+            height: 560,
         });
     }
 
@@ -72,7 +72,7 @@ export class CSItemSheet extends ItemSheet {
     setPosition(options={}) {
         const position = super.setPosition(options);
         const sheetBody = this.element.find(".sheet-body");
-        const bodyHeight = position.height - 192;
+        const bodyHeight = position.height - 142;
         sheetBody.css("height", bodyHeight);
         return position;
     }

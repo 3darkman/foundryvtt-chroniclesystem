@@ -41,6 +41,14 @@ export class CSActorSheet extends ActorSheet {
         }
     }
 
+    setPosition(options={}) {
+        const position = super.setPosition(options);
+        const sheetBody = this.element.find(".sheet-body");
+        const bodyHeight = position.height - 192;
+        sheetBody.css("height", bodyHeight);
+        return position;
+    }
+
     _checkNull(items) {
         if (items && items.length) {
             return items;

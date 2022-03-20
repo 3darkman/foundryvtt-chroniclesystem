@@ -20,7 +20,8 @@ export const preloadHandlebarsTemplates = async function () {
 
         'systems/chroniclesystem/templates/components/rating-checkbox.html',
         'systems/chroniclesystem/templates/components/house-resource-item.html',
-        'systems/chroniclesystem/templates/components/member-list-item.html'
+        'systems/chroniclesystem/templates/components/member-list-item.html',
+        'systems/chroniclesystem/templates/components/resource-holdings.html'
     ];
     return loadTemplates(templatePaths);
 };

@@ -77,6 +77,10 @@ export const registerCustomHelpers = function () {
         return "systems/chroniclesystem/templates/components/member-list-item.html";
     });
 
+    Handlebars.registerHelper('resourceHoldings', function(options) {
+        return "systems/chroniclesystem/templates/components/resource-holdings.html";
+    });
+
     Handlebars.registerHelper('for', function (from, to, incr, block) {
         let accum = '';
         for (let i = from; i <= to; i += incr)
@@ -86,5 +90,9 @@ export const registerCustomHelpers = function () {
 
     Handlebars.registerHelper('showIfLessEquals', function(arg1, arg2, result, result2 = "", options) {
         return new Handlebars.SafeString(arg1 <= arg2 ? result : result2);
+    });
+
+    Handlebars.registerHelper('showIfLess', function(arg1, arg2, result, result2 = "", options) {
+        return new Handlebars.SafeString(arg1 < arg2 ? result : result2);
     });
 };

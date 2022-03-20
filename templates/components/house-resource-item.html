@@ -1,13 +1,13 @@
 <div class="resource-item item flexrow">
     {{#if owner}}
-        <label class="resource-label capitalize resource-edit" data-id="{{resourceName}}" data-name="{{localize resourceNameKeyword}}"><a>{{localize resourceNameKeyword}}</a></label>
+        <label class="resource-label capitalize resource-edit size50" data-id="{{resourceName}}" data-name="{{localize resourceNameKeyword}}"><a>{{localize resourceNameKeyword}}</a></label>
     {{else}}
-        <label class="resource-label capitalize">{{localize resourceNameKeyword}}</label>
+        <label class="resource-label capitalize size75">{{localize resourceNameKeyword}}</label>
     {{/if}}
-    <div class="resource-value">
+    <div class="resource-value size25 center">
         {{startingValue}}
     </div>
-    <div class="resource-description">
+    <div class="resource-description size150">
         {{description}}
     </div>
 </div>

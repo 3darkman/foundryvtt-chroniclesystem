@@ -38,11 +38,16 @@
                     </div>
                 </header>
                 <ol class="feature-list list resizable" data-base-size="150">
+                    <li class="list-header flexrow">
+                        <div class="size150">{{localize "CS.sheets.generalLabels.name"}}</div>
+                        <div class="size50 center">{{localize "CS.sheets.house.resources.cost"}}</div>
+                        <div class="item-controls"></div>
+                    </li>
                     {{#each data.data.features as |feature index|}}
-                        <li class="holding-feature flexrow" data-item-id="{{index}}">
+                        <li class="holding-feature item flexrow" data-item-id="{{index}}">
                             <!--suppress HtmlFormInputWithoutLabel -->
                             <input
-                                    class="big-field"
+                                    class="size150"
                                     type="text"
                                     name="data.features.{{index}}.name"
                                     value="{{feature.name}}"
@@ -51,7 +56,7 @@
                             />
                             <!--suppress HtmlFormInputWithoutLabel -->
                             <input
-                                    class="small-field"
+                                    class="size50 center"
                                     type="text"
                                     name="data.features.{{index}}.cost"
                                     value="{{feature.cost}}"

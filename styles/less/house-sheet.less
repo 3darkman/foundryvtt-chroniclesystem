@@ -4,6 +4,19 @@
 .chroniclesystem {
   &.sheet {
     &.house {
+
+      .profile-picture {
+        margin-right: @big-margin;
+      }
+
+      .holdings {
+        align-content: flex-start;
+      }
+
+      header {
+        margin-bottom: @medium-margin;
+      }
+
       .members {
         & > * {
           margin-left: @big-margin;
@@ -18,14 +31,24 @@
         }
       }
 
+      .resource-holdings {
+        flex: 0 0 32%;
+        margin: @medium-margin;
+        height: fit-content;
+
+        .holdings-header {
+          margin: @medium-margin @small-margin+@small-margin;
+          .subheader-field {
+            margin: 0px;
+          }
+        }
+      }
+
       .list {
         .list-header {
           .event-name {
             padding-top: 12px;
             padding-left: @small-margin;
-          }
-          .item-controls {
-            flex: 0 0 12.25px;
           }
         }
         .modifiers p {
@@ -40,9 +63,6 @@
           }
         }
         .event {
-          .description {
-            display:none;
-          }
           .event-name {
             padding-left: @small-margin;
           }

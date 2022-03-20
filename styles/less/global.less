@@ -10,58 +10,79 @@
     text-align: center;
     justify-content: center;
   }
+  .hidden {
+    display: none;
+  }
+  .alert {
+    color: #AA0000;
+  }
   &.sheet {
-    .sheet-header {
-      .header-fields {
-        .complements {
-          margin: @medium-margin -@medium-margin @medium-margin 0;
+    .window-content {
+      height: 100%;
+      padding: @medium-margin @biggest-margin @medium-margin @medium-margin;
+      overflow-y: hidden;
+      background: @background-color;
+
+      .sheet-header {
+        .header-fields {
+          .complements {
+            margin: @medium-margin -@medium-margin @medium-margin 0;
+
+            input {
+              height: 27px;
+              margin: 0 @medium-margin;
+            }
+
+            .attribute-label {
+              background: @primary-color;
+              color: white;
+              padding: @medium-margin @biggest-margin @medium-margin @biggest-margin;
+              flex: 0 0 auto;
+            }
+          }
+        }
+        .link-field {
+          margin: @medium-margin;
+        }
+
+        h1.charname {
+          height: 50px;
+          padding: 0;
+          margin: @medium-margin 0 0 0;
+          border-bottom: 0;
 
           input {
-            height: 27px;
-            margin: 0 @medium-margin;
-          }
-
-          .attribute-label {
-            background: @primary-color;
-            color: white;
-            padding: @medium-margin @biggest-margin @medium-margin @biggest-margin;
-            flex: 0 0 auto;
+            width: 100%;
+            height: 100%;
+            margin: 0;
           }
         }
       }
-      .link-field {
-        margin: @medium-margin;
-      }
 
-      h1.charname {
-        height: 50px;
-        padding: 0;
-        margin: @medium-margin 0 0 0;
-        border-bottom: 0;
-
-        input {
-          width: 100%;
-          height: 100%;
-          margin: 0;
-        }
-      }
-    }
-
-    .sheet-tabs {
-      padding: 4px;
-      .item {
-        padding: 3px;
-        background: #BBBBBB;
-        font-weight: normal;
-        &.active {
-          background: @primary-color;
-          color:@field-color;
-          text-decoration: none;
+      .sheet-tabs {
+        padding: 4px;
+        .item {
+          padding: 3px;
+          background: #BBBBBB;
           font-weight: normal;
+          &.active {
+            background: @primary-color;
+            color:@field-color;
+            text-decoration: none;
+            font-weight: normal;
+          }
+          &:hover {
+            text-shadow: none;
+          }
         }
-        &:hover {
-          text-shadow: none;
-        }
+      }
+
+      .sheet-body {
+        overflow-y: auto;
+      }
+
+      .sheet-body .tab {
+        height: 100%;
       }
     }
 
@@ -77,8 +98,13 @@
     .subheader-field {
       background: black;
       color: white;
-      padding: 5px;
-      margin: 5px 0 0 0;
+      padding: @medium-margin;
+      margin: @medium-margin 0 0 0;
+      text-align: center;
+    }
+
+    .subheader-value {
+      padding: @medium-margin;
       text-align: center;
     }
 
@@ -102,12 +128,23 @@
       background-color: @field-color;
     }
 
+    .unordered {
+      list-style: circle;
+      margin: @small-margin 0;
+    }
+
     .list {
       list-style: none;
       align-items: center;
       padding: 0;
       margin: @medium-margin @medium-margin @medium-margin @small-margin;
+      .list-header {
+        .item-controls {
+          flex: 0 0 12.25px;
+        }
+      }
       .item {
+        margin: @small-margin;
         & > * {
           margin-left: @medium-margin;
           &:first-child {
@@ -135,6 +172,11 @@
     textarea {
       background: @field-color;
       border: none;
+    }
+
+    .size25 {
+      width: 25px;
+      flex: .25;
     }
 
     .small-field, .size50 {

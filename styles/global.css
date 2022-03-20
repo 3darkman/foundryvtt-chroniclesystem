@@ -1,11 +1,4 @@
 
-.chroniclesystem .window-content {
-  height: 100%;
-  padding: 5px 10px 5px 5px;
-  overflow-y: hidden;
-  background: #DCE2EF;
-}
-
 .chroniclesystem.sheet.item .header-fields .itemname {
   vertical-align: middle;
   height: 100%;
@@ -62,11 +55,6 @@
 
 .chroniclesystem.sheet.item .sheet-body {
   height: auto;
-}
-
-.chroniclesystem.sheet .sheet-body .tab {
-  height: 100%;
-  overflow-y: auto;
 }
 
 .chroniclesystem.sheet.item .header-fields {
@@ -220,7 +208,6 @@
 }
 
 .chroniclesystem.sheet.item .description {
-  background-color: white;
   padding: 5px;
 }
 
