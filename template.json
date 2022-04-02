@@ -154,7 +154,7 @@
     }
   },
   "Item": {
-    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback", "event", "holding"],
+    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback", "event", "holding", "technique"],
     "templates": {
       "physicalItem": {
         "weight": 0
@@ -267,6 +267,17 @@
       "buildTime": "",
       "resource": "",
       "features": []
+    },
+    "technique": {
+      "type": "",
+      "description": "",
+      "learning": {
+        "time": "",
+        "difficult": 9
+      },
+      "arts": [],
+      "scales": "",
+      "works": []
     }
   }
 }

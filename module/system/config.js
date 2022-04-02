@@ -18,6 +18,7 @@ import itemConstructor from "../items/itemConstructor.js";
 import {CSAbilityItemSheet} from "../items/sheets/csAbilityItemSheet.js";
 import {CSEventItemSheet} from "../items/sheets/csEventItemSheet.js";
 import {CSHoldingItemSheet} from "../items/sheets/csHoldingItemSheet.js";
+import {CSTechniqueItemSheet} from "../items/sheets/cs-technique-item-sheet.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -57,6 +58,8 @@ Hooks.once("init", async function() {
         { label: SystemUtils.localize("CS.sheets.eventItemSheet"), types: ["event"], makeDefault: true });
     Items.registerSheet("chroniclesystem", CSHoldingItemSheet,
         { label: SystemUtils.localize("CS.sheets.holdingItemSheet"), types: ["holding"], makeDefault: true });
+    Items.registerSheet("chroniclesystem", CSTechniqueItemSheet,
+        { label: SystemUtils.localize("CS.sheets.techniqueItemSheet"), types: ["technique"], makeDefault: true });
 
     registerSystemSettings();
     await preloadHandlebarsTemplates();

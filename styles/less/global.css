@@ -228,6 +228,14 @@
   width: 200px;
   flex: 2;
 }
+.chroniclesystem.sheet .size300 {
+  width: 300px;
+  flex: 3;
+}
+.chroniclesystem.sheet .size400 {
+  width: 400px;
+  flex: 4;
+}
 .chroniclesystem.sheet .list-header {
   font-weight: bold;
   margin: 3px;

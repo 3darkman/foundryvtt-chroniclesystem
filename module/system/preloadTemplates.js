@@ -9,6 +9,7 @@ export const preloadHandlebarsTemplates = async function () {
         'systems/chroniclesystem/templates/actors/partials/tabs/abilities-tab.html',
         'systems/chroniclesystem/templates/actors/partials/tabs/combat-and-intrigue-tab.html',
         'systems/chroniclesystem/templates/actors/partials/tabs/qualities-tab.html',
+        'systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.html',
         'systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.html',
         'systems/chroniclesystem/templates/actors/partials/tabs/description-tab.html',
         'systems/chroniclesystem/templates/actors/partials/form-group.html',

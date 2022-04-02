@@ -106,6 +106,14 @@
           "dislike": "dislike",
           "unfriendly": "unfriendly",
           "malicious": "malicious"
+        },
+        "tabs": {
+          "abilities": "Abilities",
+          "combat-intrigue": "Combat and Intrigue",
+          "qualities": "Qualities",
+          "sorcery": "Sorcery",
+          "equipments": "Equipments",
+          "description": "Description"
         }
       },
       "eventItem": {
@@ -121,6 +129,14 @@
         "featureCost": "Feature Cost",
         "resource": "Resource",
         "canAddFeatureAfter": "You can define specific features of the holding after adding it to a house."
+      },
+      "techniqueItem": {
+        "type": "Type",
+        "arts": "Arts",
+        "scales": "Scales",
+        "learning": "Learning",
+        "learningTime": "Time",
+        "learningDifficult": "Difficult"
       }
     },
     "constants": {
