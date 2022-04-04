@@ -30,4 +30,15 @@ export default class SystemUtils {
     static format(string, object) {
         return game.i18n.format(string, object);
     }
+
+    static isEmpty (value) {
+        return value === null || value === undefined || typeof value.toString !== 'function';
+    };
+
+    static normalizeTextValue (value) {
+        if (SystemUtils.isEmpty(value)) {
+            return '';
+        }
+        return String(value);
+    };
 }

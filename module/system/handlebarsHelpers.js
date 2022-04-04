@@ -1,4 +1,5 @@
 import {ChronicleSystem} from "./ChronicleSystem.js";
+import SystemUtils from "../utils/systemUtils.js";
 
 export const registerCustomHelpers = function () {
     Handlebars.registerHelper('modifier', (str) => {
@@ -6,6 +7,8 @@ export const registerCustomHelpers = function () {
         let value = typeof str == 'string' ? parseInt(str) : str;
         return value === 0 ? '' : value > 0 ? ` + ${value}` : ` - ${-value}`;
     });
+
+
 
     Handlebars.registerHelper('enrich', (content) => {
         return new Handlebars.SafeString(TextEditor.enrichHTML(content));
@@ -60,6 +63,13 @@ export const registerCustomHelpers = function () {
     Handlebars.registerHelper('showIfDifferent', function(arg1, arg2, result1, result2 = "", options) {
         return arg1 != arg2 ? result1 : result2;
     });
+
+    Handlebars.registerHelper('concat',function(...positional) {
+        const options = positional.splice(-1,1);
+        return positional
+            .map(SystemUtils.normalizeTextValue)
+            .join('');
+    })
 
     Handlebars.registerHelper('formGroup', function(options) {
         return "systems/chroniclesystem/templates/actors/partials/form-group.html";

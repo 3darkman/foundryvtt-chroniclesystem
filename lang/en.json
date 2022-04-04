@@ -42,10 +42,12 @@
       "itemSheet": "Item Sheet",
       "abilityItemSheet": "Ability Sheet",
       "generalLabels": {
+        "none": "None",
         "description": "Description",
         "details": "Details",
         "name": "Name",
-        "total": "Total"
+        "total": "Total",
+        "others": "Others"
       },
       "house": {
         "character": {
@@ -98,6 +100,9 @@
         }
       },
       "character": {
+        "injury": "Injury",
+        "wound": "Wound",
+        "others": "Others",
         "dispositions": {
           "affectionate": "affectionate",
           "friendly": "friendly",
@@ -131,12 +136,33 @@
         "canAddFeatureAfter": "You can define specific features of the holding after adding it to a house."
       },
       "techniqueItem": {
+        "cost": "Cost",
         "type": "Type",
         "arts": "Arts",
         "scales": "Scales",
         "learning": "Learning",
         "learningTime": "Time",
-        "learningDifficult": "Difficult"
+        "learningDifficult": "Difficult",
+        "resonance": "Resonance",
+        "tabs": {
+          "details": "Details",
+          "works": "Works"
+        },
+        "types": {
+          "spell": "Spell",
+          "ritual": "Ritual"
+        },
+        "costs": {
+          "destinySpent": "Destiny Spent",
+          "destinyBurnt": "Destiny Burnt",
+          "destinyInvested": "Destiny Invested"
+        },
+        "test": {
+          "spellcasting": "Spellcasting",
+          "invocation": "Invocation",
+          "alignment": "Alignment",
+          "unleashing": "Unleashing"
+        }
       }
     },
     "constants": {
