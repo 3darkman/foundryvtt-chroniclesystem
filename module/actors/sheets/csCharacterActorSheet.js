@@ -7,6 +7,7 @@ import { Technique } from "../../technique.js";
 import {CSActorSheet} from "./csActorSheet.js";
 import LOGGER from "../../utils/logger.js";
 import SystemUtils from "../../utils/systemUtils.js";
+import {CSConstants} from "../../system/csConstants.js";
 
 
 export class CSCharacterActorSheet extends CSActorSheet {
@@ -16,7 +17,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
       "armor",
       "equipment",
       "benefit",
-      "drawback"
+      "drawback",
+      "technique"
   ]
 
   /** @override */
@@ -54,10 +56,14 @@ export class CSCharacterActorSheet extends CSActorSheet {
     character.owned.benefits = this._checkNull(data.itemsByType['benefit']);
     character.owned.drawbacks = this._checkNull(data.itemsByType['drawback']);
     character.owned.abilities = this._checkNull(data.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
+    character.owned.techniques = this._checkNull(data.itemsByType['technique']).sort((a, b) => a.name.localeCompare(b.name));
 
     data.dispositions = ChronicleSystem.dispositions;
 
     data.notEquipped = ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED;
+
+    data.techniquesTypes = CSConstants.TechniqueType;
+    data.techniquesCosts = CSConstants.TechniqueCost;
 
     character.owned.weapons.forEach((weapon) => {
       let info = weapon.data.specialty.split(':');

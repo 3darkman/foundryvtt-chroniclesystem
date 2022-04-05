@@ -1,2 +1,20 @@
 <div class="tab flexrow" data-group="primary" data-tab="sorcery">
+    <ol class="techniques-list list">
+        {{#each data.data.owned.techniques as |technique|}}
+            <li  class="item technique flexrow" data-item-id="{{_id}}">
+                <div class="item-edit field"><a>{{technique.name}}</a></div>
+            </li>
+            {{#each technique.data.works as |work|}}
+                <li  class="item work" data-item-id="{{_id}}">
+                    <div class="flexrow">
+                        <div class="field">{{work.name}}</div>
+                        <div class="field">{{localize (lookup ../../techniquesTypes work.type)}}</div>
+                        <div class="field">{{localize (lookup ../../techniquesCosts work.cost)}}</div>
+                        <div class="item-controls"><a><i class="far fa-caret-square-down"></i></a></div>
+                    </div>
+                    <div class="description hidden">{{enrich work.description}}</div>
+                </li>
+            {{/each}}
+        {{/each}}
+    </ol>
 </div>

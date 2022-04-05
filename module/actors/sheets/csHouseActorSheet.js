@@ -94,10 +94,6 @@ export class CSHouseActorSheet extends CSActorSheet {
 
         if (!this.options.editable) return;
 
-        html.find('.item .item-controls').on('click', (ev) => {
-            $(ev.currentTarget).parents('.item').find('.description').slideToggle();
-        });
-
         html.find(".family-list").on("click", ".item-control", this._onclickMemberControl.bind(this));
         html.find(".servants-list").on("click", ".item-control", this._onclickMemberControl.bind(this));
         html.find('.member-name').click(this._openActorSheet.bind(this));
