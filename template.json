@@ -8,6 +8,10 @@
           "current": 0,
           "max": 0
         },
+        "sorceryPoints": {
+          "current": 0,
+          "max": 0
+        },
         "derivedStats": {
           "intrigueDefense": {
             "value": 0,

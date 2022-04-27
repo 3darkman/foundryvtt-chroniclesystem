@@ -103,6 +103,7 @@
         "injury": "Injury",
         "wound": "Wound",
         "others": "Others",
+        "techniques": "Techniques",
         "dispositions": {
           "affectionate": "affectionate",
           "friendly": "friendly",

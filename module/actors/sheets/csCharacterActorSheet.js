@@ -81,7 +81,20 @@ export class CSCharacterActorSheet extends CSActorSheet {
       weapon.formula = formula;
     });
 
-    this._calculateTechniques(data);
+    character.owned.techniques.forEach((technique) => {
+      let works = data.currentInjuries = Object.values(technique.data.works);
+      works.forEach((work) => {
+        if (work.type === "SPELL") {
+          work.test.spellcastingFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.spellcasting, null);
+        } else {
+          work.test.alignmentFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.alignment, null);
+          work.test.invocationFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.invocation, null);
+          work.test.unleashingFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.unleashing, null);
+        }
+      });
+    });
+
+    this._calculateIntrigueTechniques(data);
 
     data.currentInjuries = Object.values(character.injuries).length;
     data.currentWounds = Object.values(character.wounds).length;
@@ -91,7 +104,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     return data;
   }
 
-  _calculateTechniques(data) {
+  _calculateIntrigueTechniques(data) {
     let cunningValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.CUNNING));
     let willValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL));
     let persuasionValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION));

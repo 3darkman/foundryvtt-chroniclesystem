@@ -17,6 +17,17 @@
   .alert {
     color: #AA0000;
   }
+
+  .bottom {
+    vertical-align: bottom;
+    align-self: flex-end;
+  }
+
+  .no-margin {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   &.sheet {
     .window-content {
       height: 100%;
@@ -24,6 +35,13 @@
       overflow-y: hidden;
       background: @background-color;
 
+      .header-field {
+        background: @primary-color;
+        color: @field-color;
+        padding: @medium-margin;
+        margin: @medium-margin 0 0 0;
+        text-align: center;
+      }
       .sheet-header {
         .header-fields {
           .complements {

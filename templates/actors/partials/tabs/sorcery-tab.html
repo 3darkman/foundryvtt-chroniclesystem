@@ -1,20 +1,75 @@
-<div class="tab flexrow" data-group="primary" data-tab="sorcery">
-    <ol class="techniques-list list">
-        {{#each data.data.owned.techniques as |technique|}}
-            <li  class="item technique flexrow" data-item-id="{{_id}}">
-                <div class="item-edit field"><a>{{technique.name}}</a></div>
-            </li>
-            {{#each technique.data.works as |work|}}
-                <li  class="item work" data-item-id="{{_id}}">
-                    <div class="flexrow">
-                        <div class="field">{{work.name}}</div>
-                        <div class="field">{{localize (lookup ../../techniquesTypes work.type)}}</div>
-                        <div class="field">{{localize (lookup ../../techniquesCosts work.cost)}}</div>
-                        <div class="item-controls"><a><i class="far fa-caret-square-down"></i></a></div>
+<div class="tab" data-group="primary" data-tab="sorcery">
+    <section class="sorcery">
+        <header class="header-field">
+            <span>Sorcery Points</span>
+        </header>
+        <section class="sorcery-points flexrow">
+            <section class="">
+            </section>
+            <section class="">
+            </section>
+            <section class="flexrow">
+                {{> (formGroup) labelText="Current:" id="data.sorceryPoints.current" value=data.data.sorceryPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
+                {{> (formGroup) labelText="Max:" id="data.sorceryPoints.max" value=data.data.sorceryPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
+            </section>
+        </section>
+        <header class="header-field">
+            <span>{{localize "CS.sheets.character.techniques"}}</span>
+        </header>
+        <ol class="techniques-list list">
+            <li class="list-header">
+                <div class="flexrow">
+                    <div class="field size150 bottom">{{localize "CS.sheets.generalLabels.name"}}</div>
+                    <div class="field size75 center bottom">{{localize "CS.sheets.techniqueItem.type"}}</div>
+                    <div class="field size200 center bottom">
+                        <div>{{localize "CS.sheets.techniqueItem.test.spellcasting"}}</div>
+                        <div class="flexrow bottom no-margin">
+                            <div class="no-margin">{{localize "CS.sheets.techniqueItem.test.alignment"}}</div>
+                            <div class="no-margin">{{localize "CS.sheets.techniqueItem.test.invocation"}}</div>
+                            <div class="no-margin">{{localize "CS.sheets.techniqueItem.test.unleashing"}}</div>
+                        </div>
                     </div>
-                    <div class="description hidden">{{enrich work.description}}</div>
+                    <div class="field bottom">{{localize "CS.sheets.techniqueItem.cost"}}</div>
+                    <div class="item-controls"></div>
+                </div>
+            </li>
+            {{#each data.data.owned.techniques as |technique|}}
+                <li  class="item technique" data-item-id="{{_id}}">
+                    <div class="item-edit technique-header"><a>{{technique.name}}</a></div>
                 </li>
+                {{#each technique.data.works as |work|}}
+                    <li  class="item work" data-item-id="{{_id}}">
+                        <div class="flexrow">
+                            <div class="field size150"><B>{{work.name}}</B></div>
+                            <div class="field size75 center">{{localize (lookup ../../techniquesTypes work.type)}}</div>
+                            {{#ifEquals work.type "SPELL"}}
+                                <div class="field size200 rollable center" id="formula:{{work.test.spellcasting}}:{{formulaToStr work.test.spellcastingFormula}}">
+                                    <a>{{format-formula work.test.spellcastingFormula}}</a>
+                                </div>
+                            {{else}}
+                                <div class="field flexrow size200">
+                                    <div class="field size150 rollable center" id="formula:{{work.test.alignment}}:{{formulaToStr work.test.alignmentFormula}}">
+                                        <a>{{format-formula work.test.alignmentFormula}}</a>
+                                    </div>
+                                    <div class="field size150 rollable center" id="formula:{{work.test.invocation}}:{{formulaToStr work.test.invocationFormula}}">
+                                        <a>{{format-formula work.test.invocationFormula}}</a>
+                                    </div>
+                                    <div class="field size150 rollable center" id="formula:{{work.test.unleashing}}:{{formulaToStr work.test.unleashingFormula}}">
+                                        <a>{{format-formula work.test.unleashingFormula}}</a>
+                                    </div>
+                                </div>
+                            {{/ifEquals}}
+                            <div class="field">{{localize (lookup ../../techniquesCosts work.cost)}}</div>
+                            <div class="item-controls"><a><i class="far fa-caret-square-down"></i></a></div>
+                        </div>
+                        <div class="flexrow">
+                            <div class="field"></div>
+                            <div class="field size300 resonance"><b>{{localize "CS.sheets.techniqueItem.resonance"}}:</b> {{work.resonance}}</div>
+                        </div>
+                        <div class="description hidden">{{enrich work.description}}</div>
+                    </li>
+                {{/each}}
             {{/each}}
-        {{/each}}
-    </ol>
+        </ol>
+    </section>
 </div>
