@@ -167,6 +167,9 @@ export class CSCharacterActor extends CSActor {
 
     addModifier(type, documentId, value, isDocument = true, save = false) {
         LOGGER.trace(`add ${documentId} modifier to ${type} | csCharacterActor.js`);
+
+        console.assert(this.modifiers, "call actor.updateTempModifiers before adding a modifier!");
+
         if (!this.modifiers[type]) {
             this.modifiers[type] = [];
         }
@@ -187,6 +190,8 @@ export class CSCharacterActor extends CSActor {
 
     addPenalty(type, documentId, value, isDocument = true, save = false) {
         LOGGER.trace(`add ${documentId} penalty to ${type} | csCharacterActor.js`);
+
+        console.assert(this.penalties, "call actor.updateTempPenalties before adding a penalty!");
 
         if (!this.penalties[type]) {
             this.penalties[type] = [];
@@ -213,6 +218,9 @@ export class CSCharacterActor extends CSActor {
 
     removeModifier(type, documentId, save = false) {
         LOGGER.trace(`remove ${documentId} modifier to ${type} | csCharacterActor.js`);
+
+        console.assert(this.modifiers, "call actor.updateTempModifiers before removing a modifier!");
+
         if (this.modifiers[type]) {
             let index = this.modifiers[type].indexOf((mod) => mod._id === documentId);
             this.modifiers[type].splice(index, 1);
@@ -223,6 +231,9 @@ export class CSCharacterActor extends CSActor {
 
     removePenalty(type, documentId, save = false) {
         LOGGER.trace(`remove ${documentId} penalty to ${type} | csCharacterActor.js`);
+
+        console.assert(this.penalties, "call actor.updateTempPenalties before removing a penalty!");
+
         if (this.penalties[type]) {
             let index = this.penalties[type].indexOf((mod) => mod._id === documentId);
             this.penalties[type].splice(index, 1);
@@ -240,10 +251,12 @@ export class CSCharacterActor extends CSActor {
     }
 
     saveModifiers() {
+        console.assert(this.modifiers, "call actor.updateTempModifiers before saving the modifiers!");
         this.update({"data.modifiers" : this.modifiers}, {diff:false});
     }
 
     savePenalties() {
+        console.assert(this.penalties, "call actor.updateTempPenalties before saving the penalties!");
         this.update({"data.penalties" : this.penalties}, {diff:false});
     }
 
