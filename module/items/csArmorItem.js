@@ -8,10 +8,12 @@ export class CSArmorItem extends CSItem {
         super.onEquippedChanged(actor, isEquipped);
         if (isEquipped) {
             actor.addModifier(ChronicleSystem.modifiersConstants.AGILITY, this.data._id, this.data.data.penalty);
+            actor.addModifier(ChronicleSystem.modifiersConstants.COMBAT_DEFENSE, this.data._id, this.data.data.penalty);
             actor.addModifier(ChronicleSystem.modifiersConstants.DAMAGE_TAKEN, this.data._id, this.data.data.rating);
         } else {
             actor.removeModifier(ChronicleSystem.modifiersConstants.AGILITY, this.data._id);
             actor.removeModifier(ChronicleSystem.modifiersConstants.DAMAGE_TAKEN, this.data._id);
+            actor.removeModifier(ChronicleSystem.modifiersConstants.COMBAT_DEFENSE, this.data._id);
         }
     }
 

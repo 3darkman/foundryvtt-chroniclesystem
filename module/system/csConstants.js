@@ -17,6 +17,14 @@ CSConstants.Templates = {
     }
 }
 
+CSConstants.Settings = {
+    SYSTEM_NAME: "chroniclesystem",
+    ASOIAF_DEFENSE_STYLE: "asoiafDefenseStyle",
+    TRACE_LOGS: "traceLogs",
+    DEBUG_LOGS: "debugLogs",
+    CURRENT_VERSION: "version"
+}
+
 CSConstants.HouseResources = {
     DEFENSE: "CS.sheets.house.resources.defense",
     INFLUENCE: "CS.sheets.house.resources.influence",

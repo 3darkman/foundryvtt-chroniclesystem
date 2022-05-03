@@ -19,6 +19,7 @@ import {CSAbilityItemSheet} from "../items/sheets/csAbilityItemSheet.js";
 import {CSEventItemSheet} from "../items/sheets/csEventItemSheet.js";
 import {CSHoldingItemSheet} from "../items/sheets/csHoldingItemSheet.js";
 import {CSTechniqueItemSheet} from "../items/sheets/cs-technique-item-sheet.js";
+import {migrateData} from "../migrations/migration.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -63,6 +64,10 @@ Hooks.once("init", async function() {
 
     registerSystemSettings();
     await preloadHandlebarsTemplates();
+});
+
+Hooks.once("ready", async () => {
+    await migrateData();
 });
 
 Hooks.on('preCreateItem', (item, data) => {

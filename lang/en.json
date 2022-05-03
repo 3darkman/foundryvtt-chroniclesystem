@@ -34,6 +34,10 @@
       "traceLogs": {
         "name": "Trace Logs",
         "hint": ""
+      },
+      "asoiafDefenseStyle": {
+        "name": "ASoIaF Defense Style",
+        "hint": "The armor penalty influences the character's combat defense. This Needs Foundry refresh (F5)."
       }
     },
     "sheets": {
