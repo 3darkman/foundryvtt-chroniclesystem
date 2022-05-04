@@ -49,3 +49,15 @@ CSConstants.TechniqueCost = {
     WOUND: "CS.sheets.character.wound",
     OTHER: "CS.sheets.generalLabels.others"
 }
+
+CSConstants.ItemTypes = {
+    ARMOR: "armor",
+    WEAPON: "weapon",
+    ABILITY: "ability",
+    EQUIPMENT: "equipment",
+    BENEFIT: "benefit",
+    DRAWBACK: "drawback",
+    EVENT: "event",
+    HOLDING: "holding",
+    TECHNIQUE: "technique"
+}

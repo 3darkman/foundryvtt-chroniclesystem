@@ -1,8 +1,10 @@
-export async function task030() {
+import {CSConstants} from "../system/csConstants.js";
+
+function addActorArmorCombatDefenseModifier() {
     const actors = Array.from(game.actors?.values() || []);
     for (const actor of actors) {
         for (const ownedItem of Array.from(actor.items.values())) {
-            if (ownedItem.type === "armor") {
+            if (ownedItem.type === CSConstants.ItemTypes.ARMOR) {
                 if (ownedItem.data.data.equipped === 1) {
                     actor.updateTempModifiers();
                     actor.addModifier(ChronicleSystem.modifiersConstants.COMBAT_DEFENSE,
@@ -14,4 +16,8 @@ export async function task030() {
             }
         }
     }
+}
+
+export async function task030() {
+    addActorArmorCombatDefenseModifier();
 }

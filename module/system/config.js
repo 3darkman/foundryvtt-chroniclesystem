@@ -20,6 +20,7 @@ import {CSEventItemSheet} from "../items/sheets/csEventItemSheet.js";
 import {CSHoldingItemSheet} from "../items/sheets/csHoldingItemSheet.js";
 import {CSTechniqueItemSheet} from "../items/sheets/cs-technique-item-sheet.js";
 import {migrateData} from "../migrations/migration.js";
+import {loadAbilityList} from "./load-ability-list.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -68,6 +69,7 @@ Hooks.once("init", async function() {
 
 Hooks.once("ready", async () => {
     await migrateData();
+    await loadAbilityList();
 });
 
 Hooks.on('preCreateItem', (item, data) => {
