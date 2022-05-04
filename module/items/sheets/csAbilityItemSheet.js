@@ -9,18 +9,15 @@ export class CSAbilityItemSheet extends CSItemSheet {
     }
 
     async _onClickSpecialtyCreate(ev) {
-        const actor = this.item.actor;
         const item = this.item;
-        if (actor) {
-            let specialty = {
-                name: "",
-                rating: 0,
-                modifier: 0
-            };
-            let newSpec = Object.values(item.data.data.specialties);
-            newSpec.push(specialty);
-            item.update({"data.specialties" : newSpec});
-        }
+        let specialty = {
+            name: "",
+            rating: 0,
+            modifier: 0
+        };
+        let newSpec = Object.values(item.data.data.specialties);
+        newSpec.push(specialty);
+        item.update({"data.specialties" : newSpec});
     }
 
     async _onclickSpecialtyControl(event) {
