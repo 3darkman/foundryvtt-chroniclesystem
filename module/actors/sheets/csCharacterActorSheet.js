@@ -7,6 +7,7 @@ import { Technique } from "../../technique.js";
 import {CSActorSheet} from "./csActorSheet.js";
 import LOGGER from "../../utils/logger.js";
 import SystemUtils from "../../utils/systemUtils.js";
+import {CSConstants} from "../../system/csConstants.js";
 
 
 export class CSCharacterActorSheet extends CSActorSheet {
@@ -16,7 +17,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
       "armor",
       "equipment",
       "benefit",
-      "drawback"
+      "drawback",
+      "technique"
   ]
 
   /** @override */
@@ -54,10 +56,14 @@ export class CSCharacterActorSheet extends CSActorSheet {
     character.owned.benefits = this._checkNull(data.itemsByType['benefit']);
     character.owned.drawbacks = this._checkNull(data.itemsByType['drawback']);
     character.owned.abilities = this._checkNull(data.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
+    character.owned.techniques = this._checkNull(data.itemsByType['technique']).sort((a, b) => a.name.localeCompare(b.name));
 
     data.dispositions = ChronicleSystem.dispositions;
 
     data.notEquipped = ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED;
+
+    data.techniquesTypes = CSConstants.TechniqueType;
+    data.techniquesCosts = CSConstants.TechniqueCost;
 
     character.owned.weapons.forEach((weapon) => {
       let info = weapon.data.specialty.split(':');
@@ -75,7 +81,20 @@ export class CSCharacterActorSheet extends CSActorSheet {
       weapon.formula = formula;
     });
 
-    this._calculateTechniques(data);
+    character.owned.techniques.forEach((technique) => {
+      let works = data.currentInjuries = Object.values(technique.data.works);
+      works.forEach((work) => {
+        if (work.type === "SPELL") {
+          work.test.spellcastingFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.spellcasting, null);
+        } else {
+          work.test.alignmentFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.alignment, null);
+          work.test.invocationFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.invocation, null);
+          work.test.unleashingFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.unleashing, null);
+        }
+      });
+    });
+
+    this._calculateIntrigueTechniques(data);
 
     data.currentInjuries = Object.values(character.injuries).length;
     data.currentWounds = Object.values(character.wounds).length;
@@ -85,7 +104,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     return data;
   }
 
-  _calculateTechniques(data) {
+  _calculateIntrigueTechniques(data) {
     let cunningValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.CUNNING));
     let willValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL));
     let persuasionValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION));

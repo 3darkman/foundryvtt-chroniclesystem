@@ -1,12 +1,13 @@
-/**
- * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
- * @extends {Actor}
- */
 import {ChronicleSystem} from "../system/ChronicleSystem.js";
 import {CSActor} from "./csActor.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
+import {CSConstants} from "../system/csConstants.js";
 
+/**
+ * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
+ * @extends {CSActor}
+ */
 export class CSCharacterActor extends CSActor {
     modifiers;
     penalties;
@@ -46,6 +47,8 @@ export class CSCharacterActor extends CSActor {
         data.derivedStats.composure.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL)) * 3;
         data.derivedStats.composure.total = data.derivedStats.composure.value + parseInt(data.derivedStats.composure.modifier);
         data.derivedStats.combatDefense.value = this.calcCombatDefense();
+
+
         data.derivedStats.combatDefense.total = data.derivedStats.combatDefense.value + parseInt(data.derivedStats.combatDefense.modifier);
         data.derivedStats.health.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)) * 3;
         data.derivedStats.health.total = data.derivedStats.health.value + parseInt(data.derivedStats.health.modifier);
@@ -164,6 +167,9 @@ export class CSCharacterActor extends CSActor {
 
     addModifier(type, documentId, value, isDocument = true, save = false) {
         LOGGER.trace(`add ${documentId} modifier to ${type} | csCharacterActor.js`);
+
+        console.assert(this.modifiers, "call actor.updateTempModifiers before adding a modifier!");
+
         if (!this.modifiers[type]) {
             this.modifiers[type] = [];
         }
@@ -184,6 +190,8 @@ export class CSCharacterActor extends CSActor {
 
     addPenalty(type, documentId, value, isDocument = true, save = false) {
         LOGGER.trace(`add ${documentId} penalty to ${type} | csCharacterActor.js`);
+
+        console.assert(this.penalties, "call actor.updateTempPenalties before adding a penalty!");
 
         if (!this.penalties[type]) {
             this.penalties[type] = [];
@@ -210,6 +218,9 @@ export class CSCharacterActor extends CSActor {
 
     removeModifier(type, documentId, save = false) {
         LOGGER.trace(`remove ${documentId} modifier to ${type} | csCharacterActor.js`);
+
+        console.assert(this.modifiers, "call actor.updateTempModifiers before removing a modifier!");
+
         if (this.modifiers[type]) {
             let index = this.modifiers[type].indexOf((mod) => mod._id === documentId);
             this.modifiers[type].splice(index, 1);
@@ -220,6 +231,9 @@ export class CSCharacterActor extends CSActor {
 
     removePenalty(type, documentId, save = false) {
         LOGGER.trace(`remove ${documentId} penalty to ${type} | csCharacterActor.js`);
+
+        console.assert(this.penalties, "call actor.updateTempPenalties before removing a penalty!");
+
         if (this.penalties[type]) {
             let index = this.penalties[type].indexOf((mod) => mod._id === documentId);
             this.penalties[type].splice(index, 1);
@@ -237,10 +251,12 @@ export class CSCharacterActor extends CSActor {
     }
 
     saveModifiers() {
+        console.assert(this.modifiers, "call actor.updateTempModifiers before saving the modifiers!");
         this.update({"data.modifiers" : this.modifiers}, {diff:false});
     }
 
     savePenalties() {
+        console.assert(this.penalties, "call actor.updateTempPenalties before saving the penalties!");
         this.update({"data.penalties" : this.penalties}, {diff:false});
     }
 
@@ -256,9 +272,16 @@ export class CSCharacterActor extends CSActor {
     }
 
     calcCombatDefense() {
-        return this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS)) +
+        let value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS)) +
             this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.AGILITY)) +
             this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ATHLETICS));
+
+        if (game.settings.get(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.ASOIAF_DEFENSE_STYLE)){
+            let mod = this.getModifier(ChronicleSystem.modifiersConstants.COMBAT_DEFENSE);
+            value += mod.total;
+        }
+
+        return value;
     }
 
     calculateMovementData() {

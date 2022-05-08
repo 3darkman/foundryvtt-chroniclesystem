@@ -1,5 +1,4 @@
 <form class="{{cssClass}}" autocomplete="off">
-
     {{!-- Sheet Header --}}
     <header class="sheet-header">
         <div class="header-fields">
@@ -18,11 +17,12 @@
 
     {{!-- Sheet Tab Navigation --}}
     <nav  class="sheet-tabs flexrow tabs" data-group="primary">
-        <a  class="item"  data-tab="abilities">Abilities</a>
-        <a  class="item"  data-tab="combat-and-intrigue">Combat and Intrigue</a>
-        <a  class="item"  data-tab="qualities">Qualities</a>
-        <a  class="item"  data-tab="equipments">Equipments</a>
-        <a  class="item"  data-tab="actor-description">Description</a>
+        <a  class="item"  data-tab="abilities">{{localize "CS.sheets.character.tabs.abilities"}}</a>
+        <a  class="item size150"  data-tab="combat-and-intrigue">{{localize "CS.sheets.character.tabs.combat-intrigue"}}</a>
+        <a  class="item"  data-tab="qualities">{{localize "CS.sheets.character.tabs.qualities"}}</a>
+        <a class="item" data-tab="sorcery">{{localize "CS.sheets.character.tabs.sorcery"}}</a>
+        <a  class="item"  data-tab="equipments">{{localize "CS.sheets.character.tabs.equipments"}}</a>
+        <a  class="item"  data-tab="actor-description">{{localize "CS.sheets.character.tabs.description"}}</a>
     </nav>
 
     {{!-- Sheet Body --}}
@@ -30,6 +30,7 @@
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/abilities-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/combat-and-intrigue-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/qualities-tab.html"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.html"}}
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/description-tab.html"}}
     </section>

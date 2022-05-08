@@ -1,5 +1,20 @@
 #Change Log
 
+## 0.3.0
+
+### Added
+
+- Sorcery Techniques Sheet
+- Character's Sorcery Tab
+- Settings option to use ASoIaf Armor Penalty rules instead
+- Ability's Specialties can be added to World's Abilities Item now 
+
+### Changed
+- little code refactoring to clarity
+
+### Fixed
+- Changes to Character's Height accept alphanumeric characters 
+
 ## 0.2.0
 
 ### Added

@@ -2,7 +2,6 @@ import {doRoll} from "../dieroll.js";
 import {DiceRollFormula} from "../diceRollFormula.js";
 import {Disposition} from "../disposition.js";
 import LOGGER from "../utils/logger.js";
-import SystemUtils from "../utils/systemUtils.js";
 
 export const ChronicleSystem ={}
 
@@ -90,8 +89,8 @@ function adjustFormulaByWeapon (actor, formula, weapon) {
 function getActorTestFormula(actor, abilityName, specialtyName = null) {
     console.assert(actor, "actor is invalid!");
     console.assert(abilityName, "ability name is invalid!");
-    let ability = undefined;
-    let specialty = undefined;
+    let ability;
+    let specialty;
     if (specialtyName === null) {
         [ability, specialty] = actor.getAbility(abilityName);
     } else {
@@ -156,7 +155,8 @@ ChronicleSystem.modifiersConstants = {
     STATUS: "status",
 
     BULK: "bulk",
-    DAMAGE_TAKEN: "damage_taken"
+    DAMAGE_TAKEN: "damage_taken",
+    COMBAT_DEFENSE: "combat_defense"
 }
 
 ChronicleSystem.keyConstants = {

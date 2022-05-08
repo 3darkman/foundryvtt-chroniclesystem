@@ -5,6 +5,8 @@ This is a fan-created implementation of **Green Ronin's Chronicle System** for *
 It currently has one functional character sheet with the following characteristics:
 - Rollable test values
 - Armor's bulk and penalty values influencing the character
+- Support to Sorcery rules
+- Support to ASoIaF Armor penalty (see Settings)
 - Fatigue, Frustration, Stress, Injury, and Wound values affect the character's rolls (although the Ability tab still shows the basic abilities values)
 - Weapon and armor states change between equipped or not, offhand or not (although I still need to work on adaptable weapons)
 
@@ -23,7 +25,6 @@ And a House Sheet:
 
 Some of the future implementations include:
 - To Character Sheet
-  - A sorcery tab on the character sheet (I haven't done it yet, as I don't really know the rules)
   - Create a system for items and qualities in which, when registered, they already define their modifiers and penalties.
 - To House Sheet
   - Create the House Units actors and yours sheets.

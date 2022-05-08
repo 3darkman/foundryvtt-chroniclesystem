@@ -1,0 +1,59 @@
+<div class="tab flexrow details" data-group="primary" data-tab="details">
+    <section class="item-stats">
+        <header class="header-field flexrow">
+            <span>{{localize "CS.sheets.techniqueItem.arts"}}</span>
+            <div class="header-field-add">
+                <a class="art-create" data-type="art"><i class="fa fa-plus"></i></a>
+            </div>
+        </header>
+        <ol class="art-list list resizable" data-base-size="150">
+            {{#each data.data.arts as |art id|}}
+                <li class="art item flexrow" data-item-id="{{id}}">
+                    <!--suppress HtmlFormInputWithoutLabel -->
+                    <input
+                            class="big-field"
+                            type="text"
+                            name="data.arts.{{id}}.name"
+                            value="{{art.name}}"
+                            data-dtype="String"
+                    />
+                    <a class="art-control item-controls" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                </li>
+            {{/each}}
+        </ol>
+        <header class="header-field">
+            <span>{{localize "CS.sheets.techniqueItem.learning"}}</span>
+        </header>
+        {{> (formGroup)
+                id="data.learning.time"
+                labelText="CS.sheets.techniqueItem.learningTime"
+                inputCssClass="size150"
+                value=data.data.learning.time
+                dataType="String"
+        }}
+        {{> (formGroup)
+                id="data.learning.difficult"
+                labelText="CS.sheets.techniqueItem.learningDifficult"
+                inputCssClass="size150"
+                value=data.data.learning.difficult
+                dataType="Number"
+        }}
+    </section>
+    <section class="description">
+        {{> (formGroup)
+                id="data.type"
+                labelText="CS.sheets.techniqueItem.type"
+                inputCssClass="size400"
+                value=data.data.type
+                dataType="String"
+        }}
+        {{> (formGroup)
+                id="data.scales"
+                labelText="CS.sheets.techniqueItem.scales"
+                inputCssClass="size400"
+                value=data.data.scales
+                dataType="String"
+        }}
+        {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+    </section>
+</div>

@@ -12,9 +12,11 @@
                     <label class="ability-label item-edit"><a >{{ability.name}}</a></label>
                     <div class="ability-specialities">
                         {{#each ability.data.specialties as |specialty key|}}
+                            {{#if specialty.rating}}
                             <div class="rollable" id="specialty:{{specialty.name}}:{{../this.name}}">
                                 <a>{{specialty.name}} {{specialty.rating}}B{{modifier specialty.modifier}}</a>&nbsp;
                             </div>
+                            {{/if}}
                         {{/each}}
                     </div>
                 </li>

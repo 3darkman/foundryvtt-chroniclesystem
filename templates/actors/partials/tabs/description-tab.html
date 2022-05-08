@@ -20,7 +20,7 @@
                                 type="text"
                                 value="{{actor.data.data.height}}"
                                 placeholder="Height"
-                                data-dtype="Number"
+                                data-dtype="String"
                         />
                     </span>
                 </div>
@@ -201,7 +201,6 @@
             <span>Personal History</span>
         </header>
         <div class="form-group">
-            {{log actor}}
             {{editor content=actor.data.data.personalHistory target="data.personalHistory" button=true owner=owner editable=editable}}
         </div>
     </section>

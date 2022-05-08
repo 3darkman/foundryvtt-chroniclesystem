@@ -39,7 +39,6 @@
         {{/if}}
         <section class="description">
             {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
-            {{#if item.isOwned}}
             <header class="header-field flexrow">
                 <div class="header-title">
                     <span>Specialties</span>
@@ -49,7 +48,6 @@
                 </div>
             </header>
             <ol class="specialties-list list resizable" data-base-size="150">
-
                 {{#each data.data.specialties as |specialty id|}}
                     <li class="specialty item flexrow" data-item-id="{{id}}">
                         <!--suppress HtmlFormInputWithoutLabel -->
@@ -62,6 +60,7 @@
                                 data-dtype="String"
                         />
                         <!--suppress HtmlFormInputWithoutLabel -->
+                        {{#if ../item.isOwned}}
                         <input
                                 class="small-field"
                                 type="text"
@@ -79,11 +78,12 @@
                                 placeholder="Modifier"
                                 data-dtype="Number"
                         />
+                        {{/if}}
                         <a class="specialty-control item-controls" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
                     </li>
                 {{/each}}
             </ol>
         </section>
-        {{/if}}
+
     </main>
 </form>

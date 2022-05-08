@@ -8,6 +8,11 @@ export class CSActorSheet extends ActorSheet {
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
 
+        html.find('.item .item-controls').on('click', (ev) => {
+            ev.preventDefault();
+            $(ev.currentTarget).parents('.item').find('.description').slideToggle();
+        });
+
         // Update Inventory Item
         html.find('.item-edit').click(this._showEmbeddedItemSheet.bind(this));
         html.find('.rollable').click(this._onClickRoll.bind(this));

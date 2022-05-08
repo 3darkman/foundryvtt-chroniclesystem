@@ -1,10 +1,12 @@
+import {CSConstants} from "../system/csConstants.js";
+
 export default class LOGGER {
     static log(msg) {
         console.log(`CS LOG | ${msg}`);
     }
 
     static debug(msg) {
-        if (game.settings.get("chroniclesystem", "debugLogs")) {
+        if (game.settings.get(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.DEBUG_LOGS)) {
             console.debug(`CS DBG | ${msg}`);
             if (typeof msg === "object" && msg !== null) {
                 console.log(msg);
@@ -13,7 +15,7 @@ export default class LOGGER {
     }
 
     static debugObject(obj) {
-        if (game.settings.get("chroniclesystem", "debugLogs")) {
+        if (game.settings.get(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.DEBUG_LOGS)) {
             console.debug(obj);
         }
     }
@@ -23,7 +25,7 @@ export default class LOGGER {
     }
 
     static trace(msg) {
-        if (game.settings.get("chroniclesystem", "traceLogs")) {
+        if (game.settings.get(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.TRACE_LOGS)) {
             console.log(`CS TRC | ${msg}`);
         }
     }

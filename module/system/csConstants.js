@@ -17,6 +17,14 @@ CSConstants.Templates = {
     }
 }
 
+CSConstants.Settings = {
+    SYSTEM_NAME: "chroniclesystem",
+    ASOIAF_DEFENSE_STYLE: "asoiafDefenseStyle",
+    TRACE_LOGS: "traceLogs",
+    DEBUG_LOGS: "debugLogs",
+    CURRENT_VERSION: "version"
+}
+
 CSConstants.HouseResources = {
     DEFENSE: "CS.sheets.house.resources.defense",
     INFLUENCE: "CS.sheets.house.resources.influence",
@@ -25,4 +33,19 @@ CSConstants.HouseResources = {
     POPULATION: "CS.sheets.house.resources.population",
     POWER: "CS.sheets.house.resources.power",
     WEALTH: "CS.sheets.house.resources.wealth"
+}
+
+CSConstants.TechniqueType = {
+    SPELL: "CS.sheets.techniqueItem.types.spell",
+    RITUAL: "CS.sheets.techniqueItem.types.ritual"
+}
+
+CSConstants.TechniqueCost = {
+    NONE: "CS.sheets.generalLabels.none",
+    SPEND_DESTINY: "CS.sheets.techniqueItem.costs.destinySpent",
+    BURN_DESTINY: "CS.sheets.techniqueItem.costs.destinyBurnt",
+    INVEST_DESTINY: "CS.sheets.techniqueItem.costs.destinyInvested",
+    INJURY: "CS.sheets.character.injury",
+    WOUND: "CS.sheets.character.wound",
+    OTHER: "CS.sheets.generalLabels.others"
 }
