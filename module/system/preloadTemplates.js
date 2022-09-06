@@ -9,12 +9,12 @@ export const preloadHandlebarsTemplates = async function () {
         'systems/chroniclesystem/templates/items/tabs/technique-details-tab.html',
         'systems/chroniclesystem/templates/items/tabs/technique-works-tab.html',
 
-        'systems/chroniclesystem/templates/actors/partials/tabs/abilities-tab.html',
-        'systems/chroniclesystem/templates/actors/partials/tabs/combat-and-intrigue-tab.html',
-        'systems/chroniclesystem/templates/actors/partials/tabs/qualities-tab.html',
-        'systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.html',
-        'systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.html',
-        'systems/chroniclesystem/templates/actors/partials/tabs/description-tab.html',
+        'systems/chroniclesystem/templates/actors/partials/tabs/abilities-tab.hbs',
+        'systems/chroniclesystem/templates/actors/partials/tabs/combat-and-intrigue-tab.hbs',
+        'systems/chroniclesystem/templates/actors/partials/tabs/qualities-tab.hbs',
+        'systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.hbs',
+        'systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.hbs',
+        'systems/chroniclesystem/templates/actors/partials/tabs/description-tab.hbs',
         'systems/chroniclesystem/templates/actors/partials/form-group.html',
 
         'systems/chroniclesystem/templates/actors/partials/tabs/resources-tab.html',

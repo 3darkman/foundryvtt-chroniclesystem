@@ -9,42 +9,42 @@
             </section>
             <section class="flexrow">
                 <div class="form-group">
-                    <label for="data.coins.coppers">Copper:</label>
+                    <label for="system.coins.coppers">Copper:</label>
                     <span class="form-fields">
                       <input
-                              id="data.coins.coppers"
+                              id="system.coins.coppers"
                               class="small-field"
-                              name="data.coins.coppers"
+                              name="system.coins.coppers"
                               type="text"
-                              value="{{data.data.coins.coppers}}"
+                              value="{{character.coins.coppers}}"
                               placeholder="Coopers"
                               data-dtype="Number"
                       />
                     </span>
                 </div>
                 <div class="form-group">
-                    <label for="data.coins.silvers">Silver:</label>
+                    <label for="system.coins.silvers">Silver:</label>
                     <span class="form-fields">
                       <input
-                              id="data.coins.silvers"
+                              id="system.coins.silvers"
                               class="small-field"
-                              name="data.coins.silvers"
+                              name="system.coins.silvers"
                               type="text"
-                              value="{{data.data.coins.silvers}}"
+                              value="{{character.coins.silvers}}"
                               placeholder="Silvers"
                               data-dtype="Number"
                       />
                     </span>
                 </div>
                 <div class="form-group">
-                    <label for="data.coins.golds">Gold:</label>
+                    <label for="system.coins.golds">Gold:</label>
                     <span class="form-fields">
                       <input
-                              id="data.coins.golds"
+                              id="system.coins.golds"
                               class="small-field"
-                              name="data.coins.golds"
+                              name="system.coins.golds"
                               type="text"
-                              value="{{data.data.coins.golds}}"
+                              value="{{character.coins.golds}}"
                               placeholder="Golds"
                               data-dtype="Number"
                       />
@@ -65,23 +65,23 @@
                 <div class="item-qualities"><div>Qualities</div></div>
                 <div class="item-controls"></div>
             </li>
-            {{#each data.data.owned.weapons as |weapon index|}}
+            {{#each character.owned.weapons as |weapon index|}}
                 <li  class="item weapon flexrow" data-item-id="{{_id}}">
                     <div class="weapon-label item-edit field"><a>{{weapon.name}}</a></div>
                     <div class="weapon-testdice rollable field" id="weapon-test:{{weapon.name}}:{{formulaToStr weapon.formula}}">
                         <a>{{format-formula weapon.formula}}</a>
                     </div>
                     <div class="weapon-damage field"> {{weapon.damageValue}}</div>
-                    <div class="equipment-weight field">{{weapon.data.weight}} lb</div>
-                    <div class="equipment-cost field">{{weapon.data.cost}}</div>
+                    <div class="equipment-weight field">{{weapon.system.weight}} lb</div>
+                    <div class="equipment-cost field">{{weapon.system.cost}}</div>
                     <div class="item-qualities field">
-                        {{#each weapon.data.qualities}}
+                        {{#each weapon.system.qualities}}
                             <div class="item-quality">{{name}} {{parameter}}</div>
                         {{/each}}
                     </div>
                     <div class="item-controls">
-                        <a class="checkButton equipped {{showIfContains "2|4" weapon.data.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "2|4" weapon.data.equipped 0 2}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
-                        <a class="checkButton equipped off-hand {{showIfContains "3|4" weapon.data.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "3|4" weapon.data.equipped 0 3}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
+                        <a class="checkButton equipped {{showIfContains "2|4" weapon.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "2|4" weapon.system.equipped 0 2}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
+                        <a class="checkButton equipped off-hand {{showIfContains "3|4" weapon.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "3|4" weapon.system.equipped 0 3}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
                     </div>
                 </li>
             {{/each}}
@@ -102,21 +102,21 @@
                 <div class="item-qualities"><div>Qualities</div></div>
                 <div class="item-controls"></div>
             </li>
-            {{#each data.data.owned.armors as |armor index|}}
+            {{#each character.owned.armors as |armor index|}}
                 <li  class="item weapon flexrow" data-item-id="{{_id}}">
                     <div class="armor-label item-edit field"><a>{{armor.name}}</a></div>
-                    <div class="armor-rating field"><a>{{armor.data.rating}}</a></div>
-                    <div class="armor-penalty field"><a>{{armor.data.penalty}}</a></div>
-                    <div class="armor-bulk field"><a>{{armor.data.bulk}}</a></div>
-                    <div class="equipment-weight field">{{armor.data.weight}} lb</div>
-                    <div class="equipment-cost field">{{armor.data.cost}}</div>
+                    <div class="armor-rating field"><a>{{armor.system.rating}}</a></div>
+                    <div class="armor-penalty field"><a>{{armor.system.penalty}}</a></div>
+                    <div class="armor-bulk field"><a>{{armor.system.bulk}}</a></div>
+                    <div class="equipment-weight field">{{armor.system.weight}} lb</div>
+                    <div class="equipment-cost field">{{armor.system.cost}}</div>
                     <div class="item-qualities field">
-                        {{#each armor.data.qualities}}
+                        {{#each armor.system.qualities}}
                             <div class="item-quality">{{name}} {{parameter}}</div>
                         {{/each}}
                     </div>
                     <div class="item-controls">
-                        <a class="checkButton equipped {{showIfEquals "1" armor.data.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfEquals "1" armor.data.equipped 0 1}}" data-type="armor"><i class="fas fa-shield-alt"></i></a>
+                        <a class="checkButton equipped {{showIfEquals "1" armor.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfEquals "1" armor.system.equipped 0 1}}" data-type="armor"><i class="fas fa-shield-alt"></i></a>
                     </div>
                 </li>
             {{/each}}
@@ -137,11 +137,11 @@
                 <div class="equipment-quantity">Quantity</div>
                 <div class="equipment-cost">Cost</div>
             </li>
-            {{#each data.data.owned.equipments as |equipment index|}}
+            {{#each character.owned.equipments as |equipment index|}}
                 <li  class="item equipment flexrow flex3" data-item-id="{{_id}}">
                     <div class="equipment-label item-edit field"><a>{{equipment.name}}</a></div>
-                    <div class="equipment-quantity field">{{equipment.data.quantity}}</div>
-                    <div class="equipment-cost field">{{equipment.data.cost}}</div>
+                    <div class="equipment-quantity field">{{equipment.system.quantity}}</div>
+                    <div class="equipment-cost field">{{equipment.system.cost}}</div>
                 </li>
             {{/each}}
         </ol>

@@ -6,7 +6,7 @@ export async function migrateData() {
         // players can't do this stuff anyhow.
         return;
     }
-    const latest = game.system.data.version;
+    const latest = game.system.version;
     const recentVersion = (game.settings.get(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.CURRENT_VERSION) || "0.0.0");
     await game.settings.set(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.CURRENT_VERSION, latest);
     const patchVersions = Object.keys(migrationRoutines);

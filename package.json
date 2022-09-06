@@ -1,0 +1,6 @@
+{
+  "dependencies": {},
+  "devDependencies": {
+    "@league-of-foundry-developers/foundry-vtt-types": "^9.268.0"
+  }
+}

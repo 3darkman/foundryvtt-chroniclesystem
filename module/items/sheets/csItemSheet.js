@@ -14,7 +14,7 @@ export class CSItemSheet extends ItemSheet {
 
     get template() {
         const path = 'systems/chroniclesystem/templates/items';
-        return `${path}/${this.item.data.type}.html`;
+        return `${path}/${this.item.getCSData().type}.html`;
     }
 
     activateListeners(html) {

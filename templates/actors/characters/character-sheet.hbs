@@ -5,15 +5,15 @@
             <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
             <div class="complements flexrow">
                 <label  class="attribute-label"> Ancestry: </label>
-                <input  class="medium-field flex2" type="text"  name="data.ancestries"  value="{{data.data.ancestries}}"  data-dtype="String"/>
+                <input  class="medium-field flex2" type="text"  name="system.ancestries"  value="{{character.ancestries}}"  data-dtype="String"/>
                 <label  class="attribute-label"> Age: </label>
-                <input  class="small-field"  type="text"  name="data.age"  value="{{data.data.age}}"  data-dtype="Number"/>
+                <input  class="small-field"  type="text"  name="system.age"  value="{{character.age}}"  data-dtype="Number"/>
                 <label  class="attribute-label"> Gender: </label>
-                <input  class="medium-field"  type="text"  name="data.gender"  value="{{data.data.gender}}"  data-dtype="String"/>
+                <input  class="medium-field"  type="text"  name="system.gender"  value="{{character.gender}}"  data-dtype="String"/>
             </div>
         </div>
     </header>
-
+{{log character}}
 
     {{!-- Sheet Tab Navigation --}}
     <nav  class="sheet-tabs flexrow tabs" data-group="primary">
@@ -27,11 +27,11 @@
 
     {{!-- Sheet Body --}}
     <section class="sheet-body">
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/abilities-tab.html"}}
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/combat-and-intrigue-tab.html"}}
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/qualities-tab.html"}}
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.html"}}
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.html"}}
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/description-tab.html"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/abilities-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/combat-and-intrigue-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/qualities-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/description-tab.hbs"}}
     </section>
 </form>

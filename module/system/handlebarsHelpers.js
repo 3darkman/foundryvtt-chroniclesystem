@@ -1,5 +1,6 @@
 import {ChronicleSystem} from "./ChronicleSystem.js";
 import SystemUtils from "../utils/systemUtils.js";
+import LOGGER from "../utils/logger.js";
 
 export const registerCustomHelpers = function () {
     Handlebars.registerHelper('modifier', (str) => {
@@ -8,10 +9,43 @@ export const registerCustomHelpers = function () {
         return value === 0 ? '' : value > 0 ? ` + ${value}` : ` - ${-value}`;
     });
 
+    Handlebars.registerHelper("csCompare", (v1, operator, v2) => {
+        LOGGER.trace("csCompare | handlebarsHelper | Called.");
+        switch (operator) {
+            case "==":
+                // noinspection EqualityComparisonWithCoercionJS
+                return v1 == v2;
+            case "===":
+                return v1 === v2;
+            case "!==":
+                return v1 !== v2;
+            case "<":
+                return v1 < v2;
+            case "<=":
+                return v1 <= v2;
+            case ">":
+                return v1 > v2;
+            case ">=":
+                return v1 >= v2;
+            case "&&":
+                return v1 && v2;
+            case "||":
+                return v1 || v2;
+            default:
+                return false;
+        }
+    });
 
+    Handlebars.registerHelper('csDebug', (content) => {
+        LOGGER.debug(content);
+    });
+
+    Handlebars.registerHelper('csTrace', (content) => {
+        LOGGER.trace(content);
+    });
 
     Handlebars.registerHelper('enrich', (content) => {
-        return new Handlebars.SafeString(TextEditor.enrichHTML(content));
+        return new Handlebars.SafeString(TextEditor.enrichHTML(content, {async: false}));
     });
 
     Handlebars.registerHelper('str', (content) => {

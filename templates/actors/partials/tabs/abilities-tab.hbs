@@ -4,14 +4,14 @@
             <span>Abilities</span>
         </header>
         <ol  class="abilities-list">
-            {{#each data.data.owned.abilities as |ability key|}}
+            {{#each character.owned.abilities as |ability key|}}
                 <li  class="item ability flexrow" data-item-id="{{ability._id}}">
                     <div class="ability-value rollable" id="ability:{{ability.name}}">
-                        <a>{{ability.data.rating}}d{{modifier ability.data.modifier}}</a>
+                        <a>{{ability.system.rating}}d{{modifier ability.system.modifier}}</a>
                     </div>
                     <label class="ability-label item-edit"><a >{{ability.name}}</a></label>
                     <div class="ability-specialities">
-                        {{#each ability.data.specialties as |specialty key|}}
+                        {{#each ability.system.specialties as |specialty key|}}
                             {{#if specialty.rating}}
                             <div class="rollable" id="specialty:{{specialty.name}}:{{../this.name}}">
                                 <a>{{specialty.name}} {{specialty.rating}}B{{modifier specialty.modifier}}</a>&nbsp;

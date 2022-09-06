@@ -2,6 +2,7 @@ import {doRoll} from "../dieroll.js";
 import {DiceRollFormula} from "../diceRollFormula.js";
 import {Disposition} from "../disposition.js";
 import LOGGER from "../utils/logger.js";
+import {CSRoll} from "../rolls/cs-roll.js";
 
 export const ChronicleSystem ={}
 
@@ -67,14 +68,16 @@ async function handleRoll(event, actor) {
             break;
     }
 
-    await doRoll(actor,formula, roll_definition[1]);
+    let csRoll = new CSRoll(roll_definition[1], formula);
+
+    await csRoll.doRoll(actor,formula, roll_definition[1]);
 }
 
 function adjustFormulaByWeapon (actor, formula, weapon) {
-    if (!weapon.data.training)
+    let weaponData = weapon.system;
+    if (!weaponData.training)
         return formula;
-
-    let poolModifier = formula.bonusDice - weapon.data.training;
+    let poolModifier = formula.bonusDice - weaponData.training;
 
     if (poolModifier <= 0) {
         formula.pool += poolModifier;
@@ -108,11 +111,11 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
             specModifier = specialty.modifier;
         }
         let penalties = actor.getPenalty(ability.name.toLowerCase(), false, true);
-        formula.pool = ability.data.data.rating;
+        formula.pool = ability.getCSData().rating;
         formula.dicePenalty = penalties.total;
 
         let modifiers = actor.getModifier(ability.name.toLowerCase(),false, true);
-        formula.modifier = ability.data.data.modifier + specModifier + modifiers.total;
+        formula.modifier = ability.getCSData().modifier + specModifier + modifiers.total;
         formula.bonusDice = specValue;
     }
 

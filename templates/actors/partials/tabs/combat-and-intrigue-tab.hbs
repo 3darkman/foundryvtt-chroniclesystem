@@ -9,8 +9,8 @@
             <section class="">
             </section>
             <section class="flexrow">
-                {{> (formGroup) labelText="Current:" id="data.destinyPoints.current" value=data.data.destinyPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
-                {{> (formGroup) labelText="Max:" id="data.destinyPoints.max" value=data.data.destinyPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
+                {{> (formGroup) labelText="Current:" id="data.destinyPoints.current" value=character.destinyPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
+                {{> (formGroup) labelText="Max:" id="data.destinyPoints.max" value=character.destinyPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
             </section>
         </section>
         <section class="intrigue">
@@ -28,7 +28,7 @@
                               <input
                                       name="data.derivedStats.intrigueDefense.value"
                                       type="text"
-                                      value="{{data.data.derivedStats.intrigueDefense.value}}"
+                                      value="{{character.derivedStats.intrigueDefense.value}}"
                                       placeholder="Value"
                                       readonly="readonly"
                                       data-dtype="Number"
@@ -37,7 +37,7 @@
                               <input
                                       name="data.derivedStats.intrigueDefense.modifier"
                                       type="text"
-                                      value="{{data.data.derivedStats.intrigueDefense.modifier}}"
+                                      value="{{character.derivedStats.intrigueDefense.modifier}}"
                                       placeholder="Value"
                                       data-dtype="Number"
                               />
@@ -45,7 +45,7 @@
                             <input
                                     name="data.derivedStats.intrigueDefense.total"
                                     type="text"
-                                    value="{{data.data.derivedStats.intrigueDefense.total}}"
+                                    value="{{character.derivedStats.intrigueDefense.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -60,7 +60,7 @@
                             <input
                                     name="data.derivedStats.composure.value"
                                     type="text"
-                                    value="{{data.data.derivedStats.composure.value}}"
+                                    value="{{character.derivedStats.composure.value}}"
                                     placeholder="Value"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -69,7 +69,7 @@
                             <input
                                     name="data.derivedStats.composure.modifier"
                                     type="text"
-                                    value="{{data.data.derivedStats.composure.modifier}}"
+                                    value="{{character.derivedStats.composure.modifier}}"
                                     placeholder="Modifier"
                                     data-dtype="Number"
                             />
@@ -77,23 +77,23 @@
                             <input
                                     name="data.derivedStats.composure.value"
                                     type="text"
-                                    value="{{data.data.derivedStats.composure.total}}"
+                                    value="{{character.derivedStats.composure.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
                                     data-dtype="Number"
                             />
                         </span>
                     </div>
-                    {{> (formGroup) labelText="Current:" id="data.derivedStats.composure.current" value=data.data.derivedStats.composure.current inputCssClass="" placeHolder="Current" dataType="Number" }}
+                    {{> (formGroup) labelText="Current:" id="data.derivedStats.composure.current" value=character.derivedStats.composure.current inputCssClass="" placeHolder="Current" dataType="Number" }}
                     <header class="subheader-field">
                         <span>Frustration</span>
                     </header>
-                    {{> (ratingCheckbox) max=data.data.derivedStats.frustration.total currentValue=data.data.derivedStats.frustration.current dataType="Frustration" }}
+                    {{> (ratingCheckbox) max=character.derivedStats.frustration.total currentValue=character.derivedStats.frustration.current dataType="Frustration" }}
                     <section class="stress flexrow">
                     <header class="subheader-field">
                         <span>Stress</span>
                     </header>
-                    {{> (ratingCheckbox) max=2 currentValue=data.data.currentStress dataType="Stress" }}
+                    {{> (ratingCheckbox) max=2 currentValue=character.currentStress dataType="Stress" }}
                     </section>
                 </section>
                 <section class="disposition">
@@ -102,7 +102,7 @@
                     </header>
                     <div class="disposition-list">
                         {{#each dispositions}}
-                                <div class="disposition option capitalize {{showIfEquals this.rating ../data.data.currentDisposition "selected"}}" data-id="{{this.rating}}">
+                                <div class="disposition option capitalize {{showIfEquals this.rating ../character.currentDisposition "selected"}}" data-id="{{this.rating}}">
                                     {{localize this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
                                 </div>
                         {{/each}}
@@ -149,7 +149,7 @@
                             <input
                                     name="data.derivedStats.combatDefense.value"
                                     type="text"
-                                    value="{{data.data.derivedStats.combatDefense.value}}"
+                                    value="{{character.derivedStats.combatDefense.value}}"
                                     placeholder="Value"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -158,7 +158,7 @@
                             <input
                                     name="data.derivedStats.combatDefense.modifier"
                                     type="text"
-                                    value="{{data.data.derivedStats.combatDefense.modifier}}"
+                                    value="{{character.derivedStats.combatDefense.modifier}}"
                                     placeholder="Modifier"
                                     data-dtype="Number"
                             />
@@ -166,7 +166,7 @@
                             <input
                                     name="data.derivedStats.combatDefense.value"
                                     type="text"
-                                    value="{{data.data.derivedStats.combatDefense.total}}"
+                                    value="{{character.derivedStats.combatDefense.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -181,7 +181,7 @@
                             <input
                                     name="data.derivedStats.health.value"
                                     type="text"
-                                    value="{{data.data.derivedStats.health.value}}"
+                                    value="{{character.derivedStats.health.value}}"
                                     placeholder="Value"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -190,7 +190,7 @@
                             <input
                                     name="data.derivedStats.health.modifier"
                                     type="text"
-                                    value="{{data.data.derivedStats.health.modifier}}"
+                                    value="{{character.derivedStats.health.modifier}}"
                                     placeholder="Modifier"
                                     data-dtype="Number"
                             />
@@ -198,7 +198,7 @@
                             <input
                                     name="data.derivedStats.health.value"
                                     type="text"
-                                    value="{{data.data.derivedStats.health.total}}"
+                                    value="{{character.derivedStats.health.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -211,7 +211,7 @@
                             <input
                                     name="data.derivedStats.health.current"
                                     type="text"
-                                    value="{{data.data.derivedStats.health.current}}"
+                                    value="{{character.derivedStats.health.current}}"
                                     placeholder="Current"
                                     data-dtype="Number"
                             />
@@ -220,7 +220,7 @@
                     <header class="subheader-field">
                         <span>Fatigue</span>
                     </header>
-                    {{> (ratingCheckbox) max=data.data.derivedStats.fatigue.total currentValue=data.data.derivedStats.fatigue.current dataType="Fatigue" }}
+                    {{> (ratingCheckbox) max=character.derivedStats.fatigue.total currentValue=character.derivedStats.fatigue.current dataType="Fatigue" }}
                     <header class="subheader-field">
                         <span>Movement</span>
                     </header>
@@ -229,7 +229,7 @@
                             <input
                                     name="data.movement.base"
                                     type="text"
-                                    value="{{data.data.movement.base}}"
+                                    value="{{character.movement.base}}"
                                     placeholder="Base"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -238,7 +238,7 @@
                             <input
                                     name="data.derivedStats.movement.runBonus"
                                     type="text"
-                                    value="{{data.data.movement.runBonus}}"
+                                    value="{{character.movement.runBonus}}"
                                     placeholder="Run Bonus"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -247,7 +247,7 @@
                             <input
                                     name="data.movement.bulk"
                                     type="text"
-                                    value="{{data.data.movement.bulk}}"
+                                    value="{{character.movement.bulk}}"
                                     placeholder="Bulk"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -256,7 +256,7 @@
                             <input
                                     name="data.movement.modifier"
                                     type="text"
-                                    value="{{data.data.movement.modifier}}"
+                                    value="{{character.movement.modifier}}"
                                     placeholder="Modifier"
                                     data-dtype="Number"
                             />
@@ -264,7 +264,7 @@
                             <input
                                     name="data.derivedStats.movement.total"
                                     type="text"
-                                    value="{{data.data.movement.total}}"
+                                    value="{{character.movement.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
                                     data-dtype="Number"
@@ -282,7 +282,7 @@
                         </div>
                     </header>
                     <ol class="injuries-list list resizable" data-base-size="150">
-                        {{#each data.data.injuries as |injury id|}}
+                        {{#each character.injuries as |injury id|}}
                             <li class="injury flexrow" data-item-id="{{id}}">
                                 <!--suppress HtmlFormInputWithoutLabel -->
                                 <input
@@ -306,7 +306,7 @@
                         </div>
                     </header>
                     <ol class="wounds-list list resizable" data-base-size="150">
-                        {{#each data.data.wounds as |wound id|}}
+                        {{#each character.wounds as |wound id|}}
                             <li class="wound flexrow" data-item-id="{{id}}">
                                 <!--suppress HtmlFormInputWithoutLabel -->
                                 <input
@@ -335,10 +335,10 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {{#each data.data.owned.weapons as |weapon index|}}
-                            {{#ifDifferent weapon.data.equipped ../notEquipped}}
+                        {{#each character.owned.weapons as |weapon index|}}
+                            {{#ifDifferent weapon.system.equipped ../notEquipped}}
                                 <tr>
-                                    <td>{{weapon.name}} {{showIfEquals weapon.data.equipped 3 "(Off-hand)" : ""}}</td>
+                                    <td>{{weapon.name}} {{showIfEquals weapon.system.equipped 3 "(Off-hand)" : ""}}</td>
                                     <td class="rollable" id="weapon-test:{{weapon.name}}:{{formulaToStr weapon.formula}}">
                                         <a>{{format-formula weapon.formula}}</a>
                                     </td>
@@ -360,12 +360,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {{#each data.data.owned.armors as |armor index|}}
-                            {{#ifDifferent armor.data.equipped ../notEquipped}}
+                        {{#each character.owned.armors as |armor index|}}
+                            {{#ifDifferent armor.system.equipped ../notEquipped}}
                                 <tr>
                                     <td>{{armor.name}}</td>
-                                    <td>{{armor.data.rating}}</td>
-                                    <td>{{armor.data.penalty}}</td>
+                                    <td>{{armor.system.rating}}</td>
+                                    <td>{{armor.system.penalty}}</td>
                                 </tr>
                             {{/ifDifferent}}
                         {{/each}}

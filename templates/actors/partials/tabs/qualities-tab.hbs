@@ -4,7 +4,7 @@
             <span>Benefits</span>
         </header>
         <ol  class="qualities-list">
-            {{#each data.data.owned.benefits}}
+            {{#each character.owned.benefits}}
                 <li  class="item quality" data-item-id="{{_id}}">
                     <div class="quality-label item-name">
                         <label class="flex3">{{name}} </label>
@@ -17,7 +17,7 @@
                         {{/if}}
                     </div>
 
-                    <div class="description">{{enrich data.description}}</div>
+                    <div class="description">{{enrich system.description}}</div>
                 </li>
             {{/each}}
         </ol>
@@ -27,7 +27,7 @@
             <span>Drawbacks</span>
         </header>
         <ol  class="qualities-list">
-            {{#each data.data.owned.drawbacks}}
+            {{#each character.owned.drawbacks}}
                 <li  class="item quality" data-item-id="{{_id}}">
                     <div class="quality-label item-name">
                         <label class="flex3">{{name}} </label>
@@ -39,7 +39,7 @@
                             </div>
                         {{/if}}
                     </div>
-                    <div class="description">{{enrich data.description}}</div>
+                    <div class="description">{{enrich system.description }}</div>
                 </li>
             {{/each}}
         </ol>

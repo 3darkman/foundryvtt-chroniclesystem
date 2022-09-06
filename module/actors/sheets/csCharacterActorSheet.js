@@ -25,7 +25,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
       classes: ["chroniclesystem", "character", "sheet", "actor"],
-      template: "systems/chroniclesystem/templates/actors/characters/character-sheet.html",
+      template: "systems/chroniclesystem/templates/actors/characters/character-sheet.hbs",
       width: 700,
       height: 900,
       tabs: [
@@ -45,11 +45,11 @@ export class CSCharacterActorSheet extends CSActorSheet {
   getData() {
     const data = super.getData();
     data.dtypes = ["String", "Number", "Boolean"];
-
     this.splitItemsByType(data);
 
-    let character = data.data.data;
+    let character = data.actor.getCSData();
     this.isOwner = this.actor.isOwner;
+
     character.owned.equipments = this._checkNull(data.itemsByType['equipment']);
     character.owned.weapons = this._checkNull(data.itemsByType['weapon']);
     character.owned.armors = this._checkNull(data.itemsByType['armor']);
@@ -66,12 +66,13 @@ export class CSCharacterActorSheet extends CSActorSheet {
     data.techniquesCosts = CSConstants.TechniqueCost;
 
     character.owned.weapons.forEach((weapon) => {
-      let info = weapon.data.specialty.split(':');
+      let weaponData = weapon.system;
+      let info = weaponData.specialty.split(':');
       if (info.length < 2)
         return "";
       let formula = ChronicleSystem.getActorAbilityFormula(data.actor, info[0], info[1]);
       formula = ChronicleSystem.adjustFormulaByWeapon(data.actor, formula, weapon);
-      let matches = weapon.data.damage.match('@([a-zA-Z]*)([-\+\/\*]*)([0-9]*)');
+      let matches = weaponData.damage.match('@([a-zA-Z]*)([-\+\/\*]*)([0-9]*)');
       if (matches) {
         if (matches.length === 4) {
           let ability = data.actor.getAbilityValue(matches[1]);
@@ -82,7 +83,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
     });
 
     character.owned.techniques.forEach((technique) => {
-      let works = data.currentInjuries = Object.values(technique.data.works);
+      let techniqueData = technique.system;
+      let works = data.currentInjuries = Object.values(techniqueData.works);
       works.forEach((work) => {
         if (work.type === "SPELL") {
           work.test.spellcastingFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.spellcasting, null);
@@ -100,7 +102,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     data.currentWounds = Object.values(character.wounds).length;
     data.maxInjuries = this.actor.getMaxInjuries();
     data.maxWounds = this.actor.getMaxWounds();
-
+    data.character = character;
     return data;
   }
 

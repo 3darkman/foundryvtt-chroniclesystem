@@ -9,8 +9,8 @@
             <section class="">
             </section>
             <section class="flexrow">
-                {{> (formGroup) labelText="Current:" id="data.sorceryPoints.current" value=data.data.sorceryPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
-                {{> (formGroup) labelText="Max:" id="data.sorceryPoints.max" value=data.data.sorceryPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
+                {{> (formGroup) labelText="Current:" id="data.sorceryPoints.current" value=character.sorceryPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
+                {{> (formGroup) labelText="Max:" id="data.sorceryPoints.max" value=character.sorceryPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
             </section>
         </section>
         <header class="header-field">
@@ -33,11 +33,11 @@
                     <div class="item-controls"></div>
                 </div>
             </li>
-            {{#each data.data.owned.techniques as |technique|}}
+            {{#each character.owned.techniques as |technique|}}
                 <li  class="item technique" data-item-id="{{_id}}">
                     <div class="item-edit technique-header"><a>{{technique.name}}</a></div>
                 </li>
-                {{#each technique.data.works as |work|}}
+                {{#each technique.system.works as |work|}}
                     <li  class="item work" data-item-id="{{_id}}">
                         <div class="flexrow">
                             <div class="field size150"><B>{{work.name}}</B></div>
