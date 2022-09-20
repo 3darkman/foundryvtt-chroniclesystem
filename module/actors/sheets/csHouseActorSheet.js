@@ -13,7 +13,7 @@ export class CSHouseActorSheet extends CSActorSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             classes: ["chroniclesystem", "sheet", "house", "actor"],
-            template: "systems/chroniclesystem/templates/actors/houses/house-sheet.html",
+            template: "systems/chroniclesystem/templates/actors/houses/house-sheet.hbs",
             width: 800,
             height: 600,
             tabs: [
@@ -32,7 +32,7 @@ export class CSHouseActorSheet extends CSActorSheet {
 
         this.splitItemsByType(data);
 
-        let house = data.data.data;
+        let house = data.actor.getCSData();
 
         house.historicalEvents = this._checkNull(data.itemsByType['event']);
 
@@ -82,10 +82,10 @@ export class CSHouseActorSheet extends CSActorSheet {
         let holdings = this._checkNull(data.itemsByType['holding']);
         holdings.forEach((holding) => {
             let doc = this.actor.getEmbeddedDocument('Item', holding._id);
-            house.holdings[holding.data.resource].push(holding);
-            if (!house[holding.data.resource].invested)
-                house[holding.data.resource].invested = 0;
-            house[holding.data.resource].invested += doc.getTotalInvested();
+            house.holdings[holding.system.resource].push(holding);
+            if (!house[holding.system.resource].invested)
+                house[holding.system.resource].invested = 0;
+            house[holding.system.resource].invested += doc.getTotalInvested();
         });
     }
 
@@ -121,6 +121,7 @@ export class CSHouseActorSheet extends CSActorSheet {
 
     async _openResourceEditor(ev) {
         ev.preventDefault();
+        let data = super.getData();
         let resourceId = ev.currentTarget.dataset.id;
         let resourceName = ev.currentTarget.dataset.name;
 
@@ -129,8 +130,8 @@ export class CSHouseActorSheet extends CSActorSheet {
 
         const template = CSConstants.Templates.Dialogs.HOUSE_RESOURCE_EDITOR;
         const html = await renderTemplate(template, {
-            startingValue: this.actor.data.data[resourceId].startingValue,
-            description: this.actor.data.data[resourceId].description,
+            startingValue: data.actor.getCSData()[resourceId].startingValue,
+            description: data.actor.getCSData()[resourceId].description,
             resourceId: resourceId});
         return new Promise(resolve => {
             const data = {

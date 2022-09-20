@@ -11,7 +11,7 @@
                 <span>{{localize "CS.sheets.house.labels.motto"}}</span>
             </header>
             <div>
-                <input  class="field center" type="text"  name="data.motto"  value="{{data.data.motto}}"  data-dtype="String"/>
+                <input  class="field center" type="text"  name="data.motto"  value="{{actor.system.motto}}"  data-dtype="String"/>
             </div>
         </section>
         <section class="flex2">
@@ -27,17 +27,17 @@
                     <div class="center capitalize">{{localize "CS.constants.specialties.stewardship"}}</div>
                     <div class="field item-controls"></div>
                 </li>
-                {{#if data.data.steward.id}}
-                <li class="item flexrow" data-item-id="{{data.data.steward.id}}">
-                    <label  class="link-field member-name size75" data-id="{{data.data.steward.id}}"><a>{{data.data.steward.name}}</a></label>
-                    <div class="center">{{data.data.fortune.lawMod}}</div>
-                    <div class="center">{{data.data.fortune.populationMod}}</div>
-                    <div class="center">{{data.data.fortune.holdingsMod}}</div>
-                    <div class="rollable center" id="formula:{{localize "CS.constants.specialties.stewardship"}}:{{formulaToStr data.data.fortune.formula}}">
-                        <a>{{format-formula data.data.fortune.formula}}</a>
+                {{#if actor.system.steward.id}}
+                <li class="item flexrow" data-item-id="{{actor.system.steward.id}}">
+                    <label  class="link-field member-name size75" data-id="{{actor.system.steward.id}}"><a>{{actor.system.steward.name}}</a></label>
+                    <div class="center">{{actor.system.fortune.lawMod}}</div>
+                    <div class="center">{{actor.system.fortune.populationMod}}</div>
+                    <div class="center">{{actor.system.fortune.holdingsMod}}</div>
+                    <div class="rollable center" id="formula:{{localize "CS.constants.specialties.stewardship"}}:{{formulaToStr actor.system.fortune.formula}}">
+                        <a>{{format-formula actor.system.fortune.formula}}</a>
                     </div>
                     <div class="field item-controls">
-                        <a class="item-control" data-id="{{data.data.steward.id}}" data-role="STEWARD" data-action="delete"><i class="fas fa-trash"></i></a>
+                        <a class="item-control" data-id="{{actor.system.steward.id}}" data-role="STEWARD" data-action="delete"><i class="fas fa-trash"></i></a>
                     </div>
                 </li>
                 {{else}}
@@ -57,50 +57,50 @@
                         owner=owner
                         resourceName="defense"
                         resourceNameKeyword="CS.sheets.house.resources.defense"
-                        startingValue=data.data.defense.total
-                        description=data.data.defense.description
+                        startingValue=actor.system.defense.total
+                        description=actor.system.defense.description
                 }}
                 {{> (houseResourceItem)
                         owner=owner
                         resourceName="influence"
                         resourceNameKeyword="CS.sheets.house.resources.influence"
-                        startingValue=data.data.influence.total
-                        description=data.data.influence.description
+                        startingValue=actor.system.influence.total
+                        description=actor.system.influence.description
                 }}
                 {{> (houseResourceItem)
                         owner=owner
                         resourceName="lands"
                         resourceNameKeyword="CS.sheets.house.resources.lands"
-                        startingValue=data.data.lands.total
-                        description=data.data.lands.description
+                        startingValue=actor.system.lands.total
+                        description=actor.system.lands.description
                 }}
                 {{> (houseResourceItem)
                         owner=owner
                         resourceName="law"
                         resourceNameKeyword="CS.sheets.house.resources.law"
-                        startingValue=data.data.law.total
-                        description=data.data.law.description
+                        startingValue=actor.system.law.total
+                        description=actor.system.law.description
                 }}
                 {{> (houseResourceItem)
                         owner=owner
                         resourceName="population"
                         resourceNameKeyword="CS.sheets.house.resources.population"
-                        startingValue=data.data.population.total
-                        description=data.data.population.description
+                        startingValue=actor.system.population.total
+                        description=actor.system.population.description
                 }}
                 {{> (houseResourceItem)
                         owner=owner
                         resourceName="power"
                         resourceNameKeyword="CS.sheets.house.resources.power"
-                        startingValue=data.data.power.total
-                        description=data.data.power.description
+                        startingValue=actor.system.power.total
+                        description=actor.system.power.description
                 }}
                 {{> (houseResourceItem)
                         owner=owner
                         resourceName="wealth"
                         resourceNameKeyword="CS.sheets.house.resources.wealth"
-                        startingValue=data.data.wealth.total
-                        description=data.data.wealth.description
+                        startingValue=actor.system.wealth.total
+                        description=actor.system.wealth.description
                 }}
             </div>
         </section>

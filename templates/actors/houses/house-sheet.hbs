@@ -5,11 +5,11 @@
             <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
             <div class="complements flexrow">
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.head"}}: </label>
-                <label  class="link-field member-name size75" data-id="{{data.data.head.id}}"><a>{{data.data.head.name}}</a></label>
+                <label  class="link-field member-name size75" data-id="{{actor.system.head.id}}"><a>{{actor.system.head.name}}</a></label>
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.realm"}}: </label>
-                <input  class="size75"  type="text"  name="data.realm"  value="{{data.data.realm}}"  data-dtype="String"/>
+                <input  class="size75"  type="text"  name="data.realm"  value="{{actor.system.realm}}"  data-dtype="String"/>
                 <label  class="attribute-label"> {{localize "CS.sheets.house.labels.liege"}}: </label>
-                <input  class="size75"  type="text"  name="data.liege"  value="{{data.data.liege}}"  data-dtype="String"/>
+                <input  class="size75"  type="text"  name="data.liege"  value="{{actor.system.liege}}"  data-dtype="String"/>
             </div>
         </div>
     </header>
@@ -23,9 +23,9 @@
 
     {{!-- Sheet Body --}}
     <section class="sheet-body">
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/resources-tab.html"}}
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/events-tab.html"}}
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/members-tab.html"}}
-        {{> "systems/chroniclesystem/templates/actors/partials/tabs/holdings-tab.html"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/resources-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/events-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/members-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/holdings-tab.hbs"}}
     </section>
 </form>

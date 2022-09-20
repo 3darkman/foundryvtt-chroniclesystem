@@ -25,16 +25,16 @@
                     {{/if}}
                         <div>
                             <ol class="unordered">
-                            {{#each data.features as |feature index|}}
+                            {{#each system.features as |feature index|}}
                                 <li>{{name}} ({{cost}})</li>
                             {{/each}}
                             </ol>
                         </div>
                     </div>
-                    <div class="field size50 center">{{data.investment}}</div>
+                    <div class="field size50 center">{{system.investment}}</div>
                     <div class="item-controls"><a><i class="far fa-caret-square-down"></i></a></div>
                 </div>
-                <div class="field description hidden">{{enrich data.description}}</div>
+                <div class="field description hidden">{{enrich system.description}}</div>
             </li>
         {{/each}}
     </ol>

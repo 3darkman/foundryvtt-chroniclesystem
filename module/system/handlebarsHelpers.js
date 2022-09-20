@@ -118,11 +118,11 @@ export const registerCustomHelpers = function () {
     });
 
     Handlebars.registerHelper('memberListItem', function(options) {
-        return "systems/chroniclesystem/templates/components/member-list-item.html";
+        return "systems/chroniclesystem/templates/components/member-list-item.hbs";
     });
 
     Handlebars.registerHelper('resourceHoldings', function(options) {
-        return "systems/chroniclesystem/templates/components/resource-holdings.html";
+        return "systems/chroniclesystem/templates/components/resource-holdings.hbs";
     });
 
     Handlebars.registerHelper('for', function (from, to, incr, block) {
