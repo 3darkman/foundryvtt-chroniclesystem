@@ -1,5 +1,5 @@
 <form class="{{cssClass}}" autocomplete="off">
-    {{> "systems/chroniclesystem/templates/items/partials/header-delete.html"}}
+    {{> "systems/chroniclesystem/templates/items/partials/header-delete.hbs"}}
     <main class="sheet-body flexrow">
         <section class="item-stats">
             <header class="header-field">
@@ -27,7 +27,7 @@
             </div>
         </section>
         <section class="description">
-            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+            {{> "systems/chroniclesystem/templates/items/partials/description.hbs"}}
             {{#if item.isOwned}}
                 <header class="header-field flexrow">
                     <div class="header-title">

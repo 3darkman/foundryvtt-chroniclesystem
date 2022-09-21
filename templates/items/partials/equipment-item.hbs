@@ -1,13 +1,13 @@
 {{#if item.isOwned}}
 <div class="form-group">
-    <label for="data.quantity">Quantity:</label>
+    <label for="system.quantity">Quantity:</label>
     <span class="form-fields">
           <input
-                  id="data.quantity"
+                  id="system.quantity"
                   class="small-field"
-                  name="data.quantity"
+                  name="system.quantity"
                   type="text"
-                  value="{{data.data.quantity}}"
+                  value="{{item.system.quantity}}"
                   placeholder="Quantity"
                   data-dtype="Number"
           />
@@ -15,14 +15,14 @@
 </div>
 {{/if}}
 <div class="form-group">
-    <label for="data.cost">Cost:</label>
+    <label for="system.cost">Cost:</label>
     <span class="form-fields">
           <input
-                  id="data.cost"
+                  id="system.cost"
                   class="size75"
-                  name="data.cost"
+                  name="system.cost"
                   type="text"
-                  value="{{data.data.cost}}"
+                  value="{{system.cost}}"
                   placeholder="Cost"
                   data-dtype="String"
           />

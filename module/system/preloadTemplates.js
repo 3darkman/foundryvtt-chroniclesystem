@@ -1,10 +1,10 @@
 export const preloadHandlebarsTemplates = async function () {
     const templatePaths = [
-        'systems/chroniclesystem/templates/items/partials/header.html',
-        'systems/chroniclesystem/templates/items/partials/header-delete.html',
-        'systems/chroniclesystem/templates/items/partials/description.html',
-        'systems/chroniclesystem/templates/items/partials/physical-item.html',
-        'systems/chroniclesystem/templates/items/partials/equipment-item.html',
+        'systems/chroniclesystem/templates/items/partials/header.hbs',
+        'systems/chroniclesystem/templates/items/partials/header-delete.hbs',
+        'systems/chroniclesystem/templates/items/partials/description.hbs',
+        'systems/chroniclesystem/templates/items/partials/physical-item.hbs',
+        'systems/chroniclesystem/templates/items/partials/equipment-item.hbs',
 
         'systems/chroniclesystem/templates/items/tabs/technique-details-tab.html',
         'systems/chroniclesystem/templates/items/tabs/technique-works-tab.html',

@@ -1,6 +1,6 @@
 <form class="{{cssClass}}" autocomplete="off">
     {{!-- Item Sheet Header --}} {{>
-    "systems/chroniclesystem/templates/items/partials/header-delete.html"}}
+    "systems/chroniclesystem/templates/items/partials/header-delete.hbs"}}
     <main class="sheet-body flexrow">
         {{#if item.isOwned}}
         <section class="item-stats">
@@ -8,28 +8,28 @@
                 <span>{{localize "CS.sheets.generalLabels.details"}}</span>
             </header>
             <div class="form-group">
-                <label for="data.rating">Rating:</label>
+                <label for="system.rating">Rating:</label>
                 <span class="form-fields">
                   <input
-                          id="data.rating"
+                          id="system.rating"
                           class="small-field"
-                          name="data.rating"
+                          name="system.rating"
                           type="text"
-                          value="{{item.data.data.rating}}"
+                          value="{{item.system.rating}}"
                           placeholder="Rating"
                           data-dtype="Number"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.modifier">Modifier:</label>
+                <label for="system.modifier">Modifier:</label>
                 <span class="form-fields">
                   <input
-                          id="data.modifier"
+                          id="system.modifier"
                           class="small-field"
-                          name="data.modifier"
+                          name="system.modifier"
                           type="text"
-                          value="{{item.data.data.modifier}}"
+                          value="{{item.system.modifier}}"
                           placeholder="Modifier"
                           data-dtype="Number"
                   />
@@ -38,7 +38,7 @@
         </section>
         {{/if}}
         <section class="description">
-            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+            {{> "systems/chroniclesystem/templates/items/partials/description.hbs"}}
             <header class="header-field flexrow">
                 <div class="header-title">
                     <span>Specialties</span>
@@ -48,13 +48,13 @@
                 </div>
             </header>
             <ol class="specialties-list list resizable" data-base-size="150">
-                {{#each data.data.specialties as |specialty id|}}
+                {{#each item.system.specialties as |specialty id|}}
                     <li class="specialty item flexrow" data-item-id="{{id}}">
                         <!--suppress HtmlFormInputWithoutLabel -->
                         <input
                                 class="big-field"
                                 type="text"
-                                name="data.specialties.{{id}}.name"
+                                name="system.specialties.{{id}}.name"
                                 value="{{specialty.name}}"
                                 placeholder="Specialty Name"
                                 data-dtype="String"
@@ -64,7 +64,7 @@
                         <input
                                 class="small-field"
                                 type="text"
-                                name="data.specialties.{{id}}.rating"
+                                name="system.specialties.{{id}}.rating"
                                 value="{{specialty.rating}}"
                                 placeholder="Rating"
                                 data-dtype="Number"
@@ -73,7 +73,7 @@
                         <input
                                 class="small-field"
                                 type="text"
-                                name="data.specialties.{{id}}.modifier"
+                                name="system.specialties.{{id}}.modifier"
                                 value="{{specialty.modifier}}"
                                 placeholder="Modifier"
                                 data-dtype="Number"

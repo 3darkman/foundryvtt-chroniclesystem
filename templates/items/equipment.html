@@ -1,15 +1,15 @@
 <form class="{{cssClass}}" autocomplete="off">
     {{!-- Item Sheet Header --}} {{>
-"systems/chroniclesystem/templates/items/partials/header-delete.html"}}
+"systems/chroniclesystem/templates/items/partials/header-delete.hbs"}}
     <main class="sheet-body flexrow">
         <section class="item-stats">
             <header class="header-field">
                 <span>{{localize "CS.sheets.generalLabels.details"}}</span>
             </header>
-            {{> "systems/chroniclesystem/templates/items/partials/equipment-item.html"}}
+            {{> "systems/chroniclesystem/templates/items/partials/equipment-item.hbs"}}
         </section>
         <section class="description">
-            {{> "systems/chroniclesystem/templates/items/partials/description.html"}}
+            {{> "systems/chroniclesystem/templates/items/partials/description.hbs"}}
         </section>
     </main>
 </form>

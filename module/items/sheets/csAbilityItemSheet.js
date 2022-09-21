@@ -15,7 +15,7 @@ export class CSAbilityItemSheet extends CSItemSheet {
             rating: 0,
             modifier: 0
         };
-        let newSpec = Object.values(item.data.data.specialties);
+        let newSpec = Object.values(item.getCSData().specialties);
         newSpec.push(specialty);
         item.update({"data.specialties" : newSpec});
     }
@@ -29,7 +29,7 @@ export class CSAbilityItemSheet extends CSItemSheet {
         // Remove existing specialty
         if ( action === "delete" ) {
             const item = this.item;
-            let newSpec = Object.values(item.data.data.specialties);
+            let newSpec = Object.values(item.getCSData().specialties);
             newSpec.splice(index,1);
             item.update({"data.specialties" : newSpec});
         }

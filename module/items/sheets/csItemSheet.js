@@ -14,7 +14,7 @@ export class CSItemSheet extends ItemSheet {
 
     get template() {
         const path = 'systems/chroniclesystem/templates/items';
-        return `${path}/${this.item.getCSData().type}.html`;
+        return `${path}/${this.item.type}.hbs`;
     }
 
     activateListeners(html) {
@@ -36,7 +36,7 @@ export class CSItemSheet extends ItemSheet {
             name: "",
             parameter: ""
         };
-        let newQuality = Object.values(item.data.data.qualities);
+        let newQuality = Object.values(item.getCSData().qualities);
         newQuality.push(quality);
         item.update({"data.qualities" : newQuality});
     }
@@ -50,7 +50,7 @@ export class CSItemSheet extends ItemSheet {
         // Remove existing specialty
         if ( action === "delete" ) {
             const item = this.item;
-            let qualities = Object.values(item.data.data.qualities);
+            let qualities = Object.values(item.getCSData().qualities);
             qualities.splice(index,1);
             item.update({"data.qualities" : qualities});
         }

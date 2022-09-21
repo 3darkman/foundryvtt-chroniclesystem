@@ -120,7 +120,7 @@ export class CSHouseActor extends CSActor {
         switch (role) {
             case "STEWARD":
             case "HEAD":
-                if (this.data.data.members[this.roleMap[role]].id === actorId) {
+                if (this.actor.getCSData().members[this.roleMap[role]].id === actorId) {
                     let key = `data.members.${[this.roleMap[role]]}`;
                     this.update({[key]: ""});
                     founded = true;
