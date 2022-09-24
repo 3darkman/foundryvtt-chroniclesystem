@@ -9,19 +9,19 @@
 
             {{#if item.isOwned}}
                 {{> (formGroup)
-                        id="data.modifiers.defense"
+                        id="system.modifiers.defense"
                         labelText="CS.sheets.house.resources.defense"
                         placeHolder="modifier"
                         inputCssClass="small-field"
-                        value=data.data.modifiers.defense
+                        value=item.system.modifiers.defense
                         dataType="Number"
                 }}
                 {{> (formGroup)
-                        id="data.modifiers.influence"
+                        id="system.modifiers.influence"
                         labelText="CS.sheets.house.resources.influence"
                         placeHolder="modifier"
                         inputCssClass="small-field"
-                        value=data.data.modifiers.influence
+                        value=item.system.modifiers.influence
                         dataType="Number"
                 }}
                 {{> (formGroup)
@@ -29,109 +29,110 @@
                         labelText="CS.sheets.house.resources.lands"
                         placeHolder="modifier"
                         inputCssClass="small-field"
-                        value=data.data.modifiers.lands
-                        dataType="Number"
+                        value=item.system.modifiers.lands
+                        systemType="Number"
                 }}
                 {{> (formGroup)
-                        id="data.modifiers.law"
+                        id="system.modifiers.law"
                         labelText="CS.sheets.house.resources.law"
                         placeHolder="modifier"
                         inputCssClass="small-field"
-                        value=data.data.modifiers.law
+                        value=item.system.modifiers.law
                         dataType="Number"
                 }}
                 {{> (formGroup)
-                        id="data.modifiers.population"
+                        id="system.modifiers.population"
                         labelText="CS.sheets.house.resources.population"
                         placeHolder="modifier"
                         inputCssClass="small-field"
-                        value=data.data.modifiers.population
+                        value=item.system.modifiers.population
                         dataType="Number"
                 }}
                 {{> (formGroup)
-                        id="data.modifiers.power"
+                        id="system.modifiers.power"
                         labelText="CS.sheets.house.resources.power"
                         placeHolder="modifier"
                         inputCssClass="small-field"
-                        value=data.data.modifiers.power
+                        value=item.system.modifiers.power
                         dataType="Number"
                 }}
                 {{> (formGroup)
-                        id="data.modifiers.wealth"
+                        id="system.modifiers.wealth"
                         labelText="CS.sheets.house.resources.wealth"
                         placeHolder="modifier"
                         inputCssClass="small-field"
-                        value=data.data.modifiers.wealth
+                        value=item.system.modifiers.wealth
                         dataType="Number"
                 }}
             {{else}}
                 <div class="form-group">
-                    <label for="data.playerChoice">{{localize "CS.sheets.eventItem.playerChoice"}}</label>
-                    <a class="checkButton size50 {{showIfEquals true data.data.playerChoice "activated" ""}}"><i class="fa fa-check"></i></a>
+                    <label for="system.playerChoice">{{localize "CS.sheets.eventItem.playerChoice"}}</label>
+                    <a class="checkButton size50 {{showIfEquals true system.playerChoice "activated" ""}}"><i class="fa fa-check"></i></a>
                 </div>
-                {{#if data.data.playerChoice}}
+            {{log item}}
+                {{#if system.playerChoice}}
                     {{> (formGroup)
-                            id="data.numberOfChoices"
+                            id="system.numberOfChoices"
                             labelText="CS.sheets.eventItem.numberOfChoices"
                             inputCssClass="small-field"
-                            value=data.data.numberOfChoices
+                            value=item.system.numberOfChoices
                             dataType="Number"
                     }}
                     {{> (formGroup)
-                            id="data.bonusToChoices"
+                            id="system.bonusToChoices"
                             labelText="CS.sheets.eventItem.bonusToChoices"
                             inputCssClass="size75"
-                            value=data.data.bonusToChoices
+                            value=item.system.bonusToChoices
                             dataType="String"
                     }}
                 {{else}}
                     {{> (formGroup)
-                            id="data.formulas.defense"
+                            id="system.formulas.defense"
                             labelText="CS.sheets.house.resources.defense"
                             inputCssClass="big-field"
-                            value=data.data.formulas.defense
+                            value=item.system.formulas.defense
                             dataType="String"
                     }}
                     {{> (formGroup)
-                            id="data.formulas.influence"
+                            id="system.formulas.influence"
                             labelText="CS.sheets.house.resources.influence"
                             inputCssClass="big-field"
-                            value=data.data.formulas.influence
+                            value=item.system.formulas.influence
                             dataType="String"
                     }}
                     {{> (formGroup)
-                            id="data.formulas.lands"
+                            id="system.formulas.lands"
                             labelText="CS.sheets.house.resources.lands"
                             inputCssClass="big-field"
-                            value=data.data.formulas.lands
+                            value=item.system.formulas.lands
                             dataType="String"
                     }}
                     {{> (formGroup)
-                            id="data.formulas.law"
+                            id="system.formulas.law"
                             labelText="CS.sheets.house.resources.law"
                             inputCssClass="big-field"
-                            value=data.data.formulas.law
+                            value=item.system.formulas.law
                             dataType="String"
                     }}
                     {{> (formGroup)
-                            id="data.formulas.population"
+                            id="system.formulas.population"
                             labelText="CS.sheets.house.resources.population"
                             inputCssClass="big-field"
-                            value=data.data.formulas.population
+                            value=item.system.formulas.population
                             dataType="String"
                     }}
                     {{> (formGroup)
-                            id="data.formulas.power"
+                            id="system.formulas.power"
                             labelText="CS.sheets.house.resources.power"
                             inputCssClass="big-field"
-                            value=data.data.formulas.power
+                            value=item.system.formulas.power
                             dataType="String"
                     }}
                     {{> (formGroup)
-                            id="data.formulas.wealth"
+                            id="system.formulas.wealth"
                             labelText="CS.sheets.house.resources.wealth"
                             inputCssClass="big-field"
-                            value=data.data.formulas.wealth
+                            value=item.system.formulas.wealth
                             dataType="String"
                     }}
                 {{/if}}

@@ -256,7 +256,7 @@ export class CSHouseActor extends CSActor {
         let events = items.filter((item) => item.type === "event");
         let modifier = 0;
         events.forEach((event) => {
-            modifier += event.data.data.modifiers[resource];
+            modifier += event.getCSData().modifiers[resource];
         });
         return modifier;
     }

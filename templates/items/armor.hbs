@@ -7,42 +7,42 @@
                 <span>{{localize "CS.sheets.generalLabels.details"}}</span>
             </header>
             <div class="form-group">
-                <label for="data.rating">Rating:</label>
+                <label for="system.rating">Rating:</label>
                 <span class="form-fields">
                   <input
-                          id="data.rating"
+                          id="system.rating"
                           class="small-field"
-                          name="data.rating"
+                          name="system.rating"
                           type="text"
-                          value="{{item.data.data.rating}}"
+                          value="{{item.system.rating}}"
                           placeholder="Rating"
                           data-dtype="Number"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.penalty">Penalty</label>
+                <label for="system.penalty">Penalty</label>
                 <span class="form-fields">
                   <input
-                          id="data.penalty"
+                          id="system.penalty"
                           class="small-field"
-                          name="data.penalty"
+                          name="system.penalty"
                           type="text"
-                          value="{{item.data.data.penalty}}"
+                          value="{{item.system.penalty}}"
                           placeholder="Penalty"
                           data-dtype="Number"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.bulk">Bulk</label>
+                <label for="system.bulk">Bulk</label>
                 <span class="form-fields">
                   <input
-                          id="data.bulk"
+                          id="system.bulk"
                           class="small-field"
-                          name="data.bulk"
+                          name="system.bulk"
                           type="text"
-                          value="{{item.data.data.bulk}}"
+                          value="{{item.system.bulk}}"
                           placeholder="Bulk"
                           data-dtype="Number"
                   />
@@ -64,13 +64,13 @@
             </header>
             <ol class="qualities-list list resizable" data-base-size="150">
 
-                {{#each data.data.qualities as |quality index|}}
+                {{#each system.qualities as |quality index|}}
                     <li class="weapon-quality item flexrow" data-item-id="{{index}}">
                         <!--suppress HtmlFormInputWithoutLabel -->
                         <input
                                 class="big-field"
                                 type="text"
-                                name="data.qualities.{{index}}.name"
+                                name="system.qualities.{{index}}.name"
                                 value="{{quality.name}}"
                                 placeholder="Armor Quality Name"
                                 data-dtype="String"
@@ -79,7 +79,7 @@
                         <input
                                 class="small-field"
                                 type="text"
-                                name="data.qualities.{{index}}.parameter"
+                                name="system.qualities.{{index}}.parameter"
                                 value="{{quality.parameter}}"
                                 placeholder="Parameter"
                                 data-dtype="String"
