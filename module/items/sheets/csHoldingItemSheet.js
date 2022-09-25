@@ -31,7 +31,7 @@ export class CSHoldingItemSheet extends CSItemSheet {
             rating: 0,
             modifier: 0
         };
-        let featureList = Object.values(item.data.data.features);
+        let featureList = Object.values(item.getCSData().features);
         featureList.push(feature);
         item.update({"data.features" : featureList});
     }
@@ -45,7 +45,7 @@ export class CSHoldingItemSheet extends CSItemSheet {
         // Remove existing specialty
         if ( action === "delete" ) {
             const item = this.item;
-            let featureList = Object.values(item.data.data.features);
+            let featureList = Object.values(item.getCSData().features);
             featureList.splice(index,1);
             item.update({"data.features" : featureList});
         }

@@ -1,9 +1,10 @@
 export class DiceRollFormula {
     #pool;
     #bonusDice;
-    #reroll;
+    #reRoll;
     #modifier;
     #dicePenalty;
+    #difficult;
 
     constructor() {
         this.pool = 2;
@@ -11,6 +12,15 @@ export class DiceRollFormula {
         this.reroll = 0;
         this.modifier = 0;
         this.dicePenalty = 0;
+        this.difficult = 0;
+    }
+
+    get difficult() {
+        return this.#difficult;
+    }
+
+    set difficult(value) {
+        this.#difficult = value;
     }
 
     get pool() {
@@ -29,12 +39,12 @@ export class DiceRollFormula {
         this.#bonusDice = parseInt(value);
     }
 
-    get reroll() {
-        return this.#reroll;
+    get reRoll() {
+        return this.#reRoll;
     }
 
-    set reroll(value) {
-        this.#reroll = parseInt(value);
+    set reRoll(value) {
+        this.#reRoll = parseInt(value);
     }
 
     get modifier() {
@@ -56,7 +66,7 @@ export class DiceRollFormula {
 
 
     toStr() {
-        return `${this.pool}|${this.bonusDice}|${this.modifier}|${this.dicePenalty}|${this.reroll}`;
+        return `${this.pool}|${this.bonusDice}|${this.modifier}|${this.dicePenalty}|${this.reRoll}`;
     }
 
     static fromStr(str) {
@@ -67,7 +77,7 @@ export class DiceRollFormula {
             formula.bonusDice = data[1];
             formula.modifier = data[2];
             formula.dicePenalty = data[3];
-            formula.reroll = data[4];
+            formula.reRoll = data[4];
         }
         return formula;
     }

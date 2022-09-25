@@ -3,6 +3,7 @@ import {CSConstants} from "../../system/csConstants.js";
 import SystemUtils from "../../utils/systemUtils.js";
 import LOGGER from "../../utils/logger.js";
 import {ChronicleSystem} from "../../system/ChronicleSystem.js";
+import {CSHoldingItem} from "../../items/cs-holding-item.js";
 
 export class CSHouseActorSheet extends CSActorSheet {
     itemTypesPermitted = [
@@ -13,7 +14,7 @@ export class CSHouseActorSheet extends CSActorSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             classes: ["chroniclesystem", "sheet", "house", "actor"],
-            template: "systems/chroniclesystem/templates/actors/houses/house-sheet.html",
+            template: "systems/chroniclesystem/templates/actors/houses/house-sheet.hbs",
             width: 800,
             height: 600,
             tabs: [
@@ -32,7 +33,7 @@ export class CSHouseActorSheet extends CSActorSheet {
 
         this.splitItemsByType(data);
 
-        let house = data.data.data;
+        let house = data.actor.getCSData();
 
         house.historicalEvents = this._checkNull(data.itemsByType['event']);
 
@@ -78,15 +79,24 @@ export class CSHouseActorSheet extends CSActorSheet {
             power: [],
             wealth: []
         }
+        this.resetResourceInvestments(house);
 
         let holdings = this._checkNull(data.itemsByType['holding']);
         holdings.forEach((holding) => {
             let doc = this.actor.getEmbeddedDocument('Item', holding._id);
-            house.holdings[holding.data.resource].push(holding);
-            if (!house[holding.data.resource].invested)
-                house[holding.data.resource].invested = 0;
-            house[holding.data.resource].invested += doc.getTotalInvested();
+            house.holdings[holding.system.resource].push(holding);
+            house[holding.system.resource].invested += doc.getTotalInvested();
         });
+    }
+
+    resetResourceInvestments(house) {
+        house.defense.invested = 0;
+        house.influence.invested = 0;
+        house.lands.invested = 0;
+        house.law.invested = 0;
+        house.population.invested = 0;
+        house.power.invested = 0;
+        house.wealth.invested = 0;
     }
 
     activateListeners(html) {
@@ -121,6 +131,7 @@ export class CSHouseActorSheet extends CSActorSheet {
 
     async _openResourceEditor(ev) {
         ev.preventDefault();
+        let data = super.getData();
         let resourceId = ev.currentTarget.dataset.id;
         let resourceName = ev.currentTarget.dataset.name;
 
@@ -129,8 +140,8 @@ export class CSHouseActorSheet extends CSActorSheet {
 
         const template = CSConstants.Templates.Dialogs.HOUSE_RESOURCE_EDITOR;
         const html = await renderTemplate(template, {
-            startingValue: this.actor.data.data[resourceId].startingValue,
-            description: this.actor.data.data[resourceId].description,
+            startingValue: data.actor.getCSData()[resourceId].startingValue,
+            description: data.actor.getCSData()[resourceId].description,
             resourceId: resourceId});
         return new Promise(resolve => {
             const data = {
@@ -169,15 +180,18 @@ export class CSHouseActorSheet extends CSActorSheet {
     isItemPermitted(type) {
         return this.itemTypesPermitted.includes(type);
     }
-
+    /** @override */
     async _onDropActor(event, data) {
+        LOGGER.trace("On Drop Actor | CSHouseActorSheet | csHouseActorSheet.js");
         event.preventDefault();
         if ( !this.actor.isOwner ) return false;
 
-        let actor = game.actors.get(data.id);
-        if (actor && actor.type === "character") {
-            await this.showCharacterRoleDialog(actor);
-        }
+        fromUuid(data.uuid).then(value => {
+            let actor = value;
+            if (actor && actor.type === "character") {
+                this.showCharacterRoleDialog(actor);
+            }
+        });
     }
 
     async _onDropItemCreate(itemData) {

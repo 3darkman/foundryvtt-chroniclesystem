@@ -19,8 +19,8 @@ export class CSTechniqueItemSheet extends CSItemSheet {
 
     getData() {
         const data = super.getData();
-        data.data.types = CSConstants.TechniqueType;
-        data.data.costs = CSConstants.TechniqueCost;
+        data.types = CSConstants.TechniqueType;
+        data.costs = CSConstants.TechniqueCost;
         return data;
     }
 
@@ -38,7 +38,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
         let art = {
             name: ""
         };
-        let newSpec = Object.values(item.data.data.arts);
+        let newSpec = Object.values(item.getCSData().arts);
         newSpec.push(art);
         item.update({"data.arts" : newSpec});
     }
@@ -52,7 +52,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
         // Remove existing specialty
         if ( action === "delete" ) {
             const item = this.item;
-            let newSpec = Object.values(item.data.data.arts);
+            let newSpec = Object.values(item.getCSData().arts);
             newSpec.splice(index,1);
             item.update({"data.arts" : newSpec});
         }
@@ -73,7 +73,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
             cost: "",
             resonance: ""
         };
-        let newSpec = Object.values(item.data.data.works);
+        let newSpec = Object.values(item.getCSData().works);
         newSpec.push(work);
         item.update({"data.works" : newSpec});
     }
@@ -87,7 +87,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
         // Remove existing specialty
         if ( action === "delete" ) {
             const item = this.item;
-            let newSpec = Object.values(item.data.data.works);
+            let newSpec = Object.values(item.getCSData().works);
             newSpec.splice(index,1);
             item.update({"data.works" : newSpec});
         }

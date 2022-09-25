@@ -1,0 +1,30 @@
+{{#if item.isOwned}}
+<div class="form-group">
+    <label for="system.quantity">Quantity:</label>
+    <span class="form-fields">
+          <input
+                  id="system.quantity"
+                  class="small-field"
+                  name="system.quantity"
+                  type="text"
+                  value="{{item.system.quantity}}"
+                  placeholder="Quantity"
+                  data-dtype="Number"
+          />
+    </span>
+</div>
+{{/if}}
+<div class="form-group">
+    <label for="system.cost">Cost:</label>
+    <span class="form-fields">
+          <input
+                  id="system.cost"
+                  class="size75"
+                  name="system.cost"
+                  type="text"
+                  value="{{item.system.cost}}"
+                  placeholder="Cost"
+                  data-dtype="String"
+          />
+    </span>
+</div>

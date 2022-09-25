@@ -3,7 +3,7 @@ import {ChronicleSystem} from "../system/ChronicleSystem.js";
 export class CSItem extends Item {
 
     getCSData() {
-        return this.data.data;
+        return this.system;
     }
 
     prepareData() {

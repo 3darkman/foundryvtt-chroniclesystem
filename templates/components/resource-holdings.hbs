@@ -1,0 +1,41 @@
+<section class="resource-holdings">
+    <header class="header-field">
+        <span class="capitalize">{{localize resourceName}}</span>
+    </header>
+    <div class="holdings-header flexrow">
+        <div class="subheader-field">{{localize "CS.sheets.generalLabels.total"}}</div>
+        <div class="subheader-value">{{resourceTotal}}</div>
+        <div class="subheader-field">{{localize "CS.sheets.house.resources.invested"}}</div>
+        <div class="subheader-value {{showIfLess resourceTotal resourceInvested "alert" ""}}">{{resourceInvested}}</div>
+    </div>
+    <ol class="list">
+        <li class="list-header flexrow">
+            <div class="field">{{localize "CS.sheets.generalLabels.name"}}</div>
+            <div class="field size50 center">{{localize "CS.sheets.house.resources.cost"}}</div>
+            <div class="item-controls"></div>
+        </li>
+        {{#each holdings as |holding index|}}
+            <li class="item" data-item-id="{{_id}}">
+                <div class="flexrow">
+                    <div class="field">
+                    {{#if ../owner}}
+                        <div class="item-edit"><a>{{name}}</a></div>
+                    {{else}}
+                        <div>{{name}}</div>
+                    {{/if}}
+                        <div>
+                            <ol class="unordered">
+                            {{#each system.features as |feature index|}}
+                                <li>{{name}} ({{cost}})</li>
+                            {{/each}}
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="field size50 center">{{system.investment}}</div>
+                    <div class="item-controls"><a><i class="far fa-caret-square-down"></i></a></div>
+                </div>
+                <div class="field description hidden">{{enrich system.description}}</div>
+            </li>
+        {{/each}}
+    </ol>
+</section>

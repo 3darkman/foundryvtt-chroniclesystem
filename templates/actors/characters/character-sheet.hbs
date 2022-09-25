@@ -1,0 +1,37 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Sheet Header --}}
+    <header class="sheet-header">
+        <div class="header-fields">
+            <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+            <div class="complements flexrow">
+                <label  class="attribute-label"> Ancestry: </label>
+                <input  class="medium-field flex2" type="text"  name="system.ancestries"  value="{{character.ancestries}}"  data-dtype="String"/>
+                <label  class="attribute-label"> Age: </label>
+                <input  class="small-field"  type="text"  name="system.age"  value="{{character.age}}"  data-dtype="Number"/>
+                <label  class="attribute-label"> Gender: </label>
+                <input  class="medium-field"  type="text"  name="system.gender"  value="{{character.gender}}"  data-dtype="String"/>
+            </div>
+        </div>
+    </header>
+{{log character}}
+
+    {{!-- Sheet Tab Navigation --}}
+    <nav  class="sheet-tabs flexrow tabs" data-group="primary">
+        <a  class="item"  data-tab="abilities">{{localize "CS.sheets.character.tabs.abilities"}}</a>
+        <a  class="item size150"  data-tab="combat-and-intrigue">{{localize "CS.sheets.character.tabs.combat-intrigue"}}</a>
+        <a  class="item"  data-tab="qualities">{{localize "CS.sheets.character.tabs.qualities"}}</a>
+        <a class="item" data-tab="sorcery">{{localize "CS.sheets.character.tabs.sorcery"}}</a>
+        <a  class="item"  data-tab="equipments">{{localize "CS.sheets.character.tabs.equipments"}}</a>
+        <a  class="item"  data-tab="actor-description">{{localize "CS.sheets.character.tabs.description"}}</a>
+    </nav>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/abilities-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/combat-and-intrigue-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/qualities-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/description-tab.hbs"}}
+    </section>
+</form>

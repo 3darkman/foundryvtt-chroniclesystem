@@ -1,0 +1,108 @@
+<div class="tab flexrow" data-group="primary" data-tab="resources">
+    <div class="flexrow">
+        <section class="profile-picture">
+            <header class="header-field">
+                <span>{{localize "CS.sheets.house.labels.coatOfArms"}}</span>
+            </header>
+            <div class="profile-img-container flex">
+                <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" alt="{{actor.name}} Picture" />
+            </div>
+            <header class="header-field motto">
+                <span>{{localize "CS.sheets.house.labels.motto"}}</span>
+            </header>
+            <div>
+                <input  class="field center" type="text"  name="data.motto"  value="{{actor.system.motto}}"  data-dtype="String"/>
+            </div>
+        </section>
+        <section class="flex2">
+            <header class="header-field">
+                <span>{{localize "CS.sheets.house.fortune.title"}}</span>
+            </header>
+            <ol class="list family-list">
+                <li class="list-header flexrow">
+                    <label class="size75">{{localize "CS.sheets.house.labels.steward"}}</label>
+                    <div class="center">{{localize "CS.sheets.house.fortune.lawModifier"}}</div>
+                    <div class="center">{{localize "CS.sheets.house.fortune.populationModifier"}}</div>
+                    <div class="center">{{localize "CS.sheets.house.fortune.holdingModifier"}}</div>
+                    <div class="center capitalize">{{localize "CS.constants.specialties.stewardship"}}</div>
+                    <div class="field item-controls"></div>
+                </li>
+                {{#if actor.system.steward.id}}
+                <li class="item flexrow" data-item-id="{{actor.system.steward.id}}">
+                    <label  class="link-field member-name size75" data-id="{{actor.system.steward.id}}"><a>{{actor.system.steward.name}}</a></label>
+                    <div class="center">{{actor.system.fortune.lawMod}}</div>
+                    <div class="center">{{actor.system.fortune.populationMod}}</div>
+                    <div class="center">{{actor.system.fortune.holdingsMod}}</div>
+                    <div class="rollable center" id="formula:{{localize "CS.constants.specialties.stewardship"}}:{{formulaToStr actor.system.fortune.formula}}">
+                        <a>{{format-formula actor.system.fortune.formula}}</a>
+                    </div>
+                    <div class="field item-controls">
+                        <a class="item-control" data-id="{{actor.system.steward.id}}" data-role="STEWARD" data-action="delete"><i class="fas fa-trash"></i></a>
+                    </div>
+                </li>
+                {{else}}
+                    <li class="item flexrow">
+                        <div class="center">{{localize "CS.messages.notStewardLinked"}}</div>
+                    </li>
+                {{/if}}
+            </ol>
+            <header class="header-field">
+                <span>{{localize "CS.sheets.house.resources.title"}}</span>
+                {{#if owner}}
+                    <span class="item-controls regenerate-resources"><a><i class="fas fa-sync"></i></a></span>
+                {{/if}}
+            </header>
+            <div class="resources-list list">
+                {{> (houseResourceItem)
+                        owner=owner
+                        resourceName="defense"
+                        resourceNameKeyword="CS.sheets.house.resources.defense"
+                        startingValue=actor.system.defense.total
+                        description=actor.system.defense.description
+                }}
+                {{> (houseResourceItem)
+                        owner=owner
+                        resourceName="influence"
+                        resourceNameKeyword="CS.sheets.house.resources.influence"
+                        startingValue=actor.system.influence.total
+                        description=actor.system.influence.description
+                }}
+                {{> (houseResourceItem)
+                        owner=owner
+                        resourceName="lands"
+                        resourceNameKeyword="CS.sheets.house.resources.lands"
+                        startingValue=actor.system.lands.total
+                        description=actor.system.lands.description
+                }}
+                {{> (houseResourceItem)
+                        owner=owner
+                        resourceName="law"
+                        resourceNameKeyword="CS.sheets.house.resources.law"
+                        startingValue=actor.system.law.total
+                        description=actor.system.law.description
+                }}
+                {{> (houseResourceItem)
+                        owner=owner
+                        resourceName="population"
+                        resourceNameKeyword="CS.sheets.house.resources.population"
+                        startingValue=actor.system.population.total
+                        description=actor.system.population.description
+                }}
+                {{> (houseResourceItem)
+                        owner=owner
+                        resourceName="power"
+                        resourceNameKeyword="CS.sheets.house.resources.power"
+                        startingValue=actor.system.power.total
+                        description=actor.system.power.description
+                }}
+                {{> (houseResourceItem)
+                        owner=owner
+                        resourceName="wealth"
+                        resourceNameKeyword="CS.sheets.house.resources.wealth"
+                        startingValue=actor.system.wealth.total
+                        description=actor.system.wealth.description
+                }}
+            </div>
+        </section>
+    </div>
+</div>

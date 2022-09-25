@@ -1,0 +1,45 @@
+<div class="tab flexrow members" data-group="primary" data-tab="members">
+    <section class="family">
+        <header class="header-field">
+            <span>{{localize "CS.sheets.house.labels.heirsAndFamily"}}</span>
+        </header>
+        <ol  class="family-list list">
+            <li class="list-header flexrow">
+                <div class="field name">{{localize "CS.sheets.generalLabels.name"}}</div>
+                <div class="field age center">Age</div>
+                <div class="field description size150">{{localize "CS.sheets.generalLabels.description"}}</div>
+                <div class="field item-controls">&nbsp;</div>
+            </li>
+            {{#if actor.system.head.id}}
+                {{> (memberListItem) listName="family" id=actor.system.head.id age=actor.system.head.age name=actor.system.head.name description=actor.system.head.description role="HEAD" }}
+            {{/if}}
+            {{#each actor.system.heirs as |heir index|}}
+                {{> (memberListItem) listName="family" id=heir.id age=heir.age name=heir.name description=heir.description role="HEIR" }}
+            {{/each}}
+            {{#each actor.system.family as |family index|}}
+                {{> (memberListItem) listName="family" id=family.id age=family.age name=family.name description=family.description role="FAMILY" }}
+            {{/each}}
+        </ol>
+    </section>
+    <section>
+        <section class="other-members">
+            <header class="header-field">
+                <span>{{localize "CS.sheets.house.labels.retainersAndServants"}}</span>
+            </header>
+            <ol  class="servants-list list">
+                <li class="list-header flexrow">
+                    <div class="field name">{{localize "CS.sheets.generalLabels.name"}}</div>
+                    <div class="field age center">Age</div>
+                    <div class="field description size150">{{localize "CS.sheets.generalLabels.description"}}</div>
+                    <div class="field item-controls">&nbsp;</div>
+                </li>
+                {{#each actor.system.retainers as |retainer index|}}
+                    {{> (memberListItem) listName="servant" id=retainer.id age=retainer.age name=retainer.name description=retainer.description role="RETAINER" }}
+                {{/each}}
+                {{#each actor.system.servants as |servant index|}}
+                    {{> (memberListItem) listName="servant" id=servant.id age=servant.age name=servant.name description=servant.description role="SERVANT" }}
+                {{/each}}
+            </ol>
+        </section>
+    </section>
+</div>

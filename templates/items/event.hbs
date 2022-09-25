@@ -1,0 +1,145 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Item Sheet Header --}} {{>
+"systems/chroniclesystem/templates/items/partials/header-delete.hbs"}}
+    <main class="sheet-body flexrow">
+        <section class="item-stats">
+            <header class="header-field">
+                <span>{{localize "CS.sheets.generalLabels.details"}}</span>
+            </header>
+
+            {{#if item.isOwned}}
+                {{> (formGroup)
+                        id="system.modifiers.defense"
+                        labelText="CS.sheets.house.resources.defense"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=item.system.modifiers.defense
+                        dataType="Number"
+                }}
+                {{> (formGroup)
+                        id="system.modifiers.influence"
+                        labelText="CS.sheets.house.resources.influence"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=item.system.modifiers.influence
+                        dataType="Number"
+                }}
+                {{> (formGroup)
+                        id="data.modifiers.lands"
+                        labelText="CS.sheets.house.resources.lands"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=item.system.modifiers.lands
+                        systemType="Number"
+                }}
+                {{> (formGroup)
+                        id="system.modifiers.law"
+                        labelText="CS.sheets.house.resources.law"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=item.system.modifiers.law
+                        dataType="Number"
+                }}
+                {{> (formGroup)
+                        id="system.modifiers.population"
+                        labelText="CS.sheets.house.resources.population"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=item.system.modifiers.population
+                        dataType="Number"
+                }}
+                {{> (formGroup)
+                        id="system.modifiers.power"
+                        labelText="CS.sheets.house.resources.power"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=item.system.modifiers.power
+                        dataType="Number"
+                }}
+                {{> (formGroup)
+                        id="system.modifiers.wealth"
+                        labelText="CS.sheets.house.resources.wealth"
+                        placeHolder="modifier"
+                        inputCssClass="small-field"
+                        value=item.system.modifiers.wealth
+                        dataType="Number"
+                }}
+            {{else}}
+                <div class="form-group">
+                    <label for="system.playerChoice">{{localize "CS.sheets.eventItem.playerChoice"}}</label>
+                    <a class="checkButton size50 {{showIfEquals true system.playerChoice "activated" ""}}"><i class="fa fa-check"></i></a>
+                </div>
+            {{log item}}
+                {{#if system.playerChoice}}
+                    {{> (formGroup)
+                            id="system.numberOfChoices"
+                            labelText="CS.sheets.eventItem.numberOfChoices"
+                            inputCssClass="small-field"
+                            value=item.system.numberOfChoices
+                            dataType="Number"
+                    }}
+                    {{> (formGroup)
+                            id="system.bonusToChoices"
+                            labelText="CS.sheets.eventItem.bonusToChoices"
+                            inputCssClass="size75"
+                            value=item.system.bonusToChoices
+                            dataType="String"
+                    }}
+                {{else}}
+                    {{> (formGroup)
+                            id="system.formulas.defense"
+                            labelText="CS.sheets.house.resources.defense"
+                            inputCssClass="big-field"
+                            value=item.system.formulas.defense
+                            dataType="String"
+                    }}
+                    {{> (formGroup)
+                            id="system.formulas.influence"
+                            labelText="CS.sheets.house.resources.influence"
+                            inputCssClass="big-field"
+                            value=item.system.formulas.influence
+                            dataType="String"
+                    }}
+                    {{> (formGroup)
+                            id="system.formulas.lands"
+                            labelText="CS.sheets.house.resources.lands"
+                            inputCssClass="big-field"
+                            value=item.system.formulas.lands
+                            dataType="String"
+                    }}
+                    {{> (formGroup)
+                            id="system.formulas.law"
+                            labelText="CS.sheets.house.resources.law"
+                            inputCssClass="big-field"
+                            value=item.system.formulas.law
+                            dataType="String"
+                    }}
+                    {{> (formGroup)
+                            id="system.formulas.population"
+                            labelText="CS.sheets.house.resources.population"
+                            inputCssClass="big-field"
+                            value=item.system.formulas.population
+                            dataType="String"
+                    }}
+                    {{> (formGroup)
+                            id="system.formulas.power"
+                            labelText="CS.sheets.house.resources.power"
+                            inputCssClass="big-field"
+                            value=item.system.formulas.power
+                            dataType="String"
+                    }}
+                    {{> (formGroup)
+                            id="system.formulas.wealth"
+                            labelText="CS.sheets.house.resources.wealth"
+                            inputCssClass="big-field"
+                            value=item.system.formulas.wealth
+                            dataType="String"
+                    }}
+                {{/if}}
+            {{/if}}
+        </section>
+        <section class="description">
+            {{> "systems/chroniclesystem/templates/items/partials/description.hbs"}}
+        </section>
+    </main>
+</form>

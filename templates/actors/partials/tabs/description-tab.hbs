@@ -1,0 +1,240 @@
+<div class="tab description flexrow" data-group="primary" data-tab="actor-description">
+    <section class="profile-picture">
+        <div class="profile-img-container flex">
+            <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" alt="{{actor.name}} Picture" />
+        </div>
+    </section>
+    <section class="general">
+        <section class="section-split flexrow">
+            <section class="appearance">
+                <header class="header-field">
+                    <span>Appearance</span>
+                </header>
+                <div class="form-group">
+                    <label for="system.height">Height:</label>
+                    <span class="form-fields">
+                        <input
+                                id="system.height"
+                                class="size75"
+                                name="system.height"
+                                type="text"
+                                value="{{character.height}}"
+                                placeholder="Height"
+                                data-dtype="String"
+                        />
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="system.weight">Weight:</label>
+                    <span class="form-fields">
+                          <input
+                                  id="system.weight"
+                                  class="size75"
+                                  name="system.weight"
+                                  type="text"
+                                  value="{{character.weight}}"
+                                  placeholder="Weight"
+                                  data-dtype="Number"
+                          />
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="system.eyeColor">Eye Color:</label>
+                    <span class="form-fields">
+                          <input
+                                  id="system.eyeColor"
+                                  class="size75"
+                                  name="system.eyeColor"
+                                  type="text"
+                                  value="{{character.eyeColor}}"
+                                  placeholder="Eye Color"
+                                  data-dtype="String"
+                          />
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="system.hairColor">Hair Color:</label>
+                    <span class="form-fields">
+                          <input
+                                  id="system.hairColor"
+                                  class="size75"
+                                  name="system.hairColor"
+                                  type="text"
+                                  value="{{character.hairColor}}"
+                                  placeholder="Hair Color"
+                                  data-dtype="String"
+                          />
+                    </span>
+                </div>
+            </section>
+            <section class="mannerisms">
+                <section class="experience flexrow">
+                    <div class="form-group">
+                        <label for="system.experience.spent">XP Spent:</label>
+                        <span class="form-fields">
+                          <input
+                                  id="system.experience.spent"
+                                  class="small-field"
+                                  name="system.experience.spent"
+                                  type="text"
+                                  value="{{character.experience.spent}}"
+                                  placeholder="Spent"
+                                  data-dtype="Number"
+                          />
+                    </span>
+                    </div>
+                    <div class="form-group">
+                        <label for="system.experience.total">XP Total:</label>
+                        <span class="form-fields">
+                          <input
+                                  id="system.experience.total"
+                                  class="small-field"
+                                  name="system.experience.total"
+                                  type="text"
+                                  value="{{character.experience.total}}"
+                                  placeholder="Total"
+                                  data-dtype="Number"
+                          />
+                    </span>
+                    </div>
+                </section>
+                <header class="header-field">
+                    <span>Mannerisms</span>
+                </header>
+
+                <div class="form-group">
+                    <span class="form-fields">
+                        <input
+                                id="system.mannerisms"
+                                class="big-field"
+                                name="system.mannerisms"
+                                type="text"
+                                value="{{character.mannerisms}}"
+                                placeholder="Mannerisms"
+                                data-dtype="String"
+                        />
+                    </span>
+                </div>
+                <header class="header-field">
+                    <span>Distinguishing Features</span>
+                </header>
+
+                <div class="form-group">
+                    <span class="form-fields">
+                        <input
+                                id="system.distinguishingFeatures"
+                                class="big-field"
+                                name="system.distinguishingFeatures"
+                                type="text"
+                                value="{{character.distinguishingFeatures}}"
+                                placeholder="Distinguishing Features"
+                                data-dtype="String"
+                        />
+                    </span>
+                </div>
+            </section>
+        </section>
+        <section class="concept">
+            <header class="header-field">
+                <span>Concept</span>
+            </header>
+            <div class="form-group">
+                <label for="system.vice">Vice:</label>
+                <span class="form-fields">
+                  <input
+                          id="system.vice"
+                          class="big-field"
+                          name="system.vice"
+                          type="text"
+                          value="{{character.vice}}"
+                          placeholder="Vice"
+                          data-dtype="String"
+                  />
+            </span>
+            </div>
+            <div class="form-group">
+                <label for="system.virtue">Virtue:</label>
+                <span class="form-fields">
+                  <input
+                          id="system.virtue"
+                          class="big-field"
+                          name="system.virtue"
+                          type="text"
+                          value="{{character.virtue}}"
+                          placeholder="Virtue"
+                          data-dtype="String"
+                  />
+            </span>
+            </div>
+            <div class="form-group">
+                <label for="system.goal">Goal:</label>
+                <span class="form-fields">
+                  <input
+                          id="system.goal"
+                          class="big-field"
+                          name="system.goal"
+                          type="text"
+                          value="{{character.goal}}"
+                          placeholder="Goal"
+                          data-dtype="String"
+                  />
+            </span>
+            </div>
+            <div class="form-group">
+                <label for="system.motivation">Motivation:</label>
+                <span class="form-fields">
+                  <input
+                          id="system.motivation"
+                          class="big-field"
+                          name="system.motivation"
+                          type="text"
+                          value="{{character.motivation}}"
+                          placeholder="Motivation"
+                          data-dtype="String"
+                  />
+            </span>
+            </div>
+        </section>
+    </section>
+    <section class="personal-history">
+        <header class="header-field">
+            <span>Personal History</span>
+        </header>
+        <div class="form-group">
+            {{editor character.personalHistory target="system.personalHistory" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+    <section class="allies">
+        <header class="header-field">
+            <span>Allies</span>
+        </header>
+        <div class="form-group">
+            {{editor character.allies target="system.allies" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+    <section class="enemies">
+        <header class="header-field">
+            <span>Enemies</span>
+        </header>
+        <div class="form-group">
+            {{editor character.enemies target="system.enemies" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+    <section class="oaths">
+        <header class="header-field">
+            <span>Oaths</span>
+        </header>
+        <div class="form-group">
+            {{editor character.oaths target="system.oaths" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+    <section class="motto">
+        <header class="header-field">
+            <span>Motto</span>
+        </header>
+        <div class="form-group">
+            {{editor character.motto target="system.motto" button=true owner=owner editable=editable}}
+        </div>
+    </section>
+
+</div>

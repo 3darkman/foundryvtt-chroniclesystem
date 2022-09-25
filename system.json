@@ -1,20 +1,22 @@
 {
-  "name": "chroniclesystem",
   "title": "Chronicle System (Unofficial)",
   "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
   "version": "0.3.0",
-  "minimumCoreVersion": "9",
-  "compatibleCoreVersion": "9",
-  "templateVersion": 2,
-  "author": "Kirlian '3darkman' Silvestre",
-  "esmodules": ["module/system/config.js"],
-  "styles": ["styles/global.css", "styles/item-sheet.css", "styles/actor-sheet.css", "styles/less/global.css"],
-  "packs": [],
+  "esmodules": [
+    "module/system/config.js"
+  ],
+  "styles": [
+    "styles/global.css",
+    "styles/item-sheet.css",
+    "styles/actor-sheet.css",
+    "styles/less/global.css"
+  ],
   "languages": [
     {
       "lang": "en",
       "name": "English",
-      "path": "lang/en.json"
+      "path": "lang/en.json",
+      "flags": {}
     }
   ],
   "gridDistance": 5,
@@ -24,5 +26,16 @@
   "url": "https://github.com/3darkman/foundryvtt-chroniclesystem/",
   "manifest": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/system.json",
   "download": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/chroniclesystem.zip",
-  "license": "ISC"
+  "license": "ISC",
+  "id": "chroniclesystem",
+  "authors": [
+    {
+      "name": "Kirlian '3darkman' Silvestre",
+      "flags": {}
+    }
+  ],
+  "compatibility": {
+    "minimum": "9",
+    "verified": "9"
+  }
 }

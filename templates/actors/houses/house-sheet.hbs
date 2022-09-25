@@ -1,0 +1,31 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{log actor}}
+    <header class="sheet-header">
+        <div class="header-fields">
+            <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+            <div class="complements flexrow">
+                <label  class="attribute-label"> {{localize "CS.sheets.house.labels.head"}}: </label>
+                <label  class="link-field member-name size75" data-id="{{actor.system.head.id}}"><a>{{actor.system.head.name}}</a></label>
+                <label  class="attribute-label"> {{localize "CS.sheets.house.labels.realm"}}: </label>
+                <input  class="size75"  type="text"  name="data.realm"  value="{{actor.system.realm}}"  data-dtype="String"/>
+                <label  class="attribute-label"> {{localize "CS.sheets.house.labels.liege"}}: </label>
+                <input  class="size75"  type="text"  name="data.liege"  value="{{actor.system.liege}}"  data-dtype="String"/>
+            </div>
+        </div>
+    </header>
+    {{!-- Sheet Tab Navigation --}}
+    <nav  class="sheet-tabs flexrow tabs" data-group="primary">
+        <a  class="item"  data-tab="resources">{{localize "CS.sheets.house.resources.title"}}</a>
+        <a  class="item"  data-tab="events">{{localize "CS.sheets.house.events.title"}}</a>
+        <a  class="item"  data-tab="members">{{localize "CS.sheets.house.labels.members"}}</a>
+        <a  class="item"  data-tab="holdings">{{localize "CS.sheets.house.holdings.title"}}</a>
+    </nav>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/resources-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/events-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/members-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/holdings-tab.hbs"}}
+    </section>
+</form>
