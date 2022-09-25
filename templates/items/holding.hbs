@@ -6,23 +6,23 @@
                 <span>{{localize "CS.sheets.generalLabels.details"}}</span>
             </header>
             {{> (formGroup)
-                    id="data.investment"
+                    id="system.investment"
                     labelText="CS.sheets.holdingItem.investment"
                     inputCssClass="small-field"
-                    value=data.data.investment
+                    value=item.system.investment
                     dataType="Number"
             }}
             {{> (formGroup)
-                    id="data.buildTime"
+                    id="system.buildTime"
                     labelText="CS.sheets.holdingItem.buildTime"
                     inputCssClass="big-field"
-                    value=data.data.buildTime
+                    value=item.system.buildTime
                     dataType="String"
             }}
             <div class="form-group">
-                <label for="data.resource">{{localize "CS.sheets.holdingItem.resource"}}</label>
-                <select name="data.resource">
-                    {{selectOptions resourceChoices selected=data.data.resource localize=true}}
+                <label for="system.resource">{{localize "CS.sheets.holdingItem.resource"}}</label>
+                <select name="system.resource">
+                    {{selectOptions resourceChoices selected=item.system.resource localize=true}}
                 </select>
             </div>
         </section>
@@ -43,13 +43,13 @@
                         <div class="size50 center">{{localize "CS.sheets.house.resources.cost"}}</div>
                         <div class="item-controls"></div>
                     </li>
-                    {{#each data.data.features as |feature index|}}
+                    {{#each item.system.features as |feature index|}}
                         <li class="holding-feature item flexrow" data-item-id="{{index}}">
                             <!--suppress HtmlFormInputWithoutLabel -->
                             <input
                                     class="size150"
                                     type="text"
-                                    name="data.features.{{index}}.name"
+                                    name="system.features.{{index}}.name"
                                     value="{{feature.name}}"
                                     placeholder="{{localize "CS.sheets.holdingItem.featureName"}}"
                                     data-dtype="String"
@@ -58,7 +58,7 @@
                             <input
                                     class="size50 center"
                                     type="text"
-                                    name="data.features.{{index}}.cost"
+                                    name="system.features.{{index}}.cost"
                                     value="{{feature.cost}}"
                                     placeholder="{{localize "CS.sheets.holdingItem.featureCost"}}"
                                     data-dtype="String"

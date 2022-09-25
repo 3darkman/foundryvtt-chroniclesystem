@@ -22,7 +22,7 @@ export class CSItemSheet extends ItemSheet {
 
         html.find('.item-delete').click((ev) => {
             if (this.item.actor) {
-                this.item.actor.deleteEmbeddedDocuments("Item", [this.item.data._id,]);
+                this.item.actor.deleteEmbeddedDocuments("Item", [this.item._id,]);
             }
         });
 

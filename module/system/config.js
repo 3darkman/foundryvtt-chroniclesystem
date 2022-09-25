@@ -70,10 +70,13 @@ Hooks.once("ready", async () => {
     await migrateData();
 });
 
-Hooks.on('preCreateItem', (item, data) => {
-    item.data.update({
-        img: `systems/chroniclesystem/assets/icons/${data.type}.png`
-    },{diff:true});
+Hooks.on('createItem', (item, data) => {
+    if (!item.isOwned) {
+        item.img = `systems/chroniclesystem/assets/icons/${item.type}.png`;
+        // item.update({
+        //     img: `systems/chroniclesystem/assets/icons/${data.type}.png`
+        // }, {diff: true});
+    }
 });
 
 // Hooks.on('createActor', async (actor, options, userId) => {

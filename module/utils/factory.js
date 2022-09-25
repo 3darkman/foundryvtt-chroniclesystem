@@ -19,7 +19,6 @@ import SystemUtils from "./systemUtils.js";
 export default function factory(entities, baseClass) {
     return new Proxy(baseClass, {
         construct: (target, args) => {
-            LOGGER.trace("object construct | factory | factory.js");
             const [data, options] = args;
             const constructor = entities[data.type];
             if (!constructor) {
@@ -31,7 +30,6 @@ export default function factory(entities, baseClass) {
             return new constructor(data, options);
         },
         get: (target, prop) => {
-            LOGGER.trace("object get | factory | actor-factor.js");
             switch (prop) {
                 case "create":
                     // Calling the class' create() static function
@@ -47,7 +45,7 @@ export default function factory(entities, baseClass) {
                 case Symbol.hasInstance:
                     // Applying the "instanceof" operator on the instance object
                     return (instance) => {
-                        const constr = entities[instance.data.type];
+                        const constr = entities[instance.type];
                         if (!constr) {
                             return false;
                         }
