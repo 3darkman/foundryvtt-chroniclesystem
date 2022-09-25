@@ -63,7 +63,7 @@ export const registerCustomHelpers = function () {
     });
 
     Handlebars.registerHelper('weapon-test', function(actor, weapon) {
-        let data = weapon.data.specialty.split(':');
+        let data = weapon.specialty.split(':');
         if (data.length < 2)
             return "";
         let formula = ChronicleSystem.getActorAbilityFormula(actor, data[0], data[1]);
@@ -106,15 +106,15 @@ export const registerCustomHelpers = function () {
     })
 
     Handlebars.registerHelper('formGroup', function(options) {
-        return "systems/chroniclesystem/templates/actors/partials/form-group.html";
+        return "systems/chroniclesystem/templates/actors/partials/form-group.hbs";
     });
 
     Handlebars.registerHelper('ratingCheckbox', function(options) {
-        return "systems/chroniclesystem/templates/components/rating-checkbox.html";
+        return "systems/chroniclesystem/templates/components/rating-checkbox.hbs";
     });
 
     Handlebars.registerHelper('houseResourceItem', function(options) {
-        return "systems/chroniclesystem/templates/components/house-resource-item.html";
+        return "systems/chroniclesystem/templates/components/house-resource-item.hbs";
     });
 
     Handlebars.registerHelper('memberListItem', function(options) {

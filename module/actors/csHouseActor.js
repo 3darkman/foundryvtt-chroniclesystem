@@ -86,7 +86,7 @@ export class CSHouseActor extends CSActor {
         switch (role) {
             case "STEWARD":
             case "HEAD":
-                if (this.data.data.members[this.roleMap[role]].id === actorId) {
+                if (this.getCSData().members[this.roleMap[role]].id === actorId) {
                     result.hasRole = true;
                 }
                 break;

@@ -7,56 +7,56 @@
                 <span>{{localize "CS.sheets.generalLabels.details"}}</span>
             </header>
             <div class="form-group">
-                <label for="data.specialty">Specialty:</label>
+                <label for="system.specialty">Specialty:</label>
                 <span class="form-fields">
                   <input
-                          id="data.specialty"
+                          id="system.specialty"
                           class="medium-field"
-                          name="data.specialty"
+                          name="system.specialty"
                           type="text"
-                          value="{{data.data.specialty}}"
+                          value="{{item.system.specialty}}"
                           placeholder="Specialty"
                           data-dtype="String"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.reach">Reach:</label>
+                <label for="system.reach">Reach:</label>
                 <span class="form-fields">
                   <input
-                          id="data.reach"
+                          id="system.reach"
                           class="small-field"
-                          name="data.reach"
+                          name="system.reach"
                           type="text"
-                          value="{{data.data.reach}}"
+                          value="{{item.system.reach}}"
                           placeholder="Reach"
                           data-dtype="Number"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.training">Training:</label>
+                <label for="system.training">Training:</label>
                 <span class="form-fields">
                   <input
-                          id="data.training"
+                          id="system.training"
                           class="small-field"
-                          name="data.training"
+                          name="system.training"
                           type="text"
-                          value="{{data.data.training}}"
+                          value="{{item.system.training}}"
                           placeholder="Training"
                           data-dtype="Number"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.damage">Damage:</label>
+                <label for="system.damage">Damage:</label>
                 <span class="form-fields">
                   <input
-                          id="data.damage"
+                          id="system.damage"
                           class="medium-field"
-                          name="data.damage"
+                          name="system.damage"
                           type="text"
-                          value="{{data.data.damage}}"
+                          value="{{item.system.damage}}"
                           placeholder="Damage"
                           data-dtype="String"
                   />
@@ -77,13 +77,13 @@
             </header>
             <ol class="qualities-list list resizable" data-base-size="150">
 
-                {{#each data.data.qualities as |quality index|}}
+                {{#each item.system.qualities as |quality index|}}
                     <li class="weapon-quality item flexrow" data-item-id="{{index}}">
                         <!--suppress HtmlFormInputWithoutLabel -->
                         <input
                                 class="big-field"
                                 type="text"
-                                name="data.qualities.{{index}}.name"
+                                name="system.qualities.{{index}}.name"
                                 value="{{quality.name}}"
                                 placeholder="Weapon Quality Name"
                                 data-dtype="String"
@@ -92,7 +92,7 @@
                         <input
                                 class="small-field"
                                 type="text"
-                                name="data.qualities.{{index}}.parameter"
+                                name="system.qualities.{{index}}.parameter"
                                 value="{{quality.parameter}}"
                                 placeholder="Parameter"
                                 data-dtype="String"

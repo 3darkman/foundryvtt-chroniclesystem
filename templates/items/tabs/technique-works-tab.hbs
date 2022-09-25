@@ -1,3 +1,4 @@
+{{csTrace "work tab"}}
 <div class="tab flexrow works" data-group="primary" data-tab="works">
     <div>
         <header class="header-field flexrow">
@@ -7,13 +8,13 @@
             </div>
         </header>
         <ol class="work-list list resizable" data-base-size="150">
-            {{#each data.data.works as |work id|}}
+            {{#each item.system.works as |work id|}}
                 <li class="work item flexrow" data-item-id="{{id}}">
                     <!--suppress HtmlFormInputWithoutLabel -->
                     <div>
                         <div class="flexrow">
                             {{> (formGroup)
-                                    id=(concat "data.works." id ".name")
+                                    id=(concat "system.works." id ".name")
                                     labelText="CS.sheets.generalLabels.name"
                                     inputCssClass="size200"
                                     value=work.name
@@ -22,14 +23,14 @@
                             <div class="flexrow size125">
                                 <div class="form-group">
                                     <label for="type">{{localize "CS.sheets.techniqueItem.type"}}</label>
-                                    <select name="data.works.{{id}}.type" class="size75">
-                                        {{selectOptions ../data.types selected=work.type localize=true}}
+                                    <select name="system.works.{{id}}.type" class="size75">
+                                        {{selectOptions ../types selected=work.type localize=true}}
                                     </select>
                                 </div>
                                 <div class="form-group size125">
                                     <label for="cost">{{localize "CS.sheets.techniqueItem.cost"}}</label>
-                                    <select name="data.works.{{id}}.cost" class="size150">
-                                        {{selectOptions ../data.costs selected=work.cost localize=true}}
+                                    <select name="system.works.{{id}}.cost" class="size150">
+                                        {{selectOptions ../costs selected=work.cost localize=true}}
                                     </select>
                                 </div>
                             </div>
@@ -37,19 +38,19 @@
                         {{#ifEquals work.type "RITUAL"}}
                             <div class="flexrow">
                                 {{> (formGroup)
-                                        id=(concat "data.works." id ".test.alignment")
+                                        id=(concat "system.works." id ".test.alignment")
                                         labelText="CS.sheets.techniqueItem.test.alignment"
                                         value=work.test.alignment
                                         dataType="String"
                                 }}
                                 {{> (formGroup)
-                                    id=(concat "data.works." id ".test.invocation")
+                                    id=(concat "system.works." id ".test.invocation")
                                     labelText="CS.sheets.techniqueItem.test.invocation"
                                     value=work.test.invocation
                                     dataType="String"
                                 }}
                                 {{> (formGroup)
-                                        id=(concat "data.works." id ".test.unleashing")
+                                        id=(concat "system.works." id ".test.unleashing")
                                         labelText="CS.sheets.techniqueItem.test.unleashing"
                                         value=work.test.unleashing
                                         dataType="String"
@@ -60,7 +61,7 @@
                             {{#ifEquals work.type "SPELL"}}
                                 <div class="size50">
                                     {{> (formGroup)
-                                            id=(concat "data.works." id ".test.spellcasting")
+                                            id=(concat "system.works." id ".test.spellcasting")
                                             labelText="CS.sheets.techniqueItem.test.spellcasting"
                                             value=work.test.spellcasting
                                             dataType="String"
@@ -68,7 +69,7 @@
                                 </div>
                             {{/ifEquals}}
                             {{> (formGroup)
-                                    id=(concat "data.works." id ".resonance")
+                                    id=(concat "system.works." id ".resonance")
                                     labelText="CS.sheets.techniqueItem.resonance"
                                     value=work.resonance
                                     dataType="String"
@@ -79,7 +80,7 @@
                             <span>{{localize "CS.sheets.generalLabels.description"}}</span>
                         </header>
                         <div class="form-group">
-                            {{editor content=work.description target=(concat "data.works." id ".description") button=true owner=../owner editable=../editable}}
+                            {{editor work.description target=(concat "system.works." id ".description") button=true owner=../owner editable=../editable}}
                         </div>
                     </div>
                     <a class="work-control item-controls" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
@@ -88,3 +89,4 @@
         </ol>
     </div>
 </div>
+{{csTrace "/work tab"}}

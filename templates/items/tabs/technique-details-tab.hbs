@@ -1,3 +1,4 @@
+{{csTrace "technique tab"}}
 <div class="tab flexrow details" data-group="primary" data-tab="details">
     <section class="item-stats">
         <header class="header-field flexrow">
@@ -7,13 +8,13 @@
             </div>
         </header>
         <ol class="art-list list resizable" data-base-size="150">
-            {{#each data.data.arts as |art id|}}
+            {{#each item.system.arts as |art id|}}
                 <li class="art item flexrow" data-item-id="{{id}}">
                     <!--suppress HtmlFormInputWithoutLabel -->
                     <input
                             class="big-field"
                             type="text"
-                            name="data.arts.{{id}}.name"
+                            name="system.arts.{{id}}.name"
                             value="{{art.name}}"
                             data-dtype="String"
                     />
@@ -25,35 +26,36 @@
             <span>{{localize "CS.sheets.techniqueItem.learning"}}</span>
         </header>
         {{> (formGroup)
-                id="data.learning.time"
+                id="system.learning.time"
                 labelText="CS.sheets.techniqueItem.learningTime"
                 inputCssClass="size150"
-                value=data.data.learning.time
+                value=item.system.learning.time
                 dataType="String"
         }}
         {{> (formGroup)
-                id="data.learning.difficult"
+                id="system.learning.difficult"
                 labelText="CS.sheets.techniqueItem.learningDifficult"
                 inputCssClass="size150"
-                value=data.data.learning.difficult
+                value=item.system.learning.difficult
                 dataType="Number"
         }}
     </section>
     <section class="description">
         {{> (formGroup)
-                id="data.type"
+                id="system.type"
                 labelText="CS.sheets.techniqueItem.type"
                 inputCssClass="size400"
-                value=data.data.type
+                value=item.system.type
                 dataType="String"
         }}
         {{> (formGroup)
-                id="data.scales"
+                id="system.scales"
                 labelText="CS.sheets.techniqueItem.scales"
                 inputCssClass="size400"
-                value=data.data.scales
+                value=item.system.scales
                 dataType="String"
         }}
         {{> "systems/chroniclesystem/templates/items/partials/description.hbs"}}
     </section>
 </div>
+{{csTrace "/technique tab"}}
