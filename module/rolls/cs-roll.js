@@ -7,7 +7,7 @@ export class CSRoll {
         this.results = [];
     }
 
-    async doRoll() {
+    async doRoll(actor) {
         const pool = Math.max(this.formula.pool - this.formula.dicePenalty, 1);
         const dices = pool + this.formula.bonusDice;
         let dieRoll = new Die({faces: 6, number: dices});

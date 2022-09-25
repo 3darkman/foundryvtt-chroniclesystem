@@ -69,8 +69,7 @@ async function handleRoll(event, actor) {
     }
 
     let csRoll = new CSRoll(roll_definition[1], formula);
-
-    await csRoll.doRoll(actor,formula, roll_definition[1]);
+    await csRoll.doRoll(actor);
 }
 
 function adjustFormulaByWeapon (actor, formula, weapon) {
