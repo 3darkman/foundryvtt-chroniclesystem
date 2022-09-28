@@ -24,7 +24,7 @@ export class CSActorSheet extends ActorSheet {
     }
 
     async _onClickRoll(event, targets) {
-        await ChronicleSystem.handleRoll(event, this.actor, targets);
+        await ChronicleSystem.eventHandleRoll(event, this.actor, targets);
     }
 
     _showEmbeddedItemSheet(event) {

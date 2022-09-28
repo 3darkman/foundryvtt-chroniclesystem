@@ -18,7 +18,7 @@ export class CSRoll {
         let reRollFormula = "r"+this.formula.reroll+"=1";
         dieRoll.reroll(reRollFormula);
 
-        dieRoll.keep('kh' + (this.formula.pool));
+        dieRoll.keep('kh' + (this.formula.pool - this.formula.dicePenalty));
 
         const plus = new OperatorTerm({operator: "+"});
         plus.evaluate();
