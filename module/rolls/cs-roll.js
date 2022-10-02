@@ -8,7 +8,7 @@ export class CSRoll {
     }
 
     async doRoll(actor) {
-        const pool = Math.max(this.formula.pool - this.formula.dicePenalty, 1);
+        const pool = Math.max(this.formula.pool, 1);
         const dices = pool + this.formula.bonusDice;
         let dieRoll = new Die({faces: 6, number: dices});
         dieRoll.evaluate({async : false});
@@ -18,7 +18,7 @@ export class CSRoll {
         let reRollFormula = "r"+this.formula.reroll+"=1";
         dieRoll.reroll(reRollFormula);
 
-        dieRoll.keep('kh' + (this.formula.pool - this.formula.dicePenalty));
+        dieRoll.keep('kh' + Math.max(this.formula.pool - this.formula.dicePenalty, 0));
 
         const plus = new OperatorTerm({operator: "+"});
         plus.evaluate();
