@@ -1,7 +1,7 @@
 {
   "title": "Chronicle System (Unofficial)",
   "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "esmodules": [
     "module/system/config.js"
   ],
@@ -35,7 +35,7 @@
     }
   ],
   "compatibility": {
-    "minimum": "9",
-    "verified": "9"
+    "minimum": "10",
+    "verified": "10.287"
   }
 }

@@ -1,5 +1,21 @@
 #Change Log
 
+## 0.4.0
+
+### Added
+- glory field to character sheet
+- a new function to dice rolls through macros, see the readme to more information.
+
+### Changed
+- update character sheet to Foundry V10
+- dice roll that previously applied the dice penalty before the roll was made, instead of applying it when calculating how many dice are kept.
+- shows a notification if the test resulting dice pool is less than 1.
+
+### Fixed
+- adding member to house sheet
+- the system ignored all modifiers and penalties when the ability did not exist on the sheet.
+- the system gave an error when rolls a specialty test that had no value on the sheet.
+
 ## 0.3.0
 
 ### Added
