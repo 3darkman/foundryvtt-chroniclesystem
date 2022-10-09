@@ -86,7 +86,7 @@ export class CSHouseActor extends CSActor {
         switch (role) {
             case "STEWARD":
             case "HEAD":
-                if (this.data.data.members[this.roleMap[role]].id === actorId) {
+                if (this.getCSData().members[this.roleMap[role]].id === actorId) {
                     result.hasRole = true;
                 }
                 break;
@@ -120,7 +120,7 @@ export class CSHouseActor extends CSActor {
         switch (role) {
             case "STEWARD":
             case "HEAD":
-                if (this.data.data.members[this.roleMap[role]].id === actorId) {
+                if (this.actor.getCSData().members[this.roleMap[role]].id === actorId) {
                     let key = `data.members.${[this.roleMap[role]]}`;
                     this.update({[key]: ""});
                     founded = true;
@@ -256,7 +256,7 @@ export class CSHouseActor extends CSActor {
         let events = items.filter((item) => item.type === "event");
         let modifier = 0;
         events.forEach((event) => {
-            modifier += event.data.data.modifiers[resource];
+            modifier += event.getCSData().modifiers[resource];
         });
         return modifier;
     }

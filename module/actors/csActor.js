@@ -5,6 +5,6 @@
 
 export class CSActor extends Actor {
   getCSData() {
-    return this.data.data;
+    return this.system;
   }
 }

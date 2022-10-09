@@ -1,6 +1,11 @@
 import {ChronicleSystem} from "../../system/ChronicleSystem.js";
+import LOGGER from "../../utils/logger.js";
 
 export class CSActorSheet extends ActorSheet {
+
+    async _onDropActor(event, data) {
+        LOGGER.trace("On Drop Actor | CSActorSheet | csActorSheet.js");
+    }
 
     activateListeners(html) {
         super.activateListeners(html);
@@ -19,14 +24,13 @@ export class CSActorSheet extends ActorSheet {
     }
 
     async _onClickRoll(event, targets) {
-        await ChronicleSystem.handleRoll(event, this.actor, targets);
+        await ChronicleSystem.eventHandleRoll(event, this.actor, targets);
     }
 
     _showEmbeddedItemSheet(event) {
         event.preventDefault();
         const li = $(event.currentTarget).parents('.item');
         const item = this.actor.items.get(li.data('itemId'));
-        item.data.isOwned = true;
         item.sheet.render(true);
     }
 
@@ -60,7 +64,7 @@ export class CSActorSheet extends ActorSheet {
         }
         return [];
     }
-
+    
     async _onDropItemCreate(itemData) {
         let embeddedItem = [];
         let itemsToCreate = [];

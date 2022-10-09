@@ -1,5 +1,6 @@
 import {ChronicleSystem} from "./ChronicleSystem.js";
 import SystemUtils from "../utils/systemUtils.js";
+import LOGGER from "../utils/logger.js";
 
 export const registerCustomHelpers = function () {
     Handlebars.registerHelper('modifier', (str) => {
@@ -8,10 +9,43 @@ export const registerCustomHelpers = function () {
         return value === 0 ? '' : value > 0 ? ` + ${value}` : ` - ${-value}`;
     });
 
+    Handlebars.registerHelper("csCompare", (v1, operator, v2) => {
+        LOGGER.trace("csCompare | handlebarsHelper | Called.");
+        switch (operator) {
+            case "==":
+                // noinspection EqualityComparisonWithCoercionJS
+                return v1 == v2;
+            case "===":
+                return v1 === v2;
+            case "!==":
+                return v1 !== v2;
+            case "<":
+                return v1 < v2;
+            case "<=":
+                return v1 <= v2;
+            case ">":
+                return v1 > v2;
+            case ">=":
+                return v1 >= v2;
+            case "&&":
+                return v1 && v2;
+            case "||":
+                return v1 || v2;
+            default:
+                return false;
+        }
+    });
 
+    Handlebars.registerHelper('csDebug', (content) => {
+        LOGGER.debug(content);
+    });
+
+    Handlebars.registerHelper('csTrace', (content) => {
+        LOGGER.trace(content);
+    });
 
     Handlebars.registerHelper('enrich', (content) => {
-        return new Handlebars.SafeString(TextEditor.enrichHTML(content));
+        return new Handlebars.SafeString(TextEditor.enrichHTML(content, {async: false}));
     });
 
     Handlebars.registerHelper('str', (content) => {
@@ -29,7 +63,7 @@ export const registerCustomHelpers = function () {
     });
 
     Handlebars.registerHelper('weapon-test', function(actor, weapon) {
-        let data = weapon.data.specialty.split(':');
+        let data = weapon.specialty.split(':');
         if (data.length < 2)
             return "";
         let formula = ChronicleSystem.getActorAbilityFormula(actor, data[0], data[1]);
@@ -72,23 +106,23 @@ export const registerCustomHelpers = function () {
     })
 
     Handlebars.registerHelper('formGroup', function(options) {
-        return "systems/chroniclesystem/templates/actors/partials/form-group.html";
+        return "systems/chroniclesystem/templates/actors/partials/form-group.hbs";
     });
 
     Handlebars.registerHelper('ratingCheckbox', function(options) {
-        return "systems/chroniclesystem/templates/components/rating-checkbox.html";
+        return "systems/chroniclesystem/templates/components/rating-checkbox.hbs";
     });
 
     Handlebars.registerHelper('houseResourceItem', function(options) {
-        return "systems/chroniclesystem/templates/components/house-resource-item.html";
+        return "systems/chroniclesystem/templates/components/house-resource-item.hbs";
     });
 
     Handlebars.registerHelper('memberListItem', function(options) {
-        return "systems/chroniclesystem/templates/components/member-list-item.html";
+        return "systems/chroniclesystem/templates/components/member-list-item.hbs";
     });
 
     Handlebars.registerHelper('resourceHoldings', function(options) {
-        return "systems/chroniclesystem/templates/components/resource-holdings.html";
+        return "systems/chroniclesystem/templates/components/resource-holdings.hbs";
     });
 
     Handlebars.registerHelper('for', function (from, to, incr, block) {

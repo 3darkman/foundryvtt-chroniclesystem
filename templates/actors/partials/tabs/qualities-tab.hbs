@@ -1,0 +1,47 @@
+<div class="tab flexrow" data-group="primary" data-tab="qualities">
+    <section class="benefits">
+        <header class="header-field">
+            <span>Benefits</span>
+        </header>
+        <ol  class="qualities-list">
+            {{#each character.owned.benefits}}
+                <li  class="item quality" data-item-id="{{_id}}">
+                    <div class="quality-label item-name">
+                        <label class="flex3">{{name}} </label>
+                        {{#if ../owner}}
+                        <div class='item-controls'>
+                            <button type='button' class='item-edit'>
+                                <i class='fas fa-edit'></i>
+                            </button>
+                        </div>
+                        {{/if}}
+                    </div>
+
+                    <div class="description">{{enrich system.description}}</div>
+                </li>
+            {{/each}}
+        </ol>
+    </section>
+    <section class="drawbacks">
+        <header class="header-field">
+            <span>Drawbacks</span>
+        </header>
+        <ol  class="qualities-list">
+            {{#each character.owned.drawbacks}}
+                <li  class="item quality" data-item-id="{{_id}}">
+                    <div class="quality-label item-name">
+                        <label class="flex3">{{name}} </label>
+                        {{#if ../owner}}
+                            <div class='item-controls'>
+                                <button type='button' class='item-edit'>
+                                    <i class='fas fa-edit'></i>
+                                </button>
+                            </div>
+                        {{/if}}
+                    </div>
+                    <div class="description">{{enrich system.description }}</div>
+                </li>
+            {{/each}}
+        </ol>
+    </section>
+</div>

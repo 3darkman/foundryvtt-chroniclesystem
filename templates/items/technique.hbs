@@ -1,0 +1,15 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Item Sheet Header --}} {{>
+"systems/chroniclesystem/templates/items/partials/header-delete.hbs"}}
+
+    <nav  class="sheet-tabs flexrow tabs" data-group="primary">
+        <a  class="item"  data-tab="details">{{localize "CS.sheets.techniqueItem.tabs.details"}}</a>
+        <a  class="item size150"  data-tab="works">{{localize "CS.sheets.techniqueItem.tabs.works"}}</a>
+    </nav>
+
+
+    <main class="sheet-body flexrow">
+        {{> "systems/chroniclesystem/templates/items/tabs/technique-details-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/items/tabs/technique-works-tab.hbs"}}
+    </main>
+</form>

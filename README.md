@@ -41,8 +41,18 @@ The main things to know about create a weapon are:
 - the **specialty** must be set to the pattern: **Ability:Specialty**, *e.g. Fighting:Axes*
 - the **damage** must be informed in the format: **@Ability(+-\*/)number**, *eg: @Athletics+1*
 
-
 *P.s.: for now, for the automations to work, everything needs to be registered in English, both the qualities of weapons and armor, as well as abilities and their specialties.*
 
+## Example macro for doing specialty tests.
+the following macro rolls the given test for all tokens that are selected in the map.
+
+        const ability = "Agility"; //change it to the name of the ability you want to test
+        const specialty = "Acrobatics"; //change it to the name of the specialty you want to test or leave as NULL to not use any specialties 
+        const testName = "Acrobatics"; //put any test name you want to be shown in the chat.
+
+        canvas.tokens.controlled.forEach((token) => {
+          let formula = ChronicleSystem.getActorAbilityFormula(token.actor, ability, specialty);
+          ChronicleSystem.handleRoll(`formula:${testName}:${formula.toStr()}`, token.actor);
+        })
 ## Credits
 Although, for now, I'm making the system myself, I've been looking for a lot of inspiration (sometimes I've even copied it, sorry for that) in other existing systems, like **Cyberpunk Red Core**, **Burning Wheel** and **GURPS 4th Ed Game Aid**

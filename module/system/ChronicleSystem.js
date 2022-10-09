@@ -2,6 +2,7 @@ import {doRoll} from "../dieroll.js";
 import {DiceRollFormula} from "../diceRollFormula.js";
 import {Disposition} from "../disposition.js";
 import LOGGER from "../utils/logger.js";
+import {CSRoll} from "../rolls/cs-roll.js";
 
 export const ChronicleSystem ={}
 
@@ -40,11 +41,15 @@ function trim(s) {
 ChronicleSystem.trim = trim
 ChronicleSystem.escapeUnicode = escapeUnicode
 
-async function handleRoll(event, actor) {
+async function eventHandleRoll(event, actor) {
     event.preventDefault();
     if (event.ctrlKey)
         LOGGER.debug("ctrl holding");
     const rollType = event.currentTarget.id;
+    await ChronicleSystem.handleRoll(rollType, actor);
+}
+
+async function handleRoll(rollType, actor) {
     const roll_definition = rollType.split(':');
     if (roll_definition.length < 2)
         return;
@@ -67,14 +72,15 @@ async function handleRoll(event, actor) {
             break;
     }
 
-    await doRoll(actor,formula, roll_definition[1]);
+    let csRoll = new CSRoll(roll_definition[1], formula);
+    await csRoll.doRoll(actor);
 }
 
 function adjustFormulaByWeapon (actor, formula, weapon) {
-    if (!weapon.data.training)
+    let weaponData = weapon.system;
+    if (!weaponData.training)
         return formula;
-
-    let poolModifier = formula.bonusDice - weapon.data.training;
+    let poolModifier = formula.bonusDice - weaponData.training;
 
     if (poolModifier <= 0) {
         formula.pool += poolModifier;
@@ -100,19 +106,29 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
         }
     }
     let formula = new DiceRollFormula();
+
+    let specValue = 0;
+    let specModifier = 0;
+    if (specialty !== undefined) {
+        specValue = specialty.rating ? specialty.rating : 0;
+        specModifier = specialty.modifier ? specialty.modifier : 0;
+    }
+
     if (ability !== undefined) {
-        let specValue = 0;
-        let specModifier = 0;
-        if (specialty !== undefined) {
-            specValue = specialty.rating;
-            specModifier = specialty.modifier;
-        }
         let penalties = actor.getPenalty(ability.name.toLowerCase(), false, true);
-        formula.pool = ability.data.data.rating;
+        formula.pool = ability.getCSData().rating;
         formula.dicePenalty = penalties.total;
 
         let modifiers = actor.getModifier(ability.name.toLowerCase(),false, true);
-        formula.modifier = ability.data.data.modifier + specModifier + modifiers.total;
+        formula.modifier = ability.getCSData().modifier + specModifier + modifiers.total;
+        formula.bonusDice = specValue;
+    } else {
+        let penalties = actor.getPenalty(abilityName.toLowerCase(), false, true);
+        formula.pool = 2;
+        formula.dicePenalty = penalties.total;
+
+        let modifiers = actor.getModifier(abilityName.toLowerCase(),false, true);
+        formula.modifier = specModifier + modifiers.total;
         formula.bonusDice = specValue;
     }
 
@@ -120,6 +136,7 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
 }
 
 ChronicleSystem.adjustFormulaByWeapon = adjustFormulaByWeapon;
+ChronicleSystem.eventHandleRoll = eventHandleRoll;
 ChronicleSystem.handleRoll = handleRoll;
 ChronicleSystem.getActorAbilityFormula = getActorTestFormula;
 

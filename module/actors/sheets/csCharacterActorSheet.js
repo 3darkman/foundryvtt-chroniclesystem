@@ -25,7 +25,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
       classes: ["chroniclesystem", "character", "sheet", "actor"],
-      template: "systems/chroniclesystem/templates/actors/characters/character-sheet.html",
+      template: "systems/chroniclesystem/templates/actors/characters/character-sheet.hbs",
       width: 700,
       height: 900,
       tabs: [
@@ -45,11 +45,11 @@ export class CSCharacterActorSheet extends CSActorSheet {
   getData() {
     const data = super.getData();
     data.dtypes = ["String", "Number", "Boolean"];
-
     this.splitItemsByType(data);
 
-    let character = data.data.data;
+    let character = data.actor.getCSData();
     this.isOwner = this.actor.isOwner;
+
     character.owned.equipments = this._checkNull(data.itemsByType['equipment']);
     character.owned.weapons = this._checkNull(data.itemsByType['weapon']);
     character.owned.armors = this._checkNull(data.itemsByType['armor']);
@@ -66,12 +66,13 @@ export class CSCharacterActorSheet extends CSActorSheet {
     data.techniquesCosts = CSConstants.TechniqueCost;
 
     character.owned.weapons.forEach((weapon) => {
-      let info = weapon.data.specialty.split(':');
+      let weaponData = weapon.system;
+      let info = weaponData.specialty.split(':');
       if (info.length < 2)
         return "";
       let formula = ChronicleSystem.getActorAbilityFormula(data.actor, info[0], info[1]);
       formula = ChronicleSystem.adjustFormulaByWeapon(data.actor, formula, weapon);
-      let matches = weapon.data.damage.match('@([a-zA-Z]*)([-\+\/\*]*)([0-9]*)');
+      let matches = weaponData.damage.match('@([a-zA-Z]*)([-\+\/\*]*)([0-9]*)');
       if (matches) {
         if (matches.length === 4) {
           let ability = data.actor.getAbilityValue(matches[1]);
@@ -82,7 +83,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
     });
 
     character.owned.techniques.forEach((technique) => {
-      let works = data.currentInjuries = Object.values(technique.data.works);
+      let techniqueData = technique.system;
+      let works = data.currentInjuries = Object.values(techniqueData.works);
       works.forEach((work) => {
         if (work.type === "SPELL") {
           work.test.spellcastingFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.spellcasting, null);
@@ -100,7 +102,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     data.currentWounds = Object.values(character.wounds).length;
     data.maxInjuries = this.actor.getMaxInjuries();
     data.maxWounds = this.actor.getMaxWounds();
-
+    data.character = character;
     return data;
   }
 
@@ -319,19 +321,19 @@ export class CSCharacterActorSheet extends CSActorSheet {
     let isUnequipping = parseInt(eventData.hand) === 0;
 
     if (isUnequipping) {
-      documment.data.data.equipped = 0;
+      documment.getCSData().equipped = 0;
     } else {
       if (isArmor) {
-        documment.data.data.equipped = ChronicleSystem.equippedConstants.WEARING;
-        tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.data.data.equipped === ChronicleSystem.equippedConstants.WEARING);
+        documment.getCSData().equipped = ChronicleSystem.equippedConstants.WEARING;
+        tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.getCSData().equipped === ChronicleSystem.equippedConstants.WEARING);
       } else {
-        let twoHandedQuality = Object.values(documment.data.data.qualities).filter((quality) => quality.name.toLowerCase() === "two-handed");
+        let twoHandedQuality = Object.values(documment.getCSData().qualities).filter((quality) => quality.name.toLowerCase() === "two-handed");
         if (twoHandedQuality.length > 0) {
-          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.data.data.equipped === ChronicleSystem.equippedConstants.MAIN_HAND || item.data.data.equipped === ChronicleSystem.equippedConstants.OFFHAND || item.data.data.equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
-          documment.data.data.equipped = ChronicleSystem.equippedConstants.BOTH_HANDS;
+          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.getCSData().equipped === ChronicleSystem.equippedConstants.MAIN_HAND || item.getCSData().equipped === ChronicleSystem.equippedConstants.OFFHAND || item.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
+          documment.getCSData().equipped = ChronicleSystem.equippedConstants.BOTH_HANDS;
         } else {
-          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.data.data.equipped === parseInt(eventData.hand) || item.data.data.equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
-          documment.data.data.equipped = parseInt(eventData.hand);
+          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.getCSData().equipped === parseInt(eventData.hand) || item.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
+          documment.getCSData().equipped = parseInt(eventData.hand);
         }
       }
     }
@@ -339,12 +341,12 @@ export class CSCharacterActorSheet extends CSActorSheet {
     this.actor.updateTempModifiers();
 
     tempCollection.forEach((item) => {
-      collection.push({_id: item.data._id, "data.equipped": ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED});
+      collection.push({_id: item._id, "data.equipped": ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED});
       item.onEquippedChanged(this.actor, false);
     });
 
-    collection.push({_id: documment.data._id, "data.equipped": documment.data.data.equipped});
-    documment.onEquippedChanged(this.actor, documment.data.data.equipped > 0);
+    collection.push({_id: documment._id, "data.equipped": documment.getCSData().equipped});
+    documment.onEquippedChanged(this.actor, documment.getCSData().equipped > 0);
 
     this.actor.saveModifiers();
 

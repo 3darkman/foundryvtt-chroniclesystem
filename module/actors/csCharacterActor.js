@@ -17,15 +17,8 @@ export class CSCharacterActor extends CSActor {
         this.calculateMovementData();
     }
 
-    prepareEmbeddedEntities() {
-        super.prepareEmbeddedEntities();
-        // let data = this.getChronicleSystemActorData();
-        // data.owned.equipments = this._checkNull(data.itemsByType['equipment']);
-        // data.owned.weapons = this._checkNull(data.itemsByType['weapon']);
-        // data.owned.armors = this._checkNull(data.itemsByType['armor']);
-        // data.owned.edges = this._checkNull(data.itemsByType['quality']);
-        // data.owned.hindrances = this._checkNull(data.itemsByType['drawback']);
-        // data.owned.abilities = this._checkNull(data.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
+    prepareEmbeddedDocuments() {
+        super.prepareEmbeddedDocuments();
     }
 
     prepareDerivedData() {
@@ -65,7 +58,7 @@ export class CSCharacterActor extends CSActor {
 
     getAbility(abilityName) {
         let items = this.getEmbeddedCollection("Item");
-        const ability = items.find((item) => item.data.name.toLowerCase() === abilityName.toString().toLowerCase() && item.type === 'ability');
+        const ability = items.find((item) => item.name.toLowerCase() === abilityName.toString().toLowerCase() && item.type === 'ability');
         return [ability, undefined];
     }
 
@@ -73,11 +66,12 @@ export class CSCharacterActor extends CSActor {
         let items = this.getEmbeddedCollection("Item");
         let specialty = null;
         const ability = items.filter((item) => item.type === 'ability' && item.name.toLowerCase() === abilityName.toString().toLowerCase()).find(function (ability) {
-            if (ability.data.data.specialties === undefined)
+            let data = ability.getCSData();
+            if (data.specialties === undefined)
                 return false;
 
             // convert specialties list to array
-            let specialties = ability.data.data.specialties;
+            let specialties = data.specialties;
             let specialtiesArray = Object.keys(specialties).map((key) => specialties[key]);
 
             specialty = specialtiesArray.find((specialty) => specialty.name.toLowerCase() === specialtyName.toString().toLowerCase());
@@ -262,7 +256,7 @@ export class CSCharacterActor extends CSActor {
 
     getAbilityValue(abilityName) {
         const [ability,] = this.getAbility(abilityName);
-        return ability !== undefined? ability.data.data.rating : 2;
+        return ability !== undefined? ability.getCSData().rating : 2;
     }
 
     calcIntrigueDefense() {
@@ -318,10 +312,10 @@ export class CSCharacterActor extends CSActor {
         super._onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId);
         this.updateTempModifiers();
         result.forEach((doc) => {
-            let item = this.items.find((item) => item.data._id === doc._id);
+            let item = this.items.find((item) => item._id === doc._id);
             if (item) {
                 item.onObtained(this);
-                item.onEquippedChanged(this, item.data.data.equipped > 0);
+                item.onEquippedChanged(this, item.getCSData().equipped > 0);
             }
         })
         this.saveModifiers();
