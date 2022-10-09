@@ -1,5 +1,10 @@
 #Change Log
 
+## 0.4.1
+
+### Fixed
+- error removing the head of the house.
+
 ## 0.4.0
 
 ### Added
