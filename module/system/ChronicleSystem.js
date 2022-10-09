@@ -50,7 +50,6 @@ async function eventHandleRoll(event, actor) {
 }
 
 async function handleRoll(rollType, actor) {
-    console.log(actor);
     const roll_definition = rollType.split(':');
     if (roll_definition.length < 2)
         return;

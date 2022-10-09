@@ -1,3 +1,5 @@
+import SystemUtils from "../utils/systemUtils.js";
+
 export class CSRoll {
     constructor(title, formula) {
         this.formula = formula;
@@ -8,6 +10,10 @@ export class CSRoll {
     }
 
     async doRoll(actor) {
+        if (this.formula.pool - this.formula.dicePenalty <=0 ) {
+            ui.notifications.info(SystemUtils.localize("CS.notifications.dicePoolInvalid"));
+            return null;
+        }
         const pool = Math.max(this.formula.pool, 1);
         const dices = pool + this.formula.bonusDice;
         let dieRoll = new Die({faces: 6, number: dices});
