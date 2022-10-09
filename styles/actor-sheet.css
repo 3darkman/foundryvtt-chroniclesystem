@@ -159,9 +159,13 @@
     flex: 1;
 }
 
+.chroniclesystem.sheet.actor .tab.description .appearance label {
+    flex:2.5;
+}
+
 .chroniclesystem.sheet.actor .tab.description .section-split .appearance {
     margin-right: 8px;
-    flex: 0.7;
+    flex: 0.5;
 }
 
 .chroniclesystem.sheet.actor .tab.description .profile-picture {
@@ -259,14 +263,24 @@
     text-align: right;
 }
 
+.chroniclesystem.sheet.actor .general .experience .label {
+    flex: 0.7;
+}
+
 .chroniclesystem.sheet.actor .general .experience .form-fields {
-    flex: 0 0 50px;
+    flex: 1;
     margin: 0 3px 0 3px;
     text-align: right;
 }
 
 .chroniclesystem.sheet.actor .general .experience .form-group {
-    flex: 0.5;
+    flex: 0.35;
+    display: inline-flex;
+    margin: 0 3px 0 3px;
+}
+
+.chroniclesystem.sheet.actor .general .experience .form-group.glory {
+    flex: 0.3;
     display: inline-flex;
     margin: 0 3px 0 3px;
 }

@@ -1,5 +1,8 @@
 {
   "CS": {
+    "notifications": {
+      "dicePoolInvalid": "you cannot roll this test because your dice pool results in less than 1 die being kept."
+    },
     "dialogs": {
       "characterRole": {
         "title": "Select the role of {actorName} in the house.",
