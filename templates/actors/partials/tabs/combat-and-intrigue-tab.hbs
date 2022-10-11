@@ -9,8 +9,8 @@
             <section class="">
             </section>
             <section class="flexrow">
-                {{> (formGroup) labelText="Current:" id="data.destinyPoints.current" value=character.destinyPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
-                {{> (formGroup) labelText="Max:" id="data.destinyPoints.max" value=character.destinyPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
+                {{> (formGroup) labelText="Current:" id="system.destinyPoints.current" value=character.destinyPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
+                {{> (formGroup) labelText="Max:" id="system.destinyPoints.max" value=character.destinyPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
             </section>
         </section>
         <section class="intrigue">
@@ -26,7 +26,7 @@
                     <div class="form-group">
                         <span class="form-fields">
                               <input
-                                      name="data.derivedStats.intrigueDefense.value"
+                                      name="system.derivedStats.intrigueDefense.value"
                                       type="text"
                                       value="{{character.derivedStats.intrigueDefense.value}}"
                                       placeholder="Value"
@@ -35,7 +35,7 @@
                               />
                             <b>+</b>
                               <input
-                                      name="data.derivedStats.intrigueDefense.modifier"
+                                      name="system.derivedStats.intrigueDefense.modifier"
                                       type="text"
                                       value="{{character.derivedStats.intrigueDefense.modifier}}"
                                       placeholder="Value"
@@ -43,7 +43,7 @@
                               />
                             <b>=</b>
                             <input
-                                    name="data.derivedStats.intrigueDefense.total"
+                                    name="system.derivedStats.intrigueDefense.total"
                                     type="text"
                                     value="{{character.derivedStats.intrigueDefense.total}}"
                                     placeholder="Total"
@@ -58,7 +58,7 @@
                     <div class="form-group">
                         <span class="form-fields">
                             <input
-                                    name="data.derivedStats.composure.value"
+                                    name="system.derivedStats.composure.value"
                                     type="text"
                                     value="{{character.derivedStats.composure.value}}"
                                     placeholder="Value"
@@ -67,7 +67,7 @@
                             />
                             <b>+</b>
                             <input
-                                    name="data.derivedStats.composure.modifier"
+                                    name="system.derivedStats.composure.modifier"
                                     type="text"
                                     value="{{character.derivedStats.composure.modifier}}"
                                     placeholder="Modifier"
@@ -75,7 +75,7 @@
                             />
                             <b>=</b>
                             <input
-                                    name="data.derivedStats.composure.value"
+                                    name="system.derivedStats.composure.value"
                                     type="text"
                                     value="{{character.derivedStats.composure.total}}"
                                     placeholder="Total"
@@ -84,7 +84,7 @@
                             />
                         </span>
                     </div>
-                    {{> (formGroup) labelText="Current:" id="data.derivedStats.composure.current" value=character.derivedStats.composure.current inputCssClass="" placeHolder="Current" dataType="Number" }}
+                    {{> (formGroup) labelText="Current:" id="system.derivedStats.composure.current" value=character.derivedStats.composure.current inputCssClass="" placeHolder="Current" dataType="Number" }}
                     <header class="subheader-field">
                         <span>Frustration</span>
                     </header>
@@ -147,7 +147,7 @@
                     <div class="form-group">
                         <span class="form-fields">
                             <input
-                                    name="data.derivedStats.combatDefense.value"
+                                    name="system.derivedStats.combatDefense.value"
                                     type="text"
                                     value="{{character.derivedStats.combatDefense.value}}"
                                     placeholder="Value"
@@ -156,7 +156,7 @@
                             />
                             <b>+</b>
                             <input
-                                    name="data.derivedStats.combatDefense.modifier"
+                                    name="system.derivedStats.combatDefense.modifier"
                                     type="text"
                                     value="{{character.derivedStats.combatDefense.modifier}}"
                                     placeholder="Modifier"
@@ -164,7 +164,7 @@
                             />
                             <b>=</b>
                             <input
-                                    name="data.derivedStats.combatDefense.value"
+                                    name="system.derivedStats.combatDefense.value"
                                     type="text"
                                     value="{{character.derivedStats.combatDefense.total}}"
                                     placeholder="Total"
@@ -179,7 +179,7 @@
                     <div class="form-group">
                         <span class="form-fields">
                             <input
-                                    name="data.derivedStats.health.value"
+                                    name="system.derivedStats.health.value"
                                     type="text"
                                     value="{{character.derivedStats.health.value}}"
                                     placeholder="Value"
@@ -188,7 +188,7 @@
                             />
                             <b>+</b>
                             <input
-                                    name="data.derivedStats.health.modifier"
+                                    name="system.derivedStats.health.modifier"
                                     type="text"
                                     value="{{character.derivedStats.health.modifier}}"
                                     placeholder="Modifier"
@@ -196,7 +196,7 @@
                             />
                             <b>=</b>
                             <input
-                                    name="data.derivedStats.health.value"
+                                    name="system.derivedStats.health.value"
                                     type="text"
                                     value="{{character.derivedStats.health.total}}"
                                     placeholder="Total"
@@ -206,10 +206,10 @@
                         </span>
                     </div>
                     <div class="form-group">
-                        <label for="data.derivedStats.health.current">Current</label>
+                        <label for="system.derivedStats.health.current">Current</label>
                         <span class="form-fields">
                             <input
-                                    name="data.derivedStats.health.current"
+                                    name="system.derivedStats.health.current"
                                     type="text"
                                     value="{{character.derivedStats.health.current}}"
                                     placeholder="Current"
@@ -227,7 +227,7 @@
                     <div class="form-group">
                         <span class="form-fields">
                             <input
-                                    name="data.movement.base"
+                                    name="system.movement.base"
                                     type="text"
                                     value="{{character.movement.base}}"
                                     placeholder="Base"
@@ -236,7 +236,7 @@
                             />
                             <b>+</b>
                             <input
-                                    name="data.derivedStats.movement.runBonus"
+                                    name="system.derivedStats.movement.runBonus"
                                     type="text"
                                     value="{{character.movement.runBonus}}"
                                     placeholder="Run Bonus"
@@ -245,7 +245,7 @@
                             />
                             <b>-</b>
                             <input
-                                    name="data.movement.bulk"
+                                    name="system.movement.bulk"
                                     type="text"
                                     value="{{character.movement.bulk}}"
                                     placeholder="Bulk"
@@ -254,7 +254,7 @@
                             />
                             <b>+</b>
                             <input
-                                    name="data.movement.modifier"
+                                    name="system.movement.modifier"
                                     type="text"
                                     value="{{character.movement.modifier}}"
                                     placeholder="Modifier"
@@ -262,7 +262,7 @@
                             />
                             <b>=</b>
                             <input
-                                    name="data.derivedStats.movement.total"
+                                    name="system.derivedStats.movement.total"
                                     type="text"
                                     value="{{character.movement.total}}"
                                     placeholder="Total"
@@ -288,7 +288,7 @@
                                 <input
                                         class="big-field"
                                         type="text"
-                                        name="data.injuries.{{id}}"
+                                        name="system.injuries.{{id}}"
                                         value="{{injury}}"
                                         placeholder="Description"
                                         data-dtype="String"
@@ -312,7 +312,7 @@
                                 <input
                                         class="big-field"
                                         type="text"
-                                        name="data.wounds.{{id}}"
+                                        name="system.wounds.{{id}}"
                                         value="{{wound}}"
                                         placeholder="Description"
                                         data-dtype="String"

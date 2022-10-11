@@ -1,5 +1,10 @@
 #Change Log
 
+## 0.4.2
+
+### Fixed
+- the combat and intrigue tab fields are not retaining the values.
+
 ## 0.4.1
 
 ### Fixed
