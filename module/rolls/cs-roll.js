@@ -9,7 +9,7 @@ export class CSRoll {
         this.results = [];
     }
 
-    async doRoll(actor) {
+    async doRoll(actor, async = true) {
         if (this.formula.pool - this.formula.dicePenalty <=0 ) {
             ui.notifications.info(SystemUtils.localize("CS.notifications.dicePoolInvalid"));
             return null;
@@ -17,8 +17,7 @@ export class CSRoll {
         const pool = Math.max(this.formula.pool, 1);
         const dices = pool + this.formula.bonusDice;
         let dieRoll = new Die({faces: 6, number: dices});
-        dieRoll.evaluate({async : false});
-
+        await dieRoll.evaluate({async : async});
         this.results = dieRoll.results;
 
         let reRollFormula = "r"+this.formula.reroll+"=1";
@@ -37,5 +36,6 @@ export class CSRoll {
             speaker: ChatMessage.getSpeaker({ actor: actor }),
             flavor: flavor
         });
+        return resultRoll;
     }
 }

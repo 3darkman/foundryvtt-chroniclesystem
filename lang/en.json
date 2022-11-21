@@ -11,6 +11,13 @@
       "houseResourceEditor": {
         "title": "{resourceName} Editor"
       },
+      "initiativeSelector": {
+        "title": "Select the encounter type",
+        "combat": "Combat",
+        "intrigue": "Intrigue",
+        "warfare": "Warfare",
+        "label": "Conflict Type"
+      },
       "addingHouseEvent": {
         "title": "Should the event generate the modifiers automatically?",
         "labels": {
@@ -21,13 +28,17 @@
       },
       "actions": {
         "save": "Save",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "confirm": "Confirm"
       }
     },
     "messages": {
       "nobodyHasBeenChosen": "Nobody has been chosen",
       "actorDoesntExists": "Actor doesn't exists",
       "notStewardLinked": "No actor has been linked to the house like steward"
+    },
+    "chatMessages": {
+      "initiativeRolls": "{name} rolls for {type} initiative!"
     },
     "settings": {
       "debugLogs": {

@@ -20,6 +20,8 @@ import {CSEventItemSheet} from "../items/sheets/csEventItemSheet.js";
 import {CSHoldingItemSheet} from "../items/sheets/csHoldingItemSheet.js";
 import {CSTechniqueItemSheet} from "../items/sheets/cs-technique-item-sheet.js";
 import {migrateData} from "../migrations/migration.js";
+import {CsCombat} from "../combat/cs-combat.js";
+import {CsCombatant} from "../combat/cs-combatant.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -42,6 +44,8 @@ Hooks.once("init", async function() {
 	// Define custom Entity classes
     CONFIG.Actor.documentClass = actorConstructor;
     CONFIG.Item.documentClass = itemConstructor;
+    CONFIG.Combat.documentClass = CsCombat;
+    CONFIG.Combatant.documentClass = CsCombatant;
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
