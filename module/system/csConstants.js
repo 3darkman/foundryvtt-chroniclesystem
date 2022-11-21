@@ -14,7 +14,8 @@ CSConstants.Templates = {
         CHARACTER_ROLE_IN_HOUSE: "systems/chroniclesystem/templates/dialogs/characterRoleInHouse.html",
         HOUSE_RESOURCE_EDITOR: "systems/chroniclesystem/templates/dialogs/houseResourceEditor.html",
         ADDING_HOUSE_EVENT: "systems/chroniclesystem/templates/dialogs/addingHouseEvent.html",
-        INITIATIVE_SELECTOR: "systems/chroniclesystem/templates/dialogs/initiative-selector.hbs"
+        INITIATIVE_SELECTOR: "systems/chroniclesystem/templates/dialogs/initiative-selector.hbs",
+        ROLL_MODIFIER: "systems/chroniclesystem/templates/dialogs/roll-modifier.hbs"
     }
 }
 

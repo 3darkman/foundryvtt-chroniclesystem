@@ -5,6 +5,7 @@ export class DiceRollFormula {
     #modifier;
     #dicePenalty;
     #difficult;
+    #isUserChanged;
 
     constructor() {
         this.pool = 2;
@@ -13,6 +14,15 @@ export class DiceRollFormula {
         this.modifier = 0;
         this.dicePenalty = 0;
         this.difficult = 0;
+        this.isUserChanged = false;
+    }
+
+    get isUserChanged() {
+        return this.#isUserChanged;
+    }
+
+    set isUserChanged(value) {
+        this.#isUserChanged = value;
     }
 
     get difficult() {
