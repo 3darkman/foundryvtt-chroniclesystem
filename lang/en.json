@@ -18,6 +18,14 @@
         "warfare": "Warfare",
         "label": "Conflict Type"
       },
+      "rollModifier": {
+        "title": "Roll Parameters",
+        "pool": "Dice Pool",
+        "bonusDice": "Bonus Dice",
+        "modifier": "Modifiers",
+        "dicePenalty": "Penalties",
+        "reRoll": "Re-Roll 1s"
+      },
       "addingHouseEvent": {
         "title": "Should the event generate the modifiers automatically?",
         "labels": {
@@ -38,7 +46,9 @@
       "notStewardLinked": "No actor has been linked to the house like steward"
     },
     "chatMessages": {
-      "initiativeRolls": "{name} rolls for {type} initiative!"
+      "initiativeRolls": "{name} rolls for {type} initiative!",
+      "simpleRoll": "{name} make a {test} roll!",
+      "customRoll": "{name} make a custom {test} roll!"
     },
     "settings": {
       "debugLogs": {

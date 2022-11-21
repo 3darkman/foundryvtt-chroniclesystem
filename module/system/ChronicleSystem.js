@@ -2,6 +2,8 @@ import {DiceRollFormula} from "../diceRollFormula.js";
 import {Disposition} from "../disposition.js";
 import LOGGER from "../utils/logger.js";
 import {CSRoll} from "../rolls/cs-roll.js";
+import {CSConstants} from "./csConstants.js";
+import SystemUtils from "../utils/systemUtils.js";
 
 export const ChronicleSystem ={}
 
@@ -42,10 +44,12 @@ ChronicleSystem.escapeUnicode = escapeUnicode
 
 async function eventHandleRoll(event, actor) {
     event.preventDefault();
-    if (event.ctrlKey)
-        LOGGER.debug("ctrl holding");
+    let showModifierDialog = false;
+    if (event.ctrlKey) {
+        showModifierDialog = true;
+    }
     const rollType = event.currentTarget.id;
-    await ChronicleSystem.handleRoll(rollType, actor);
+    await ChronicleSystem.handleRollAsync(rollType, actor, showModifierDialog);
 }
 
 function _getFormula(roll_definition, actor) {
@@ -82,15 +86,57 @@ function handleRoll(rollType, actor) {
     return csRoll.doRoll(actor, false);
 }
 
-async function handleRollAsync(rollType, actor) {
+async function _showModifierDialog(formula) {
+    const template = CSConstants.Templates.Dialogs.ROLL_MODIFIER;
+    const html = await renderTemplate(template, {formula: formula});
+    return new Promise(resolve => {
+        const data = {
+            title: SystemUtils.localize("CS.dialogs.rollModifier.title"),
+            content: html,
+            buttons: {
+                normal: {
+                    label: SystemUtils.localize("CS.dialogs.actions.confirm"),
+                    callback: html => resolve({data: html[0].querySelector("form")})
+                },
+                cancel: {
+                    label: SystemUtils.localize("CS.dialogs.actions.cancel"),
+                    callback: html => resolve({cancelled: true})
+                }
+            },
+            default: "normal",
+            close: () => resolve({cancelled: true})
+        };
+        new Dialog(data, null).render(true);
+    })
+}
+
+async function handleRollAsync(rollType, actor, showModifierDialog = false) {
     const roll_definition = rollType.split(':');
     if (roll_definition.length < 2)
         return;
     let formula = _getFormula(roll_definition, actor);
 
+    if (showModifierDialog) {
+        let form = await _showModifierDialog(formula);
+        if (!form.cancelled) {
+            const formulaChanged = new DiceRollFormula();
+            formulaChanged.pool = form.data.pool.value;
+            formulaChanged.bonusDice = form.data.bonusDice.value;
+            formulaChanged.reRoll = form.data.reRoll.value;
+            formulaChanged.modifier = form.data.modifier.value;
+            formulaChanged.dicePenalty = form.data.dicePenalty.value;
+
+            if (formulaChanged.toStr() !== formula.toStr()) {
+                formulaChanged.isUserChanged = true;
+                formula = formulaChanged;
+            }
+        }
+    }
+
     let csRoll = new CSRoll(roll_definition[1], formula);
     return await csRoll.doRoll(actor, true);
 }
+
 
 function adjustFormulaByWeapon (actor, formula, weapon) {
     let weaponData = weapon.system;
@@ -129,7 +175,7 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
         specValue = specialty.rating ? specialty.rating : 0;
         specModifier = specialty.modifier ? specialty.modifier : 0;
     }
-
+    formula.reRoll = 0;
     if (ability !== undefined) {
         let penalties = actor.getPenalty(ability.name.toLowerCase(), false, true);
         formula.pool = ability.getCSData().rating;
