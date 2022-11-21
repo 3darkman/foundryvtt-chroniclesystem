@@ -1,6 +1,16 @@
 {
-  "dependencies": {},
   "devDependencies": {
-    "@league-of-foundry-developers/foundry-vtt-types": "^9.268.0"
+    "@league-of-foundry-developers/foundry-vtt-types": "^9.280.0",
+    "eslint": "^8.28.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.2",
+    "pixi": "^0.3.1",
+    "prettier": "^2.7.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   }
 }
