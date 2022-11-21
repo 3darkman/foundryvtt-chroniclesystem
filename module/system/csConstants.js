@@ -13,7 +13,8 @@ CSConstants.Templates = {
     Dialogs: {
         CHARACTER_ROLE_IN_HOUSE: "systems/chroniclesystem/templates/dialogs/characterRoleInHouse.html",
         HOUSE_RESOURCE_EDITOR: "systems/chroniclesystem/templates/dialogs/houseResourceEditor.html",
-        ADDING_HOUSE_EVENT: "systems/chroniclesystem/templates/dialogs/addingHouseEvent.html"
+        ADDING_HOUSE_EVENT: "systems/chroniclesystem/templates/dialogs/addingHouseEvent.html",
+        INITIATIVE_SELECTOR: "systems/chroniclesystem/templates/dialogs/initiative-selector.hbs"
     }
 }
 
@@ -33,6 +34,18 @@ CSConstants.HouseResources = {
     POPULATION: "CS.sheets.house.resources.population",
     POWER: "CS.sheets.house.resources.power",
     WEALTH: "CS.sheets.house.resources.wealth"
+}
+
+CSConstants.InitiativeTypes = {
+    COMBAT: "CS.dialogs.initiativeSelector.combat",//"specialty:quickness:agility",
+    INTRIGUE: "CS.dialogs.initiativeSelector.intrigue",//"specialty:reputation:status",
+    WARFARE: "CS.dialogs.initiativeSelector.warfare"//"specialty:strategy:warfare"
+}
+
+CSConstants.InitiativeTypeRolls = {
+    COMBAT: "specialty:quickness:agility",
+    INTRIGUE: "specialty:reputation:status",
+    WARFARE: "specialty:strategy:warfare"
 }
 
 CSConstants.TechniqueType = {

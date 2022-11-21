@@ -1,4 +1,3 @@
-import {doRoll} from "../dieroll.js";
 import {DiceRollFormula} from "../diceRollFormula.js";
 import {Disposition} from "../disposition.js";
 import LOGGER from "../utils/logger.js";
@@ -49,10 +48,7 @@ async function eventHandleRoll(event, actor) {
     await ChronicleSystem.handleRoll(rollType, actor);
 }
 
-async function handleRoll(rollType, actor) {
-    const roll_definition = rollType.split(':');
-    if (roll_definition.length < 2)
-        return;
+function _getFormula(roll_definition, actor) {
     let formula = new DiceRollFormula();
 
     switch (roll_definition[0]){
@@ -72,8 +68,28 @@ async function handleRoll(rollType, actor) {
             break;
     }
 
+    return formula;
+}
+
+function handleRoll(rollType, actor) {
+    const roll_definition = rollType.split(':');
+    if (roll_definition.length < 2)
+        return;
+
+    const formula = _getFormula(roll_definition, actor);
+
     let csRoll = new CSRoll(roll_definition[1], formula);
-    await csRoll.doRoll(actor);
+    return csRoll.doRoll(actor, false);
+}
+
+async function handleRollAsync(rollType, actor) {
+    const roll_definition = rollType.split(':');
+    if (roll_definition.length < 2)
+        return;
+    let formula = _getFormula(roll_definition, actor);
+
+    let csRoll = new CSRoll(roll_definition[1], formula);
+    return await csRoll.doRoll(actor, true);
 }
 
 function adjustFormulaByWeapon (actor, formula, weapon) {
@@ -138,6 +154,7 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
 ChronicleSystem.adjustFormulaByWeapon = adjustFormulaByWeapon;
 ChronicleSystem.eventHandleRoll = eventHandleRoll;
 ChronicleSystem.handleRoll = handleRoll;
+ChronicleSystem.handleRollAsync = handleRollAsync;
 ChronicleSystem.getActorAbilityFormula = getActorTestFormula;
 
 ChronicleSystem.dispositions = [
