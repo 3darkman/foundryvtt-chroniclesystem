@@ -24,7 +24,8 @@ CSConstants.Settings = {
     ASOIAF_DEFENSE_STYLE: "asoiafDefenseStyle",
     TRACE_LOGS: "traceLogs",
     DEBUG_LOGS: "debugLogs",
-    CURRENT_VERSION: "version"
+    CURRENT_VERSION: "version",
+    MODIFIER_DIALOG_AS_DEFAULT: "isModifierDialogDefault"
 }
 
 CSConstants.HouseResources = {

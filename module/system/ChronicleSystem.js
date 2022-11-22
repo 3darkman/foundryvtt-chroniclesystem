@@ -116,7 +116,9 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
         return;
     let formula = _getFormula(roll_definition, actor);
 
-    if (showModifierDialog) {
+    const revertModifierDialog = game.settings.get(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.MODIFIER_DIALOG_AS_DEFAULT);
+
+    if (showModifierDialog ? !revertModifierDialog : revertModifierDialog) {
         let form = await _showModifierDialog(formula);
         if (!form.cancelled) {
             const formulaChanged = new DiceRollFormula();
@@ -130,6 +132,8 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
                 formulaChanged.isUserChanged = true;
                 formula = formulaChanged;
             }
+        } else {
+            return new Promise((resolve)=> resolve = new Roll('') );
         }
     }
 
