@@ -1,5 +1,11 @@
 #Change Log
 
+## 0.5.0
+
+### Added
+- modifier window on rolls when holding SHIFT key (can be inverted in settings)
+- automatic initiative rolls (when clicking on one of the combat tracker initiative rolls buttons, a window will appear asking the type of initiative)
+
 ## 0.4.2
 
 ### Fixed
