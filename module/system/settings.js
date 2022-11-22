@@ -51,6 +51,18 @@ const registerSystemSettings = () => {
             LOGGER.log(`Changed ${CSConstants.Settings.CURRENT_VERSION} to ${value}`);
         },
     });
+
+    game.settings.register(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.MODIFIER_DIALOG_AS_DEFAULT, {
+        name: "CS.settings.isModifierDialogDefault.name",
+        hint: "CS.settings.isModifierDialogDefault.hint",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false,
+        onChange: (value) => {
+            LOGGER.log(`Changed ${CSConstants.Settings.MODIFIER_DIALOG_AS_DEFAULT} to ${value}`);
+        },
+    });
 };
 
 export default registerSystemSettings;

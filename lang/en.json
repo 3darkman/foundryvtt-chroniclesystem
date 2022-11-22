@@ -11,6 +11,21 @@
       "houseResourceEditor": {
         "title": "{resourceName} Editor"
       },
+      "initiativeSelector": {
+        "title": "Select the encounter type",
+        "combat": "Combat",
+        "intrigue": "Intrigue",
+        "warfare": "Warfare",
+        "label": "Conflict Type"
+      },
+      "rollModifier": {
+        "title": "Roll Parameters",
+        "pool": "Dice Pool",
+        "bonusDice": "Bonus Dice",
+        "modifier": "Modifiers",
+        "dicePenalty": "Penalties",
+        "reRoll": "Re-Roll 1s"
+      },
       "addingHouseEvent": {
         "title": "Should the event generate the modifiers automatically?",
         "labels": {
@@ -21,13 +36,19 @@
       },
       "actions": {
         "save": "Save",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "confirm": "Confirm"
       }
     },
     "messages": {
       "nobodyHasBeenChosen": "Nobody has been chosen",
       "actorDoesntExists": "Actor doesn't exists",
       "notStewardLinked": "No actor has been linked to the house like steward"
+    },
+    "chatMessages": {
+      "initiativeRolls": "{name} rolls for {type} initiative!",
+      "simpleRoll": "{name} make a {test} roll!",
+      "customRoll": "{name} make a custom {test} roll!"
     },
     "settings": {
       "debugLogs": {
@@ -41,6 +62,10 @@
       "asoiafDefenseStyle": {
         "name": "ASoIaF Defense Style",
         "hint": "The armor penalty influences the character's combat defense. This Needs Foundry refresh (F5)."
+      },
+      "isModifierDialogDefault": {
+        "name": "Modifier Dialog as Default?",
+        "hint": "if checked, when clicking on dice rolls on an actor's sheet, it will show the modifiers window, and will make the roll without showing the window when holding the SHIFT key. Each player defines his configuration."
       }
     },
     "sheets": {

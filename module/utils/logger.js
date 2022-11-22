@@ -7,7 +7,7 @@ export default class LOGGER {
 
     static debug(msg) {
         if (game.settings.get(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.DEBUG_LOGS)) {
-            console.debug(`CS DBG | ${msg}`);
+            console.debug(`CS dbg | ${msg}`);
             if (typeof msg === "object" && msg !== null) {
                 console.log(msg);
             }
