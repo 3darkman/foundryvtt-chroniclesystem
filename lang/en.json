@@ -65,7 +65,7 @@
       },
       "isModifierDialogDefault": {
         "name": "Modifier Dialog as Default?",
-        "hint": "if checked, when clicking on dice rolls on an actor's sheet, it will show the modifiers window, and will make the roll without showing the window when holding the ctrl key. Each player defines his configuration."
+        "hint": "if checked, when clicking on dice rolls on an actor's sheet, it will show the modifiers window, and will make the roll without showing the window when holding the SHIFT key. Each player defines his configuration."
       }
     },
     "sheets": {

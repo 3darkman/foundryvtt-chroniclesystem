@@ -45,7 +45,7 @@ ChronicleSystem.escapeUnicode = escapeUnicode
 async function eventHandleRoll(event, actor) {
     event.preventDefault();
     let showModifierDialog = false;
-    if (event.ctrlKey) {
+    if (event.shiftKey) {
         showModifierDialog = true;
     }
     const rollType = event.currentTarget.id;
