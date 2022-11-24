@@ -86,6 +86,7 @@ export class CSHouseActorSheet extends CSActorSheet {
             let doc = this.actor.getEmbeddedDocument('Item', holding._id);
             house.holdings[holding.system.resource].push(holding);
             house[holding.system.resource].invested += doc.getTotalInvested();
+            house[holding.system.resource].hasHoldings = true;
         });
     }
 
