@@ -22,6 +22,7 @@ import {CSTechniqueItemSheet} from "../items/sheets/cs-technique-item-sheet.js";
 import {migrateData} from "../migrations/migration.js";
 import {CsCombat} from "../combat/cs-combat.js";
 import {CsCombatant} from "../combat/cs-combatant.js";
+import {CsHouseUnitTypeItemSheet} from "../items/sheets/cs-house-unit-type-item-sheet.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -65,6 +66,8 @@ Hooks.once("init", async function() {
         { label: SystemUtils.localize("CS.sheets.holdingItemSheet"), types: ["holding"], makeDefault: true });
     Items.registerSheet("chroniclesystem", CSTechniqueItemSheet,
         { label: SystemUtils.localize("CS.sheets.techniqueItemSheet"), types: ["technique"], makeDefault: true });
+    Items.registerSheet("chroniclesystem", CsHouseUnitTypeItemSheet,
+        { label: SystemUtils.localize("CS.sheets.unitTypeItemSheet"), types: ["unitType"], makeDefault: true });
 
     registerSystemSettings();
     await preloadHandlebarsTemplates();

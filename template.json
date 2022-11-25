@@ -159,7 +159,7 @@
     }
   },
   "Item": {
-    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback", "event", "holding", "technique"],
+    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback", "event", "holding", "technique", "unitType"],
     "templates": {
       "physicalItem": {
         "weight": 0
@@ -285,6 +285,58 @@
       "arts": [],
       "scales": "",
       "works": []
+    },
+    "unitType": {
+      "description": "",
+      "powerCost": 0,
+      "hasAnotherCost": false,
+      "anotherCost": {
+        "keyResource": "",
+        "modifier": 0,
+        "hasModifierByTraining": false,
+        "modifierByTraining": [
+          {
+            "training": "CS.sheets.houseUnit.trainingRanks.Green",
+            "modifier": 0
+          },
+          {
+            "training": "CS.sheets.houseUnit.trainingRanks.Trained",
+            "modifier": 0
+          },
+          {
+            "training": "CS.sheets.houseUnit.trainingRanks.Veteran",
+            "modifier": 0
+          },
+          {
+            "training": "CS.sheets.houseUnit.trainingRanks.Elite",
+            "modifier": 0
+          }
+        ]
+      },
+      "disciplineModifier": 0,
+      "keyAbilities": ["","",""],
+      "startingEquipment": {
+        "armor": {
+          "rating": 0,
+          "penalty": 0,
+          "bulk": 0
+        },
+        "fightingDamage": "",
+        "marksmanshipDamage": "",
+        "isCloseRange": false,
+        "isLongRange": false
+      },
+      "upgradedEquipment": {
+        "armor": {
+          "rating": 0,
+          "penalty": 0,
+          "bulk": 0
+        },
+        "fightingDamage": "",
+        "marksmanshipDamage": "",
+        "isCloseRange": false,
+        "isLongRange": false
+      }
     }
   }
 }

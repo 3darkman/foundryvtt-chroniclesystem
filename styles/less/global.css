@@ -91,6 +91,15 @@
 .chroniclesystem.sheet.technique .work.item {
   margin-bottom: 8px;
 }
+.chroniclesystem.sheet.uniType .unitType-ability input {
+  margin-top: 5px;
+}
+.chroniclesystem.sheet.uniType .unitType-modifierByTraining input {
+  margin-top: 5px;
+}
+.chroniclesystem.sheet.uniType .armor {
+  padding-right: 5px;
+}
 .chroniclesystem .capitalize {
   text-transform: capitalize;
 }

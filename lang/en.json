@@ -159,6 +159,40 @@
         "numberOfChoices": "Number of Choices",
         "bonusToChoices": "Bonus to Choices"
       },
+      "houseUnit": {
+        "trainingRanks": {
+          "Green": "Green",
+          "Trained": "Trained",
+          "Veteran": "Veteran",
+          "Elite": "Elite"
+        }
+      },
+      "houseUnitType": {
+        "powerCost": "Power Cost",
+        "disciplineModifier": "Discipline Modifier",
+        "startingEquipment": "Starting Equipment",
+        "upgradedEquipment": "Upgraded Equipment",
+        "keyAbilities": "Key Abilities",
+        "keyAbility": "Ability Name",
+        "hasAnotherCost": "Has Another Cost?",
+        "anotherCost": {
+          "header": "Another Cost",
+          "keyResource": "Key Resource",
+          "modifier": "Modifier",
+          "hasModifierByTraining": "Has Modifier By Training?"
+        },
+        "equipment": {
+          "armor": {
+            "rating": "AR",
+            "penalty": "AP",
+            "bulk": "Bulk"
+          },
+          "fightingDamage": "Fighting Damage",
+          "marksmanshipDamage": "Marksmanship Damage",
+          "isCloseRange": "Is Close Range?",
+          "isLongRange": "Is Long Range?"
+        }
+      },
       "holdingItem": {
         "features": "Features",
         "investment": "Investment",
