@@ -1,0 +1,196 @@
+<form class="{{cssClass}}" autoComplete="off">
+    {{> "systems/chroniclesystem/templates/items/partials/header-delete.hbs"}}
+    <main class="sheet-body flexrow">
+        <section class="item-stats">
+            <header class="header-field">
+                <span>{{localize "CS.sheets.generalLabels.details"}}</span>
+            </header>
+            {{> (formGroup)
+                    id="system.powerCost"
+                    labelText="CS.sheets.houseUnitType.powerCost"
+                    inputCssClass="small-field"
+                    value=item.system.powerCost
+                    dataType="Number"
+            }}
+            {{> (formGroup)
+                    id="system.disciplineModifier"
+                    labelText="CS.sheets.houseUnitType.disciplineModifier"
+                    inputCssClass="small-field"
+                    value=item.system.disciplineModifier
+                    dataType="Number"
+            }}
+            <div class="form-group">
+                <label for="system.hasAnotherCost">{{localize "CS.sheets.houseUnitType.hasAnotherCost"}}</label>
+                <a class="checkButton hasAnotherCost size50 {{showIfEquals true item.system.hasAnotherCost "activated" ""}}"><i class="fa fa-check"></i></a>
+            </div>
+
+            {{#if item.system.hasAnotherCost}}
+                <header class="list-header">
+                    <span>{{localize "CS.sheets.houseUnitType.anotherCost.header"}}</span>
+                </header>
+                {{> (formGroup)
+                        id="system.anotherCost.keyResource"
+                        labelText="CS.sheets.houseUnitType.anotherCost.keyResource"
+                        inputCssClass="size200"
+                        value=item.system.anotherCost.keyResource
+                        dataType="String"
+                }}
+                {{#if item.system.anotherCost.hasModifierByTraining}}
+                {{else}}
+                    {{> (formGroup)
+                            id="system.anotherCost.modifier"
+                            labelText="CS.sheets.houseUnitType.anotherCost.modifier"
+                            inputCssClass="small-field"
+                            value=item.system.anotherCost.modifier
+                            dataType="Number"
+                    }}
+                {{/if}}
+                <div class="form-group">
+                    <label for="system.anotherCost.hasModifierByTraining">{{localize "CS.sheets.houseUnitType.anotherCost.hasModifierByTraining"}}</label>
+                    <a class="checkButton hasModifierByTraining size50 {{showIfEquals true item.system.anotherCost.hasModifierByTraining "activated" ""}}"><i class="fa fa-check"></i></a>
+                </div>
+                {{#if item.system.anotherCost.hasModifierByTraining}}
+                    {{#each item.system.anotherCost.modifierByTraining as |mbt index|}}
+                        <li class="unitType-modifierByTraining item flexrow" data-item-id="{{index}}">
+                            <label>{{localize mbt.training}}</label>
+                            <input
+                                    class="size50"
+                                    type="text"
+                                    name="system.anotherCost.modifierByTraining.{{index}}.modifier"
+                                    value="{{mbt.modifier}}"
+                                    data-dtype="Number"
+                            />
+                        </li>
+                    {{/each}}
+                {{/if}}
+            {{/if}}
+            <header class="list-header">
+                <span>{{localize "CS.sheets.houseUnitType.keyAbilities"}}</span>
+            </header>
+            {{#each item.system.keyAbilities as |ability index|}}
+                <li class="unitType-ability item flexrow" data-item-id="{{index}}">
+                    <!--suppress HtmlFormInputWithoutLabel -->
+                    <input
+                            class="size150"
+                            type="text"
+                            name="system.keyAbilities.{{index}}"
+                            value="{{ability}}"
+                            placeholder="{{localize "CS.sheets.houseUnitType.keyAbility"}}"
+                            data-dtype="String"
+                    />
+                </li>
+            {{/each}}
+        </section>
+        <section class="description">
+            {{> "systems/chroniclesystem/templates/items/partials/description.hbs"}}
+            <header class="header-field">
+                <span>{{localize "CS.sheets.houseUnitType.startingEquipment"}}</span>
+            </header>
+            <div class="flexrow">
+                <div class="armor">
+                    {{> (formGroup)
+                            id="system.startingEquipment.armor.rating"
+                            labelText="CS.sheets.houseUnitType.equipment.armor.rating"
+                            inputCssClass="size50"
+                            value=item.system.startingEquipment.armor.rating
+                            dataType="Number"
+                    }}
+                    {{> (formGroup)
+                            id="system.startingEquipment.armor.penalty"
+                            labelText="CS.sheets.houseUnitType.equipment.armor.penalty"
+                            inputCssClass="size50"
+                            value=item.system.startingEquipment.armor.penalty
+                            dataType="Number"
+                    }}
+                    {{> (formGroup)
+                            id="system.startingEquipment.armor.bulk"
+                            labelText="CS.sheets.houseUnitType.equipment.armor.bulk"
+                            inputCssClass="size50"
+                            value=item.system.startingEquipment.armor.bulk
+                            dataType="Number"
+                    }}
+                </div>
+                <div class="size200">
+                    {{> (formGroup)
+                            id="system.startingEquipment.fightingDamage"
+                            labelText="CS.sheets.houseUnitType.equipment.fightingDamage"
+                            inputCssClass="size150"
+                            value=item.system.startingEquipment.fightingDamage
+                            dataType="String"
+                    }}
+                    {{> (formGroup)
+                            id="system.startingEquipment.marksmanshipDamage"
+                            labelText="CS.sheets.houseUnitType.equipment.marksmanshipDamage"
+                            inputCssClass="size150"
+                            value=item.system.startingEquipment.marksmanshipDamage
+                            dataType="String"
+                    }}
+                    <div class="flexrow">
+                        <div class="form-group">
+                            <label for="system.startingEquipment.isCloseRange">{{localize "CS.sheets.houseUnitType.equipment.isCloseRange"}}</label>
+                            <a class="checkButton startingIsCloseRange size50 {{showIfEquals true item.system.startingEquipment.isCloseRange "activated" ""}}"><i class="fa fa-check"></i></a>
+                        </div>
+                        <div class="form-group">
+                            <label for="system.startingEquipment.isLongRange">{{localize "CS.sheets.houseUnitType.equipment.isLongRange"}}</label>
+                            <a class="checkButton startingIsLongRange size50 {{showIfEquals true item.system.startingEquipment.isLongRange "activated" ""}}"><i class="fa fa-check"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <header class="header-field">
+                <span>{{localize "CS.sheets.houseUnitType.upgradedEquipment"}}</span>
+            </header>
+            <div class="flexrow">
+                <div class="armor">
+                    {{> (formGroup)
+                            id="system.upgradedEquipment.armor.rating"
+                            labelText="CS.sheets.houseUnitType.equipment.armor.rating"
+                            inputCssClass="size50"
+                            value=item.system.upgradedEquipment.armor.rating
+                            dataType="Number"
+                    }}
+                    {{> (formGroup)
+                            id="system.upgradedEquipment.armor.penalty"
+                            labelText="CS.sheets.houseUnitType.equipment.armor.penalty"
+                            inputCssClass="size50"
+                            value=item.system.upgradedEquipment.armor.penalty
+                            dataType="Number"
+                    }}
+                    {{> (formGroup)
+                            id="system.upgradedEquipment.armor.bulk"
+                            labelText="CS.sheets.houseUnitType.equipment.armor.bulk"
+                            inputCssClass="size50"
+                            value=item.system.upgradedEquipment.armor.bulk
+                            dataType="Number"
+                    }}
+                </div>
+                <div class="size200">
+                    {{> (formGroup)
+                            id="system.upgradedEquipment.fightingDamage"
+                            labelText="CS.sheets.houseUnitType.equipment.fightingDamage"
+                            inputCssClass="size150"
+                            value=item.system.upgradedEquipment.fightingDamage
+                            dataType="String"
+                    }}
+                    {{> (formGroup)
+                            id="system.upgradedEquipment.marksmanshipDamage"
+                            labelText="CS.sheets.houseUnitType.equipment.marksmanshipDamage"
+                            inputCssClass="size150"
+                            value=item.system.upgradedEquipment.marksmanshipDamage
+                            dataType="String"
+                    }}
+                    <div class="flexrow">
+                        <div class="form-group">
+                            <label for="system.upgradedEquipment.isCloseRange">{{localize "CS.sheets.houseUnitType.equipment.isCloseRange"}}</label>
+                            <a class="checkButton upgradedIsCloseRange size50 {{showIfEquals true item.system.upgradedEquipment.isCloseRange "activated" ""}}"><i class="fa fa-check"></i></a>
+                        </div>
+                        <div class="form-group">
+                            <label for="system.upgradedEquipment.isLongRange">{{localize "CS.sheets.houseUnitType.equipment.isLongRange"}}</label>
+                            <a class="checkButton upgradedIsLongRange size50 {{showIfEquals true item.system.upgradedEquipment.isLongRange "activated" ""}}"><i class="fa fa-check"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</form>
