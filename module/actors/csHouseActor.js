@@ -354,9 +354,13 @@ export class CSHouseActor extends CSActor {
         );
         let modifier = 0;
         holdings
-            .map((holding) => holding.fortuneDice)
-            .forEach((mod) => {
-                modifier += mod;
+            .filter(
+                (holding) =>
+                    !!holding.system.fortuneDice &&
+                    !isNaN(holding.system.fortuneDice.split(/[d|D]/)[0])
+            )
+            .forEach((holding) => {
+                modifier += +holding.system.fortuneDice.split(/[d|D]/)[0];
             });
         return modifier;
     }
@@ -367,9 +371,13 @@ export class CSHouseActor extends CSActor {
         );
         let modifier = 0;
         holdings
-            .map((holding) => holding.fortuneModifier)
-            .forEach((mod) => {
-                modifier += mod;
+            .filter(
+                (holding) =>
+                    !!holding.system.fortuneModifier &&
+                    !isNaN(holding.system.fortuneModifier)
+            )
+            .forEach((holding) => {
+                modifier += +holding.system.fortuneModifier;
             });
         return modifier;
     }

@@ -72,16 +72,17 @@ export class CSHouseActorSheet extends CSActorSheet {
             holdingsFlat: data.actor.getHoldingsModifier(),
             holdingsMod: '0',
         };
-        house.fortune.holdingsMod += house.fortune.holdingsDice
-            ? `${house.fortune.holdingsDice}d6`
-            : '';
+        house.fortune.holdingsMod =
+            house.fortune.holdingsDice && house.fortune.holdingsDice !== 0
+                ? `${house.fortune.holdingsDice}d6`
+                : '';
         house.fortune.holdingsMod +=
             house.fortune.holdingsFlat && house.fortune.holdingsFlat !== 0
                 ? house.fortune.holdingsFlat > 0
-                    ? `${!!house.fortun.holdingsMod ? '+' : ''}${
+                    ? `${!!house.fortune.holdingsMod ? '+' : ''}${
                           house.fortune.holdingsFlat
                       }`
-                    : `${!!house.fortun.holdingsMod ? '-' : ''}${
+                    : `${!!house.fortune.holdingsMod ? '-' : ''}${
                           house.fortune.holdingsFlat
                       }`
                 : '';
