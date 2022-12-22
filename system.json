@@ -24,8 +24,8 @@
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "power",
   "url": "https://github.com/YolloDwarf/foundryvtt-chroniclesystem/",
-  "manifest": "https://raw.githubusercontent.com/YolloDwarf/foundryvtt-chroniclesystem/master/system.json",
-  "download": "https://raw.githubusercontent.com/YolloDwarf/foundryvtt-chroniclesystem/master/chroniclesystem.zip",
+  "manifest": "https://raw.githubusercontent.com/YolloDwarf/foundryvtt-chroniclesystem/feature/holdings-fortune-modifier/system.json",
+  "download": "https://raw.githubusercontent.com/YolloDwarf/foundryvtt-chroniclesystem/feature/holdings-fortune-modifier/chroniclesystem.zip",
   "license": "ISC",
   "id": "chroniclesystem",
   "authors": [
