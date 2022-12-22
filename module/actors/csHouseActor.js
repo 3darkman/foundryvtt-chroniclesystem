@@ -362,7 +362,7 @@ export class CSHouseActor extends CSActor {
                     modifier.dice += +holdingMod.split(/d|D/)[0];
 
                     if (holdingMod.match(/^\d+[dD]6\s*[+-]\d+$/)) {
-                        modifier.flat += +holdingMod.split(/+|-/)[1];
+                        modifier.flat += +holdingMod.split(/[+|-]/)[1];
                     }
                 }
             }
