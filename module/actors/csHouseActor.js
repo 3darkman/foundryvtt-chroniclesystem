@@ -361,11 +361,15 @@ export class CSHouseActor extends CSActor {
                 } else if (holdingMod.match(/^\d+[dD]6/)) {
                     modifier.dice += +holdingMod.split(/d|D/)[0];
 
-                    if (holdingMod.match(/^\d+[dD]6\s*[+-]\d+$/) && !isNaN(+holdingMod.split(/[+|-]/)[1])) {
+                    if (
+                        holdingMod.match(/^\d+[dD]6\s*[+-]\d+$/) &&
+                        !isNaN(+holdingMod.split(/[+|-]/)[1])
+                    ) {
                         modifier.flat += +holdingMod.split(/[+|-]/)[1];
                     }
                 }
             }
         });
+        return modifier;
     }
 }
