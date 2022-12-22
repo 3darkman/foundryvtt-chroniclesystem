@@ -348,28 +348,29 @@ export class CSHouseActor extends CSActor {
         return lastMod;
     }
 
+    getHoldingsDice() {
+        let holdings = this.getEmbeddedCollection('Item').contents.filter(
+            (item) => item.type === 'holding'
+        );
+        let modifier = 0;
+        holdings
+            .map((holding) => holding.fortuneDice)
+            .forEach((mod) => {
+                modifier += mod;
+            });
+        return modifier;
+    }
+
     getHoldingsModifier() {
         let holdings = this.getEmbeddedCollection('Item').contents.filter(
             (item) => item.type === 'holding'
         );
-        let modifier = { dice: 0, flat: 0 };
-        holdings.forEach((holding) => {
-            const holdingMod = holding.getCSData().fortuneModifier;
-            if (holdingMod) {
-                if (!isNaN(+holdingMod)) {
-                    modifier.flat += holdingMod;
-                } else if (holdingMod.match(/^\d+[dD]6/)) {
-                    modifier.dice += +holdingMod.split(/d|D/)[0];
-
-                    if (
-                        holdingMod.match(/^\d+[dD]6\s*[+-]\d+$/) &&
-                        !isNaN(+holdingMod.split(/[+|-]/)[1])
-                    ) {
-                        modifier.flat += +holdingMod.split(/[+|-]/)[1];
-                    }
-                }
-            }
-        });
+        let modifier = 0;
+        holdings
+            .map((holding) => holding.fortuneModifier)
+            .forEach((mod) => {
+                modifier += mod;
+            });
         return modifier;
     }
 }

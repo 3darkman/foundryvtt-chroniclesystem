@@ -26,11 +26,18 @@
                 </select>
             </div>
             {{> (formGroup)
+                    id="system.fortuneDice"
+                    labelText="CS.sheets.holdingItem.fortuneDice"
+                    inputCssClass="big-field"
+                    value=item.system.fortuneDice
+                    dataType="String"
+            }}
+             {{> (formGroup)
                     id="system.fortuneModifier"
                     labelText="CS.sheets.holdingItem.fortuneModifier"
                     inputCssClass="big-field"
                     value=item.system.fortuneModifier
-                    dataType="String"
+                    dataType="Number"
             }}
         </section>
         <section class="description">

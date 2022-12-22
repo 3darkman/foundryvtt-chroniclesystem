@@ -68,21 +68,21 @@ export class CSHouseActorSheet extends CSActorSheet {
         house.fortune = {
             lawMod: data.actor.getLawModifier(),
             populationMod: data.actor.getPopulationModifier(),
+            holdingsDice: data.actor.getHoldingsDice(),
             holdingsMod: data.actor.getHoldingsModifier(),
         };
-        console.log(house.fortune.holdingMod);
         const steward = game.actors.get(house.steward.id);
         let stewardshipFormula = ChronicleSystem.getActorAbilityFormula(
             steward,
             SystemUtils.localize(ChronicleSystem.keyConstants.STATUS),
             SystemUtils.localize(ChronicleSystem.keyConstants.STEWARDSHIP)
         );
-        stewardshipFormula.pool += house.fortune.holdingsMod.dice;
+        stewardshipFormula.pool += house.fortune.holdingsDice;
         stewardshipFormula.modifier =
             stewardshipFormula.modifier +
             house.fortune.lawMod +
             house.fortune.populationMod +
-            house.fortune.holdingsMod.flat;
+            house.fortune.holdingsMod;
         house.fortune.formula = stewardshipFormula;
     }
 
