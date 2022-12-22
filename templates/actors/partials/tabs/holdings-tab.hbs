@@ -1,24 +1,24 @@
 
 <div class="tab flexrow holdings" data-group="primary" data-tab="holdings">
-    {{#if actor.system.defense.invested}}
+    {{#if actor.system.defense.hasHoldings}}
         {{> (resourceHoldings) resourceName="CS.sheets.house.resources.defense" holdings=actor.system.holdings.defense resourceTotal=actor.system.defense.total resourceInvested=actor.system.defense.invested}}
     {{/if}}
-    {{#if actor.system.influence.invested}}
+    {{#if actor.system.influence.hasHoldings}}
         {{> (resourceHoldings) resourceName="CS.sheets.house.resources.influence" holdings=actor.system.holdings.influence resourceTotal=actor.system.influence.total resourceInvested=actor.system.influence.invested}}
     {{/if}}
-    {{#if actor.system.law.invested}}
+    {{#if actor.system.law.hasHoldings}}
         {{> (resourceHoldings) resourceName="CS.sheets.house.resources.law"  holdings=actor.system.holdings.law resourceTotal=actor.system.law.total resourceInvested=actor.system.law.invested}}
     {{/if}}
-    {{#if actor.system.lands.invested}}
+    {{#if actor.system.lands.hasHoldings}}
         {{> (resourceHoldings) resourceName="CS.sheets.house.resources.lands"  holdings=actor.system.holdings.lands resourceTotal=actor.system.lands.total resourceInvested=actor.system.lands.invested}}
     {{/if}}
-    {{#if actor.system.population.invested}}
+    {{#if actor.system.population.hasHoldings}}
         {{> (resourceHoldings) resourceName="CS.sheets.house.resources.population"  holdings=actor.system.holdings.population resourceTotal=actor.system.population.total resourceInvested=actor.system.population.invested}}
     {{/if}}
-    {{#if actor.system.power.invested}}
+    {{#if actor.system.power.hasHoldings}}
         {{> (resourceHoldings) resourceName="CS.sheets.house.resources.power" holdings=actor.system.holdings.power resourceTotal=actor.system.power.total resourceInvested=actor.system.power.invested}}
     {{/if}}
-    {{#if actor.system.wealth.invested}}
+    {{#if actor.system.wealth.hasHoldings}}
         {{> (resourceHoldings) resourceName="CS.sheets.house.resources.wealth"  holdings=actor.system.holdings.wealth resourceTotal=actor.system.wealth.total resourceInvested=actor.system.wealth.invested}}
     {{/if}}
 </div>
