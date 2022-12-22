@@ -23,15 +23,18 @@
   "gridUnits": "ft",
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "power",
-  "url": "https://github.com/3darkman/foundryvtt-chroniclesystem/",
-  "manifest": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/system.json",
-  "download": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/chroniclesystem.zip",
+  "url": "https://github.com/YolloDwarf/foundryvtt-chroniclesystem/",
+  "manifest": "https://raw.githubusercontent.com/YolloDwarf/foundryvtt-chroniclesystem/master/system.json",
+  "download": "https://raw.githubusercontent.com/YolloDwarf/foundryvtt-chroniclesystem/master/chroniclesystem.zip",
   "license": "ISC",
   "id": "chroniclesystem",
   "authors": [
     {
       "name": "Kirlian '3darkman' Silvestre",
       "flags": {}
+    },
+    {
+      "name":"Nicolò 'Yollo the Dwarf' Antonucci"
     }
   ],
   "compatibility": {
