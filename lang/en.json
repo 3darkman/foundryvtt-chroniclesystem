@@ -165,6 +165,7 @@
         "buildTime": "Build Time",
         "featureName": "Feature Name",
         "featureCost": "Feature Cost",
+        "fortuneModifier": "Fortune Modifier",
         "resource": "Resource",
         "canAddFeatureAfter": "You can define specific features of the holding after adding it to a house."
       },

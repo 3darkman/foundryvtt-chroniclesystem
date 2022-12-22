@@ -61,7 +61,7 @@ export class CSHouseActorSheet extends CSActorSheet {
         house.fortune = {
             lawMod: data.actor.getLawModifier(),
             populationMod: data.actor.getPopulationModifier(),
-            holdingsMod: 0
+            holdingsMod: data.actor.getHoldingsModifier()
         }
         const steward = game.actors.get(house.steward.id);
         let stewardshipFormula = ChronicleSystem.getActorAbilityFormula(steward, SystemUtils.localize(ChronicleSystem.keyConstants.STATUS), SystemUtils.localize(ChronicleSystem.keyConstants.STEWARDSHIP));

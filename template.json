@@ -271,7 +271,8 @@
       "investment": 0,
       "buildTime": "",
       "resource": "",
-      "features": []
+      "features": [],
+      "fortuneModifier": ""
     },
     "technique": {
       "type": "",
