@@ -69,8 +69,22 @@ export class CSHouseActorSheet extends CSActorSheet {
             lawMod: data.actor.getLawModifier(),
             populationMod: data.actor.getPopulationModifier(),
             holdingsDice: data.actor.getHoldingsDice(),
-            holdingsMod: data.actor.getHoldingsModifier(),
+            holdingsFlat: data.actor.getHoldingsModifier(),
+            holdingsMod: '0',
         };
+        house.fortune.holdingsMod += house.fortune.holdingsDice
+            ? `${house.fortune.holdingsDice}d6`
+            : '';
+        house.fortune.holdingsMod +=
+            house.fortune.holdingsFlat && house.fortune.holdingsFlat !== 0
+                ? house.fortune.holdingsFlat > 0
+                    ? `${!!house.fortun.holdingsMod ? '+' : ''}${
+                          house.fortune.holdingsFlat
+                      }`
+                    : `${!!house.fortun.holdingsMod ? '-' : ''}${
+                          house.fortune.holdingsFlat
+                      }`
+                : '';
         const steward = game.actors.get(house.steward.id);
         let stewardshipFormula = ChronicleSystem.getActorAbilityFormula(
             steward,
@@ -82,7 +96,7 @@ export class CSHouseActorSheet extends CSActorSheet {
             stewardshipFormula.modifier +
             house.fortune.lawMod +
             house.fortune.populationMod +
-            house.fortune.holdingsMod;
+            house.fortune.holdingsFlat;
         house.fortune.formula = stewardshipFormula;
     }
 
