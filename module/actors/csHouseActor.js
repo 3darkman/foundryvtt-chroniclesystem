@@ -356,7 +356,7 @@ export class CSHouseActor extends CSActor {
         holdings.forEach((holding) => {
             const holdingMod = holding.getCSData().fortuneModifier;
             if (holdingMod) {
-                if (!isNan(+holdingMod)) {
+                if (!isNaN(+holdingMod)) {
                     modifier.flat += holdingMod;
                 } else if (holdingMod.match(/^\d+[dD]6$/)) {
                     modifier.dice = `${
