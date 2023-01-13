@@ -1,30 +1,38 @@
-import {CSActor} from "./csActor.js";
-import LOGGER from "../utils/logger.js";
-import SystemUtils from "../utils/systemUtils.js";
-import {ChronicleSystem} from "../system/ChronicleSystem.js";
-import {CSConstants} from "../system/csConstants.js";
+import { CSActor } from './csActor.js';
+import LOGGER from '../utils/logger.js';
+import SystemUtils from '../utils/systemUtils.js';
+import { ChronicleSystem } from '../system/ChronicleSystem.js';
+import { CSConstants } from '../system/csConstants.js';
 
 export class CSHouseActor extends CSActor {
     roleMap = {
-        HEAD: "head",
-        STEWARD: "steward",
-        HEIR: "heirs",
-        FAMILY: "family",
-        RETAINER: "retainers",
-        SERVANT: "servants"
-    }
+        HEAD: 'head',
+        STEWARD: 'steward',
+        HEIR: 'heirs',
+        FAMILY: 'family',
+        RETAINER: 'retainers',
+        SERVANT: 'servants',
+    };
 
-    removeCharacterFromHouse(actorId, role = undefined, ignoreRoles = ["STEWARD",]) {
+    removeCharacterFromHouse(
+        actorId,
+        role = undefined,
+        ignoreRoles = ['STEWARD']
+    ) {
         if (role) {
             let result = this.characterHasRole(actorId, role);
             if (result.hasRole)
                 this._removeCharacterFromRole(role, actorId, result.index);
         } else {
-            Object.entries(this.roleMap).forEach((item) =>{
-                if  (!ignoreRoles.includes(item[0])) {
+            Object.entries(this.roleMap).forEach((item) => {
+                if (!ignoreRoles.includes(item[0])) {
                     let result = this.characterHasRole(actorId, item[0]);
                     if (result.hasRole)
-                        this._removeCharacterFromRole(item[0], actorId, result.index);
+                        this._removeCharacterFromRole(
+                            item[0],
+                            actorId,
+                            result.index
+                        );
                 }
             });
         }
@@ -32,68 +40,104 @@ export class CSHouseActor extends CSActor {
 
     async regenerateAllStartingResources() {
         let data = this.getCSData();
-        await this._regenerateResource(data,"defense");
-        await this._regenerateResource(data,"influence");
-        await this._regenerateResource(data,"lands");
-        await this._regenerateResource(data,"law");
-        await this._regenerateResource(data,"population");
-        await this._regenerateResource(data,"power");
-        await this._regenerateResource(data,"wealth");
+        await this._regenerateResource(data, 'defense');
+        await this._regenerateResource(data, 'influence');
+        await this._regenerateResource(data, 'lands');
+        await this._regenerateResource(data, 'law');
+        await this._regenerateResource(data, 'population');
+        await this._regenerateResource(data, 'power');
+        await this._regenerateResource(data, 'wealth');
 
         this._updateAllResourcesTotal(data);
     }
 
     async _regenerateResource(data, resource) {
-        let roll = new Roll("8d6-2d6");
-        await roll.evaluate({async: true});
+        let roll = new Roll('8d6-2d6');
+        await roll.evaluate({ async: true });
         data[resource].startingValue = roll.total;
     }
 
-    _onCreateEmbeddedDocuments(embeddedName, documents, result, options, userId) {
-        super._onCreateEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    _onCreateEmbeddedDocuments(
+        embeddedName,
+        documents,
+        result,
+        options,
+        userId
+    ) {
+        super._onCreateEmbeddedDocuments(
+            embeddedName,
+            documents,
+            result,
+            options,
+            userId
+        );
 
-        let isToUpdate = documents.find((doc)=> doc.type === "event");
+        let isToUpdate = documents.find((doc) => doc.type === 'event');
 
-        if (isToUpdate)
-            this._updateAllResourcesTotal();
+        if (isToUpdate) this._updateAllResourcesTotal();
     }
 
-    _onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId) {
-        super._onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    _onUpdateEmbeddedDocuments(
+        embeddedName,
+        documents,
+        result,
+        options,
+        userId
+    ) {
+        super._onUpdateEmbeddedDocuments(
+            embeddedName,
+            documents,
+            result,
+            options,
+            userId
+        );
 
-        let isToUpdate = documents.find((doc)=> doc.type === "event");
+        let isToUpdate = documents.find((doc) => doc.type === 'event');
 
-        if (isToUpdate)
-            this._updateAllResourcesTotal();
+        if (isToUpdate) this._updateAllResourcesTotal();
     }
 
-    _onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId) {
-        super._onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    _onDeleteEmbeddedDocuments(
+        embeddedName,
+        documents,
+        result,
+        options,
+        userId
+    ) {
+        super._onDeleteEmbeddedDocuments(
+            embeddedName,
+            documents,
+            result,
+            options,
+            userId
+        );
 
-        let isToUpdate = documents.find((doc)=> doc.type === "event");
+        let isToUpdate = documents.find((doc) => doc.type === 'event');
 
-        if (isToUpdate)
-            this._updateAllResourcesTotal();
+        if (isToUpdate) this._updateAllResourcesTotal();
     }
-
 
     characterHasRole(actorId, role) {
-        LOGGER.trace(`Check if the Character has the Role ${role} | CSHouseActor | csHouseActor.js`);
+        LOGGER.trace(
+            `Check if the Character has the Role ${role} | CSHouseActor | csHouseActor.js`
+        );
         let result = {
-            hasRole : false,
-            index : -1
-        }
+            hasRole: false,
+            index: -1,
+        };
         switch (role) {
-            case "STEWARD":
-            case "HEAD":
-                if (this.getCSData().members[this.roleMap[role]].id === actorId) {
+            case 'STEWARD':
+            case 'HEAD':
+                if (
+                    this.getCSData().members[this.roleMap[role]].id === actorId
+                ) {
                     result.hasRole = true;
                 }
                 break;
-            case "HEIR":
-            case "FAMILY":
-            case "RETAINER":
-            case "SERVANT":
+            case 'HEIR':
+            case 'FAMILY':
+            case 'RETAINER':
+            case 'SERVANT':
                 let index = this._getMemberIndexIfExists(role, actorId);
                 if (index >= 0) {
                     result.hasRole = true;
@@ -107,29 +151,32 @@ export class CSHouseActor extends CSActor {
     }
 
     _getMemberIndexIfExists(role, id, list = undefined) {
-        if (!list)
-            list = this.getCSData().members[this.roleMap[role]];
+        if (!list) list = this.getCSData().members[this.roleMap[role]];
         let index = list.findIndex((member) => member.id === id);
         return index;
     }
 
     _removeCharacterFromRole(role, actorId, index = -1) {
-        LOGGER.trace("Remove the Character from a Role | CSHouseActor |" +
-            " csHouseActor.js");
+        LOGGER.trace(
+            'Remove the Character from a Role | CSHouseActor |' +
+                ' csHouseActor.js'
+        );
         let founded = false;
         switch (role) {
-            case "STEWARD":
-            case "HEAD":
-                if (this.getCSData().members[this.roleMap[role]].id === actorId) {
+            case 'STEWARD':
+            case 'HEAD':
+                if (
+                    this.getCSData().members[this.roleMap[role]].id === actorId
+                ) {
                     let key = `data.members.${[this.roleMap[role]]}`;
-                    this.update({[key]: ""});
+                    this.update({ [key]: '' });
                     founded = true;
                 }
                 break;
-            case "HEIR":
-            case "FAMILY":
-            case "RETAINER":
-            case "SERVANT":
+            case 'HEIR':
+            case 'FAMILY':
+            case 'RETAINER':
+            case 'SERVANT':
                 let list = this.getCSData().members[this.roleMap[role]];
                 if (index < 0)
                     index = this._getMemberIndexIfExists(role, actorId, list);
@@ -137,15 +184,14 @@ export class CSHouseActor extends CSActor {
                     list.splice(index);
                     let key = `data.members.${[this.roleMap[role]]}`;
                     this.update({
-                        [key]: list
+                        [key]: list,
                     });
                     founded = true;
                 }
                 break;
         }
 
-        if (founded)
-            LOGGER.debug(`actor ${actorId} removed from ${role}`);
+        if (founded) LOGGER.debug(`actor ${actorId} removed from ${role}`);
     }
 
     changeResource(resourceId, startingValue, description) {
@@ -154,64 +200,81 @@ export class CSHouseActor extends CSActor {
         data[resourceId].description = description;
         data[resourceId].total = this._updateResourceTotal(data, resourceId);
         let key = `data.${resourceId}`;
-        this.update({[key]: data[resourceId]});
+        this.update({ [key]: data[resourceId] });
     }
 
     addCharacterToHouse(actorId, role, description) {
-        LOGGER.trace("Add Character to House | CSHouseActor | csHouseActor.js");
+        LOGGER.trace('Add Character to House | CSHouseActor | csHouseActor.js');
         let result = this.characterHasRole(actorId, role);
         if (result.hasRole) {
             return;
         }
-        if (role !== "STEWARD") {
+        if (role !== 'STEWARD') {
             this.removeCharacterFromHouse(actorId);
         }
         switch (role) {
-            case "HEAD":
+            case 'HEAD':
                 if (!description) {
-                    description = SystemUtils.localize("CS.sheets.house.labels.head");
+                    description = SystemUtils.localize(
+                        'CS.sheets.house.labels.head'
+                    );
                 }
-            case "STEWARD":
+            case 'STEWARD':
                 let key = `data.members.${[this.roleMap[role]]}`;
-                this.update({[key]: {id: actorId, description: description}});
+                this.update({
+                    [key]: { id: actorId, description: description },
+                });
                 break;
-            case "HEIR":
-            case "FAMILY":
-            case "RETAINER":
-            case "SERVANT":
+            case 'HEIR':
+            case 'FAMILY':
+            case 'RETAINER':
+            case 'SERVANT':
                 let list = this.getCSData().members[this.roleMap[role]];
                 if (this._getMemberIndexIfExists(role, actorId, list) < 0) {
-                    list.push({id: actorId, description: description});
+                    list.push({ id: actorId, description: description });
                     let key = `data.members.${[this.roleMap[role]]}`;
                     this.update({
-                        [key]: list
+                        [key]: list,
                     });
                 } else {
-                    LOGGER.debug(`actor is already part of the house ${this.roleMap[role]}`);
+                    LOGGER.debug(
+                        `actor is already part of the house ${this.roleMap[role]}`
+                    );
                 }
                 break;
         }
     }
 
     getCharactersFromRole(role) {
-        LOGGER.trace(`get Characters from Role ${role} | CSHouseActor | csActorHouse.js`);
+        LOGGER.trace(
+            `get Characters from Role ${role} | CSHouseActor | csActorHouse.js`
+        );
         let membersData = this.getCSData().members[role];
         let members = [];
         if (Array.isArray(membersData)) {
             membersData.forEach((member) => {
                 let actor = this._getCharacterDataById(member.id);
-                members.push({"name": actor.name, "age": actor.age, "id": member.id, "description": member.description});
-            })
+                members.push({
+                    name: actor.name,
+                    age: actor.age,
+                    id: member.id,
+                    description: member.description,
+                });
+            });
         } else {
             let actor = this._getCharacterDataById(membersData.id);
-            members = {"name": actor.name, "age": actor.age, "id": membersData.id, "description": membersData.description};
+            members = {
+                name: actor.name,
+                age: actor.age,
+                id: membersData.id,
+                description: membersData.description,
+            };
         }
         return members;
     }
 
     _getCharacterDataById(id) {
-        if (!id)
-            return SystemUtils.localize("CS.messages.nobodyHasBeenChosen");
+        if (!id) return SystemUtils.localize('CS.messages.nobodyHasBeenChosen');
         let actor = game.actors.get(id);
         let name = SystemUtils.localize('CS.messages.actorDoesntExists');
         let age = 0;
@@ -219,41 +282,43 @@ export class CSHouseActor extends CSActor {
             name = actor.name;
             age = actor.getCSData().age;
         }
-        return {"name": name, "age": age};
+        return { name: name, age: age };
     }
 
     _updateResourceTotal(data, resource) {
-        data[resource].total = data[resource].startingValue + this._getAllEventModifiers(resource);
-        LOGGER.debug(`the resource ${resource} total is: ${data[resource].total}`);
+        data[resource].total =
+            data[resource].startingValue + this._getAllEventModifiers(resource);
+        LOGGER.debug(
+            `the resource ${resource} total is: ${data[resource].total}`
+        );
         return data[resource].total;
     }
 
     _updateAllResourcesTotal(data = undefined) {
-        if (!data)
-            data = this.getCSData();
+        if (!data) data = this.getCSData();
 
-        this._updateResourceTotal(data, "defense");
-        this._updateResourceTotal(data, "influence");
-        this._updateResourceTotal(data, "lands");
-        this._updateResourceTotal(data, "law");
-        this._updateResourceTotal(data, "population");
-        this._updateResourceTotal(data, "power");
-        this._updateResourceTotal(data, "wealth");
+        this._updateResourceTotal(data, 'defense');
+        this._updateResourceTotal(data, 'influence');
+        this._updateResourceTotal(data, 'lands');
+        this._updateResourceTotal(data, 'law');
+        this._updateResourceTotal(data, 'population');
+        this._updateResourceTotal(data, 'power');
+        this._updateResourceTotal(data, 'wealth');
 
         this.update({
-            "data.defense": data.defense,
-            "data.influence": data.influence,
-            "data.lands": data.lands,
-            "data.law": data.law,
-            "data.population": data.population,
-            "data.power": data.power,
-            "data.wealth": data.wealth
+            'data.defense': data.defense,
+            'data.influence': data.influence,
+            'data.lands': data.lands,
+            'data.law': data.law,
+            'data.population': data.population,
+            'data.power': data.power,
+            'data.wealth': data.wealth,
         });
     }
 
     _getAllEventModifiers(resource) {
-        let items = this.getEmbeddedCollection("Item").contents;
-        let events = items.filter((item) => item.type === "event");
+        let items = this.getEmbeddedCollection('Item').contents;
+        let events = items.filter((item) => item.type === 'event');
         let modifier = 0;
         events.forEach((event) => {
             modifier += event.getCSData().modifiers[resource];
@@ -268,7 +333,7 @@ export class CSHouseActor extends CSActor {
             if (data.population.total >= mod.min) {
                 lastMod = mod.mod;
             }
-        })
+        });
         return lastMod;
     }
 
@@ -279,9 +344,41 @@ export class CSHouseActor extends CSActor {
             if (data.law.total >= mod.min) {
                 lastMod = mod.mod;
             }
-        })
+        });
         return lastMod;
     }
 
+    getHoldingsDice() {
+        let holdings = this.getEmbeddedCollection('Item').contents.filter(
+            (item) => item.type === 'holding'
+        );
+        let modifier = 0;
+        holdings
+            .filter(
+                (holding) =>
+                    !!holding.system.fortuneDice &&
+                    !isNaN(holding.system.fortuneDice.split(/[d|D]/)[0])
+            )
+            .forEach((holding) => {
+                modifier += +holding.system.fortuneDice.split(/[d|D]/)[0];
+            });
+        return modifier;
+    }
 
+    getHoldingsModifier() {
+        let holdings = this.getEmbeddedCollection('Item').contents.filter(
+            (item) => item.type === 'holding'
+        );
+        let modifier = 0;
+        holdings
+            .filter(
+                (holding) =>
+                    !!holding.system.fortuneModifier &&
+                    !isNaN(holding.system.fortuneModifier)
+            )
+            .forEach((holding) => {
+                modifier += +holding.system.fortuneModifier;
+            });
+        return modifier;
+    }
 }

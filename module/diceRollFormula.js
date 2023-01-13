@@ -73,8 +73,6 @@ export class DiceRollFormula {
         this.#dicePenalty = parseInt(value);
     }
 
-
-
     toStr() {
         return `${this.pool}|${this.bonusDice}|${this.modifier}|${this.dicePenalty}|${this.reRoll}`;
     }
@@ -96,10 +94,13 @@ export class DiceRollFormula {
         let pool = Math.max(this.pool - this.dicePenalty, 1);
         let result = `${pool}d6`;
         if (this.bonusDice > 0) {
-            result += ` + ${this.bonusDice}B`
+            result += ` + ${this.bonusDice}B`;
         }
         if (this.modifier !== 0) {
-            result += this.modifier > 0 ? ` + ${this.modifier}` : ` - ${-this.modifier}`
+            result +=
+                this.modifier > 0
+                    ? ` + ${this.modifier}`
+                    : ` - ${-this.modifier}`;
         }
         return result;
     }
