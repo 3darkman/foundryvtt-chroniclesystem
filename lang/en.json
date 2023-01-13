@@ -176,10 +176,10 @@
       },
       "houseUnit": {
         "trainingRanks": {
-          "Green": "Green",
-          "Trained": "Trained",
-          "Veteran": "Veteran",
-          "Elite": "Elite"
+          "green": "Green",
+          "trained": "Trained",
+          "veteran": "Veteran",
+          "elite": "Elite"
         }
       },
       "houseUnitType": {
@@ -190,12 +190,12 @@
         "keyAbilities": "Key Abilities",
         "keyAbility": "Ability Name",
         "hasAnotherCost": "Has Another Cost?",
-        "allowAnyAbilities": "Allow any abilities?",
+        "allowAnyAbilities": "Allow Any Three Abilities?",
         "anotherCost": {
           "header": "Another Cost",
           "keyResource": "Key Resource",
-          "modifier": "Modifier",
-          "hasModifierByTraining": "Has Modifier By Training?"
+          "modifier": "Cost",
+          "hasModifierByTraining": "Has Cost By Training?"
         },
         "equipment": {
           "armor": {
