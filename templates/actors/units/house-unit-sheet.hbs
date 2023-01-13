@@ -1,0 +1,128 @@
+<form class="{{cssClass}}" autocomplete="off">
+    <header class="sheet-header">
+        <div class="header-fields">
+            <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+        </div>
+    </header>
+
+    <section class="sheet-body">
+        <div class="tab flexrow">
+            <div>
+                <section class="trainingLevel flex3">
+                    <Label for="system.trainingLevel.base">{{localize "CS.sheets.unit.trainingLevel"}}:</Label>
+                    <select name="system.trainingLevel.base">
+                        {{selectOptions trainingLevels selected=unit.trainingLevel.base localize=true}}
+                    </select>
+                    <Label for="system.trainingLevel.modifier">{{localize "CS.sheets.unit.trainingLevelModifier"}}:</Label>
+                    <input
+                            class="size50"
+                            type="text"
+                            name="system.trainingLevel.modifier"
+                            value="{{unit.trainingLevel.modifier}}"
+                            data-dtype="Number"
+                            readonly
+                    />
+                    <Label for="system.xp.value">{{localize "CS.sheets.unit.xp"}}:</Label>
+                    <input
+                            class="size35 right"
+                            type="text"
+                            name="system.xp.value"
+                            value="{{unit.xp.value}}"
+                            data-dtype="Number"
+                            readonly
+                    /> /
+                    <input
+                            class="size35"
+                            type="text"
+                            name="system.xp.max"
+                            value="{{unit.xp.max}}"
+                            data-dtype="Number"
+                            readonly
+                    />
+                </section>
+                <section class="abilities flex3">
+                    <header class="header-field">
+                        <span>{{localize "CS.sheets.generalLabels.abilitiesTitle" }}</span>
+                    </header>
+                    <ol  class="abilities-list">
+                        {{#each unit.owned.abilities as |ability key|}}
+                            <li  class="item ability flexrow" data-item-id="{{ability._id}}">
+                                <div class="abilityControl">
+                                    <a class="button addAbilityRank" data-item-id="{{ability._id}}"><i class="fa fa-plus"></i></a>
+                                    <div class="ability-value rollable" id="ability:{{ability.name}}">
+                                        <a>{{ability.system.rating}}d{{modifier ability.system.modifier}}</a>
+                                    </div>
+                                    <a class="button subAbilityRank" data-item-id="{{ability._id}}"><i class="fa fa-minus"></i></a>
+                                </div>
+                                <div class="ability-label size150"><p>{{ability.name}}</p></div>
+                            </li>
+                        {{/each}}
+                    </ol>
+                </section>
+            </div>
+            <div>
+                <section class="Discipline flex3">
+                    <Label for="discipline">{{localize "CS.sheets.unit.discipline"}}:</Label>
+                    <input
+                            class="size25 right"
+                            type="text"
+                            name="discipline.base"
+                            value="{{unit.discipline.base}}"
+                            data-dtype="Number"
+                            readonly
+                    />
+                    +
+                    <input
+                            class="size25 center"
+                            type="text"
+                            name="discipline.modifier"
+                            value="{{unit.discipline.modifier}}"
+                            data-dtype="Number"
+                            readonly
+                    />
+                    =
+                    <input
+                            class="size25"
+                            type="text"
+                            name="discipline.total"
+                            value="{{unit.discipline.total}}"
+                            data-dtype="Number"
+                            readonly
+                    />
+                </section>
+                <section class="powerCost flex3">
+                    <Label for="powercost">{{localize "CS.sheets.unit.powerCost"}}:</Label>
+                    <input
+                            class="size25 right"
+                            type="text"
+                            name="powerCost"
+                            value="{{unit.powerCost}}"
+                            data-dtype="Number"
+                            readonly
+                    />
+                    <Label for="anotherCosts.string">{{localize "CS.sheets.unit.anotherCosts"}}:</Label>
+                    <input
+                            class="size150"
+                            type="text"
+                            name="anotherCosts.string"
+                            value="{{anotherCosts.string}}"
+                            data-dtype="String"
+                            readonly
+                    />
+                </section>
+                <section class="types flex3">
+                    <header class="header-field">
+                        <span>{{localize "CS.sheets.unit.typesTitle" }}</span>
+                    </header>
+                    <ol  class="types-list">
+                        {{#each unit.owned.types as |type key|}}
+                            <li  class="item ability flexrow" data-item-id="{{type._id}}">
+                                <label class="ability-label item-edit"><a >{{type.name}}</a></label>
+                            </li>
+                        {{/each}}
+                    </ol>
+                </section>
+            </div>
+        </div>
+    </section>
+</form>

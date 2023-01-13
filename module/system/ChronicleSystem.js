@@ -201,6 +201,11 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
     return formula;
 }
 
+ChronicleSystem.getAllItemFromType = (type) => {
+    return game.items.filter(doc => doc.type === type);
+}
+
+
 ChronicleSystem.adjustFormulaByWeapon = adjustFormulaByWeapon;
 ChronicleSystem.eventHandleRoll = eventHandleRoll;
 ChronicleSystem.handleRoll = handleRoll;

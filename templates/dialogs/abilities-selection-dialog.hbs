@@ -1,0 +1,10 @@
+<form>
+    {{#each data.system.keyAbilities as |ability index|}}
+        <li class="unitType-ability item flexrow" data-item-id="{{index}}">
+            <!--suppress HtmlFormInputWithoutLabel -->
+            <select name="{{index}}" class="mbt3">
+                {{selectOptions ../choices selected=ability localize=false}}
+            </select>
+        </li>
+    {{/each}}
+</form>

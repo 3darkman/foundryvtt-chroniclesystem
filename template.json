@@ -1,6 +1,6 @@
 {
   "Actor": {
-    "types": ["character", "house"],
+    "types": ["character", "house", "unit"],
     "templates": {
       "common": {
         "age": 0,
@@ -156,6 +156,48 @@
         "retainers": [],
         "servants": []
       }
+    },
+    "unit": {
+      "owned": {
+        "equipments": [],
+        "weapons": [],
+        "armors": [],
+        "qualities": [],
+        "drawbacks": [],
+        "abilities": [],
+        "powers": [],
+        "benefits": []
+      },
+      "modifiers": {},
+      "penalties": {},
+      "derivedStats": {
+        "combatDefense": {
+          "value": 0,
+          "modifier": 0
+        },
+        "health": {
+          "total": 0,
+          "modifier": 0,
+          "value": 0,
+          "current": 0
+        }
+      },
+      "description": "",
+      "types": [],
+      "currentEquipmentIndex": 0,
+      "isEquipmentUpgraded": false,
+      "xp": {
+        "value": 0,
+        "max": 0
+      },
+      "trainingLevel": {
+        "base": 0,
+        "modifier": 0
+      },
+      "status": {
+        "current": 0
+      },
+      "disorganizedPenalties": 0
     }
   },
   "Item": {
@@ -314,6 +356,7 @@
         ]
       },
       "disciplineModifier": 0,
+      "allowAnyAbility": false,
       "keyAbilities": ["","",""],
       "startingEquipment": {
         "armor": {

@@ -67,19 +67,29 @@
             <header class="list-header">
                 <span>{{localize "CS.sheets.houseUnitType.keyAbilities"}}</span>
             </header>
-            {{#each item.system.keyAbilities as |ability index|}}
-                <li class="unitType-ability item flexrow" data-item-id="{{index}}">
-                    <!--suppress HtmlFormInputWithoutLabel -->
-                    <input
-                            class="size150"
-                            type="text"
-                            name="system.keyAbilities.{{index}}"
-                            value="{{ability}}"
-                            placeholder="{{localize "CS.sheets.houseUnitType.keyAbility"}}"
-                            data-dtype="String"
-                    />
-                </li>
-            {{/each}}
+            <div class="form-group">
+                <label for="system.allowAnyAbility">{{localize "CS.sheets.houseUnitType.allowAnyAbilities"}}</label>
+                <a class="checkButton allowAnyAbilities size50 {{showIfEquals true item.system.allowAnyAbility "activated" ""}}"><i class="fa fa-check"></i></a>
+            </div>
+            {{#if item.system.allowAnyAbility}}
+            {{else}}
+                {{#each item.system.keyAbilities as |ability index|}}
+                    <li class="unitType-ability item flexrow" data-item-id="{{index}}">
+                        <!--suppress HtmlFormInputWithoutLabel -->
+                        <select name="system.keyAbilities.{{index}}" class="mbt3">
+                            {{selectOptions ../abilities selected=ability localize=false}}
+                        </select>
+                        <!--input
+                                class="size150"
+                                type="text"
+                                name="system.keyAbilities.{{index}}"
+                                value="{{ability}}"
+                                placeholder="{{localize "CS.sheets.houseUnitType.keyAbility"}}"
+                                data-dtype="String"
+                        /-->
+                    </li>
+                {{/each}}
+            {{/if}}
         </section>
         <section class="description">
             {{> "systems/chroniclesystem/templates/items/partials/description.hbs"}}

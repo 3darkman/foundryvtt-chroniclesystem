@@ -23,6 +23,7 @@ import {migrateData} from "../migrations/migration.js";
 import {CsCombat} from "../combat/cs-combat.js";
 import {CsCombatant} from "../combat/cs-combatant.js";
 import {CsHouseUnitTypeItemSheet} from "../items/sheets/cs-house-unit-type-item-sheet.js";
+import {CsHouseUnitActorSheet} from "../actors/sheets/cs-house-unit-actor-sheet.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -54,6 +55,8 @@ Hooks.once("init", async function() {
         { label: SystemUtils.localize("CS.sheets.characterSheet"), types: ["character"], makeDefault: true });
     Actors.registerSheet("chroniclesystem", CSHouseActorSheet,
         { label: SystemUtils.localize("CS.sheets.houseSheet"), types: ["house"], makeDefault: true });
+    Actors.registerSheet("chroniclesystem", CsHouseUnitActorSheet,
+        { label: SystemUtils.localize("CS.sheets.houseUnitSheet"), types: ["unit"], makeDefault: true });
 
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("chroniclesystem", CSItemSheet,

@@ -34,6 +34,9 @@
           "resourceNumber": "Resource #{number}:"
         }
       },
+      "abilitiesSelection": {
+        "title": "Select abilities provided by the {name} unit type"
+      },
       "actions": {
         "save": "Save",
         "cancel": "Cancel",
@@ -43,7 +46,9 @@
     "messages": {
       "nobodyHasBeenChosen": "Nobody has been chosen",
       "actorDoesntExists": "Actor doesn't exists",
-      "notStewardLinked": "No actor has been linked to the house like steward"
+      "notStewardLinked": "No actor has been linked to the house like steward",
+      "noXp": "the unit has no more xp available to be spent.",
+      "abilityMin": "the ability rating is already at the minimum acceptable value."
     },
     "chatMessages": {
       "initiativeRolls": "{name} rolls for {type} initiative!",
@@ -79,7 +84,17 @@
         "details": "Details",
         "name": "Name",
         "total": "Total",
-        "others": "Others"
+        "others": "Others",
+        "abilitiesTitle": "Abilities"
+      },
+      "unit": {
+        "typesTitle": "Types",
+        "trainingLevel": "Training Level",
+        "trainingLevelModifier": "Mod",
+        "xp": "XP",
+        "discipline": "Discipline",
+        "powerCost": "Power Cost",
+        "anotherCosts": "Another Costs"
       },
       "house": {
         "character": {
@@ -161,10 +176,10 @@
       },
       "houseUnit": {
         "trainingRanks": {
-          "Green": "Green",
-          "Trained": "Trained",
-          "Veteran": "Veteran",
-          "Elite": "Elite"
+          "green": "Green",
+          "trained": "Trained",
+          "veteran": "Veteran",
+          "elite": "Elite"
         }
       },
       "houseUnitType": {
@@ -175,11 +190,12 @@
         "keyAbilities": "Key Abilities",
         "keyAbility": "Ability Name",
         "hasAnotherCost": "Has Another Cost?",
+        "allowAnyAbilities": "Allow Any Three Abilities?",
         "anotherCost": {
           "header": "Another Cost",
           "keyResource": "Key Resource",
-          "modifier": "Modifier",
-          "hasModifierByTraining": "Has Modifier By Training?"
+          "modifier": "Cost",
+          "hasModifierByTraining": "Has Cost By Training?"
         },
         "equipment": {
           "armor": {

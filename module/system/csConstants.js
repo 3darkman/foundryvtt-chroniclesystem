@@ -15,9 +15,24 @@ CSConstants.Templates = {
         HOUSE_RESOURCE_EDITOR: "systems/chroniclesystem/templates/dialogs/houseResourceEditor.html",
         ADDING_HOUSE_EVENT: "systems/chroniclesystem/templates/dialogs/addingHouseEvent.html",
         INITIATIVE_SELECTOR: "systems/chroniclesystem/templates/dialogs/initiative-selector.hbs",
-        ROLL_MODIFIER: "systems/chroniclesystem/templates/dialogs/roll-modifier.hbs"
+        ROLL_MODIFIER: "systems/chroniclesystem/templates/dialogs/roll-modifier.hbs",
+        ABILITIES_SELECION: "systems/chroniclesystem/templates/dialogs/abilities-selection-dialog.hbs"
     }
 }
+
+CSConstants.UnitTrainingLevel = [
+    "CS.sheets.houseUnit.trainingRanks.green",
+    "CS.sheets.houseUnit.trainingRanks.trained",
+    "CS.sheets.houseUnit.trainingRanks.veteran",
+    "CS.sheets.houseUnit.trainingRanks.elite"
+];
+
+CSConstants.UnitStatus = [
+    "CS.sheets.houseUnit.status.normal",
+    "CS.sheets.houseUnit.status.disorganized",
+    "CS.sheets.houseUnit.status.routed",
+    "CS.sheets.houseUnit.status.destroyed",
+]
 
 CSConstants.Settings = {
     SYSTEM_NAME: "chroniclesystem",
