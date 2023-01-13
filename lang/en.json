@@ -1,240 +1,240 @@
 {
-  "CS": {
-    "notifications": {
-      "dicePoolInvalid": "you cannot roll this test because your dice pool results in less than 1 die being kept."
-    },
-    "dialogs": {
-      "characterRole": {
-        "title": "Select the role of {actorName} in the house.",
-        "label": "Role: "
-      },
-      "houseResourceEditor": {
-        "title": "{resourceName} Editor"
-      },
-      "initiativeSelector": {
-        "title": "Select the encounter type",
-        "combat": "Combat",
-        "intrigue": "Intrigue",
-        "warfare": "Warfare",
-        "label": "Conflict Type"
-      },
-      "rollModifier": {
-        "title": "Roll Parameters",
-        "pool": "Dice Pool",
-        "bonusDice": "Bonus Dice",
-        "modifier": "Modifiers",
-        "dicePenalty": "Penalties",
-        "reRoll": "Re-Roll 1s"
-      },
-      "addingHouseEvent": {
-        "title": "Should the event generate the modifiers automatically?",
-        "labels": {
-          "generateModifiers": "Generate the modifiers automatically?",
-          "resourcesChoices": "Choose the resources that will receive the modifiers",
-          "resourceNumber": "Resource #{number}:"
+    "CS": {
+        "notifications": {
+            "dicePoolInvalid": "you cannot roll this test because your dice pool results in less than 1 die being kept."
+        },
+        "dialogs": {
+            "characterRole": {
+                "title": "Select the role of {actorName} in the house.",
+                "label": "Role: "
+            },
+            "houseResourceEditor": {
+                "title": "{resourceName} Editor"
+            },
+            "initiativeSelector": {
+                "title": "Select the encounter type",
+                "combat": "Combat",
+                "intrigue": "Intrigue",
+                "warfare": "Warfare",
+                "label": "Conflict Type"
+            },
+            "rollModifier": {
+                "title": "Roll Parameters",
+                "pool": "Dice Pool",
+                "bonusDice": "Bonus Dice",
+                "modifier": "Modifiers",
+                "dicePenalty": "Penalties",
+                "reRoll": "Re-Roll 1s"
+            },
+            "addingHouseEvent": {
+                "title": "Should the event generate the modifiers automatically?",
+                "labels": {
+                    "generateModifiers": "Generate the modifiers automatically?",
+                    "resourcesChoices": "Choose the resources that will receive the modifiers",
+                    "resourceNumber": "Resource #{number}:"
+                }
+            },
+            "actions": {
+                "save": "Save",
+                "cancel": "Cancel",
+                "confirm": "Confirm"
+            }
+        },
+        "messages": {
+            "nobodyHasBeenChosen": "Nobody has been chosen",
+            "actorDoesntExists": "Actor doesn't exists",
+            "notStewardLinked": "No actor has been linked to the house like steward"
+        },
+        "chatMessages": {
+            "initiativeRolls": "{name} rolls for {type} initiative!",
+            "simpleRoll": "{name} make a {test} roll!",
+            "customRoll": "{name} make a custom {test} roll!"
+        },
+        "settings": {
+            "debugLogs": {
+                "name": "Debug Logs",
+                "hint": ""
+            },
+            "traceLogs": {
+                "name": "Trace Logs",
+                "hint": ""
+            },
+            "asoiafDefenseStyle": {
+                "name": "ASoIaF Defense Style",
+                "hint": "The armor penalty influences the character's combat defense. This Needs Foundry refresh (F5)."
+            },
+            "isModifierDialogDefault": {
+                "name": "Modifier Dialog as Default?",
+                "hint": "if checked, when clicking on dice rolls on an actor's sheet, it will show the modifiers window, and will make the roll without showing the window when holding the SHIFT key. Each player defines his configuration."
+            }
+        },
+        "sheets": {
+            "characterSheet": "Character Sheet",
+            "houseSheet": "House Sheet",
+            "itemSheet": "Item Sheet",
+            "abilityItemSheet": "Ability Sheet",
+            "generalLabels": {
+                "none": "None",
+                "description": "Description",
+                "details": "Details",
+                "name": "Name",
+                "total": "Total",
+                "others": "Others"
+            },
+            "house": {
+                "character": {
+                    "roles": {
+                        "head": "Head",
+                        "steward": "Steward",
+                        "heir": "Heir",
+                        "family": "Family",
+                        "retainer": "Retainer",
+                        "servant": "Servant"
+                    }
+                },
+                "events": {
+                    "title": "Historical Events",
+                    "name": "Event",
+                    "modifiers": "Effects"
+                },
+                "fortune": {
+                    "title": "House Fortune",
+                    "lawModifier": "Law Mod",
+                    "populationModifier": "Population Mod",
+                    "holdingModifier": "Mods from Holdings"
+                },
+                "holdings": {
+                    "title": "Holdings"
+                },
+                "resources": {
+                    "defense": "Defense",
+                    "influence": "Influence",
+                    "lands": "Lands",
+                    "law": "Law",
+                    "population": "Population",
+                    "power": "Power",
+                    "wealth": "Wealth",
+                    "title": "Resources",
+                    "invested": "Invested",
+                    "cost": "Cost"
+                },
+                "labels": {
+                    "members": "Members",
+                    "head": "Head of House",
+                    "realm": "Realm",
+                    "liege": "Liege",
+                    "steward": "Steward",
+                    "heirsAndFamily": "Heirs and Family",
+                    "retainersAndServants": "Retainers and Servants",
+                    "startingValue": "Starting Value",
+                    "coatOfArms": "Coat of Arms",
+                    "motto": "Motto"
+                }
+            },
+            "character": {
+                "injury": "Injury",
+                "wound": "Wound",
+                "others": "Others",
+                "techniques": "Techniques",
+                "dispositions": {
+                    "affectionate": "affectionate",
+                    "friendly": "friendly",
+                    "amiable": "amiable",
+                    "indifferent": "indifferent",
+                    "dislike": "dislike",
+                    "unfriendly": "unfriendly",
+                    "malicious": "malicious"
+                },
+                "tabs": {
+                    "abilities": "Abilities",
+                    "combat-intrigue": "Combat and Intrigue",
+                    "qualities": "Qualities",
+                    "sorcery": "Sorcery",
+                    "equipments": "Equipments",
+                    "description": "Description"
+                }
+            },
+            "eventItem": {
+                "playerChoice": "Is a player choice?",
+                "numberOfChoices": "Number of Choices",
+                "bonusToChoices": "Bonus to Choices"
+            },
+            "holdingItem": {
+                "features": "Features",
+                "investment": "Investment",
+                "buildTime": "Build Time",
+                "featureName": "Feature Name",
+                "featureCost": "Feature Cost",
+                "fortuneDice": "Fortune Dice",
+                "fortuneModifier": "Fortune Modifier",
+                "resource": "Resource",
+                "canAddFeatureAfter": "You can define specific features of the holding after adding it to a house."
+            },
+            "techniqueItem": {
+                "cost": "Cost",
+                "type": "Type",
+                "arts": "Arts",
+                "scales": "Scales",
+                "learning": "Learning",
+                "learningTime": "Time",
+                "learningDifficult": "Difficult",
+                "resonance": "Resonance",
+                "tabs": {
+                    "details": "Details",
+                    "works": "Works"
+                },
+                "types": {
+                    "spell": "Spell",
+                    "ritual": "Ritual"
+                },
+                "costs": {
+                    "destinySpent": "Destiny Spent",
+                    "destinyBurnt": "Destiny Burnt",
+                    "destinyInvested": "Destiny Invested"
+                },
+                "test": {
+                    "spellcasting": "Spellcasting",
+                    "invocation": "Invocation",
+                    "alignment": "Alignment",
+                    "unleashing": "Unleashing"
+                }
+            }
+        },
+        "constants": {
+            "abilities": {
+                "agility": "agility",
+                "athletics": "athletics",
+                "awareness": "awareness",
+                "cunning": "cunning",
+                "deception": "deception",
+                "persuasion": "persuasion",
+                "endurance": "endurance",
+                "status": "status",
+                "will": "will"
+            },
+            "specialties": {
+                "act": "act",
+                "bargain": "bargain",
+                "bluff": "bluff",
+                "charm": "charm",
+                "convince": "convince",
+                "incite": "incite",
+                "intimidate": "intimidate",
+                "run": "run",
+                "seduce": "seduce",
+                "stewardship": "stewardship",
+                "taunt": "taunt"
+            },
+            "qualities": {
+                "bulk": "bulk"
+            },
+            "others": {
+                "wounds": "Wounds",
+                "injuries": "Injuries",
+                "frustrations": "Frustrations",
+                "stress": "Stress",
+                "fatigue": "Fatigue"
+            }
         }
-      },
-      "actions": {
-        "save": "Save",
-        "cancel": "Cancel",
-        "confirm": "Confirm"
-      }
-    },
-    "messages": {
-      "nobodyHasBeenChosen": "Nobody has been chosen",
-      "actorDoesntExists": "Actor doesn't exists",
-      "notStewardLinked": "No actor has been linked to the house like steward"
-    },
-    "chatMessages": {
-      "initiativeRolls": "{name} rolls for {type} initiative!",
-      "simpleRoll": "{name} make a {test} roll!",
-      "customRoll": "{name} make a custom {test} roll!"
-    },
-    "settings": {
-      "debugLogs": {
-        "name": "Debug Logs",
-        "hint": ""
-      },
-      "traceLogs": {
-        "name": "Trace Logs",
-        "hint": ""
-      },
-      "asoiafDefenseStyle": {
-        "name": "ASoIaF Defense Style",
-        "hint": "The armor penalty influences the character's combat defense. This Needs Foundry refresh (F5)."
-      },
-      "isModifierDialogDefault": {
-        "name": "Modifier Dialog as Default?",
-        "hint": "if checked, when clicking on dice rolls on an actor's sheet, it will show the modifiers window, and will make the roll without showing the window when holding the SHIFT key. Each player defines his configuration."
-      }
-    },
-    "sheets": {
-      "characterSheet": "Character Sheet",
-      "houseSheet": "House Sheet",
-      "itemSheet": "Item Sheet",
-      "abilityItemSheet": "Ability Sheet",
-      "generalLabels": {
-        "none": "None",
-        "description": "Description",
-        "details": "Details",
-        "name": "Name",
-        "total": "Total",
-        "others": "Others"
-      },
-      "house": {
-        "character": {
-          "roles": {
-            "head": "Head",
-            "steward": "Steward",
-            "heir": "Heir",
-            "family": "Family",
-            "retainer": "Retainer",
-            "servant": "Servant"
-          }
-        },
-        "events": {
-          "title": "Historical Events",
-          "name": "Event",
-          "modifiers": "Effects"
-        },
-        "fortune": {
-          "title": "House Fortune",
-          "lawModifier": "Law Mod",
-          "populationModifier": "Population Mod",
-          "holdingModifier": "Mods from Holdings"
-        },
-        "holdings": {
-          "title": "Holdings"
-        },
-        "resources": {
-          "defense": "Defense",
-          "influence": "Influence",
-          "lands": "Lands",
-          "law": "Law",
-          "population": "Population",
-          "power": "Power",
-          "wealth": "Wealth",
-          "title": "Resources",
-          "invested": "Invested",
-          "cost": "Cost"
-        },
-        "labels": {
-          "members": "Members",
-          "head": "Head of House",
-          "realm": "Realm",
-          "liege": "Liege",
-          "steward": "Steward",
-          "heirsAndFamily": "Heirs and Family",
-          "retainersAndServants": "Retainers and Servants",
-          "startingValue": "Starting Value",
-          "coatOfArms": "Coat of Arms",
-          "motto": "Motto"
-        }
-      },
-      "character": {
-        "injury": "Injury",
-        "wound": "Wound",
-        "others": "Others",
-        "techniques": "Techniques",
-        "dispositions": {
-          "affectionate": "affectionate",
-          "friendly": "friendly",
-          "amiable": "amiable",
-          "indifferent": "indifferent",
-          "dislike": "dislike",
-          "unfriendly": "unfriendly",
-          "malicious": "malicious"
-        },
-        "tabs": {
-          "abilities": "Abilities",
-          "combat-intrigue": "Combat and Intrigue",
-          "qualities": "Qualities",
-          "sorcery": "Sorcery",
-          "equipments": "Equipments",
-          "description": "Description"
-        }
-      },
-      "eventItem": {
-        "playerChoice": "Is a player choice?",
-        "numberOfChoices": "Number of Choices",
-        "bonusToChoices": "Bonus to Choices"
-      },
-      "holdingItem": {
-        "features": "Features",
-        "investment": "Investment",
-        "buildTime": "Build Time",
-        "featureName": "Feature Name",
-        "featureCost": "Feature Cost",
-        "fortuneDice": "Fortune Dice",
-        "fortuneModifier": "Fortune Modifier",
-        "resource": "Resource",
-        "canAddFeatureAfter": "You can define specific features of the holding after adding it to a house."
-      },
-      "techniqueItem": {
-        "cost": "Cost",
-        "type": "Type",
-        "arts": "Arts",
-        "scales": "Scales",
-        "learning": "Learning",
-        "learningTime": "Time",
-        "learningDifficult": "Difficult",
-        "resonance": "Resonance",
-        "tabs": {
-          "details": "Details",
-          "works": "Works"
-        },
-        "types": {
-          "spell": "Spell",
-          "ritual": "Ritual"
-        },
-        "costs": {
-          "destinySpent": "Destiny Spent",
-          "destinyBurnt": "Destiny Burnt",
-          "destinyInvested": "Destiny Invested"
-        },
-        "test": {
-          "spellcasting": "Spellcasting",
-          "invocation": "Invocation",
-          "alignment": "Alignment",
-          "unleashing": "Unleashing"
-        }
-      }
-    },
-    "constants": {
-      "abilities": {
-        "agility": "agility",
-        "athletics": "athletics",
-        "awareness": "awareness",
-        "cunning": "cunning",
-        "deception": "deception",
-        "persuasion": "persuasion",
-        "endurance": "endurance",
-        "status": "status",
-        "will": "will"
-      },
-      "specialties": {
-        "act": "act",
-        "bargain": "bargain",
-        "bluff": "bluff",
-        "charm": "charm",
-        "convince": "convince",
-        "incite": "incite",
-        "intimidate": "intimidate",
-        "run": "run",
-        "seduce": "seduce",
-        "stewardship": "stewardship",
-        "taunt": "taunt"
-      },
-      "qualities": {
-        "bulk": "bulk"
-      },
-      "others": {
-        "wounds": "Wounds",
-        "injuries": "Injuries",
-        "frustrations": "Frustrations",
-        "stress": "Stress",
-        "fatigue": "Fatigue"
-      }
     }
-  }
 }
