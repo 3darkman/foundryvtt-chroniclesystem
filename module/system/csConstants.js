@@ -21,10 +21,10 @@ CSConstants.Templates = {
 }
 
 CSConstants.UnitTrainingLevel = [
-    "CS.sheets.houseUnit.trainingRanks.green",
-    "CS.sheets.houseUnit.trainingRanks.trained",
-    "CS.sheets.houseUnit.trainingRanks.veteran",
-    "CS.sheets.houseUnit.trainingRanks.elite"
+    "CS.sheets.houseUnit.trainingRanks.Green",
+    "CS.sheets.houseUnit.trainingRanks.Trained",
+    "CS.sheets.houseUnit.trainingRanks.Veteran",
+    "CS.sheets.houseUnit.trainingRanks.Elite"
 ];
 
 CSConstants.UnitStatus = [

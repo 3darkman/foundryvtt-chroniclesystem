@@ -190,6 +190,7 @@
         "keyAbilities": "Key Abilities",
         "keyAbility": "Ability Name",
         "hasAnotherCost": "Has Another Cost?",
+        "allowAnyAbilities": "Allow any abilities?",
         "anotherCost": {
           "header": "Another Cost",
           "keyResource": "Key Resource",
