@@ -103,7 +103,7 @@
                     <div class="disposition-list">
                         {{#each dispositions}}
                                 <div class="disposition option capitalize {{showIfEquals this.rating ../character.currentDisposition "selected"}}" data-id="{{this.rating}}">
-                                    {{localize this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
+                                    {{this.rating}} - {{localize this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
                                 </div>
                         {{/each}}
                     </div>
