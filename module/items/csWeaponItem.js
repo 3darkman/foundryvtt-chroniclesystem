@@ -9,6 +9,20 @@ export class CSWeaponItem extends CSItem {
         //TODO: implement the onEquippedChanged from CSWeaponItem
     }
 
+    updateDamageValue(actor) {
+        let matches = this.getCSData().damage.match('@([a-z\sA-Z]*)([-\+\/\*]*)([0-9]*)');
+        if (matches) {
+            if (matches.length === 4) {
+                let ability = actor.getAbilityValue(matches[1]);
+                this.damageValue = eval(`${ability}${matches[2]}${matches[3]}`);
+                let adaptableQuality = Object.values(this.getCSData().qualities).filter((quality) => quality.name.toLowerCase() === "adaptable");
+                if(adaptableQuality.length > 0 && this.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS) {
+                    this.damageValue += 1;
+                }
+            }
+        }
+    }
+
     onObtained(actor) {
         LOGGER.trace(`Weapon ${this._id} obtained by the actor ${actor.name} | csWeaponItem.js`);
         super.onObtained(actor);
