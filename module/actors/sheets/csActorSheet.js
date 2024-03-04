@@ -40,7 +40,7 @@ export class CSActorSheet extends ActorSheet {
 
     splitItemsByType(data) {
         data.itemsByType = {};
-        for (const item of data.items) {
+        for (const item of this.actor.getEmbeddedCollection("Item")) {
             let list = data.itemsByType[item.type];
             if (!list) {
                 list = [];

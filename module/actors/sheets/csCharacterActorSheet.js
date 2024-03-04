@@ -72,13 +72,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
         return "";
       let formula = ChronicleSystem.getActorAbilityFormula(data.actor, info[0], info[1]);
       formula = ChronicleSystem.adjustFormulaByWeapon(data.actor, formula, weapon);
-      let matches = weaponData.damage.match('@([a-zA-Z]*)([-\+\/\*]*)([0-9]*)');
-      if (matches) {
-        if (matches.length === 4) {
-          let ability = data.actor.getAbilityValue(matches[1]);
-          weapon.damageValue = eval(`${ability}${matches[2]}${matches[3]}`);
-        }
-      }
+      weapon.updateDamageValue(this.actor);
       weapon.formula = formula;
     });
 
@@ -313,44 +307,63 @@ export class CSCharacterActorSheet extends CSActorSheet {
   async _onEquippedStateChanged(event) {
     event.preventDefault();
     const eventData = event.currentTarget.dataset;
-    let documment = this.actor.getEmbeddedDocument('Item', eventData.itemId);
+    let currentItem = this.actor.getEmbeddedDocument('Item', eventData.itemId);
     let collection = [];
     let tempCollection = [];
 
     let isArmor = parseInt(eventData.hand) === ChronicleSystem.equippedConstants.WEARING;
     let isUnequipping = parseInt(eventData.hand) === 0;
 
+    this.actor.updateTempModifiers();
+
     if (isUnequipping) {
-      documment.getCSData().equipped = 0;
+      let adaptableQuality = Object.values(currentItem.getCSData().qualities).filter((quality) => quality.name.toLowerCase() === "adaptable");
+      if (adaptableQuality.length > 0 && parseInt(eventData.hand) === ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED && currentItem.getCSData().equipped !== ChronicleSystem.equippedConstants.BOTH_HANDS) {
+        collection = this.UnequipsAllItemsInTheSlots([ ChronicleSystem.equippedConstants.MAIN_HAND, ChronicleSystem.equippedConstants.OFFHAND, ChronicleSystem.equippedConstants.BOTH_HANDS], collection);
+        collection = this.ChangeItemEquippedStatus(collection, currentItem, ChronicleSystem.equippedConstants.BOTH_HANDS);
+      } else {
+        collection = this.ChangeItemEquippedStatus(collection, currentItem);
+      }
     } else {
       if (isArmor) {
-        documment.getCSData().equipped = ChronicleSystem.equippedConstants.WEARING;
-        tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.getCSData().equipped === ChronicleSystem.equippedConstants.WEARING);
+        collection = this.UnequipsAllItemsInTheSlots([ ChronicleSystem.equippedConstants.WEARING], collection);
+        collection = this.ChangeItemEquippedStatus(collection, currentItem, ChronicleSystem.equippedConstants.WEARING);
       } else {
-        let twoHandedQuality = Object.values(documment.getCSData().qualities).filter((quality) => quality.name.toLowerCase() === "two-handed");
+        let twoHandedQuality = Object.values(currentItem.getCSData().qualities).filter((quality) => quality.name.toLowerCase() === "two-handed");
         if (twoHandedQuality.length > 0) {
-          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.getCSData().equipped === ChronicleSystem.equippedConstants.MAIN_HAND || item.getCSData().equipped === ChronicleSystem.equippedConstants.OFFHAND || item.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
-          documment.getCSData().equipped = ChronicleSystem.equippedConstants.BOTH_HANDS;
+          collection = this.UnequipsAllItemsInTheSlots([ ChronicleSystem.equippedConstants.MAIN_HAND, ChronicleSystem.equippedConstants.OFFHAND, ChronicleSystem.equippedConstants.BOTH_HANDS], collection);
+          collection = this.ChangeItemEquippedStatus(collection, currentItem, ChronicleSystem.equippedConstants.BOTH_HANDS);
         } else {
-          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.getCSData().equipped === parseInt(eventData.hand) || item.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
-          documment.getCSData().equipped = parseInt(eventData.hand);
+          collection = this.UnequipsAllItemsInTheSlots([ parseInt(eventData.hand), ChronicleSystem.equippedConstants.BOTH_HANDS], collection);
+          collection = this.ChangeItemEquippedStatus(collection, currentItem, parseInt(eventData.hand));
         }
       }
     }
 
-    this.actor.updateTempModifiers();
+    this.actor.saveModifiers();
+
+    this.actor.updateEmbeddedDocuments('Item', collection);
+  }
+
+  UnequipsAllItemsInTheSlots(slots = [], collection = []) {
+    let tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => slots.includes(item.getCSData().equipped));
 
     tempCollection.forEach((item) => {
       collection.push({_id: item._id, "data.equipped": ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED});
       item.onEquippedChanged(this.actor, false);
     });
 
-    collection.push({_id: documment._id, "data.equipped": documment.getCSData().equipped});
-    documment.onEquippedChanged(this.actor, documment.getCSData().equipped > 0);
+    return collection;
+  }
 
-    this.actor.saveModifiers();
+  ChangeItemEquippedStatus(collection = [], item, equippedStatus = ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED) {
+    item.getCSData().equipped = equippedStatus;
 
-    this.actor.updateEmbeddedDocuments('Item', collection);
+    collection.push({_id: item._id, "data.equipped": item.getCSData().equipped});
+
+    item.onEquippedChanged(this.actor, equippedStatus > 0);
+
+    return collection;
   }
 
   async _onDispositionChanged(event, targets) {
