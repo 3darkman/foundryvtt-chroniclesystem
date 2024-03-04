@@ -52,6 +52,9 @@
 .chroniclesystem.sheet.character .qualities-list .item .description {
   display: none;
 }
+.chroniclesystem.sheet.character section.disposition {
+  flex: 0 0 170px;
+}
 .chroniclesystem.sheet.character section.sorcery {
   margin-right: 9px;
 }
