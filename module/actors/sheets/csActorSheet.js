@@ -74,7 +74,7 @@ export class CSActorSheet extends ActorSheet {
             const item = this.actor.items.find((i) => {
                 return i.name === doc.name;
             });
-            if (item) {
+            if (item && item.type !== "weapon") {
                 embeddedItem.push(this.actor.getEmbeddedDocument("Item", item.data._id));
             } else {
                 if (this.isItemPermitted(doc.type))
