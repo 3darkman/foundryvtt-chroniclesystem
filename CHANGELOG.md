@@ -1,5 +1,21 @@
 #Change Log
 
+## 0.6.0
+
+### Added
+- Holding Fortune Modifier to House Sheet (Thanks Nicolò)
+- It is now possible to add two weapons of the same type to the character
+- Disposition DR to Intrigue Tab
+- Weapon "Adaptable" quality support (The weapon can be equipped with one or two hands, the extra damage is already calculated.)
+
+### CHanged
+
+- Item Description field resizes with the item sheet size.
+
+### Fixed
+- House Event "Player choice" field
+- Armor quality field
+
 ## 0.5.0
 
 ### Added

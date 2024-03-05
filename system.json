@@ -7,7 +7,6 @@
   ],
   "styles": [
     "styles/global.css",
-    "styles/item-sheet.css",
     "styles/actor-sheet.css",
     "styles/less/global.css"
   ],
@@ -36,7 +35,7 @@
     }
   ],
   "compatibility": {
-    "minimum": "10",
-    "verified": "10.290"
+    "minimum": "11",
+    "verified": "11.315"
   }
 }
