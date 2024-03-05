@@ -53,14 +53,6 @@
   text-shadow: none;
 }
 
-.chroniclesystem.sheet.item .sheet-body {
-  height: auto;
-}
-
-.chroniclesystem.sheet.item .header-fields {
-  display: flex;
-}
-
 .chroniclesystem.sheet.actor .abilities {
   margin-right: 8px;
 }
@@ -82,36 +74,6 @@
 
 .chroniclesystem.sheet .derived-statistics b {
   text-align: center;
-}
-
-.chroniclesystem.sheet.item .sheet-body .description .editor {
-  min-height: 200px;
-  max-height: 100%;
-  flex-grow: 1;
-  display: flex;
-  height: 200px;
-  width: 100%;
-  position: relative;
-  word-break: break-word;
-  padding: 0 3px;
-  background: white;
-  border: white 0;
-}
-
-.chroniclesystem.sheet.item .sheet-body .poison .editor {
-  min-height: 150px;
-  padding: 0 3px;
-  background: white;
-  border: white 0;
-}
-
-.chroniclesystem.sheet-item .sheet-body  {
-  align-items: stretch;
-
-}
-
-.chroniclesystem.sheet.item .form-group {
-  margin: 5px 0 0 5px;
 }
 
 .chroniclesystem .item-list {
@@ -197,10 +159,6 @@
   float: right;
   width: content-box;
   text-align: right;
-}
-
-.chroniclesystem.sheet.item .description {
-  padding: 5px;
 }
 
 .chroniclesystem.sheet .benefits {

@@ -40,7 +40,7 @@ export class CSActorSheet extends ActorSheet {
 
     splitItemsByType(data) {
         data.itemsByType = {};
-        for (const item of data.items) {
+        for (const item of this.actor.getEmbeddedCollection("Item")) {
             let list = data.itemsByType[item.type];
             if (!list) {
                 list = [];
@@ -74,7 +74,7 @@ export class CSActorSheet extends ActorSheet {
             const item = this.actor.items.find((i) => {
                 return i.name === doc.name;
             });
-            if (item) {
+            if (item && item.type !== "weapon") {
                 embeddedItem.push(this.actor.getEmbeddedDocument("Item", item.data._id));
             } else {
                 if (this.isItemPermitted(doc.type))

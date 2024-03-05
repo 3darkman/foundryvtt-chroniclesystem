@@ -1,13 +1,12 @@
 {
   "title": "Chronicle System (Unofficial)",
   "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "esmodules": [
     "module/system/config.js"
   ],
   "styles": [
     "styles/global.css",
-    "styles/item-sheet.css",
     "styles/actor-sheet.css",
     "styles/less/global.css"
   ],
@@ -31,11 +30,12 @@
   "authors": [
     {
       "name": "Kirlian '3darkman' Silvestre",
+      "discord": "Kirlian#1814",
       "flags": {}
     }
   ],
   "compatibility": {
-    "minimum": "10",
-    "verified": "10.290"
+    "minimum": "11",
+    "verified": "11.315"
   }
 }

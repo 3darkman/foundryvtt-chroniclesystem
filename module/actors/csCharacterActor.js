@@ -308,8 +308,8 @@ export class CSCharacterActor extends CSActor {
         this.saveModifiers();
     }
 
-    _onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId) {
-        super._onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    _onUpdateDescendantDocuments(embeddedName, documents, result, options, userId) {
+        super._onUpdateDescendantDocuments(embeddedName, documents, result, options, userId);
         this.updateTempModifiers();
         result.forEach((doc) => {
             let item = this.items.find((item) => item._id === doc._id);

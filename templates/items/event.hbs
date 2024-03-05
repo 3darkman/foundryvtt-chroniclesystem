@@ -67,10 +67,10 @@
             {{else}}
                 <div class="form-group">
                     <label for="system.playerChoice">{{localize "CS.sheets.eventItem.playerChoice"}}</label>
-                    <a class="checkButton size50 {{showIfEquals true system.playerChoice "activated" ""}}"><i class="fa fa-check"></i></a>
+                    <a class="checkButton size50 {{showIfEquals true item.system.playerChoice "activated" ""}}"><i class="fa fa-check"></i></a>
                 </div>
             {{log item}}
-                {{#if system.playerChoice}}
+                {{#if item.system.playerChoice}}
                     {{> (formGroup)
                             id="system.numberOfChoices"
                             labelText="CS.sheets.eventItem.numberOfChoices"

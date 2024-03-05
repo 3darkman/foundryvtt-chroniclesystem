@@ -52,6 +52,9 @@
 .chroniclesystem.sheet.character .qualities-list .item .description {
   display: none;
 }
+.chroniclesystem.sheet.character section.disposition {
+  flex: 0 0 170px;
+}
 .chroniclesystem.sheet.character section.sorcery {
   margin-right: 9px;
 }
@@ -90,6 +93,64 @@
 }
 .chroniclesystem.sheet.technique .work.item {
   margin-bottom: 8px;
+}
+.chroniclesystem.sheet.item {
+  min-width: 460px;
+  min-height: 400px;
+}
+.chroniclesystem.sheet.item .sheet-header .item-control {
+  flex: 0 0 36px;
+  margin-left: 10px;
+  align-self: center;
+  align-items: center;
+  color: black;
+  line-height: normal;
+}
+.chroniclesystem.sheet.item .sheet-body {
+  align-items: stretch;
+  height: auto;
+}
+.chroniclesystem.sheet.item .sheet-body .form-group input {
+  margin: 0 0 0 5px;
+  height: 34px;
+}
+.chroniclesystem.sheet.item .sheet-body .poison {
+  flex-grow: 2;
+}
+.chroniclesystem.sheet.item .sheet-body .poison .editor {
+  min-height: 150px;
+  padding: 0 3px;
+  background: white;
+  border: white 0;
+}
+.chroniclesystem.sheet.item .sheet-body .header-fields {
+  display: flex;
+}
+.chroniclesystem.sheet.item .sheet-body .form-group {
+  margin: 5px 0 0 5px;
+}
+.chroniclesystem.sheet.item .sheet-body .item-stats {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+.chroniclesystem.sheet.item .sheet-body .description-text {
+  height: 65%;
+}
+.chroniclesystem.sheet.item .sheet-body .description {
+  flex-grow: 2.5;
+}
+.chroniclesystem.sheet.item .sheet-body .description .editor {
+  min-height: 100px;
+  max-height: 100%;
+  flex-grow: 1;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  word-break: break-word;
+  padding: 0 3px;
+  background: white;
+  border: white 0;
 }
 .chroniclesystem .capitalize {
   text-transform: capitalize;

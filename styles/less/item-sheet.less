@@ -1,0 +1,78 @@
+@import "constants.less";
+
+.chroniclesystem {
+  &.sheet {
+    &.item {
+      min-width: 460px;
+      min-height: 400px;
+
+      .sheet-header {
+        .item-control {
+          flex: 0 0 36px;
+          margin-left: 10px;
+          align-self: center;
+          align-items: center;
+          color: black;
+          line-height: normal;
+        }
+      }
+      .sheet-body {
+        align-items: stretch;
+        height: auto;
+
+
+        .form-group input {
+          margin: 0 0 0 5px;
+          height: 34px;
+        }
+
+        .poison {
+          flex-grow: 2;
+
+          .editor {
+            min-height: 150px;
+            padding: 0 3px;
+            background: white;
+            border: white 0;
+          }
+        }
+
+        .header-fields {
+          display: flex;
+        }
+
+        .form-group {
+          margin: 5px 0 0 5px;
+        }
+
+        .item-stats {
+          flex-grow: 1;
+          margin-right: 10px;
+        }
+
+        .description-text {
+          height: 65%;
+        }
+
+        .description {
+          flex-grow: 2.5;
+
+          .editor {
+            min-height: 100px;
+            max-height: 100%;
+            flex-grow: 1;
+            display: flex;
+            height: 100%;
+            width: 100%;
+            position: relative;
+            word-break: break-word;
+            padding: 0 3px;
+            background: white;
+            border: white 0;
+          }
+        }
+      }
+    }
+  }
+}
+

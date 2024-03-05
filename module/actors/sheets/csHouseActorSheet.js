@@ -1,35 +1,35 @@
-import {CSActorSheet} from "./csActorSheet.js";
-import {CSConstants} from "../../system/csConstants.js";
-import SystemUtils from "../../utils/systemUtils.js";
-import LOGGER from "../../utils/logger.js";
-import {ChronicleSystem} from "../../system/ChronicleSystem.js";
-import {CSHoldingItem} from "../../items/cs-holding-item.js";
+import { CSActorSheet } from './csActorSheet.js';
+import { CSConstants } from '../../system/csConstants.js';
+import SystemUtils from '../../utils/systemUtils.js';
+import LOGGER from '../../utils/logger.js';
+import { ChronicleSystem } from '../../system/ChronicleSystem.js';
+import { CSHoldingItem } from '../../items/cs-holding-item.js';
 
 export class CSHouseActorSheet extends CSActorSheet {
-    itemTypesPermitted = [
-        "event",
-        "holding"
-    ]
+    itemTypesPermitted = ['event', 'holding'];
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            classes: ["chroniclesystem", "sheet", "house", "actor"],
-            template: "systems/chroniclesystem/templates/actors/houses/house-sheet.hbs",
+            classes: ['chroniclesystem', 'sheet', 'house', 'actor'],
+            template:
+                'systems/chroniclesystem/templates/actors/houses/house-sheet.hbs',
             width: 800,
             height: 600,
             tabs: [
                 {
-                    navSelector: ".tabs",
-                    contentSelector: ".sheet-body",
-                    initial: "resources"
-                }
+                    navSelector: '.tabs',
+                    contentSelector: '.sheet-body',
+                    initial: 'resources',
+                },
             ],
-            dragDrop: [{dragSelector: ".item-list .item", dropSelector: null}]
+            dragDrop: [
+                { dragSelector: '.item-list .item', dropSelector: null },
+            ],
         });
     }
 
     getData(options) {
-        let data =  super.getData(options);
+        let data = super.getData(options);
 
         this.splitItemsByType(data);
 
@@ -48,24 +48,58 @@ export class CSHouseActorSheet extends CSActorSheet {
 
     prepareRolesData(house, data) {
         house.head = data.actor.getCharactersFromRole(data.actor.roleMap.HEAD);
-        house.steward = data.actor.getCharactersFromRole(data.actor.roleMap.STEWARD);
+        house.steward = data.actor.getCharactersFromRole(
+            data.actor.roleMap.STEWARD
+        );
         house.heirs = data.actor.getCharactersFromRole(data.actor.roleMap.HEIR);
-        house.family = data.actor.getCharactersFromRole(data.actor.roleMap.FAMILY);
-        house.retainers = data.actor.getCharactersFromRole(data.actor.roleMap.RETAINER);
-        house.servants = data.actor.getCharactersFromRole(data.actor.roleMap.SERVANT);
+        house.family = data.actor.getCharactersFromRole(
+            data.actor.roleMap.FAMILY
+        );
+        house.retainers = data.actor.getCharactersFromRole(
+            data.actor.roleMap.RETAINER
+        );
+        house.servants = data.actor.getCharactersFromRole(
+            data.actor.roleMap.SERVANT
+        );
     }
 
     prepareFortuneData(house, data) {
-        if (!house.steward.id)
-            return;
+        if (!house.steward.id) return;
         house.fortune = {
             lawMod: data.actor.getLawModifier(),
             populationMod: data.actor.getPopulationModifier(),
-            holdingsMod: 0
-        }
+            holdingsDice: data.actor.getHoldingsDice(),
+            holdingsFlat: data.actor.getHoldingsModifier(),
+            holdingsMod: '0',
+        };
+
+        house.fortune.holdingsMod =
+            house.fortune.holdingsDice && house.fortune.holdingsDice !== 0
+                ? `${house.fortune.holdingsDice}d6`
+                : '';
+        house.fortune.holdingsMod +=
+            house.fortune.holdingsFlat && house.fortune.holdingsFlat !== 0
+                ? house.fortune.holdingsFlat > 0
+                    ? `${!!house.fortune.holdingsMod ? ' + ' : ''}${
+                          house.fortune.holdingsFlat
+                      }`
+                    : `${!!house.fortune.holdingsMod ? ' - ' : ''}${
+                          -(house.fortune.holdingsFlat)
+                      }`
+                : '';
+
         const steward = game.actors.get(house.steward.id);
-        let stewardshipFormula = ChronicleSystem.getActorAbilityFormula(steward, SystemUtils.localize(ChronicleSystem.keyConstants.STATUS), SystemUtils.localize(ChronicleSystem.keyConstants.STEWARDSHIP));
-        stewardshipFormula.modifier = stewardshipFormula.modifier + house.fortune.lawMod + house.fortune.populationMod + house.fortune.holdingsMod;
+        let stewardshipFormula = ChronicleSystem.getActorAbilityFormula(
+            steward,
+            SystemUtils.localize(ChronicleSystem.keyConstants.STATUS),
+            SystemUtils.localize(ChronicleSystem.keyConstants.STEWARDSHIP)
+        );
+        stewardshipFormula.pool += house.fortune.holdingsDice;
+        stewardshipFormula.modifier =
+            stewardshipFormula.modifier +
+            house.fortune.lawMod +
+            house.fortune.populationMod +
+            house.fortune.holdingsFlat;
         house.fortune.formula = stewardshipFormula;
     }
 
@@ -77,8 +111,8 @@ export class CSHouseActorSheet extends CSActorSheet {
             law: [],
             population: [],
             power: [],
-            wealth: []
-        }
+            wealth: [],
+        };
         this.resetResourceInvestments(house);
 
         let holdings = this._checkNull(data.itemsByType['holding']);
@@ -86,6 +120,7 @@ export class CSHouseActorSheet extends CSActorSheet {
             let doc = this.actor.getEmbeddedDocument('Item', holding._id);
             house.holdings[holding.system.resource].push(holding);
             house[holding.system.resource].invested += doc.getTotalInvested();
+            house[holding.system.resource].hasHoldings = true;
         });
     }
 
@@ -104,12 +139,21 @@ export class CSHouseActorSheet extends CSActorSheet {
 
         if (!this.options.editable) return;
 
-        html.find(".family-list").on("click", ".item-control", this._onclickMemberControl.bind(this));
-        html.find(".servants-list").on("click", ".item-control", this._onclickMemberControl.bind(this));
+        html.find('.family-list').on(
+            'click',
+            '.item-control',
+            this._onclickMemberControl.bind(this)
+        );
+        html.find('.servants-list').on(
+            'click',
+            '.item-control',
+            this._onclickMemberControl.bind(this)
+        );
         html.find('.member-name').click(this._openActorSheet.bind(this));
         html.find('.resource-edit').click(this._openResourceEditor.bind(this));
-        html.find('.regenerate-resources').click(this._regenerateResources.bind(this));
-
+        html.find('.regenerate-resources').click(
+            this._regenerateResources.bind(this)
+        );
     }
 
     async _onclickMemberControl(event) {
@@ -119,7 +163,7 @@ export class CSHouseActorSheet extends CSActorSheet {
         const action = a.dataset.action;
         const role = a.dataset.role;
 
-        if ( action === "delete" ) {
+        if (action === 'delete') {
             this.actor.removeCharacterFromHouse(actorId, role);
         }
     }
@@ -135,37 +179,51 @@ export class CSHouseActorSheet extends CSActorSheet {
         let resourceId = ev.currentTarget.dataset.id;
         let resourceName = ev.currentTarget.dataset.name;
 
-        if (!resourceId || !resourceName)
-            return;
+        if (!resourceId || !resourceName) return;
 
         const template = CSConstants.Templates.Dialogs.HOUSE_RESOURCE_EDITOR;
         const html = await renderTemplate(template, {
             startingValue: data.actor.getCSData()[resourceId].startingValue,
             description: data.actor.getCSData()[resourceId].description,
-            resourceId: resourceId});
-        return new Promise(resolve => {
+            resourceId: resourceId,
+        });
+        return new Promise((resolve) => {
             const data = {
-                title: SystemUtils.format("CS.dialogs.houseResourceEditor.title", {resourceName: resourceName}),
+                title: SystemUtils.format(
+                    'CS.dialogs.houseResourceEditor.title',
+                    { resourceName: resourceName }
+                ),
                 content: html,
                 buttons: {
                     normal: {
-                        label: SystemUtils.localize("CS.dialogs.actions.save"),
-                        callback: html => resolve(this._processResourceEdition(html[0].querySelector("form")))
+                        label: SystemUtils.localize('CS.dialogs.actions.save'),
+                        callback: (html) =>
+                            resolve(
+                                this._processResourceEdition(
+                                    html[0].querySelector('form')
+                                )
+                            ),
                     },
                     cancel: {
-                        label: SystemUtils.localize("CS.dialogs.actions.cancel"),
-                        callback: html => resolve({cancelled: true})
-                    }
+                        label: SystemUtils.localize(
+                            'CS.dialogs.actions.cancel'
+                        ),
+                        callback: (html) => resolve({ cancelled: true }),
+                    },
                 },
-                default: "normal",
-                close: () => resolve({cancelled: true})
+                default: 'normal',
+                close: () => resolve({ cancelled: true }),
             };
             new Dialog(data, null).render(true);
-        })
+        });
     }
 
     _processResourceEdition(formData) {
-        this.actor.changeResource(formData.resourceId.value, formData.startingValue.value, formData.description.value);
+        this.actor.changeResource(
+            formData.resourceId.value,
+            formData.startingValue.value,
+            formData.description.value
+        );
         return true;
     }
 
@@ -173,8 +231,7 @@ export class CSHouseActorSheet extends CSActorSheet {
         ev.preventDefault();
         const id = ev.currentTarget.dataset.id;
         const actor = game.actors.get(id);
-        if (actor)
-            actor.sheet.render(true);
+        if (actor) actor.sheet.render(true);
     }
 
     isItemPermitted(type) {
@@ -182,13 +239,15 @@ export class CSHouseActorSheet extends CSActorSheet {
     }
     /** @override */
     async _onDropActor(event, data) {
-        LOGGER.trace("On Drop Actor | CSHouseActorSheet | csHouseActorSheet.js");
+        LOGGER.trace(
+            'On Drop Actor | CSHouseActorSheet | csHouseActorSheet.js'
+        );
         event.preventDefault();
-        if ( !this.actor.isOwner ) return false;
+        if (!this.actor.isOwner) return false;
 
-        fromUuid(data.uuid).then(value => {
+        fromUuid(data.uuid).then((value) => {
             let actor = value;
-            if (actor && actor.type === "character") {
+            if (actor && actor.type === 'character') {
                 this.showCharacterRoleDialog(actor);
             }
         });
@@ -202,20 +261,22 @@ export class CSHouseActorSheet extends CSActorSheet {
         let eventsCanGenerateModifiers = [];
 
         data = data.concat(itemData);
-        for (let i = 0; i < data.length; i++){
+        for (let i = 0; i < data.length; i++) {
             const doc = data[i];
             if (this.isItemPermitted(doc.type)) {
-                if (doc.type === "event") {
-                    await this.showAddingEventDialog(doc)
-                        .then((result) => {
-                            if (!result.cancelled) {
-                                let generateData = this._processAddingEvent(result);
-                                if (generateData.canGenerate) {
-                                    eventsCanGenerateModifiers.push({doc: doc.name, choices: generateData.choices});
-                                }
-                                itemsToCreate.push(doc);
+                if (doc.type === 'event') {
+                    await this.showAddingEventDialog(doc).then((result) => {
+                        if (!result.cancelled) {
+                            let generateData = this._processAddingEvent(result);
+                            if (generateData.canGenerate) {
+                                eventsCanGenerateModifiers.push({
+                                    doc: doc.name,
+                                    choices: generateData.choices,
+                                });
                             }
-                        });
+                            itemsToCreate.push(doc);
+                        }
+                    });
                 } else {
                     itemsToCreate.push(doc);
                 }
@@ -223,12 +284,14 @@ export class CSHouseActorSheet extends CSActorSheet {
         }
 
         if (itemsToCreate.length > 0) {
-            this.actor.createEmbeddedDocuments("Item", itemsToCreate)
-                .then(function(result) {
+            this.actor
+                .createEmbeddedDocuments('Item', itemsToCreate)
+                .then(function (result) {
                     result.forEach((item) => {
-                        let event = eventsCanGenerateModifiers.find(ev => ev.doc === item.name);
-                        if (event)
-                            item.generateModifiers(event.choices);
+                        let event = eventsCanGenerateModifiers.find(
+                            (ev) => ev.doc === item.name
+                        );
+                        if (event) item.generateModifiers(event.choices);
                         item.onObtained(item.actor);
                     });
                     embeddedItem.concat(result);
@@ -238,31 +301,44 @@ export class CSHouseActorSheet extends CSActorSheet {
         return embeddedItem;
     }
 
-
     async showAddingEventDialog(event) {
-        LOGGER.trace("show adding event dialog | CSHouseActorSheet |" +
-            " csHouseActorSheet.js");
+        LOGGER.trace(
+            'show adding event dialog | CSHouseActorSheet |' +
+                ' csHouseActorSheet.js'
+        );
         const template = CSConstants.Templates.Dialogs.ADDING_HOUSE_EVENT;
-        const html = await renderTemplate(template, {data: event, choices: CSConstants.HouseResources, id: event.id});
-        return new Promise(resolve => {
+        const html = await renderTemplate(template, {
+            data: event,
+            choices: CSConstants.HouseResources,
+            id: event.id,
+        });
+        return new Promise((resolve) => {
             const data = {
-                title: SystemUtils.localize("CS.dialogs.addingHouseEvent.title"),
+                title: SystemUtils.localize(
+                    'CS.dialogs.addingHouseEvent.title'
+                ),
                 content: html,
                 buttons: {
                     normal: {
-                        label: SystemUtils.localize("CS.dialogs.actions.save"),
-                        callback: html => resolve({data: html[0].querySelector("form"), event: event})
+                        label: SystemUtils.localize('CS.dialogs.actions.save'),
+                        callback: (html) =>
+                            resolve({
+                                data: html[0].querySelector('form'),
+                                event: event,
+                            }),
                     },
                     cancel: {
-                        label: SystemUtils.localize("CS.dialogs.actions.cancel"),
-                        callback: html => resolve({cancelled: true})
-                    }
+                        label: SystemUtils.localize(
+                            'CS.dialogs.actions.cancel'
+                        ),
+                        callback: (html) => resolve({ cancelled: true }),
+                    },
                 },
-                default: "normal",
-                close: () => resolve({cancelled: true})
+                default: 'normal',
+                close: () => resolve({ cancelled: true }),
             };
             new Dialog(data, null).render(true);
-        })
+        });
     }
 
     _processAddingEvent(formData) {
@@ -273,37 +349,56 @@ export class CSHouseActorSheet extends CSActorSheet {
         for (let i = 1; i <= formData.event.data.numberOfChoices; i++) {
             choices.push(formData.data[`resource_${i}`].value);
         }
-        return {canGenerate: true, choices: choices};
+        return { canGenerate: true, choices: choices };
     }
 
     async showCharacterRoleDialog(actor) {
-        LOGGER.trace("show character role dialog | CSHouseActorSheet |" +
-            " csHouseActorSheet.js");
+        LOGGER.trace(
+            'show character role dialog | CSHouseActorSheet |' +
+                ' csHouseActorSheet.js'
+        );
         const template = CSConstants.Templates.Dialogs.CHARACTER_ROLE_IN_HOUSE;
-        const html = await renderTemplate(template, {choices: CSConstants.HouseRoles, value: "HEAD", id: actor.id});
-        return new Promise(resolve => {
+        const html = await renderTemplate(template, {
+            choices: CSConstants.HouseRoles,
+            value: 'HEAD',
+            id: actor.id,
+        });
+        return new Promise((resolve) => {
             const data = {
-                title: SystemUtils.format("CS.dialogs.characterRole.title", {actorName: actor.name}),
+                title: SystemUtils.format('CS.dialogs.characterRole.title', {
+                    actorName: actor.name,
+                }),
                 content: html,
                 buttons: {
                     normal: {
-                        label: SystemUtils.localize("CS.dialogs.actions.save"),
-                        callback: html => resolve(this._processCharacterRole(html[0].querySelector("form")))
+                        label: SystemUtils.localize('CS.dialogs.actions.save'),
+                        callback: (html) =>
+                            resolve(
+                                this._processCharacterRole(
+                                    html[0].querySelector('form')
+                                )
+                            ),
                     },
                     cancel: {
-                        label: SystemUtils.localize("CS.dialogs.actions.cancel"),
-                        callback: html => resolve({cancelled: true})
-                    }
+                        label: SystemUtils.localize(
+                            'CS.dialogs.actions.cancel'
+                        ),
+                        callback: (html) => resolve({ cancelled: true }),
+                    },
                 },
-                default: "normal",
-                close: () => resolve({cancelled: true})
+                default: 'normal',
+                close: () => resolve({ cancelled: true }),
             };
             new Dialog(data, null).render(true);
-        })
+        });
     }
 
     _processCharacterRole(formData) {
-        this.actor.addCharacterToHouse(formData.characterId.value, formData.characterRole.value, formData.description.value);
+        this.actor.addCharacterToHouse(
+            formData.characterId.value,
+            formData.characterRole.value,
+            formData.description.value
+        );
         return true;
     }
 }
