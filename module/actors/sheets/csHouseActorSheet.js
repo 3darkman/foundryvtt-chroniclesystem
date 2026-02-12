@@ -9,7 +9,7 @@ export class CSHouseActorSheet extends CSActorSheet {
     itemTypesPermitted = ['event', 'holding'];
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ['chroniclesystem', 'sheet', 'house', 'actor'],
             template:
                 'systems/chroniclesystem/templates/actors/houses/house-sheet.hbs',
@@ -28,7 +28,7 @@ export class CSHouseActorSheet extends CSActorSheet {
         });
     }
 
-    getData(options) {
+    async getData(options) {
         let data = super.getData(options);
 
         this.splitItemsByType(data);
@@ -42,6 +42,27 @@ export class CSHouseActorSheet extends CSActorSheet {
         this.prepareRolesData(house, data);
 
         this.prepareFortuneData(house, data);
+
+        // Pre-enrich HTML descriptions for events and holdings (FR-015)
+        const rollData = this.actor.getRollData();
+        for (const event of house.historicalEvents) {
+            if (event.system.description) {
+                event.system.description = await TextEditor.enrichHTML(
+                    event.system.description,
+                    { async: true, rollData }
+                );
+            }
+        }
+        for (const resourceKey of Object.keys(house.holdings)) {
+            for (const holding of house.holdings[resourceKey]) {
+                if (holding.system.description) {
+                    holding.system.description = await TextEditor.enrichHTML(
+                        holding.system.description,
+                        { async: true, rollData }
+                    );
+                }
+            }
+        }
 
         return data;
     }
@@ -286,14 +307,14 @@ export class CSHouseActorSheet extends CSActorSheet {
         if (itemsToCreate.length > 0) {
             this.actor
                 .createEmbeddedDocuments('Item', itemsToCreate)
-                .then(function (result) {
-                    result.forEach((item) => {
+                .then(async function (result) {
+                    for (const item of result) {
                         let event = eventsCanGenerateModifiers.find(
                             (ev) => ev.doc === item.name
                         );
-                        if (event) item.generateModifiers(event.choices);
+                        if (event) await item.generateModifiers(event.choices);
                         item.onObtained(item.actor);
-                    });
+                    }
                     embeddedItem.concat(result);
                 });
         }
@@ -346,7 +367,7 @@ export class CSHouseActorSheet extends CSActorSheet {
             return { canGenerate: false };
 
         let choices = [];
-        for (let i = 1; i <= formData.event.data.numberOfChoices; i++) {
+        for (let i = 1; i <= formData.event.system.numberOfChoices; i++) {
             choices.push(formData.data[`resource_${i}`].value);
         }
         return { canGenerate: true, choices: choices };

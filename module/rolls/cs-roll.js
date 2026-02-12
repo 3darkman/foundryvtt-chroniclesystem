@@ -9,15 +9,15 @@ export class CSRoll {
         this.results = [];
     }
 
-    async doRoll(actor, async = true) {
+    async doRoll(actor) {
         if (this.formula.pool - this.formula.dicePenalty <=0 ) {
             ui.notifications.info(SystemUtils.localize("CS.notifications.dicePoolInvalid"));
             return null;
         }
         const pool = Math.max(this.formula.pool, 1);
         const dices = pool + this.formula.bonusDice;
-        let dieRoll = new Die({faces: 6, number: dices});
-        await dieRoll.evaluate({async : async});
+        let dieRoll = new foundry.dice.terms.Die({faces: 6, number: dices});
+        await dieRoll.evaluate();
         this.results = dieRoll.results;
 
         let reRollFormula = "r"+this.formula.reRoll+"=1";
@@ -25,10 +25,10 @@ export class CSRoll {
 
         dieRoll.keep('kh' + Math.max(this.formula.pool - this.formula.dicePenalty, 0));
 
-        const plus = new OperatorTerm({operator: "+"});
-        plus.evaluate();
-        const bonus = new NumericTerm({number: this.formula.modifier});
-        bonus.evaluate();
+        const plus = new foundry.dice.terms.OperatorTerm({operator: "+"});
+        await plus.evaluate();
+        const bonus = new foundry.dice.terms.NumericTerm({number: this.formula.modifier});
+        await bonus.evaluate();
 
         let resultRoll = Roll.fromTerms([dieRoll, plus, bonus]);
         const messageId = this.formula.isUserChanged ? "CS.chatMessages.customRoll" : "CS.chatMessages.simpleRoll";

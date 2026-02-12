@@ -4,9 +4,9 @@
         <label for="generateModifiers">{{localize "CS.dialogs.addingHouseEvent.labels.generateModifiers"}}</label>
         <input type="checkbox" name="generateModifiers" id="generateModifiers" value="1" checked="checked"/>
     </div>
-    {{#if data.data.playerChoice}}
+    {{#if system.playerChoice}}
         <h4><b>{{localize "CS.dialogs.addingHouseEvent.labels.resourcesChoices"}}</b></h4>
-        {{#for 1 data.data.numberOfChoices 1}}
+        {{#for 1 system.numberOfChoices 1}}
             <div class="form-group">
                 <label for="resource_{{index}}">{{localize "CS.dialogs.addingHouseEvent.labels.resourceNumber" number=index}}</label>
                 <select name="resource_{{index}}">

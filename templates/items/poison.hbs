@@ -7,65 +7,65 @@
                 <span>{{localize "CS.sheets.generalLabels.details"}}</span>
             </header>
             <div class="form-group">
-                <label for="data.delivery">Delivery:</label>
+                <label for="system.delivery">Delivery:</label>
                 <span class="form-fields">
                   <input
                           class="small-field"
-                          name="data.delivery"
+                          name="system.delivery"
                           type="text"
-                          value="{{item.data.delivery}}"
+                          value="{{item.system.delivery}}"
                           placeholder="Delivery"
                           data-dtype="String"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.virulence">Virulence:</label>
+                <label for="system.virulence">Virulence:</label>
                 <span class="form-fields">
                   <input
                           class="small-field"
-                          name="data.virulence"
+                          name="system.virulence"
                           type="text"
-                          value="{{item.data.virulence}}"
+                          value="{{item.system.virulence}}"
                           placeholder="Virulence"
                           data-dtype="String"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.frequency">Frequency:</label>
+                <label for="system.frequency">Frequency:</label>
                 <span class="form-fields">
                   <input
                           class="small-field"
-                          name="data.frequency"
+                          name="system.frequency"
                           type="text"
-                          value="{{item.data.frequency}}"
+                          value="{{item.system.frequency}}"
                           placeholder="Frequency"
                           data-dtype="String"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.toxicity">Toxicity:</label>
+                <label for="system.toxicity">Toxicity:</label>
                 <span class="form-fields">
                   <input
                           class="small-field"
-                          name="data.toxicity"
+                          name="system.toxicity"
                           type="text"
-                          value="{{item.data.toxicity}}"
+                          value="{{item.system.toxicity}}"
                           placeholder="Toxicity"
                           data-dtype="Number"
                   />
                 </span>
             </div>
             <div class="form-group">
-                <label for="data.diagnosis">Diagnosis:</label>
+                <label for="system.diagnosis">Diagnosis:</label>
                 <span class="form-fields">
                   <input
                           class="small-field"
-                          name="data.diagnosis"
+                          name="system.diagnosis"
                           type="text"
-                          value="{{item.data.diagnosis}}"
+                          value="{{item.system.diagnosis}}"
                           placeholder="Diagnosis"
                           data-dtype="Number"
                   />
@@ -79,13 +79,13 @@
                 <span>Effects</span>
             </header>
             <div class="form-group">
-                {{editor content=data.effects target="data.effects" button=true owner=owner editable=editable}}
+                {{editor content=system.effects target="system.effects" button=true owner=owner editable=editable}}
             </div>
             <header class="header-field">
                 <span>Recovery</span>
             </header>
             <div class="form-group">
-                {{editor content=data.recovery target="data.recovery" button=true owner=owner editable=editable}}
+                {{editor content=system.recovery target="system.recovery" button=true owner=owner editable=editable}}
             </div>
         </section>
     </main>

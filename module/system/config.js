@@ -23,6 +23,22 @@ import {migrateData} from "../migrations/migration.js";
 import {CsCombat} from "../combat/cs-combat.js";
 import {CsCombatant} from "../combat/cs-combatant.js";
 
+// TypeDataModel classes
+import CharacterData from "../data/actor/character-data.js";
+import HouseData from "../data/actor/house-data.js";
+import UnitData from "../data/actor/unit-data.js";
+import WeaponData from "../data/item/weapon-data.js";
+import ArmorData from "../data/item/armor-data.js";
+import AbilityData from "../data/item/ability-data.js";
+import BenefitData from "../data/item/benefit-data.js";
+import DrawbackData from "../data/item/drawback-data.js";
+import EquipmentData from "../data/item/equipment-data.js";
+import EventData from "../data/item/event-data.js";
+import HoldingData from "../data/item/holding-data.js";
+import PoisonData from "../data/item/poison-data.js";
+import TechniqueData from "../data/item/technique-data.js";
+import UnitTypeData from "../data/item/unit-type-data.js";
+
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
 /* -------------------------------------------- */
@@ -47,16 +63,38 @@ Hooks.once("init", async function() {
     CONFIG.Combat.documentClass = CsCombat;
     CONFIG.Combatant.documentClass = CsCombatant;
 
+    // Register TypeDataModel schemas
+    CONFIG.Actor.dataModels = {
+        character: CharacterData,
+        house: HouseData,
+        unit: UnitData
+    };
+    CONFIG.Item.dataModels = {
+        weapon: WeaponData,
+        armor: ArmorData,
+        ability: AbilityData,
+        benefit: BenefitData,
+        drawback: DrawbackData,
+        equipment: EquipmentData,
+        event: EventData,
+        holding: HoldingData,
+        poison: PoisonData,
+        technique: TechniqueData,
+        unitType: UnitTypeData
+    };
+
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
     Actors.registerSheet("chroniclesystem", CSCharacterActorSheet,
         { label: SystemUtils.localize("CS.sheets.characterSheet"), types: ["character"], makeDefault: true });
     Actors.registerSheet("chroniclesystem", CSHouseActorSheet,
         { label: SystemUtils.localize("CS.sheets.houseSheet"), types: ["house"], makeDefault: true });
+    Actors.registerSheet("chroniclesystem", CSCharacterActorSheet,
+        { label: SystemUtils.localize("CS.sheets.unitSheet"), types: ["unit"], makeDefault: true });
 
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("chroniclesystem", CSItemSheet,
-        { label: SystemUtils.localize("CS.sheets.itemSheet"), types: ["armor", "weapon", "equipment", "benefit", "drawback"], makeDefault: true });
+        { label: SystemUtils.localize("CS.sheets.itemSheet"), types: ["armor", "weapon", "equipment", "benefit", "drawback", "unitType", "poison"], makeDefault: true });
     Items.registerSheet("chroniclesystem", CSAbilityItemSheet,
         { label: SystemUtils.localize("CS.sheets.abilityItemSheet"), types: ["ability"], makeDefault: true });
     Items.registerSheet("chroniclesystem", CSEventItemSheet,
@@ -75,7 +113,7 @@ Hooks.once("ready", async () => {
 });
 
 Hooks.on('createItem', (item, data) => {
-    if (!item.isOwned) {
+    if (!item.isEmbedded) {
         item.img = `systems/chroniclesystem/assets/icons/${item.type}.png`;
     }
 });

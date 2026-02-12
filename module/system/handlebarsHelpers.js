@@ -45,7 +45,7 @@ export const registerCustomHelpers = function () {
     });
 
     Handlebars.registerHelper('enrich', (content) => {
-        return new Handlebars.SafeString(TextEditor.enrichHTML(content, {async: false}));
+        return new Handlebars.SafeString(content || '');
     });
 
     Handlebars.registerHelper('str', (content) => {

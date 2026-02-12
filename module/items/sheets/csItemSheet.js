@@ -5,7 +5,7 @@
 export class CSItemSheet extends ItemSheet {
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ["worldbuilding","chroniclesystem", "sheet", "item"],
             width: 650,
             height: 560,
@@ -38,7 +38,7 @@ export class CSItemSheet extends ItemSheet {
         };
         let newQuality = Object.values(item.getCSData().qualities);
         newQuality.push(quality);
-        item.update({"data.qualities" : newQuality});
+        item.update({"system.qualities" : newQuality});
     }
 
     async _onClickItemQualityControl(event) {
@@ -52,7 +52,7 @@ export class CSItemSheet extends ItemSheet {
             const item = this.item;
             let qualities = Object.values(item.getCSData().qualities);
             qualities.splice(index,1);
-            item.update({"data.qualities" : qualities});
+            item.update({"system.qualities" : qualities});
         }
     }
 
@@ -60,9 +60,20 @@ export class CSItemSheet extends ItemSheet {
     /* -------------------------------------------- */
 
     /** @override */
-    getData() {
+    async getData() {
         const data = super.getData();
         data.dtypes = ["String", "Number", "Boolean"];
+        const system = data.item?.system;
+        if (system?.description) {
+            system.description = await TextEditor.enrichHTML(system.description, { async: true });
+        }
+        // Enrich additional rich-text fields (e.g. poison effects/recovery)
+        if (system?.effects) {
+            system.effects = await TextEditor.enrichHTML(system.effects, { async: true });
+        }
+        if (system?.recovery) {
+            system.recovery = await TextEditor.enrichHTML(system.recovery, { async: true });
+        }
         return data;
     }
 

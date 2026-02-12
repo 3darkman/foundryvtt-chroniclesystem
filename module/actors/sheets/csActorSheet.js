@@ -75,7 +75,7 @@ export class CSActorSheet extends ActorSheet {
                 return i.name === doc.name;
             });
             if (item) {
-                embeddedItem.push(this.actor.getEmbeddedDocument("Item", item.data._id));
+                embeddedItem.push(this.actor.getEmbeddedDocument("Item", item.id));
             } else {
                 if (this.isItemPermitted(doc.type))
                     itemsToCreate.push(doc);

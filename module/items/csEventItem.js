@@ -3,28 +3,28 @@ import LOGGER from "../utils/logger.js";
 import {CSConstants} from "../system/csConstants.js";
 
 export class CSEventItem extends CSItem {
-    generateModifiers(choices) {
+    async generateModifiers(choices) {
         LOGGER.trace("generate historical event modifiers | CSEventItem.cs");
         let data = this.getCSData();
 
         if (data.playerChoice) {
             console.log(choices);
-            choices.forEach((choice) => {
-                this._generateModifier(choice.toLowerCase(), data);
-            });
+            for (const choice of choices) {
+                await this._generateModifier(choice.toLowerCase(), data);
+            }
         }else {
-            this._generateModifier("defense", data);
-            this._generateModifier("influence", data);
-            this._generateModifier("lands", data);
-            this._generateModifier("law", data);
-            this._generateModifier("population", data);
-            this._generateModifier("power", data);
-            this._generateModifier("wealth", data);
+            await this._generateModifier("defense", data);
+            await this._generateModifier("influence", data);
+            await this._generateModifier("lands", data);
+            await this._generateModifier("law", data);
+            await this._generateModifier("population", data);
+            await this._generateModifier("power", data);
+            await this._generateModifier("wealth", data);
         }
-        this.update({"data.modifiers": data.modifiers});
+        this.update({"system.modifiers": data.modifiers});
     }
 
-    _generateModifier(resource, data) {
+    async _generateModifier(resource, data) {
         LOGGER.trace(`generate the modifier to ${resource} | CSEventItem.js`);
 
         let formula = data.playerChoice ? data.bonusToChoices : data.formulas[resource];
@@ -35,7 +35,7 @@ export class CSEventItem extends CSItem {
         }
 
         let roll = new Roll(formula);
-        roll.evaluate({async: false});
+        await roll.evaluate();
         data.modifiers[resource] = roll.total;
     }
 }

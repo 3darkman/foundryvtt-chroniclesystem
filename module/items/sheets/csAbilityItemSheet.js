@@ -17,7 +17,7 @@ export class CSAbilityItemSheet extends CSItemSheet {
         };
         let newSpec = Object.values(item.getCSData().specialties);
         newSpec.push(specialty);
-        item.update({"data.specialties" : newSpec});
+        item.update({"system.specialties" : newSpec});
     }
 
     async _onclickSpecialtyControl(event) {
@@ -31,7 +31,7 @@ export class CSAbilityItemSheet extends CSItemSheet {
             const item = this.item;
             let newSpec = Object.values(item.getCSData().specialties);
             newSpec.splice(index,1);
-            item.update({"data.specialties" : newSpec});
+            item.update({"system.specialties" : newSpec});
         }
     }
 

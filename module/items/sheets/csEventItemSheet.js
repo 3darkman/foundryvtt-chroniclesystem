@@ -8,6 +8,6 @@ export class CSEventItemSheet extends CSItemSheet {
     }
     async _onClickPlayerChoice(ev) {
         ev.preventDefault();
-        this.item.update({"data.playerChoice": !this.item.getCSData().playerChoice});
+        this.item.update({"system.playerChoice": !this.item.getCSData().playerChoice});
     }
 }

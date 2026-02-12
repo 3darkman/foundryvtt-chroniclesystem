@@ -52,18 +52,18 @@ export class CSCharacterActor extends CSActor {
     }
 
     getAbilities() {
-        let items = this.getEmbeddedCollection("Item");
+        let items = this.items;
         return items.filter((item) => item.type === 'ability');
     }
 
     getAbility(abilityName) {
-        let items = this.getEmbeddedCollection("Item");
+        let items = this.items;
         const ability = items.find((item) => item.name.toLowerCase() === abilityName.toString().toLowerCase() && item.type === 'ability');
         return [ability, undefined];
     }
 
     getAbilityBySpecialty(abilityName, specialtyName) {
-        let items = this.getEmbeddedCollection("Item");
+        let items = this.items;
         let specialty = null;
         const ability = items.filter((item) => item.type === 'ability' && item.name.toLowerCase() === abilityName.toString().toLowerCase()).find(function (ability) {
             let data = ability.getCSData();
@@ -178,7 +178,7 @@ export class CSCharacterActor extends CSActor {
         }
 
         if (save) {
-            this.update({"data.modifiers": this.modifiers});
+            this.update({"system.modifiers": this.modifiers});
         }
     }
 
@@ -206,7 +206,7 @@ export class CSCharacterActor extends CSActor {
         }
 
         if (save) {
-            this.update({"data.penalties": this.penalties});
+            this.update({"system.penalties": this.penalties});
         }
     }
 
@@ -216,11 +216,11 @@ export class CSCharacterActor extends CSActor {
         console.assert(this.modifiers, "call actor.updateTempModifiers before removing a modifier!");
 
         if (this.modifiers[type]) {
-            let index = this.modifiers[type].indexOf((mod) => mod._id === documentId);
+            let index = this.modifiers[type].findIndex((mod) => mod._id === documentId);
             this.modifiers[type].splice(index, 1);
         }
         if (save)
-            this.update({"data.modifiers" : this.modifiers});
+            this.update({"system.modifiers" : this.modifiers});
     }
 
     removePenalty(type, documentId, save = false) {
@@ -229,11 +229,11 @@ export class CSCharacterActor extends CSActor {
         console.assert(this.penalties, "call actor.updateTempPenalties before removing a penalty!");
 
         if (this.penalties[type]) {
-            let index = this.penalties[type].indexOf((mod) => mod._id === documentId);
+            let index = this.penalties[type].findIndex((mod) => mod._id === documentId);
             this.penalties[type].splice(index, 1);
         }
         if (save)
-            this.update({"data.penalties" : this.penalties});
+            this.update({"system.penalties" : this.penalties});
     }
 
     getMaxInjuries() {
@@ -246,12 +246,12 @@ export class CSCharacterActor extends CSActor {
 
     saveModifiers() {
         console.assert(this.modifiers, "call actor.updateTempModifiers before saving the modifiers!");
-        this.update({"data.modifiers" : this.modifiers}, {diff:false});
+        this.update({"system.modifiers" : this.modifiers}, {diff:false});
     }
 
     savePenalties() {
         console.assert(this.penalties, "call actor.updateTempPenalties before saving the penalties!");
-        this.update({"data.penalties" : this.penalties}, {diff:false});
+        this.update({"system.penalties" : this.penalties}, {diff:false});
     }
 
     getAbilityValue(abilityName) {
@@ -289,17 +289,17 @@ export class CSCharacterActor extends CSActor {
         data.movement.sprintTotal = data.movement.total * data.movement.sprintMultiplier - data.movement.bulk;
     }
 
-    _onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId) {
-        super._onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+        super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
         this.updateTempModifiers();
         for (let i = 0; i < documents.length; i++) {
-            documents[i].onDiscardedFromActor(this, result[0]);
+            documents[i].onDiscardedFromActor(this, ids[0]);
         }
         this.saveModifiers();
     }
 
-    _onCreateEmbeddedDocuments(embeddedName, documents, result, options, userId) {
-        super._onCreateEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
+        super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
         this.updateTempModifiers();
         for (let i = 0; i < documents.length; i++) {
             documents[i].onObtained(this);
@@ -308,10 +308,10 @@ export class CSCharacterActor extends CSActor {
         this.saveModifiers();
     }
 
-    _onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId) {
-        super._onUpdateEmbeddedDocuments(embeddedName, documents, result, options, userId);
+    _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
+        super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
         this.updateTempModifiers();
-        result.forEach((doc) => {
+        changes.forEach((doc) => {
             let item = this.items.find((item) => item._id === doc._id);
             if (item) {
                 item.onObtained(this);

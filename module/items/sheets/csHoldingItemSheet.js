@@ -2,8 +2,8 @@ import {CSItemSheet} from "./csItemSheet.js";
 
 export class CSHoldingItemSheet extends CSItemSheet {
 
-    getData() {
-        const data = super.getData();
+    async getData() {
+        const data = await super.getData();
         data.resourceChoices = {
             defense: "CS.sheets.house.resources.defense",
             influence: "CS.sheets.house.resources.influence",
@@ -33,7 +33,7 @@ export class CSHoldingItemSheet extends CSItemSheet {
         };
         let featureList = Object.values(item.getCSData().features);
         featureList.push(feature);
-        item.update({"data.features" : featureList});
+        item.update({"system.features" : featureList});
     }
 
     async _onclickFeatureControl(event) {
@@ -47,7 +47,7 @@ export class CSHoldingItemSheet extends CSItemSheet {
             const item = this.item;
             let featureList = Object.values(item.getCSData().features);
             featureList.splice(index,1);
-            item.update({"data.features" : featureList});
+            item.update({"system.features" : featureList});
         }
     }
 }

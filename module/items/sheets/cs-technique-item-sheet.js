@@ -3,7 +3,7 @@ import {CSConstants} from "../../system/csConstants.js";
 
 export class CSTechniqueItemSheet extends CSItemSheet {
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ["chroniclesystem", "technique", "sheet", "item"],
             width: 650,
             height: 560,
@@ -17,10 +17,19 @@ export class CSTechniqueItemSheet extends CSItemSheet {
         });
     }
 
-    getData() {
-        const data = super.getData();
+    async getData() {
+        const data = await super.getData();
         data.types = CSConstants.TechniqueType;
         data.costs = CSConstants.TechniqueCost;
+        // Enrich work descriptions for the works tab
+        const works = data.item?.system?.works;
+        if (works) {
+            for (const work of Object.values(works)) {
+                if (work.description) {
+                    work.description = await TextEditor.enrichHTML(work.description, { async: true });
+                }
+            }
+        }
         return data;
     }
 
@@ -40,7 +49,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
         };
         let newSpec = Object.values(item.getCSData().arts);
         newSpec.push(art);
-        item.update({"data.arts" : newSpec});
+        item.update({"system.arts" : newSpec});
     }
 
     async _onclickArtControl(event) {
@@ -54,7 +63,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
             const item = this.item;
             let newSpec = Object.values(item.getCSData().arts);
             newSpec.splice(index,1);
-            item.update({"data.arts" : newSpec});
+            item.update({"system.arts" : newSpec});
         }
     }
 
@@ -75,7 +84,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
         };
         let newSpec = Object.values(item.getCSData().works);
         newSpec.push(work);
-        item.update({"data.works" : newSpec});
+        item.update({"system.works" : newSpec});
     }
 
     async _onclickWorkControl(event) {
@@ -89,7 +98,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
             const item = this.item;
             let newSpec = Object.values(item.getCSData().works);
             newSpec.splice(index,1);
-            item.update({"data.works" : newSpec});
+            item.update({"system.works" : newSpec});
         }
     }
 }

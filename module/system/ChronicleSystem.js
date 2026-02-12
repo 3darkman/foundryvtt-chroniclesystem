@@ -133,7 +133,7 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
                 formula = formulaChanged;
             }
         } else {
-            return new Promise((resolve)=> resolve = new Roll('') );
+            return null;
         }
     }
 

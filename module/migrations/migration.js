@@ -11,7 +11,7 @@ export async function migrateData() {
     await game.settings.set(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.CURRENT_VERSION, latest);
     const patchVersions = Object.keys(migrationRoutines);
     for (const version of patchVersions) {
-        if (isNewerVersion(version, recentVersion)) {
+        if (foundry.utils.isNewerVersion(version, recentVersion)) {
             // we need to do some updates.
             ui.notifications?.notify(`Beginning ${version} data migration.`, 'info');
             await migrationRoutines[version]();

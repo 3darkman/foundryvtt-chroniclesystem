@@ -23,7 +23,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
 
   /** @override */
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["chroniclesystem", "character", "sheet", "actor"],
       template: "systems/chroniclesystem/templates/actors/characters/character-sheet.hbs",
       width: 700,
@@ -42,7 +42,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   /* -------------------------------------------- */
 
   /** @override */
-  getData() {
+  async getData() {
     const data = super.getData();
     data.dtypes = ["String", "Number", "Boolean"];
     this.splitItemsByType(data);
@@ -103,6 +103,28 @@ export class CSCharacterActorSheet extends CSActorSheet {
     data.maxInjuries = this.actor.getMaxInjuries();
     data.maxWounds = this.actor.getMaxWounds();
     data.character = character;
+
+    // Pre-enrich HTML descriptions for benefit and drawback items
+    // Templates use {{enrich system.description}} which is now a simple passthrough
+    const rollData = this.actor.getRollData();
+    const enrichOpts = { async: true, rollData };
+    for (const item of [...character.owned.benefits, ...character.owned.drawbacks]) {
+      if (item.system.description) {
+        item.system.description = await TextEditor.enrichHTML(item.system.description, enrichOpts);
+      }
+    }
+
+    // Pre-enrich HTML descriptions for technique works
+    // Templates use {{enrich work.description}} which is now a simple passthrough
+    for (const technique of character.owned.techniques) {
+      const works = Object.values(technique.system.works);
+      for (const work of works) {
+        if (work.description) {
+          work.description = await TextEditor.enrichHTML(work.description, enrichOpts);
+        }
+      }
+    }
+
     return data;
   }
 
@@ -177,8 +199,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
     }
 
     this.actor.update({
-      "data.derivedStats.frustration.current" : value,
-      "data.penalties": this.actor.penalties
+      "system.derivedStats.frustration.current" : value,
+      "system.penalties": this.actor.penalties
     });
   }
 
@@ -194,8 +216,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
     }
 
     this.actor.update({
-      "data.derivedStats.fatigue.current" : value,
-      "data.modifiers": this.actor.modifiers
+      "system.derivedStats.fatigue.current" : value,
+      "system.modifiers": this.actor.modifiers
     });
   }
 
@@ -215,8 +237,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
     }
 
     this.actor.update({
-      "data.currentStress" : value,
-      "data.penalties": this.actor.penalties
+      "system.currentStress" : value,
+      "system.penalties": this.actor.penalties
     });
   }
 
@@ -237,8 +259,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
     this.actor.updateTempPenalties();
     this.actor.addPenalty(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.WOUNDS, wounds.length, false);
     this.actor.update({
-      "data.wounds" : wounds,
-      "data.penalties" : this.actor.penalties
+      "system.wounds" : wounds,
+      "system.penalties" : this.actor.penalties
     });
   }
 
@@ -260,8 +282,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
         this.actor.addPenalty(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.WOUNDS, wounds.length, false);
       }
       this.actor.update({
-        "data.wounds" : wounds,
-        "data.penalties" : this.actor.penalties
+        "system.wounds" : wounds,
+        "system.penalties" : this.actor.penalties
       });
     }
   }
@@ -280,8 +302,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
     this.actor.addModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.INJURY, -injuries.length, false);
 
     this.actor.update({
-      "data.injuries" : injuries,
-      "data.modifiers" : this.actor.modifiers
+      "system.injuries" : injuries,
+      "system.modifiers" : this.actor.modifiers
     });
   }
 
@@ -304,8 +326,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
       }
 
       this.actor.update({
-        "data.injuries" : injuries,
-        "data.modifiers" : this.actor.modifiers
+        "system.injuries" : injuries,
+        "system.modifiers" : this.actor.modifiers
       });
     }
   }
@@ -325,14 +347,14 @@ export class CSCharacterActorSheet extends CSActorSheet {
     } else {
       if (isArmor) {
         documment.getCSData().equipped = ChronicleSystem.equippedConstants.WEARING;
-        tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.getCSData().equipped === ChronicleSystem.equippedConstants.WEARING);
+        tempCollection = this.actor.items.filter((item) => item.getCSData().equipped === ChronicleSystem.equippedConstants.WEARING);
       } else {
         let twoHandedQuality = Object.values(documment.getCSData().qualities).filter((quality) => quality.name.toLowerCase() === "two-handed");
         if (twoHandedQuality.length > 0) {
-          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.getCSData().equipped === ChronicleSystem.equippedConstants.MAIN_HAND || item.getCSData().equipped === ChronicleSystem.equippedConstants.OFFHAND || item.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
+          tempCollection = this.actor.items.filter((item) => item.getCSData().equipped === ChronicleSystem.equippedConstants.MAIN_HAND || item.getCSData().equipped === ChronicleSystem.equippedConstants.OFFHAND || item.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
           documment.getCSData().equipped = ChronicleSystem.equippedConstants.BOTH_HANDS;
         } else {
-          tempCollection = this.actor.getEmbeddedCollection('Item').filter((item) => item.getCSData().equipped === parseInt(eventData.hand) || item.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
+          tempCollection = this.actor.items.filter((item) => item.getCSData().equipped === parseInt(eventData.hand) || item.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS);
           documment.getCSData().equipped = parseInt(eventData.hand);
         }
       }
@@ -341,11 +363,11 @@ export class CSCharacterActorSheet extends CSActorSheet {
     this.actor.updateTempModifiers();
 
     tempCollection.forEach((item) => {
-      collection.push({_id: item._id, "data.equipped": ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED});
+      collection.push({_id: item._id, "system.equipped": ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED});
       item.onEquippedChanged(this.actor, false);
     });
 
-    collection.push({_id: documment._id, "data.equipped": documment.getCSData().equipped});
+    collection.push({_id: documment._id, "system.equipped": documment.getCSData().equipped});
     documment.onEquippedChanged(this.actor, documment.getCSData().equipped > 0);
 
     this.actor.saveModifiers();
@@ -359,7 +381,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
       LOGGER.warn("the informed disposition does not exist.");
       return;
     }
-    this.actor.update({"data.currentDisposition": event.target.dataset.id});
+    this.actor.update({"system.currentDisposition": event.target.dataset.id});
   }
 
   /* -------------------------------------------- */

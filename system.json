@@ -19,8 +19,10 @@
       "flags": {}
     }
   ],
-  "gridDistance": 5,
-  "gridUnits": "ft",
+  "grid": {
+    "distance": 5,
+    "units": "ft"
+  },
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "power",
   "url": "https://github.com/3darkman/foundryvtt-chroniclesystem/",
@@ -36,7 +38,8 @@
     }
   ],
   "compatibility": {
-    "minimum": "10",
-    "verified": "10.290"
+    "minimum": "12",
+    "verified": "13",
+    "maximum": "13"
   }
 }
