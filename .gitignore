@@ -3,3 +3,10 @@
 .vs/
 /chroniclesystem.lock
 node_modules/
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Speckit
+.specify/
