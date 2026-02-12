@@ -1,7 +1,7 @@
 import {ChronicleSystem} from "../../system/ChronicleSystem.js";
 import LOGGER from "../../utils/logger.js";
 
-export class CSActorSheet extends ActorSheet {
+export class CSActorSheet extends foundry.appv1.sheets.ActorSheet {
 
     async _onDropActor(event, data) {
         LOGGER.trace("On Drop Actor | CSActorSheet | csActorSheet.js");

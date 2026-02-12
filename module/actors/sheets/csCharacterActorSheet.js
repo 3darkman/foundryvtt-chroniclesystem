@@ -110,7 +110,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     const enrichOpts = { async: true, rollData };
     for (const item of [...character.owned.benefits, ...character.owned.drawbacks]) {
       if (item.system.description) {
-        item.system.description = await TextEditor.enrichHTML(item.system.description, enrichOpts);
+        item.system.description = await foundry.applications.ux.TextEditor.implementation.enrichHTML(item.system.description, enrichOpts);
       }
     }
 
@@ -120,7 +120,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
       const works = Object.values(technique.system.works);
       for (const work of works) {
         if (work.description) {
-          work.description = await TextEditor.enrichHTML(work.description, enrichOpts);
+          work.description = await foundry.applications.ux.TextEditor.implementation.enrichHTML(work.description, enrichOpts);
         }
       }
     }

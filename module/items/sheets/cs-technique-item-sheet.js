@@ -26,7 +26,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
         if (works) {
             for (const work of Object.values(works)) {
                 if (work.description) {
-                    work.description = await TextEditor.enrichHTML(work.description, { async: true });
+                    work.description = await foundry.applications.ux.TextEditor.implementation.enrichHTML(work.description, { async: true });
                 }
             }
         }

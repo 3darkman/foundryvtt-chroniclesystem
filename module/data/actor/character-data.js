@@ -1,6 +1,25 @@
 const fields = foundry.data.fields;
 
 export default class CharacterData extends foundry.abstract.TypeDataModel {
+  /** @override */
+  static migrateData(source) {
+    if (source.derivedStats) {
+      const stats = source.derivedStats;
+      for (const key of Object.keys(stats)) {
+        const stat = stats[key];
+        if (stat && typeof stat === "object") {
+          for (const field of Object.keys(stat)) {
+            const val = stat[field];
+            if (val !== null && val !== undefined && !Number.isFinite(val)) {
+              stat[field] = Number(val) || 0;
+            }
+          }
+        }
+      }
+    }
+    return super.migrateData(source);
+  }
+
   static defineSchema() {
     return {
       // === common template ===
@@ -37,105 +56,105 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
         intrigueDefense: new fields.SchemaField({
           value: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           modifier: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
         }),
         composure: new fields.SchemaField({
           value: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           modifier: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           current: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
         }),
         frustration: new fields.SchemaField({
           value: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           modifier: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           current: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
         }),
         combatDefense: new fields.SchemaField({
           value: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           modifier: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
         }),
         health: new fields.SchemaField({
           value: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           modifier: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           current: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
         }),
         fatigue: new fields.SchemaField({
           value: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           modifier: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           current: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
         }),
         armorRating: new fields.SchemaField({
           value: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
           modifier: new fields.NumberField({
             required: true,
+            nullable: true,
             initial: 0,
-            integer: true,
           }),
         }),
       }),

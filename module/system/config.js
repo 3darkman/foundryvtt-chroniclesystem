@@ -84,24 +84,24 @@ Hooks.once("init", async function() {
     };
 
     // Register sheet application classes
-    Actors.unregisterSheet("core", ActorSheet);
-    Actors.registerSheet("chroniclesystem", CSCharacterActorSheet,
+    foundry.documents.collections.Actors.unregisterSheet("core", foundry.appv1.sheets.ActorSheet);
+    foundry.documents.collections.Actors.registerSheet("chroniclesystem", CSCharacterActorSheet,
         { label: SystemUtils.localize("CS.sheets.characterSheet"), types: ["character"], makeDefault: true });
-    Actors.registerSheet("chroniclesystem", CSHouseActorSheet,
+    foundry.documents.collections.Actors.registerSheet("chroniclesystem", CSHouseActorSheet,
         { label: SystemUtils.localize("CS.sheets.houseSheet"), types: ["house"], makeDefault: true });
-    Actors.registerSheet("chroniclesystem", CSCharacterActorSheet,
+    foundry.documents.collections.Actors.registerSheet("chroniclesystem", CSCharacterActorSheet,
         { label: SystemUtils.localize("CS.sheets.unitSheet"), types: ["unit"], makeDefault: true });
 
-    Items.unregisterSheet("core", ItemSheet);
-    Items.registerSheet("chroniclesystem", CSItemSheet,
+    foundry.documents.collections.Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
+    foundry.documents.collections.Items.registerSheet("chroniclesystem", CSItemSheet,
         { label: SystemUtils.localize("CS.sheets.itemSheet"), types: ["armor", "weapon", "equipment", "benefit", "drawback", "unitType", "poison"], makeDefault: true });
-    Items.registerSheet("chroniclesystem", CSAbilityItemSheet,
+    foundry.documents.collections.Items.registerSheet("chroniclesystem", CSAbilityItemSheet,
         { label: SystemUtils.localize("CS.sheets.abilityItemSheet"), types: ["ability"], makeDefault: true });
-    Items.registerSheet("chroniclesystem", CSEventItemSheet,
+    foundry.documents.collections.Items.registerSheet("chroniclesystem", CSEventItemSheet,
         { label: SystemUtils.localize("CS.sheets.eventItemSheet"), types: ["event"], makeDefault: true });
-    Items.registerSheet("chroniclesystem", CSHoldingItemSheet,
+    foundry.documents.collections.Items.registerSheet("chroniclesystem", CSHoldingItemSheet,
         { label: SystemUtils.localize("CS.sheets.holdingItemSheet"), types: ["holding"], makeDefault: true });
-    Items.registerSheet("chroniclesystem", CSTechniqueItemSheet,
+    foundry.documents.collections.Items.registerSheet("chroniclesystem", CSTechniqueItemSheet,
         { label: SystemUtils.localize("CS.sheets.techniqueItemSheet"), types: ["technique"], makeDefault: true });
 
     registerSystemSettings();

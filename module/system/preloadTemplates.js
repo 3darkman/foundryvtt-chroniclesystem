@@ -27,5 +27,5 @@ export const preloadHandlebarsTemplates = async function () {
         'systems/chroniclesystem/templates/components/member-list-item.hbs',
         'systems/chroniclesystem/templates/components/resource-holdings.hbs'
     ];
-    return loadTemplates(templatePaths);
+    return foundry.applications.handlebars.loadTemplates(templatePaths);
 };

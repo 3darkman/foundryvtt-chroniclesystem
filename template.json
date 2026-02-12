@@ -1,6 +1,6 @@
 {
   "Actor": {
-    "types": ["character", "house"],
+    "types": ["character", "house", "unit"],
     "templates": {
       "common": {
         "age": 0,
@@ -156,10 +156,11 @@
         "retainers": [],
         "servants": []
       }
-    }
+    },
+    "unit": {}
   },
   "Item": {
-    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback", "event", "holding", "technique"],
+    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback", "event", "holding", "technique", "unitType", "poison"],
     "templates": {
       "physicalItem": {
         "weight": 0
@@ -285,6 +286,7 @@
       "arts": [],
       "scales": "",
       "works": []
-    }
+    },
+    "unitType": {}
   }
 }

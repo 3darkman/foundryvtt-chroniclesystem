@@ -47,7 +47,7 @@ export class CSHouseActorSheet extends CSActorSheet {
         const rollData = this.actor.getRollData();
         for (const event of house.historicalEvents) {
             if (event.system.description) {
-                event.system.description = await TextEditor.enrichHTML(
+                event.system.description = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
                     event.system.description,
                     { async: true, rollData }
                 );
@@ -56,7 +56,7 @@ export class CSHouseActorSheet extends CSActorSheet {
         for (const resourceKey of Object.keys(house.holdings)) {
             for (const holding of house.holdings[resourceKey]) {
                 if (holding.system.description) {
-                    holding.system.description = await TextEditor.enrichHTML(
+                    holding.system.description = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
                         holding.system.description,
                         { async: true, rollData }
                     );

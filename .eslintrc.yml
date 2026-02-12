@@ -18,23 +18,15 @@ globals:
   CONFIG: readonly
   CONST: readonly
   Actor: readonly
-  ActorSheet: readonly
   Item: readonly
-  ItemSheet: readonly
   ChatMessage: readonly
   Roll: readonly
   Dialog: readonly
   Hooks: readonly
-  Actors: readonly
-  Items: readonly
   Handlebars: readonly
-  TextEditor: readonly
-  FormApplication: readonly
-  DocumentSheet: readonly
   Combat: readonly
   Combatant: readonly
   renderTemplate: readonly
   getTemplate: readonly
-  loadTemplates: readonly
 rules:
   prettier/prettier: error

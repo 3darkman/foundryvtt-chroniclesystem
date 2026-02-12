@@ -2,7 +2,7 @@
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
  */
-export class CSItemSheet extends ItemSheet {
+export class CSItemSheet extends foundry.appv1.sheets.ItemSheet {
     /** @override */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
@@ -65,14 +65,14 @@ export class CSItemSheet extends ItemSheet {
         data.dtypes = ["String", "Number", "Boolean"];
         const system = data.item?.system;
         if (system?.description) {
-            system.description = await TextEditor.enrichHTML(system.description, { async: true });
+            system.description = await foundry.applications.ux.TextEditor.implementation.enrichHTML(system.description, { async: true });
         }
         // Enrich additional rich-text fields (e.g. poison effects/recovery)
         if (system?.effects) {
-            system.effects = await TextEditor.enrichHTML(system.effects, { async: true });
+            system.effects = await foundry.applications.ux.TextEditor.implementation.enrichHTML(system.effects, { async: true });
         }
         if (system?.recovery) {
-            system.recovery = await TextEditor.enrichHTML(system.recovery, { async: true });
+            system.recovery = await foundry.applications.ux.TextEditor.implementation.enrichHTML(system.recovery, { async: true });
         }
         return data;
     }
