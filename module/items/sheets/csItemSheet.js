@@ -1,90 +1,150 @@
 /**
- * Extend the basic ItemSheet with some very simple modifications
- * @extends {ItemSheet}
+ * Extend the basic ItemSheetV2 with some very simple modifications
+ * @extends {ItemSheetV2}
  */
-export class CSItemSheet extends foundry.appv1.sheets.ItemSheet {
-    /** @override */
-    static get defaultOptions() {
-        return foundry.utils.mergeObject(super.defaultOptions, {
-            classes: ["worldbuilding","chroniclesystem", "sheet", "item"],
-            width: 650,
-            height: 560,
-        });
-    }
+export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationMixin(
+  foundry.applications.sheets.ItemSheetV2
+) {
+  static DEFAULT_OPTIONS = {
+    classes: ["worldbuilding", "chroniclesystem", "sheet", "item"],
+    position: { width: 650, height: 560 },
+    form: {
+      submitOnChange: true,
+    },
+    actions: {
+      deleteItem: CSItemSheet._onDeleteItem,
+      createQuality: CSItemSheet._onCreateQuality,
+      deleteQuality: CSItemSheet._onDeleteQuality,
+    },
+  };
 
-    get template() {
-        const path = 'systems/chroniclesystem/templates/items';
-        return `${path}/${this.item.type}.hbs`;
-    }
+  /** @override */
+  // eslint-disable-next-line no-unused-vars
+  _configureRenderParts(options) {
+    const type = this.document.type;
+    return {
+      form: {
+        template: `systems/chroniclesystem/templates/items/${type}.hbs`,
+        scrollable: [""],
+      },
+    };
+  }
 
-    activateListeners(html) {
-        super.activateListeners(html);
+  /** @override */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    context.dtypes = ["String", "Number", "Boolean"];
+    const item = this.document;
+    const system = item.system;
 
-        html.find('.item-delete').click((ev) => {
-            if (this.item.actor) {
-                this.item.actor.deleteEmbeddedDocuments("Item", [this.item._id,]);
-            }
-        });
+    // Provide template variables expected by V1 templates
+    context.item = item;
+    context.system = system;
+    context.data = { item: item }; // backward compat for templates using data.item
+    context.owner = item.isOwner;
+    context.cssClass = this.isEditable ? "editable" : "locked";
 
-        html.find(".item-qualities-control").on("click", this._onClickItemQualityControl.bind(this));
-        html.find('.item-quality-create').on("click", this._onClickItemQualityCreate.bind(this));
-    }
+    // Pre-enrich HTML for editor display (separate variables to avoid corrupting save data)
+    const TextEditorImpl = foundry.applications.ux.TextEditor.implementation;
+    context.enrichedDescription = system?.description
+      ? await TextEditorImpl.enrichHTML(system.description, { async: true, relativeTo: item })
+      : "";
+    context.enrichedEffects = system?.effects
+      ? await TextEditorImpl.enrichHTML(system.effects, { async: true, relativeTo: item })
+      : "";
+    context.enrichedRecovery = system?.recovery
+      ? await TextEditorImpl.enrichHTML(system.recovery, { async: true, relativeTo: item })
+      : "";
 
-    async _onClickItemQualityCreate(ev) {
-        const item = this.item;
+    return context;
+  }
+
+  /* -------------------------------------------- */
+
+  /** @override */
+  _attachPartListeners(partId, htmlElement, options) {
+    super._attachPartListeners(partId, htmlElement, options);
+
+    // Delete item button (V1 templates use class="item-delete")
+    htmlElement.querySelectorAll(".item-delete").forEach((el) => {
+      el.addEventListener("click", () => {
+        const item = this.document;
+        if (item.actor) {
+          item.actor.deleteEmbeddedDocuments("Item", [item._id]);
+        }
+      });
+    });
+
+    // Delete quality button (V1 templates use class="item-qualities-control")
+    htmlElement.querySelectorAll(".item-qualities-control").forEach((el) => {
+      el.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        const index = parseInt(el.dataset.id);
+        const action = el.dataset.action;
+        if (action === "delete") {
+          const item = this.document;
+          let qualities = Object.values(item.getCSData().qualities);
+          qualities.splice(index, 1);
+          item.update({ "system.qualities": qualities });
+        }
+      });
+    });
+
+    // Create quality button (V1 templates use class="item-quality-create")
+    htmlElement.querySelectorAll(".item-quality-create").forEach((el) => {
+      el.addEventListener("click", () => {
+        const item = this.document;
         let quality = {
-            name: "",
-            parameter: ""
+          name: "",
+          parameter: "",
         };
         let newQuality = Object.values(item.getCSData().qualities);
         newQuality.push(quality);
-        item.update({"system.qualities" : newQuality});
+        item.update({ "system.qualities": newQuality });
+      });
+    });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Action handler: Delete this item from its parent actor.
+   * For use with data-action="deleteItem" in templates.
+   */
+  // eslint-disable-next-line no-unused-vars
+  static _onDeleteItem(event, target) {
+    const item = this.document;
+    if (item.actor) {
+      item.actor.deleteEmbeddedDocuments("Item", [item._id]);
     }
+  }
 
-    async _onClickItemQualityControl(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-        const index = parseInt(a.dataset.id);
-        const action = a.dataset.action;
+  /**
+   * Action handler: Create a new quality entry on this item.
+   * For use with data-action="createQuality" in templates.
+   */
+  // eslint-disable-next-line no-unused-vars
+  static _onCreateQuality(event, target) {
+    const item = this.document;
+    let quality = {
+      name: "",
+      parameter: "",
+    };
+    let newQuality = Object.values(item.getCSData().qualities);
+    newQuality.push(quality);
+    item.update({ "system.qualities": newQuality });
+  }
 
-        // Remove existing specialty
-        if ( action === "delete" ) {
-            const item = this.item;
-            let qualities = Object.values(item.getCSData().qualities);
-            qualities.splice(index,1);
-            item.update({"system.qualities" : qualities});
-        }
-    }
-
-
-    /* -------------------------------------------- */
-
-    /** @override */
-    async getData() {
-        const data = super.getData();
-        data.dtypes = ["String", "Number", "Boolean"];
-        const system = data.item?.system;
-        if (system?.description) {
-            system.description = await foundry.applications.ux.TextEditor.implementation.enrichHTML(system.description, { async: true });
-        }
-        // Enrich additional rich-text fields (e.g. poison effects/recovery)
-        if (system?.effects) {
-            system.effects = await foundry.applications.ux.TextEditor.implementation.enrichHTML(system.effects, { async: true });
-        }
-        if (system?.recovery) {
-            system.recovery = await foundry.applications.ux.TextEditor.implementation.enrichHTML(system.recovery, { async: true });
-        }
-        return data;
-    }
-
-    /* -------------------------------------------- */
-
-    /** @override */
-    setPosition(options={}) {
-        const position = super.setPosition(options);
-        const sheetBody = this.element.find(".sheet-body");
-        const bodyHeight = position.height - 142;
-        sheetBody.css("height", bodyHeight);
-        return position;
-    }
+  /**
+   * Action handler: Delete a quality entry from this item.
+   * For use with data-action="deleteQuality" in templates.
+   * Expects target to have data-id attribute with the quality index.
+   */
+  static _onDeleteQuality(event, target) {
+    const item = this.document;
+    const index = parseInt(target.dataset.id);
+    let qualities = Object.values(item.getCSData().qualities);
+    qualities.splice(index, 1);
+    item.update({ "system.qualities": qualities });
+  }
 }

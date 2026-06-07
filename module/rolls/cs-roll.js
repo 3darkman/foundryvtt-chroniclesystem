@@ -16,21 +16,21 @@ export class CSRoll {
         }
         const pool = Math.max(this.formula.pool, 1);
         const dices = pool + this.formula.bonusDice;
-        let dieRoll = new foundry.dice.terms.Die({faces: 6, number: dices});
-        await dieRoll.evaluate();
-        this.results = dieRoll.results;
+        const keep = Math.max(this.formula.pool - this.formula.dicePenalty, 0);
 
-        let reRollFormula = "r"+this.formula.reRoll+"=1";
-        dieRoll.reroll(reRollFormula);
+        // v13: Build the complete formula string so all terms evaluate together.
+        // Roll.fromTerms rejects mixing evaluated/unevaluated terms.
+        let dieFormula = `${dices}d6`;
+        if (this.formula.reRoll > 0) {
+            dieFormula += `r=${this.formula.reRoll}`;
+        }
+        dieFormula += `kh${keep}`;
+        dieFormula += ` + ${this.formula.modifier}`;
 
-        dieRoll.keep('kh' + Math.max(this.formula.pool - this.formula.dicePenalty, 0));
+        let resultRoll = new Roll(dieFormula);
+        await resultRoll.evaluate();
+        this.results = resultRoll.terms[0].results;
 
-        const plus = new foundry.dice.terms.OperatorTerm({operator: "+"});
-        await plus.evaluate();
-        const bonus = new foundry.dice.terms.NumericTerm({number: this.formula.modifier});
-        await bonus.evaluate();
-
-        let resultRoll = Roll.fromTerms([dieRoll, plus, bonus]);
         const messageId = this.formula.isUserChanged ? "CS.chatMessages.customRoll" : "CS.chatMessages.simpleRoll";
         let flavor =  SystemUtils.format(messageId, {name: actor.name, test: this.title});
         resultRoll.toMessage({

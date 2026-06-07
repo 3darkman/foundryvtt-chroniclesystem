@@ -14,9 +14,9 @@ export class CsCombat extends Combat {
         let result = await this._showInitiativeSelector();
         formula = "";
         let type = "";
-        if (result && !result.cancelled) {
-            formula = CSConstants.InitiativeTypeRolls[result.data.initiativeType.value];
-            type = SystemUtils.localize(CSConstants.InitiativeTypes[result.data.initiativeType.value]);
+        if (result) {
+            formula = CSConstants.InitiativeTypeRolls[result.initiativeType.value];
+            type = SystemUtils.localize(CSConstants.InitiativeTypes[result.initiativeType.value]);
         }
 
         // Iterate over Combatants, performing an initiative roll for each
@@ -68,25 +68,27 @@ export class CsCombat extends Combat {
 
     async _showInitiativeSelector() {
         const template = CSConstants.Templates.Dialogs.INITIATIVE_SELECTOR;
-        const html = await renderTemplate(template, {choices: CSConstants.InitiativeTypes});
-        return new Promise(resolve => {
-            const data = {
+        const html = await foundry.applications.handlebars.renderTemplate(template, {choices: CSConstants.InitiativeTypes});
+        return foundry.applications.api.DialogV2.wait({
+            window: {
                 title: SystemUtils.localize("CS.dialogs.initiativeSelector.title"),
-                content: html,
-                buttons: {
-                    normal: {
-                        label: SystemUtils.localize("CS.dialogs.actions.confirm"),
-                        callback: html => resolve({data: html[0].querySelector("form")})
-                    },
-                    cancel: {
-                        label: SystemUtils.localize("CS.dialogs.actions.cancel"),
-                        callback: html => resolve({cancelled: true})
-                    }
+            },
+            content: html,
+            buttons: [
+                {
+                    action: 'confirm',
+                    label: SystemUtils.localize("CS.dialogs.actions.confirm"),
+                    icon: 'fas fa-check',
+                    default: true,
+                    callback: (event, button) => button.form,
                 },
-                default: "normal",
-                close: () => resolve({cancelled: true})
-            };
-            new Dialog(data, null).render(true);
-        })
+                {
+                    action: 'cancel',
+                    label: SystemUtils.localize("CS.dialogs.actions.cancel"),
+                    icon: 'fas fa-times',
+                },
+            ],
+            rejectClose: false,
+        });
     }
 }

@@ -57,7 +57,7 @@ Hooks.once("init", async function() {
 
     registerCustomHelpers();
 
-	// Define custom Entity classes
+	// Define custom Document classes
     CONFIG.Actor.documentClass = actorConstructor;
     CONFIG.Item.documentClass = itemConstructor;
     CONFIG.Combat.documentClass = CsCombat;
@@ -117,20 +117,3 @@ Hooks.on('createItem', (item, data) => {
         item.img = `systems/chroniclesystem/assets/icons/${item.type}.png`;
     }
 });
-
-// Hooks.on('createActor', async (actor, options, userId) => {
-//     if (actor.data.type === 'character' && options.renderSheet) {
-//         const abilitiesToFind = [
-//             'Athletics',
-//             'Common Knowledge',
-//             'Notice',
-//             'Persuasion',
-//             'Stealth',
-//             'Untrained',
-//         ];
-//         const abilityIndex = (await game.packs
-//             .get('chroniclesystem.abilities')
-//             .getContent());
-//         actor.createEmbeddedEntity('OwnedItem', abilityIndex.filter((i) => abilitiesToFind.includes(i.data.name)));
-//     }
-// });

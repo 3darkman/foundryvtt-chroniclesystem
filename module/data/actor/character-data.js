@@ -3,6 +3,32 @@ const fields = foundry.data.fields;
 export default class CharacterData extends foundry.abstract.TypeDataModel {
   /** @override */
   static migrateData(source) {
+    // ancestries was previously an ArrayField; the sheet binds it to a single
+    // text input, so coerce legacy array data (e.g. [], [{}], ["Andal"]) to a string.
+    if (source.ancestries !== undefined && typeof source.ancestries !== "string") {
+      const arr = Array.isArray(source.ancestries) ? source.ancestries : [source.ancestries];
+      source.ancestries = arr.filter((v) => typeof v === "string" && v).join(", ");
+    }
+    // injuries/wounds hold plain description strings; they were previously
+    // ArrayField(ObjectField), which silently coerced every string to {}.
+    // Coerce legacy entries back to strings, preserving array length
+    // (injury/wound counts drive modifiers and penalties).
+    for (const key of ["injuries", "wounds"]) {
+      const val = source[key];
+      if (val === undefined || val === null) continue;
+      const arr = Array.isArray(val) ? val : Object.values(val);
+      source[key] = arr.map((v) => (typeof v === "string" ? v : ""));
+    }
+    // Coerce legacy movement values (may contain null/NaN/strings).
+    if (source.movement && typeof source.movement === "object") {
+      const defaults = { base: 4, runBonus: 0, sprintMultiplier: 4, bulk: 0, modifier: 0, total: 0, sprintTotal: 0 };
+      for (const [field, fallback] of Object.entries(defaults)) {
+        const val = source.movement[field];
+        if (val !== undefined && !Number.isFinite(val)) {
+          source.movement[field] = Number(val) || fallback;
+        }
+      }
+    }
     if (source.derivedStats) {
       const stats = source.derivedStats;
       for (const key of Object.keys(stats)) {
@@ -158,8 +184,8 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
           }),
         }),
       }),
-      wounds: new fields.ArrayField(new fields.ObjectField()),
-      injuries: new fields.ArrayField(new fields.ObjectField()),
+      wounds: new fields.ArrayField(new fields.StringField({ required: true, initial: "" })),
+      injuries: new fields.ArrayField(new fields.StringField({ required: true, initial: "" })),
       currentDisposition: new fields.NumberField({
         required: true,
         initial: 4,
@@ -206,7 +232,7 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
       }),
 
       // === character-common template ===
-      ancestries: new fields.ArrayField(new fields.ObjectField()),
+      ancestries: new fields.StringField({ required: true, initial: "" }),
       gender: new fields.StringField({ required: true, initial: "" }),
       house: new fields.StringField({ required: true, initial: "" }),
       height: new fields.StringField({ required: true, initial: "1.72" }),

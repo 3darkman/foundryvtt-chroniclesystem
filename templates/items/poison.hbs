@@ -1,4 +1,4 @@
-<form class="{{cssClass}}" autocomplete="off">
+<section class="{{cssClass}}">
     {{!-- Item Sheet Header --}} {{>
     "systems/chroniclesystem/templates/items/partials/header.hbs"}}
     <main class="sheet-body flexrow">
@@ -79,14 +79,26 @@
                 <span>Effects</span>
             </header>
             <div class="form-group">
-                {{editor content=system.effects target="system.effects" button=true owner=owner editable=editable}}
+                {{#if editable}}
+                <prose-mirror name="system.effects" button="true" toggled="true" value="{{item.system.effects}}">
+                    {{{enrichedEffects}}}
+                </prose-mirror>
+                {{else}}
+                <div class="editor-content">{{{enrichedEffects}}}</div>
+                {{/if}}
             </div>
             <header class="header-field">
                 <span>Recovery</span>
             </header>
             <div class="form-group">
-                {{editor content=system.recovery target="system.recovery" button=true owner=owner editable=editable}}
+                {{#if editable}}
+                <prose-mirror name="system.recovery" button="true" toggled="true" value="{{item.system.recovery}}">
+                    {{{enrichedRecovery}}}
+                </prose-mirror>
+                {{else}}
+                <div class="editor-content">{{{enrichedRecovery}}}</div>
+                {{/if}}
             </div>
         </section>
     </main>
-</form>
+</section>

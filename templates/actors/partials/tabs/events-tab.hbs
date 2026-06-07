@@ -24,7 +24,7 @@
                 <li  class="item event" data-item-id="{{_id}}">
                     <div class="flexrow">
                         {{#if ../owner}}
-                            <div class="event-name item-edit field"><a>{{name}}</a></div>
+                            <div class="event-name item-edit field" data-action="editItem"><a>{{name}}</a></div>
                         {{else}}
                             <div class="event-name field">{{name}}</div>
                         {{/if}}
@@ -39,7 +39,7 @@
                                 <div>{{system.modifiers.wealth}}</div>
                             </div>
                         </div>
-                        <div class="item-controls"><a><i class="far fa-caret-square-down"></i></a></div>
+                        <div class="item-controls" data-action="toggleDescription"><a><i class="far fa-caret-square-down"></i></a></div>
                     </div>
                     <div class="event-label field description hidden">{{enrich system.description}}</div>
                 </li>

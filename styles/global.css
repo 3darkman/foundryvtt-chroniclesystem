@@ -54,7 +54,8 @@
 }
 
 .chroniclesystem.sheet.item .sheet-body {
-  height: auto;
+  flex: 1;
+  overflow: hidden;
 }
 
 .chroniclesystem.sheet.item .header-fields {
@@ -74,6 +75,14 @@
 .chroniclesystem.sheet .derived-statistics input {
   text-align: center;
   height: 100%;
+}
+
+/* Form controls in flex rows can shrink to nothing (their automatic
+   minimum size is 0). The movement row packs 5 inputs + 4 separators
+   into a narrow column, so without a floor the values become invisible. */
+.chroniclesystem.sheet .derived-statistics .form-fields > input {
+  min-width: 2em;
+  padding: 0 2px;
 }
 
 .chroniclesystem.sheet .derived-statistics label {
@@ -240,4 +249,130 @@
 .tox.tox-tinymce {
   height: 100% !important;
   width: 100%;
+}
+
+/* -------------------------------------------------- */
+/*  V2 Application framework compatibility            */
+/* -------------------------------------------------- */
+
+/* In V2, .window-content is a flexbox column container.
+   .sheet-body should fill the remaining vertical space
+   and hide overflow so individual tabs can scroll. */
+.chroniclesystem .sheet-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Utility class replacing jQuery slideToggle/hide/show.
+   Uses !important to override inline styles and
+   Foundry's own display rules reliably. */
+.chroniclesystem .hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   V2 migration: restore v12 global form layout.
+   Core v13 moved these rules into the V1-only compatibility layer
+   (foundry2.css: body.game .app form .form-group ...), so ApplicationV2
+   sheets without .standard-form lose all .form-group/.form-fields layout
+   and the global input { width: 100% } stacks every field on its own line.
+   Rules below are the v12 originals scoped to this system. Being unlayered,
+   they override the core @layer rules without !important. */
+.chroniclesystem.sheet .form-group {
+  clear: both;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: 3px 0;
+  align-items: center;
+}
+/* :where() keeps specificity at zero so system size classes
+   (.small-field, .medium-field, .sizeNN...) still win, while the
+   unlayered rule still overrides core @layer defaults. */
+:where(.chroniclesystem.sheet .form-group) > * {
+  flex: 3;
+}
+:where(.chroniclesystem.sheet .form-group) > label {
+  flex: 2;
+}
+.chroniclesystem.sheet .form-group label {
+  line-height: var(--input-height, 28px);
+}
+.chroniclesystem.sheet .form-group .form-fields {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+}
+:where(.chroniclesystem.sheet .form-group .form-fields) > * {
+  flex: 1;
+}
+.chroniclesystem.sheet .form-group .form-fields > label {
+  flex: 0;
+  padding: 0 4px;
+  text-align: center;
+}
+.chroniclesystem.sheet .form-group .form-fields > b {
+  flex: none;
+  padding: 0 2px;
+}
+.chroniclesystem.sheet .form-group .form-fields > input[type="checkbox"] {
+  flex: 0 0 20px;
+}
+.chroniclesystem.sheet .form-group .form-fields button {
+  flex: 0;
+}
+/* v13 changed .flexrow to align-items: center; V1 apps kept the v12
+   behavior (initial → stretch) via the compatibility layer. Restore it. */
+.chroniclesystem.sheet .flexrow {
+  align-items: initial;
+}
+
+/* v13 core restyled nav.tabs (foundry2.css: color vars, glow text-shadow,
+   gap, line-height 2.5, borders). The system only overrode background and
+   the active color, so tabs picked up the new core look. Fully restore the
+   v12-era system tab styling. */
+.chroniclesystem.sheet nav.sheet-tabs {
+  gap: 4px;
+  line-height: normal;
+  border-top: none;
+  border-bottom: none;
+  justify-content: flex-start;
+}
+.chroniclesystem.sheet nav.sheet-tabs [data-tab] {
+  background: #BBBBBB;
+  color: black;
+  padding: 3px;
+  font-weight: normal;
+  text-shadow: none;
+}
+.chroniclesystem.sheet nav.sheet-tabs [data-tab]:hover {
+  color: black;
+  text-shadow: none;
+}
+.chroniclesystem.sheet nav.sheet-tabs [data-tab].active {
+  background: #005390;
+  color: white;
+  text-decoration: none;
+}
+
+/* v13 themes <select> as a dark form control (--input-background-color:
+   var(--color-cool-4), light text). Match the system's white inputs. */
+.chroniclesystem.sheet select {
+  background: white;
+  color: black;
+  border: none;
+}
+.chroniclesystem.sheet select option {
+  background: white;
+  color: black;
+}
+
+/* v13 gives table cells padding: 0.5rem 1rem (foundry2.css:3401-3404),
+   far taller than the v12 look. Restore compact cells. */
+.chroniclesystem.sheet table th,
+.chroniclesystem.sheet table td {
+  padding: 1px 4px;
 }

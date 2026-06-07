@@ -4,7 +4,7 @@
         <header class="header-field flexrow">
             <span>{{localize "CS.sheets.techniqueItem.tabs.works"}}</span>
             <div class="header-field-add">
-                <a class="work-create" data-type="art"><i class="fa fa-plus"></i></a>
+                <a class="work-create" data-action="createWork" data-type="art"><i class="fa fa-plus"></i></a>
             </div>
         </header>
         <ol class="work-list list resizable" data-base-size="150">
@@ -13,7 +13,7 @@
                     <!--suppress HtmlFormInputWithoutLabel -->
                     <div>
                         <div class="flexrow">
-                            {{> (formGroup)
+                            {{> (csFormGroup)
                                     id=(concat "system.works." id ".name")
                                     labelText="CS.sheets.generalLabels.name"
                                     inputCssClass="size200"
@@ -37,19 +37,19 @@
                         </div>
                         {{#ifEquals work.type "RITUAL"}}
                             <div class="flexrow">
-                                {{> (formGroup)
+                                {{> (csFormGroup)
                                         id=(concat "system.works." id ".test.alignment")
                                         labelText="CS.sheets.techniqueItem.test.alignment"
                                         value=work.test.alignment
                                         dataType="String"
                                 }}
-                                {{> (formGroup)
+                                {{> (csFormGroup)
                                     id=(concat "system.works." id ".test.invocation")
                                     labelText="CS.sheets.techniqueItem.test.invocation"
                                     value=work.test.invocation
                                     dataType="String"
                                 }}
-                                {{> (formGroup)
+                                {{> (csFormGroup)
                                         id=(concat "system.works." id ".test.unleashing")
                                         labelText="CS.sheets.techniqueItem.test.unleashing"
                                         value=work.test.unleashing
@@ -60,7 +60,7 @@
                         <div class="flexrow">
                             {{#ifEquals work.type "SPELL"}}
                                 <div class="size50">
-                                    {{> (formGroup)
+                                    {{> (csFormGroup)
                                             id=(concat "system.works." id ".test.spellcasting")
                                             labelText="CS.sheets.techniqueItem.test.spellcasting"
                                             value=work.test.spellcasting
@@ -68,7 +68,7 @@
                                     }}
                                 </div>
                             {{/ifEquals}}
-                            {{> (formGroup)
+                            {{> (csFormGroup)
                                     id=(concat "system.works." id ".resonance")
                                     labelText="CS.sheets.techniqueItem.resonance"
                                     value=work.resonance
@@ -80,10 +80,16 @@
                             <span>{{localize "CS.sheets.generalLabels.description"}}</span>
                         </header>
                         <div class="form-group">
-                            {{editor work.description target=(concat "system.works." id ".description") button=true owner=../owner editable=../editable}}
+                            {{#if ../editable}}
+                            <prose-mirror name="system.works.{{id}}.description" button="true" toggled="true" value="{{work.description}}">
+                                {{{work.description}}}
+                            </prose-mirror>
+                            {{else}}
+                            <div class="editor-content">{{{work.description}}}</div>
+                            {{/if}}
                         </div>
                     </div>
-                    <a class="work-control item-controls" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                    <a class="work-control item-controls" data-id="{{id}}" data-action="deleteWork"><i class="fas fa-trash"></i></a>
                 </li>
             {{/each}}
         </ol>

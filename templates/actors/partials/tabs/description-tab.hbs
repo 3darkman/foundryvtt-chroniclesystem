@@ -215,7 +215,13 @@
             <span>Personal History</span>
         </header>
         <div class="form-group">
-            {{editor character.personalHistory target="system.personalHistory" button=true owner=owner editable=editable}}
+            {{#if editable}}
+            <prose-mirror name="system.personalHistory" button="true" toggled="true" value="{{character.personalHistory}}">
+                {{{enrichedPersonalHistory}}}
+            </prose-mirror>
+            {{else}}
+            <div class="editor-content">{{{enrichedPersonalHistory}}}</div>
+            {{/if}}
         </div>
     </section>
     <section class="allies">
@@ -223,7 +229,13 @@
             <span>Allies</span>
         </header>
         <div class="form-group">
-            {{editor character.allies target="system.allies" button=true owner=owner editable=editable}}
+            {{#if editable}}
+            <prose-mirror name="system.allies" button="true" toggled="true" value="{{character.allies}}">
+                {{{enrichedAllies}}}
+            </prose-mirror>
+            {{else}}
+            <div class="editor-content">{{{enrichedAllies}}}</div>
+            {{/if}}
         </div>
     </section>
     <section class="enemies">
@@ -231,7 +243,13 @@
             <span>Enemies</span>
         </header>
         <div class="form-group">
-            {{editor character.enemies target="system.enemies" button=true owner=owner editable=editable}}
+            {{#if editable}}
+            <prose-mirror name="system.enemies" button="true" toggled="true" value="{{character.enemies}}">
+                {{{enrichedEnemies}}}
+            </prose-mirror>
+            {{else}}
+            <div class="editor-content">{{{enrichedEnemies}}}</div>
+            {{/if}}
         </div>
     </section>
     <section class="oaths">
@@ -239,7 +257,13 @@
             <span>Oaths</span>
         </header>
         <div class="form-group">
-            {{editor character.oaths target="system.oaths" button=true owner=owner editable=editable}}
+            {{#if editable}}
+            <prose-mirror name="system.oaths" button="true" toggled="true" value="{{character.oaths}}">
+                {{{enrichedOaths}}}
+            </prose-mirror>
+            {{else}}
+            <div class="editor-content">{{{enrichedOaths}}}</div>
+            {{/if}}
         </div>
     </section>
     <section class="motto">
@@ -247,7 +271,13 @@
             <span>Motto</span>
         </header>
         <div class="form-group">
-            {{editor character.motto target="system.motto" button=true owner=owner editable=editable}}
+            {{#if editable}}
+            <prose-mirror name="system.motto" button="true" toggled="true" value="{{character.motto}}">
+                {{{enrichedMotto}}}
+            </prose-mirror>
+            {{else}}
+            <div class="editor-content">{{{enrichedMotto}}}</div>
+            {{/if}}
         </div>
     </section>
 

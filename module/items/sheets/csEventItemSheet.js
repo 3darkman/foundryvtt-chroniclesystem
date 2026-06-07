@@ -1,13 +1,20 @@
-import {CSItemSheet} from "./csItemSheet.js";
+import { CSItemSheet } from "./csItemSheet.js";
 
 export class CSEventItemSheet extends CSItemSheet {
-    activateListeners(html) {
-        super.activateListeners(html);
+  static DEFAULT_OPTIONS = {
+    actions: {
+      togglePlayerChoice: CSEventItemSheet._onTogglePlayerChoice,
+    },
+  };
 
-        html.find('.checkButton').on("click", this._onClickPlayerChoice.bind(this));
-    }
-    async _onClickPlayerChoice(ev) {
-        ev.preventDefault();
-        this.item.update({"system.playerChoice": !this.item.getCSData().playerChoice});
-    }
+  /**
+   * Action handler: Toggle the playerChoice flag on this event item.
+   * For use with data-action="togglePlayerChoice" in templates.
+   */
+  // eslint-disable-next-line no-unused-vars
+  static _onTogglePlayerChoice(event, target) {
+    this.document.update({
+      "system.playerChoice": !this.document.system.playerChoice,
+    });
+  }
 }

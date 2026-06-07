@@ -50,7 +50,7 @@
   margin: 0 4px;
 }
 .chroniclesystem.sheet.character .qualities-list .item .description {
-  display: none;
+  padding: 5px;
 }
 .chroniclesystem.sheet.character section.sorcery {
   margin-right: 9px;
@@ -91,6 +91,9 @@
 .chroniclesystem.sheet.technique .work.item {
   margin-bottom: 8px;
 }
+.chroniclesystem {
+  color: black;
+}
 .chroniclesystem .capitalize {
   text-transform: capitalize;
 }
@@ -113,10 +116,27 @@
   padding: 0 !important;
 }
 .chroniclesystem.sheet .window-content {
-  height: 100%;
   padding: 5px 10px 5px 5px;
   overflow-y: hidden;
   background: #DCE2EF;
+  /* V2: .window-content contains a part wrapper div, then .editable/.locked.
+     The flex column layout must flow through the entire chain so that
+     .sheet-body can flex-grow into remaining space. */
+  display: flex;
+  flex-direction: column;
+}
+.chroniclesystem.sheet .window-content > [data-application-part] {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+.chroniclesystem.sheet .window-content .editable,
+.chroniclesystem.sheet .window-content .locked {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
 }
 .chroniclesystem.sheet .window-content .header-field {
   background: #005390;
@@ -240,6 +260,7 @@
 .chroniclesystem.sheet input {
   background: white;
   border: none;
+  color: black;
 }
 .chroniclesystem.sheet input:read-only {
   background: #DCE2EF;
@@ -249,6 +270,7 @@
 .chroniclesystem.sheet textarea {
   background: white;
   border: none;
+  color: black;
 }
 .chroniclesystem.sheet .size25 {
   width: 25px;

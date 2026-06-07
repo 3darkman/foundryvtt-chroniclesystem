@@ -2,5 +2,11 @@
     <span>Description</span>
 </header>
 <div class="form-group">
-    {{editor item.system.description target="system.description" button=true owner=owner editable=editable}}
+    {{#if editable}}
+    <prose-mirror name="system.description" button="true" toggled="true" value="{{item.system.description}}">
+        {{{enrichedDescription}}}
+    </prose-mirror>
+    {{else}}
+    <div class="editor-content">{{{enrichedDescription}}}</div>
+    {{/if}}
 </div>

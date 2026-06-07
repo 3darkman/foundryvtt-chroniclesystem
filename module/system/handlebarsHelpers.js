@@ -105,7 +105,7 @@ export const registerCustomHelpers = function () {
             .join('');
     })
 
-    Handlebars.registerHelper('formGroup', function(options) {
+    Handlebars.registerHelper('csFormGroup', function(options) {
         return "systems/chroniclesystem/templates/actors/partials/form-group.hbs";
     });
 

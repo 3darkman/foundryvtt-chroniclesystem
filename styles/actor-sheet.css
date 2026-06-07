@@ -182,6 +182,20 @@
     margin: 3px;
 }
 
+/* V2 migration: .flexrow still wraps in v13, and the v13 element defaults
+   widened the columns' min-content, pushing the third column (techniques/
+   weapons tables) onto a new line. Force a single row and let the table
+   columns shrink instead of wrapping. */
+.chroniclesystem.sheet.actor .content.flexrow {
+    flex-wrap: nowrap;
+}
+
+.chroniclesystem.sheet.actor .content .techniques,
+.chroniclesystem.sheet.actor .content .weapons,
+.chroniclesystem.sheet.actor .content .healthState {
+    min-width: 0;
+}
+
 .chroniclesystem.sheet.actor .content .techniques {
     flex: 1;
     margin: 3px;

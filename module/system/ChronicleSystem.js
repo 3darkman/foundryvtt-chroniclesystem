@@ -88,26 +88,29 @@ function handleRoll(rollType, actor) {
 
 async function _showModifierDialog(formula) {
     const template = CSConstants.Templates.Dialogs.ROLL_MODIFIER;
-    const html = await renderTemplate(template, {formula: formula});
-    return new Promise(resolve => {
-        const data = {
+    const html = await foundry.applications.handlebars.renderTemplate(template, {formula: formula});
+
+    return foundry.applications.api.DialogV2.wait({
+        window: {
             title: SystemUtils.localize("CS.dialogs.rollModifier.title"),
-            content: html,
-            buttons: {
-                normal: {
-                    label: SystemUtils.localize("CS.dialogs.actions.confirm"),
-                    callback: html => resolve({data: html[0].querySelector("form")})
-                },
-                cancel: {
-                    label: SystemUtils.localize("CS.dialogs.actions.cancel"),
-                    callback: html => resolve({cancelled: true})
-                }
+        },
+        content: html,
+        buttons: [
+            {
+                action: 'confirm',
+                label: SystemUtils.localize("CS.dialogs.actions.confirm"),
+                icon: 'fas fa-check',
+                default: true,
+                callback: (event, button) => button.form,
             },
-            default: "normal",
-            close: () => resolve({cancelled: true})
-        };
-        new Dialog(data, null).render(true);
-    })
+            {
+                action: 'cancel',
+                label: SystemUtils.localize("CS.dialogs.actions.cancel"),
+                icon: 'fas fa-times',
+            },
+        ],
+        rejectClose: false,
+    });
 }
 
 async function handleRollAsync(rollType, actor, showModifierDialog = false) {
@@ -119,14 +122,14 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
     const revertModifierDialog = game.settings.get(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.MODIFIER_DIALOG_AS_DEFAULT);
 
     if (showModifierDialog ? !revertModifierDialog : revertModifierDialog) {
-        let form = await _showModifierDialog(formula);
-        if (!form.cancelled) {
+        let formData = await _showModifierDialog(formula);
+        if (formData) {
             const formulaChanged = new DiceRollFormula();
-            formulaChanged.pool = form.data.pool.value;
-            formulaChanged.bonusDice = form.data.bonusDice.value;
-            formulaChanged.reRoll = form.data.reRoll.value;
-            formulaChanged.modifier = form.data.modifier.value;
-            formulaChanged.dicePenalty = form.data.dicePenalty.value;
+            formulaChanged.pool = formData.pool.value;
+            formulaChanged.bonusDice = formData.bonusDice.value;
+            formulaChanged.reRoll = formData.reRoll.value;
+            formulaChanged.modifier = formData.modifier.value;
+            formulaChanged.dicePenalty = formData.dicePenalty.value;
 
             if (formulaChanged.toStr() !== formula.toStr()) {
                 formulaChanged.isUserChanged = true;

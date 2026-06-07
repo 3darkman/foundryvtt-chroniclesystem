@@ -9,8 +9,8 @@
             <section class="">
             </section>
             <section class="flexrow">
-                {{> (formGroup) labelText="Current:" id="system.sorceryPoints.current" value=character.sorceryPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
-                {{> (formGroup) labelText="Max:" id="system.sorceryPoints.max" value=character.sorceryPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
+                {{> (csFormGroup) labelText="Current:" id="system.sorceryPoints.current" value=character.sorceryPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
+                {{> (csFormGroup) labelText="Max:" id="system.sorceryPoints.max" value=character.sorceryPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
             </section>
         </section>
         <header class="header-field">
@@ -34,8 +34,8 @@
                 </div>
             </li>
             {{#each character.owned.techniques as |technique|}}
-                <li  class="item technique" data-item-id="{{_id}}">
-                    <div class="item-edit technique-header"><a>{{technique.name}}</a></div>
+                <li  class="item technique" data-item-id="{{_id}}" draggable="true">
+                    <div class="item-edit technique-header" data-action="editItem"><a>{{technique.name}}</a></div>
                 </li>
                 {{#each technique.system.works as |work|}}
                     <li  class="item work" data-item-id="{{_id}}">
@@ -43,24 +43,24 @@
                             <div class="field size150"><B>{{work.name}}</B></div>
                             <div class="field size75 center">{{localize (lookup ../../techniquesTypes work.type)}}</div>
                             {{#ifEquals work.type "SPELL"}}
-                                <div class="field size200 rollable center" id="formula:{{work.test.spellcasting}}:{{formulaToStr work.test.spellcastingFormula}}">
+                                <div class="field size200 rollable center" id="formula:{{work.test.spellcasting}}:{{formulaToStr work.test.spellcastingFormula}}" data-action="rollDice">
                                     <a>{{format-formula work.test.spellcastingFormula}}</a>
                                 </div>
                             {{else}}
                                 <div class="field flexrow size200">
-                                    <div class="field size150 rollable center" id="formula:{{work.test.alignment}}:{{formulaToStr work.test.alignmentFormula}}">
+                                    <div class="field size150 rollable center" id="formula:{{work.test.alignment}}:{{formulaToStr work.test.alignmentFormula}}" data-action="rollDice">
                                         <a>{{format-formula work.test.alignmentFormula}}</a>
                                     </div>
-                                    <div class="field size150 rollable center" id="formula:{{work.test.invocation}}:{{formulaToStr work.test.invocationFormula}}">
+                                    <div class="field size150 rollable center" id="formula:{{work.test.invocation}}:{{formulaToStr work.test.invocationFormula}}" data-action="rollDice">
                                         <a>{{format-formula work.test.invocationFormula}}</a>
                                     </div>
-                                    <div class="field size150 rollable center" id="formula:{{work.test.unleashing}}:{{formulaToStr work.test.unleashingFormula}}">
+                                    <div class="field size150 rollable center" id="formula:{{work.test.unleashing}}:{{formulaToStr work.test.unleashingFormula}}" data-action="rollDice">
                                         <a>{{format-formula work.test.unleashingFormula}}</a>
                                     </div>
                                 </div>
                             {{/ifEquals}}
                             <div class="field">{{localize (lookup ../../techniquesCosts work.cost)}}</div>
-                            <div class="item-controls"><a><i class="far fa-caret-square-down"></i></a></div>
+                            <div class="item-controls" data-action="toggleDescription"><a><i class="far fa-caret-square-down"></i></a></div>
                         </div>
                         <div class="flexrow">
                             <div class="field"></div>

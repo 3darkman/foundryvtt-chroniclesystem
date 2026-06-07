@@ -1,6 +1,6 @@
 /**
- * Extend the basic ActorSheet with some very simple modifications
- * @extends {ActorSheet}
+ * Extend the basic ActorSheetV2 with character-specific modifications
+ * @extends {CSActorSheet}
  */
 import { ChronicleSystem } from "../../system/ChronicleSystem.js";
 import { Technique } from "../../technique.js";
@@ -18,64 +18,85 @@ export class CSCharacterActorSheet extends CSActorSheet {
       "equipment",
       "benefit",
       "drawback",
-      "technique"
+      "technique",
+      "unitType"
   ]
 
-  /** @override */
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["chroniclesystem", "character", "sheet", "actor"],
+  static DEFAULT_OPTIONS = {
+    classes: ["chroniclesystem", "character", "sheet", "actor"],
+    position: { width: 750, height: 900 },
+    window: { resizable: true },
+    actions: {
+      changeDisposition: CSCharacterActorSheet._onDispositionChanged,
+      toggleEquipped: CSCharacterActorSheet._onEquippedStateChanged,
+      createInjury: CSCharacterActorSheet._onClickInjuryCreate,
+      deleteInjury: CSCharacterActorSheet._onClickInjuryDelete,
+      createWound: CSCharacterActorSheet._onClickWoundCreate,
+      deleteWound: CSCharacterActorSheet._onClickWoundDelete,
+      clickSquare: CSCharacterActorSheet._onClickSquare,
+    }
+  };
+
+  static PARTS = {
+    form: {
       template: "systems/chroniclesystem/templates/actors/characters/character-sheet.hbs",
-      width: 700,
-      height: 900,
-      tabs: [
-        {
-          navSelector: ".tabs",
-          contentSelector: ".sheet-body",
-          initial: "abilities"
-        }
-      ],
-      dragDrop: [{dragSelector: ".item-list .item", dropSelector: null}]
-    });
-  }
+      scrollable: [""]
+    }
+  };
+
+  static TABS = {
+    primary: {
+      tabs: ["abilities", "combat-and-intrigue", "qualities", "sorcery", "equipments", "actor-description"],
+      initial: "abilities"
+    }
+  };
 
   /* -------------------------------------------- */
 
   /** @override */
-  async getData() {
-    const data = super.getData();
-    data.dtypes = ["String", "Number", "Boolean"];
-    this.splitItemsByType(data);
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    context.dtypes = ["String", "Number", "Boolean"];
 
-    let character = data.actor.getCSData();
-    this.isOwner = this.actor.isOwner;
+    // Provide backward-compatible template variables
+    const actor = this.document;
+    context.actor = actor;
+    context.items = Array.from(actor.items);
+    context.owner = actor.isOwner;
+    context.cssClass = this.isEditable ? "editable" : "locked";
+    context.editable = this.isEditable;
 
-    character.owned.equipments = this._checkNull(data.itemsByType['equipment']);
-    character.owned.weapons = this._checkNull(data.itemsByType['weapon']);
-    character.owned.armors = this._checkNull(data.itemsByType['armor']);
-    character.owned.benefits = this._checkNull(data.itemsByType['benefit']);
-    character.owned.drawbacks = this._checkNull(data.itemsByType['drawback']);
-    character.owned.abilities = this._checkNull(data.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
-    character.owned.techniques = this._checkNull(data.itemsByType['technique']).sort((a, b) => a.name.localeCompare(b.name));
+    // Split items by type (reuse base class helper)
+    this.splitItemsByType(context);
 
-    data.dispositions = ChronicleSystem.dispositions;
+    let character = actor.getCSData();
 
-    data.notEquipped = ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED;
+    character.owned.equipments = this._checkNull(context.itemsByType['equipment']);
+    character.owned.weapons = this._checkNull(context.itemsByType['weapon']);
+    character.owned.armors = this._checkNull(context.itemsByType['armor']);
+    character.owned.benefits = this._checkNull(context.itemsByType['benefit']);
+    character.owned.drawbacks = this._checkNull(context.itemsByType['drawback']);
+    character.owned.abilities = this._checkNull(context.itemsByType['ability']).sort((a, b) => a.name.localeCompare(b.name));
+    character.owned.techniques = this._checkNull(context.itemsByType['technique']).sort((a, b) => a.name.localeCompare(b.name));
 
-    data.techniquesTypes = CSConstants.TechniqueType;
-    data.techniquesCosts = CSConstants.TechniqueCost;
+    context.dispositions = ChronicleSystem.dispositions;
+
+    context.notEquipped = ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED;
+
+    context.techniquesTypes = CSConstants.TechniqueType;
+    context.techniquesCosts = CSConstants.TechniqueCost;
 
     character.owned.weapons.forEach((weapon) => {
       let weaponData = weapon.system;
       let info = weaponData.specialty.split(':');
       if (info.length < 2)
         return "";
-      let formula = ChronicleSystem.getActorAbilityFormula(data.actor, info[0], info[1]);
-      formula = ChronicleSystem.adjustFormulaByWeapon(data.actor, formula, weapon);
+      let formula = ChronicleSystem.getActorAbilityFormula(actor, info[0], info[1]);
+      formula = ChronicleSystem.adjustFormulaByWeapon(actor, formula, weapon);
       let matches = weaponData.damage.match('@([a-zA-Z]*)([-\+\/\*]*)([0-9]*)');
       if (matches) {
         if (matches.length === 4) {
-          let ability = data.actor.getAbilityValue(matches[1]);
+          let ability = actor.getAbilityValue(matches[1]);
           weapon.damageValue = eval(`${ability}${matches[2]}${matches[3]}`);
         }
       }
@@ -84,28 +105,27 @@ export class CSCharacterActorSheet extends CSActorSheet {
 
     character.owned.techniques.forEach((technique) => {
       let techniqueData = technique.system;
-      let works = data.currentInjuries = Object.values(techniqueData.works);
+      let works = context.currentInjuries = Object.values(techniqueData.works);
       works.forEach((work) => {
         if (work.type === "SPELL") {
-          work.test.spellcastingFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.spellcasting, null);
+          work.test.spellcastingFormula = ChronicleSystem.getActorAbilityFormula(actor, work.test.spellcasting, null);
         } else {
-          work.test.alignmentFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.alignment, null);
-          work.test.invocationFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.invocation, null);
-          work.test.unleashingFormula = ChronicleSystem.getActorAbilityFormula(data.actor, work.test.unleashing, null);
+          work.test.alignmentFormula = ChronicleSystem.getActorAbilityFormula(actor, work.test.alignment, null);
+          work.test.invocationFormula = ChronicleSystem.getActorAbilityFormula(actor, work.test.invocation, null);
+          work.test.unleashingFormula = ChronicleSystem.getActorAbilityFormula(actor, work.test.unleashing, null);
         }
       });
     });
 
-    this._calculateIntrigueTechniques(data);
+    this._calculateIntrigueTechniques(context, actor);
 
-    data.currentInjuries = Object.values(character.injuries).length;
-    data.currentWounds = Object.values(character.wounds).length;
-    data.maxInjuries = this.actor.getMaxInjuries();
-    data.maxWounds = this.actor.getMaxWounds();
-    data.character = character;
+    context.currentInjuries = character.injuries ? Object.values(character.injuries).length : 0;
+    context.currentWounds = character.wounds ? Object.values(character.wounds).length : 0;
+    context.maxInjuries = this.actor.getMaxInjuries();
+    context.maxWounds = this.actor.getMaxWounds();
+    context.character = character;
 
     // Pre-enrich HTML descriptions for benefit and drawback items
-    // Templates use {{enrich system.description}} which is now a simple passthrough
     const rollData = this.actor.getRollData();
     const enrichOpts = { async: true, rollData };
     for (const item of [...character.owned.benefits, ...character.owned.drawbacks]) {
@@ -115,7 +135,6 @@ export class CSCharacterActorSheet extends CSActorSheet {
     }
 
     // Pre-enrich HTML descriptions for technique works
-    // Templates use {{enrich work.description}} which is now a simple passthrough
     for (const technique of character.owned.techniques) {
       const works = Object.values(technique.system.works);
       for (const work of works) {
@@ -125,26 +144,70 @@ export class CSCharacterActorSheet extends CSActorSheet {
       }
     }
 
-    return data;
+    // Pre-enrich editor fields for the description tab
+    const TextEditorImpl = foundry.applications.ux.TextEditor.implementation;
+    context.enrichedPersonalHistory = await TextEditorImpl.enrichHTML(
+      character.personalHistory || "", { async: true, relativeTo: actor }
+    );
+    context.enrichedAllies = await TextEditorImpl.enrichHTML(
+      character.allies || "", { async: true, relativeTo: actor }
+    );
+    context.enrichedEnemies = await TextEditorImpl.enrichHTML(
+      character.enemies || "", { async: true, relativeTo: actor }
+    );
+    context.enrichedOaths = await TextEditorImpl.enrichHTML(
+      character.oaths || "", { async: true, relativeTo: actor }
+    );
+    context.enrichedMotto = await TextEditorImpl.enrichHTML(
+      character.motto || "", { async: true, relativeTo: actor }
+    );
+
+    // Prepare tab state
+    context.tabs = this._getTabs();
+
+    return context;
   }
 
-  _calculateIntrigueTechniques(data) {
-    let cunningValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.CUNNING));
-    let willValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL));
-    let persuasionValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION));
-    let awarenessValue = data.actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS));
+  /**
+   * Prepare tabs data for template rendering.
+   * @returns {object} Tab group configuration with active states.
+   */
+  _getTabs() {
+    const tabGroup = this.constructor.TABS.primary;
+    const activeTab = this.tabGroups?.primary ?? tabGroup.initial;
+    return tabGroup.tabs.reduce((tabs, tab) => {
+      tabs[tab] = { active: tab === activeTab };
+      return tabs;
+    }, {});
+  }
 
-    let bluffFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.DECEPTION), SystemUtils.localize(ChronicleSystem.keyConstants.BLUFF));
-    let actFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.DECEPTION), SystemUtils.localize(ChronicleSystem.keyConstants.ACT));
-    let bargainFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.BARGAIN));
-    let charmFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.CHARM));
-    let convinceFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.CONVINCE));
-    let inciteFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.INCITE));
-    let intimidateFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.INTIMIDATE));
-    let seduceFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.SEDUCE));
-    let tauntFormula = ChronicleSystem.getActorAbilityFormula(data.actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.TAUNT));
+  _calculateIntrigueTechniques(data, actor) {
+    let cunningValue = actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.CUNNING));
+    let willValue = actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL));
+    let persuasionValue = actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION));
+    let awarenessValue = actor.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS));
+
+    let bluffFormula = ChronicleSystem.getActorAbilityFormula(actor, SystemUtils.localize(ChronicleSystem.keyConstants.DECEPTION), SystemUtils.localize(ChronicleSystem.keyConstants.BLUFF));
+    let actFormula = ChronicleSystem.getActorAbilityFormula(actor, SystemUtils.localize(ChronicleSystem.keyConstants.DECEPTION), SystemUtils.localize(ChronicleSystem.keyConstants.ACT));
+    let bargainFormula = ChronicleSystem.getActorAbilityFormula(actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.BARGAIN));
+    let charmFormula = ChronicleSystem.getActorAbilityFormula(actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.CHARM));
+    let convinceFormula = ChronicleSystem.getActorAbilityFormula(actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.CONVINCE));
+    let inciteFormula = ChronicleSystem.getActorAbilityFormula(actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.INCITE));
+    let intimidateFormula = ChronicleSystem.getActorAbilityFormula(actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.INTIMIDATE));
+    let seduceFormula = ChronicleSystem.getActorAbilityFormula(actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.SEDUCE));
+    let tauntFormula = ChronicleSystem.getActorAbilityFormula(actor, SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION), SystemUtils.localize(ChronicleSystem.keyConstants.TAUNT));
 
     let intimidateDeceptionFormula = actFormula.bonusDice + actFormula.modifier > bluffFormula.bonusDice + bluffFormula.modifier ? actFormula : bluffFormula;
+
+    // Apply current disposition modifiers to technique formulas
+    const currentDisposition = ChronicleSystem.dispositions.find(d => d.rating === actor.getCSData().currentDisposition);
+    if (currentDisposition) {
+      for (const f of [bargainFormula, charmFormula, convinceFormula, inciteFormula, intimidateFormula, seduceFormula, tauntFormula]) {
+        f.modifier += currentDisposition.persuasionModifier;
+      }
+      bluffFormula.modifier += currentDisposition.deceptionModifier;
+      actFormula.modifier += currentDisposition.deceptionModifier;
+    }
 
     data.techniques = {
       bargain: new Technique(SystemUtils.localize(ChronicleSystem.keyConstants.BARGAIN), cunningValue, bargainFormula, bluffFormula),
@@ -160,32 +223,18 @@ export class CSCharacterActorSheet extends CSActorSheet {
   /* -------------------------------------------- */
 
   /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
+  _attachPartListeners(partId, htmlElement, options) {
+    super._attachPartListeners(partId, htmlElement, options);
 
-    // Everything below here is only needed if the sheet is editable
-    if (!this.options.editable) return;
-
-    html.find('.item .item-name').on('click', (ev) => {
-      $(ev.currentTarget).parents('.item').find('.description').slideToggle();
-    });
-
-    html.find('.disposition.option').click(this._onDispositionChanged.bind(this));
-
-    html.find('.equipped').click(this._onEquippedStateChanged.bind(this));
-
-    html.find('.injury-create').on("click", this._onClickInjuryCreate.bind(this));
-    html.find(".injuries-list").on("click", ".injury-control", this._onclickInjuryControl.bind(this));
-
-    html.find('.wound-create').on("click", this._onClickWoundCreate.bind(this));
-    html.find(".wounds-list").on("click", ".wound-control", this._onclickWoundControl.bind(this));
-
-    html.find(".square").on("click", this._onClickSquare.bind(this));
-
-    // Add or Remove Attribute
+    // V2 action handlers (changeDisposition, toggleEquipped, createInjury,
+    // deleteInjury, createWound, deleteWound, clickSquare) are registered
+    // in DEFAULT_OPTIONS.actions and dispatched automatically by the
+    // framework for elements with data-action attributes.
+    // No manual event listeners needed here.
   }
 
   async setFrustrationValue(newValue) {
+    if (!this.actor.getCSData().derivedStats?.frustration) return;
     let value = Math.max(Math.min(parseInt(newValue), this.actor.getCSData().derivedStats.frustration.total), 0);
 
     this.actor.updateTempPenalties();
@@ -205,6 +254,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   async setFatigueValue(newValue) {
+    if (!this.actor.getCSData().derivedStats?.fatigue) return;
     let value = Math.max(Math.min(parseInt(newValue), this.actor.getCSData().derivedStats.fatigue.total), 0);
 
     this.actor.updateTempModifiers();
@@ -222,6 +272,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   async setStressValue(newValue) {
+    if (!this.actor.getCSData().derivedStats?.frustration) return;
     let value = Math.max(Math.min(parseInt(newValue), this.actor.getCSData().derivedStats.frustration.total), 0);
 
     this.actor.updateTempPenalties();
@@ -242,15 +293,27 @@ export class CSCharacterActorSheet extends CSActorSheet {
     });
   }
 
-  async _onClickSquare(ev) {
-    ev.preventDefault();
-    let method = `set${ev.currentTarget.dataset.type}Value`;
-    await this[method](ev.currentTarget.id);
+  /**
+   * Static action handler for clicking fatigue/frustration/stress squares.
+   * Called from data-action="clickSquare" or via _attachPartListeners.
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  static async _onClickSquare(event, target) {
+    event.preventDefault();
+    let method = `set${target.dataset.type}Value`;
+    await this[method](target.id);
   }
 
-  async _onClickWoundCreate(ev) {
-    ev.preventDefault();
+  /**
+   * Static action handler for creating a wound.
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  static async _onClickWoundCreate(event, target) {
+    event.preventDefault();
     const data = this.actor.getCSData();
+    if (!data.wounds) return;
     let wound = "";
     let wounds = Object.values(data.wounds);
     if (wounds.length >= this.actor.getMaxWounds())
@@ -264,33 +327,41 @@ export class CSCharacterActorSheet extends CSActorSheet {
     });
   }
 
-  async _onclickWoundControl(event) {
+  /**
+   * Static action handler for wound delete (via data-action="deleteWound").
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  static async _onClickWoundDelete(event, target) {
     event.preventDefault();
-    const a = event.currentTarget;
-    const index = parseInt(a.dataset.id);
-    const action = a.dataset.action;
+    const index = parseInt(target.dataset.id);
 
-    if ( action === "delete" ) {
-      const data = this.actor.getCSData();
-      let wounds = Object.values(data.wounds);
-      wounds.splice(index,1);
+    const data = this.actor.getCSData();
+    if (!data.wounds) return;
+    let wounds = Object.values(data.wounds);
+    wounds.splice(index,1);
 
-      this.actor.updateTempPenalties();
-      if (wounds.length === 0) {
-        this.actor.removePenalty(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.WOUNDS);
-      } else {
-        this.actor.addPenalty(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.WOUNDS, wounds.length, false);
-      }
-      this.actor.update({
-        "system.wounds" : wounds,
-        "system.penalties" : this.actor.penalties
-      });
+    this.actor.updateTempPenalties();
+    if (wounds.length === 0) {
+      this.actor.removePenalty(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.WOUNDS);
+    } else {
+      this.actor.addPenalty(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.WOUNDS, wounds.length, false);
     }
+    this.actor.update({
+      "system.wounds" : wounds,
+      "system.penalties" : this.actor.penalties
+    });
   }
 
-  async _onClickInjuryCreate(ev) {
-    ev.preventDefault();
+  /**
+   * Static action handler for creating an injury.
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  static async _onClickInjuryCreate(event, target) {
+    event.preventDefault();
     const data = this.actor.getCSData();
+    if (!data.injuries) return;
     let injury = "";
     let injuries = Object.values(data.injuries);
     if (injuries.length >= this.actor.getMaxInjuries())
@@ -307,34 +378,41 @@ export class CSCharacterActorSheet extends CSActorSheet {
     });
   }
 
-  async _onclickInjuryControl(event) {
+  /**
+   * Static action handler for injury delete (via data-action="deleteInjury").
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  static async _onClickInjuryDelete(event, target) {
     event.preventDefault();
-    const a = event.currentTarget;
-    const index = parseInt(a.dataset.id);
-    const action = a.dataset.action;
+    const index = parseInt(target.dataset.id);
 
-    if ( action === "delete" ) {
-      const data = this.actor.getCSData();
-      let injuries = Object.values(data.injuries);
-      injuries.splice(index,1);
+    const data = this.actor.getCSData();
+    if (!data.injuries) return;
+    let injuries = Object.values(data.injuries);
+    injuries.splice(index,1);
 
-      this.actor.updateTempModifiers();
-      if (injuries.length === 0) {
-        this.actor.removeModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.INJURY);
-      } else {
-        this.actor.addModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.INJURY, -injuries.length, false);
-      }
-
-      this.actor.update({
-        "system.injuries" : injuries,
-        "system.modifiers" : this.actor.modifiers
-      });
+    this.actor.updateTempModifiers();
+    if (injuries.length === 0) {
+      this.actor.removeModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.INJURY);
+    } else {
+      this.actor.addModifier(ChronicleSystem.modifiersConstants.ALL, ChronicleSystem.keyConstants.INJURY, -injuries.length, false);
     }
+
+    this.actor.update({
+      "system.injuries" : injuries,
+      "system.modifiers" : this.actor.modifiers
+    });
   }
 
-  async _onEquippedStateChanged(event) {
+  /**
+   * Static action handler for equipped state changes.
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  static async _onEquippedStateChanged(event, target) {
     event.preventDefault();
-    const eventData = event.currentTarget.dataset;
+    const eventData = target.dataset;
     let documment = this.actor.getEmbeddedDocument('Item', eventData.itemId);
     let collection = [];
     let tempCollection = [];
@@ -375,29 +453,21 @@ export class CSCharacterActorSheet extends CSActorSheet {
     this.actor.updateEmbeddedDocuments('Item', collection);
   }
 
-  async _onDispositionChanged(event, targets) {
+  /**
+   * Static action handler for disposition changes.
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  static async _onDispositionChanged(event, target) {
     event.preventDefault();
-    if (!ChronicleSystem.dispositions.find((disposition) => disposition.rating === parseInt(event.target.dataset.id))) {
+    if (!ChronicleSystem.dispositions.find((disposition) => disposition.rating === parseInt(target.dataset.id))) {
       LOGGER.warn("the informed disposition does not exist.");
       return;
     }
-    this.actor.update({"system.currentDisposition": event.target.dataset.id});
+    this.actor.update({"system.currentDisposition": parseInt(target.dataset.id)});
   }
 
   /* -------------------------------------------- */
-
-  async _onDrop(event) {
-    event.preventDefault();
-    let data;
-    try {
-      data = JSON.parse(event.dataTransfer.getData('text/plain'));
-
-    }
-    catch (err) {
-      return;
-    }
-    return super._onDrop(event);
-  }
 
   isItemPermitted(type) {
     return this.itemTypesPermitted.includes(type);

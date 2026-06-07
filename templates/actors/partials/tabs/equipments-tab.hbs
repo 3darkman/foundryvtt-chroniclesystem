@@ -66,9 +66,9 @@
                 <div class="item-controls"></div>
             </li>
             {{#each character.owned.weapons as |weapon index|}}
-                <li  class="item weapon flexrow" data-item-id="{{_id}}">
-                    <div class="weapon-label item-edit field"><a>{{weapon.name}}</a></div>
-                    <div class="weapon-testdice rollable field" id="weapon-test:{{weapon.name}}:{{formulaToStr weapon.formula}}">
+                <li  class="item weapon flexrow" data-item-id="{{_id}}" draggable="true">
+                    <div class="weapon-label item-edit field" data-action="editItem"><a>{{weapon.name}}</a></div>
+                    <div class="weapon-testdice rollable field" id="weapon-test:{{weapon.name}}:{{formulaToStr weapon.formula}}" data-action="rollDice">
                         <a>{{format-formula weapon.formula}}</a>
                     </div>
                     <div class="weapon-damage field"> {{weapon.damageValue}}</div>
@@ -80,8 +80,8 @@
                         {{/each}}
                     </div>
                     <div class="item-controls">
-                        <a class="checkButton equipped {{showIfContains "2|4" weapon.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "2|4" weapon.system.equipped 0 2}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
-                        <a class="checkButton equipped off-hand {{showIfContains "3|4" weapon.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "3|4" weapon.system.equipped 0 3}}" data-type="weapon"><i class="fa fa-hand-paper"></i></a>
+                        <a class="checkButton equipped {{showIfContains "2|4" weapon.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "2|4" weapon.system.equipped 0 2}}" data-type="weapon" data-action="toggleEquipped"><i class="fa fa-hand-paper"></i></a>
+                        <a class="checkButton equipped off-hand {{showIfContains "3|4" weapon.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "3|4" weapon.system.equipped 0 3}}" data-type="weapon" data-action="toggleEquipped"><i class="fa fa-hand-paper"></i></a>
                     </div>
                 </li>
             {{/each}}
@@ -103,8 +103,8 @@
                 <div class="item-controls"></div>
             </li>
             {{#each character.owned.armors as |armor index|}}
-                <li  class="item weapon flexrow" data-item-id="{{_id}}">
-                    <div class="armor-label item-edit field"><a>{{armor.name}}</a></div>
+                <li  class="item weapon flexrow" data-item-id="{{_id}}" draggable="true">
+                    <div class="armor-label item-edit field" data-action="editItem"><a>{{armor.name}}</a></div>
                     <div class="armor-rating field"><a>{{armor.system.rating}}</a></div>
                     <div class="armor-penalty field"><a>{{armor.system.penalty}}</a></div>
                     <div class="armor-bulk field"><a>{{armor.system.bulk}}</a></div>
@@ -116,7 +116,7 @@
                         {{/each}}
                     </div>
                     <div class="item-controls">
-                        <a class="checkButton equipped {{showIfEquals "1" armor.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfEquals "1" armor.system.equipped 0 1}}" data-type="armor"><i class="fas fa-shield-alt"></i></a>
+                        <a class="checkButton equipped {{showIfEquals "1" armor.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfEquals "1" armor.system.equipped 0 1}}" data-type="armor" data-action="toggleEquipped"><i class="fas fa-shield-alt"></i></a>
                     </div>
                 </li>
             {{/each}}
@@ -138,8 +138,8 @@
                 <div class="equipment-cost">Cost</div>
             </li>
             {{#each character.owned.equipments as |equipment index|}}
-                <li  class="item equipment flexrow flex3" data-item-id="{{_id}}">
-                    <div class="equipment-label item-edit field"><a>{{equipment.name}}</a></div>
+                <li  class="item equipment flexrow flex3" data-item-id="{{_id}}" draggable="true">
+                    <div class="equipment-label item-edit field" data-action="editItem"><a>{{equipment.name}}</a></div>
                     <div class="equipment-quantity field">{{equipment.system.quantity}}</div>
                     <div class="equipment-cost field">{{equipment.system.cost}}</div>
                 </li>

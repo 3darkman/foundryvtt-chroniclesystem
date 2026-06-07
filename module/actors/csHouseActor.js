@@ -175,7 +175,7 @@ export class CSHouseActor extends CSActor {
                     this.getCSData().members[this.roleMap[role]].id === actorId
                 ) {
                     let key = `system.members.${[this.roleMap[role]]}`;
-                    this.update({ [key]: '' });
+                    this.update({ [key]: { id: '', description: '' } });
                     founded = true;
                 }
                 break;
@@ -280,7 +280,12 @@ export class CSHouseActor extends CSActor {
     }
 
     _getCharacterDataById(id) {
-        if (!id) return SystemUtils.localize('CS.messages.nobodyHasBeenChosen');
+        if (!id) {
+            return {
+                name: SystemUtils.localize('CS.messages.nobodyHasBeenChosen'),
+                age: 0,
+            };
+        }
         let actor = game.actors.get(id);
         let name = SystemUtils.localize('CS.messages.actorDoesntExists');
         let age = 0;

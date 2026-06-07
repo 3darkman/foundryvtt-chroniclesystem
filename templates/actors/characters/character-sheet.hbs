@@ -1,4 +1,4 @@
-<form class="{{cssClass}}" autocomplete="off">
+<div class="{{cssClass}}" autocomplete="off">
     {{!-- Sheet Header --}}
     <header class="sheet-header">
         <div class="header-fields">
@@ -13,16 +13,14 @@
             </div>
         </div>
     </header>
-{{log character}}
-
     {{!-- Sheet Tab Navigation --}}
     <nav  class="sheet-tabs flexrow tabs" data-group="primary">
-        <a  class="item"  data-tab="abilities">{{localize "CS.sheets.character.tabs.abilities"}}</a>
-        <a  class="item size150"  data-tab="combat-and-intrigue">{{localize "CS.sheets.character.tabs.combat-intrigue"}}</a>
-        <a  class="item"  data-tab="qualities">{{localize "CS.sheets.character.tabs.qualities"}}</a>
-        <a class="item" data-tab="sorcery">{{localize "CS.sheets.character.tabs.sorcery"}}</a>
-        <a  class="item"  data-tab="equipments">{{localize "CS.sheets.character.tabs.equipments"}}</a>
-        <a  class="item"  data-tab="actor-description">{{localize "CS.sheets.character.tabs.description"}}</a>
+        <a  class="item"  data-tab="abilities" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.abilities"}}</a>
+        <a  class="item size150"  data-tab="combat-and-intrigue" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.combat-intrigue"}}</a>
+        <a  class="item"  data-tab="qualities" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.qualities"}}</a>
+        <a class="item" data-tab="sorcery" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.sorcery"}}</a>
+        <a  class="item"  data-tab="equipments" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.equipments"}}</a>
+        <a  class="item"  data-tab="actor-description" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.description"}}</a>
     </nav>
 
     {{!-- Sheet Body --}}
@@ -34,4 +32,4 @@
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.hbs"}}
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/description-tab.hbs"}}
     </section>
-</form>
+</div>

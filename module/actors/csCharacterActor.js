@@ -35,20 +35,34 @@ export class CSCharacterActor extends CSActor {
 
     calculateDerivedValues() {
         let data = this.getCSData();
-        data.derivedStats.intrigueDefense.value = this.calcIntrigueDefense();
-        data.derivedStats.intrigueDefense.total = data.derivedStats.intrigueDefense.value + parseInt(data.derivedStats.intrigueDefense.modifier);
-        data.derivedStats.composure.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL)) * 3;
-        data.derivedStats.composure.total = data.derivedStats.composure.value + parseInt(data.derivedStats.composure.modifier);
-        data.derivedStats.combatDefense.value = this.calcCombatDefense();
 
+        // Combat defense and health exist on both character and unit data models
+        if (data.derivedStats?.combatDefense) {
+            data.derivedStats.combatDefense.value = this.calcCombatDefense() || 0;
+            data.derivedStats.combatDefense.total = data.derivedStats.combatDefense.value + (Number(data.derivedStats.combatDefense.modifier) || 0);
+        }
+        if (data.derivedStats?.health) {
+            data.derivedStats.health.value = (this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)) || 0) * 3;
+            data.derivedStats.health.total = data.derivedStats.health.value + (Number(data.derivedStats.health.modifier) || 0);
+        }
 
-        data.derivedStats.combatDefense.total = data.derivedStats.combatDefense.value + parseInt(data.derivedStats.combatDefense.modifier);
-        data.derivedStats.health.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)) * 3;
-        data.derivedStats.health.total = data.derivedStats.health.value + parseInt(data.derivedStats.health.modifier);
-        data.derivedStats.frustration.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL));
-        data.derivedStats.frustration.total = data.derivedStats.frustration.value + parseInt(data.derivedStats.frustration.modifier);
-        data.derivedStats.fatigue.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE));
-        data.derivedStats.fatigue.total = data.derivedStats.fatigue.value + parseInt(data.derivedStats.fatigue.modifier);
+        // Intrigue, composure, frustration, and fatigue only exist on character data model
+        if (data.derivedStats?.intrigueDefense) {
+            data.derivedStats.intrigueDefense.value = this.calcIntrigueDefense() || 0;
+            data.derivedStats.intrigueDefense.total = data.derivedStats.intrigueDefense.value + (Number(data.derivedStats.intrigueDefense.modifier) || 0);
+        }
+        if (data.derivedStats?.composure) {
+            data.derivedStats.composure.value = (this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL)) || 0) * 3;
+            data.derivedStats.composure.total = data.derivedStats.composure.value + (Number(data.derivedStats.composure.modifier) || 0);
+        }
+        if (data.derivedStats?.frustration) {
+            data.derivedStats.frustration.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL)) || 0;
+            data.derivedStats.frustration.total = data.derivedStats.frustration.value + (Number(data.derivedStats.frustration.modifier) || 0);
+        }
+        if (data.derivedStats?.fatigue) {
+            data.derivedStats.fatigue.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)) || 0;
+            data.derivedStats.fatigue.total = data.derivedStats.fatigue.value + (Number(data.derivedStats.fatigue.modifier) || 0);
+        }
     }
 
     getAbilities() {
@@ -280,13 +294,15 @@ export class CSCharacterActor extends CSActor {
 
     calculateMovementData() {
         let data = this.getCSData();
+        // Movement only exists on the character data model, not on units
+        if (!data.movement) return;
         data.movement.base = ChronicleSystem.defaultMovement;
         let runFormula = ChronicleSystem.getActorAbilityFormula(this, SystemUtils.localize(ChronicleSystem.keyConstants.ATHLETICS), SystemUtils.localize(ChronicleSystem.keyConstants.RUN));
         data.movement.runBonus = Math.floor(runFormula.bonusDice / 2);
         let bulkMod = this.getModifier(SystemUtils.localize(ChronicleSystem.modifiersConstants.BULK));
         data.movement.bulk = Math.floor(bulkMod.total/2);
-        data.movement.total = Math.max(data.movement.base + data.movement.runBonus - data.movement.bulk + parseInt(data.movement.modifier), 1);
-        data.movement.sprintTotal = data.movement.total * data.movement.sprintMultiplier - data.movement.bulk;
+        data.movement.total = Math.max(data.movement.base + data.movement.runBonus - data.movement.bulk + (parseInt(data.movement.modifier) || 0), 1);
+        data.movement.sprintTotal = data.movement.total * (Number(data.movement.sprintMultiplier) || 4) - data.movement.bulk;
     }
 
     _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {

@@ -62,7 +62,7 @@
         }
       },
       "character-common": {
-        "ancestries": [],
+        "ancestries": "",
         "gender": "",
         "house": "",
         "height": "1.72",
@@ -149,8 +149,8 @@
       "historicalEvents": [],
       "motto": "",
       "members": {
-        "head": "",
-        "steward": "",
+        "head": { "id": "", "description": "" },
+        "steward": { "id": "", "description": "" },
         "heirs": [],
         "family": [],
         "retainers": [],

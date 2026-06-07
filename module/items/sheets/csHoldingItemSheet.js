@@ -1,53 +1,55 @@
-import {CSItemSheet} from "./csItemSheet.js";
+import { CSItemSheet } from "./csItemSheet.js";
 
 export class CSHoldingItemSheet extends CSItemSheet {
+  static DEFAULT_OPTIONS = {
+    actions: {
+      createFeature: CSHoldingItemSheet._onCreateFeature,
+      deleteFeature: CSHoldingItemSheet._onDeleteFeature,
+    },
+  };
 
-    async getData() {
-        const data = await super.getData();
-        data.resourceChoices = {
-            defense: "CS.sheets.house.resources.defense",
-            influence: "CS.sheets.house.resources.influence",
-            lands: "CS.sheets.house.resources.lands",
-            law: "CS.sheets.house.resources.law",
-            population: "CS.sheets.house.resources.population",
-            power: "CS.sheets.house.resources.power",
-            wealth: "CS.sheets.house.resources.wealth"
-        }
-        return data;
-    }
+  /** @override */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    context.resourceChoices = {
+      defense: "CS.sheets.house.resources.defense",
+      influence: "CS.sheets.house.resources.influence",
+      lands: "CS.sheets.house.resources.lands",
+      law: "CS.sheets.house.resources.law",
+      population: "CS.sheets.house.resources.population",
+      power: "CS.sheets.house.resources.power",
+      wealth: "CS.sheets.house.resources.wealth",
+    };
+    return context;
+  }
 
-    activateListeners(html) {
-        super.activateListeners(html);
+  /**
+   * Action handler: Create a new feature entry on this holding item.
+   * For use with data-action="createFeature" in templates.
+   */
+  // eslint-disable-next-line no-unused-vars
+  static _onCreateFeature(event, target) {
+    const item = this.document;
+    const feature = {
+      name: "",
+      rating: 0,
+      modifier: 0,
+    };
+    const featureList = Object.values(item.getCSData().features);
+    featureList.push(feature);
+    item.update({ "system.features": featureList });
+  }
 
-        html.find('.item-feature-create').on("click", this._onClickFeatureCreate.bind(this));
-        html.find(".feature-list").on("click", ".item-features-control", this._onclickFeatureControl.bind(this));
-    }
-
-    async _onClickFeatureCreate(event) {
-        event.preventDefault();
-        const item = this.item;
-        let feature = {
-            name: "",
-            rating: 0,
-            modifier: 0
-        };
-        let featureList = Object.values(item.getCSData().features);
-        featureList.push(feature);
-        item.update({"system.features" : featureList});
-    }
-
-    async _onclickFeatureControl(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-        const index = parseInt(a.dataset.id);
-        const action = a.dataset.action;
-
-        // Remove existing specialty
-        if ( action === "delete" ) {
-            const item = this.item;
-            let featureList = Object.values(item.getCSData().features);
-            featureList.splice(index,1);
-            item.update({"system.features" : featureList});
-        }
-    }
+  /**
+   * Action handler: Delete a feature entry from this holding item.
+   * For use with data-action="deleteFeature" in templates.
+   * Expects target to have data-id attribute with the feature index.
+   */
+  static _onDeleteFeature(event, target) {
+    const index = parseInt(target.dataset.id);
+    const item = this.document;
+    const featureList = Object.values(item.getCSData().features);
+    featureList.splice(index, 1);
+    item.update({ "system.features": featureList });
+  }
 }
