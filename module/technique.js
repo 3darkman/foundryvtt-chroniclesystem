@@ -1,29 +1,29 @@
 export class Technique {
-    #name;
-    #influence;
-    #persuasion;
-    #deception;
+  #name;
+  #influence;
+  #persuasion;
+  #deception;
 
-    constructor(name, influence, persuasion, deception) {
-        this.#name = name;
-        this.#influence = influence;
-        this.#deception = deception;
-        this.#persuasion = persuasion;
-    }
+  constructor(name, influence, persuasion, deception) {
+    this.#name = name;
+    this.#influence = influence;
+    this.#deception = deception;
+    this.#persuasion = persuasion;
+  }
 
-    get name() {
-        return this.#name;
-    }
+  get name() {
+    return this.#name;
+  }
 
-    get influence() {
-        return this.#influence;
-    }
+  get influence() {
+    return this.#influence;
+  }
 
-    get persuasion() {
-        return this.#persuasion;
-    }
+  get persuasion() {
+    return this.#persuasion;
+  }
 
-    get deception() {
-        return this.#deception;
-    }
+  get deception() {
+    return this.#deception;
+  }
 }

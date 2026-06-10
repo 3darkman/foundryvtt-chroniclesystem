@@ -47,13 +47,22 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     // Pre-enrich HTML for editor display (separate variables to avoid corrupting save data)
     const TextEditorImpl = foundry.applications.ux.TextEditor.implementation;
     context.enrichedDescription = system?.description
-      ? await TextEditorImpl.enrichHTML(system.description, { async: true, relativeTo: item })
+      ? await TextEditorImpl.enrichHTML(system.description, {
+          async: true,
+          relativeTo: item,
+        })
       : "";
     context.enrichedEffects = system?.effects
-      ? await TextEditorImpl.enrichHTML(system.effects, { async: true, relativeTo: item })
+      ? await TextEditorImpl.enrichHTML(system.effects, {
+          async: true,
+          relativeTo: item,
+        })
       : "";
     context.enrichedRecovery = system?.recovery
-      ? await TextEditorImpl.enrichHTML(system.recovery, { async: true, relativeTo: item })
+      ? await TextEditorImpl.enrichHTML(system.recovery, {
+          async: true,
+          relativeTo: item,
+        })
       : "";
 
     return context;

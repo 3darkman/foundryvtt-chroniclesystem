@@ -17,50 +17,54 @@ import SystemUtils from "./systemUtils.js";
  * @returns - a Proxy object with interceptions routing to the desired actor class
  */
 export default function factory(entities, baseClass) {
-    return new Proxy(baseClass, {
-        // Without this trap the proxy's prototype chain never contains
-        // baseClass itself, so foundry.utils.isSubclass(documentClass, Actor)
-        // fails and core skips the ActorDelta redirect for unlinked token
-        // actors (server then rejects with "actors is not a valid embedded
-        // Document within the Token Document").
-        getPrototypeOf: () => baseClass,
-        construct: (target, args) => {
-            const [data, options] = args;
+  return new Proxy(baseClass, {
+    // Without this trap the proxy's prototype chain never contains
+    // baseClass itself, so foundry.utils.isSubclass(documentClass, Actor)
+    // fails and core skips the ActorDelta redirect for unlinked token
+    // actors (server then rejects with "actors is not a valid embedded
+    // Document within the Token Document").
+    getPrototypeOf: () => baseClass,
+    construct: (target, args) => {
+      const [data, options] = args;
+      const constructor = entities[data.type];
+      if (!constructor) {
+        // emit error
+        const error = `${SystemUtils.localize(
+          "CS.messages.unsupportedEntityError"
+        )}: ${data.type}`;
+        SystemUtils.displayMessage("error", error);
+        throw new Error(error);
+      }
+      return new constructor(data, options);
+    },
+    get: (target, prop) => {
+      switch (prop) {
+        case "create":
+          // Calling the class' create() static function
+          return (data, options) => {
             const constructor = entities[data.type];
             if (!constructor) {
-                // emit error
-                const error = `${SystemUtils.localize("CS.messages.unsupportedEntityError")}: ${data.type}`;
-                SystemUtils.displayMessage("error", error);
-                throw new Error(error);
+              const error = `${SystemUtils.localize(
+                "CS.messages.unsupportedEntityError"
+              )}: ${data.type}`;
+              SystemUtils.displayMessage("error", error);
+              throw new Error(error);
             }
-            return new constructor(data, options);
-        },
-        get: (target, prop) => {
-            switch (prop) {
-                case "create":
-                    // Calling the class' create() static function
-                    return (data, options) => {
-                        const constructor = entities[data.type];
-                        if (!constructor) {
-                            const error = `${SystemUtils.localize("CS.messages.unsupportedEntityError")}: ${data.type}`;
-                            SystemUtils.displayMessage("error", error);
-                            throw new Error(error);
-                        }
-                        return constructor.create(data, options);
-                    };
-                case Symbol.hasInstance:
-                    // Applying the "instanceof" operator on the instance object
-                    return (instance) => {
-                        const constr = entities[instance?.type];
-                        if (!constr) {
-                            return instance instanceof baseClass;
-                        }
-                        return instance instanceof constr;
-                    };
-                default:
-                    // Just forward any requested properties to the base Actor class
-                    return baseClass[prop];
+            return constructor.create(data, options);
+          };
+        case Symbol.hasInstance:
+          // Applying the "instanceof" operator on the instance object
+          return (instance) => {
+            const constr = entities[instance?.type];
+            if (!constr) {
+              return instance instanceof baseClass;
             }
-        },
-    });
+            return instance instanceof constr;
+          };
+        default:
+          // Just forward any requested properties to the base Actor class
+          return baseClass[prop];
+      }
+    },
+  });
 }

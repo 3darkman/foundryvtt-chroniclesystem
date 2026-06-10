@@ -1,6 +1,6 @@
 import factory from "../utils/factory.js";
-import {CSCharacterActor} from "./csCharacterActor.js";
-import {CSHouseActor} from "./csHouseActor.js";
+import { CSCharacterActor } from "./csCharacterActor.js";
+import { CSHouseActor } from "./csHouseActor.js";
 
 const actorTypes = {};
 actorTypes.character = CSCharacterActor;

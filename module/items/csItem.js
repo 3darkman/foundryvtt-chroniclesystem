@@ -1,22 +1,19 @@
-import {ChronicleSystem} from "../system/ChronicleSystem.js";
+import { ChronicleSystem } from "../system/ChronicleSystem.js";
 
 export class CSItem extends Item {
+  getCSData() {
+    return this.system;
+  }
 
-    getCSData() {
-        return this.system;
-    }
+  prepareData() {
+    super.prepareData();
+  }
 
-    prepareData() {
-        super.prepareData();
-    }
+  onEquippedChanged(actor, isEquipped) {}
 
-    onEquippedChanged(actor, isEquipped) { }
+  onObtained(actor) {}
 
-    onObtained(actor) { }
+  onDiscardedFromActor(actor, oldId) {}
 
-    onDiscardedFromActor(actor, oldId) { }
-
-    _onArmorEquippedChanged(actor, isEquipped) {
-
-    }
+  _onArmorEquippedChanged(actor, isEquipped) {}
 }

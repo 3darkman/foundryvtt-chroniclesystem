@@ -1,349 +1,506 @@
-import {ChronicleSystem} from "../system/ChronicleSystem.js";
-import {CSActor} from "./csActor.js";
+import { ChronicleSystem } from "../system/ChronicleSystem.js";
+import { CSActor } from "./csActor.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
-import {CSConstants} from "../system/csConstants.js";
+import { CSConstants } from "../system/csConstants.js";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {CSActor}
  */
 export class CSCharacterActor extends CSActor {
-    modifiers;
-    penalties;
+  modifiers;
+  penalties;
 
-    prepareData() {
-        super.prepareData();
-        this.calculateMovementData();
+  prepareData() {
+    super.prepareData();
+    this.calculateMovementData();
+  }
+
+  prepareEmbeddedDocuments() {
+    super.prepareEmbeddedDocuments();
+  }
+
+  prepareDerivedData() {
+    super.prepareDerivedData();
+    this.calculateDerivedValues();
+  }
+
+  /** @override */
+  getRollData() {
+    return super.getRollData();
+  }
+
+  calculateDerivedValues() {
+    let data = this.getCSData();
+
+    // Combat defense and health exist on both character and unit data models
+    if (data.derivedStats?.combatDefense) {
+      data.derivedStats.combatDefense.value = this.calcCombatDefense() || 0;
+      data.derivedStats.combatDefense.total =
+        data.derivedStats.combatDefense.value +
+        (Number(data.derivedStats.combatDefense.modifier) || 0);
+    }
+    if (data.derivedStats?.health) {
+      data.derivedStats.health.value =
+        (this.getAbilityValue(
+          SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)
+        ) || 0) * 3;
+      data.derivedStats.health.total =
+        data.derivedStats.health.value +
+        (Number(data.derivedStats.health.modifier) || 0);
     }
 
-    prepareEmbeddedDocuments() {
-        super.prepareEmbeddedDocuments();
+    // Intrigue, composure, frustration, and fatigue only exist on character data model
+    if (data.derivedStats?.intrigueDefense) {
+      data.derivedStats.intrigueDefense.value = this.calcIntrigueDefense() || 0;
+      data.derivedStats.intrigueDefense.total =
+        data.derivedStats.intrigueDefense.value +
+        (Number(data.derivedStats.intrigueDefense.modifier) || 0);
     }
-
-    prepareDerivedData() {
-        super.prepareDerivedData()
-        this.calculateDerivedValues()
-
+    if (data.derivedStats?.composure) {
+      data.derivedStats.composure.value =
+        (this.getAbilityValue(
+          SystemUtils.localize(ChronicleSystem.keyConstants.WILL)
+        ) || 0) * 3;
+      data.derivedStats.composure.total =
+        data.derivedStats.composure.value +
+        (Number(data.derivedStats.composure.modifier) || 0);
     }
-
-    /** @override */
-    getRollData() {
-        return super.getRollData();
+    if (data.derivedStats?.frustration) {
+      data.derivedStats.frustration.value =
+        this.getAbilityValue(
+          SystemUtils.localize(ChronicleSystem.keyConstants.WILL)
+        ) || 0;
+      data.derivedStats.frustration.total =
+        data.derivedStats.frustration.value +
+        (Number(data.derivedStats.frustration.modifier) || 0);
     }
+    if (data.derivedStats?.fatigue) {
+      data.derivedStats.fatigue.value =
+        this.getAbilityValue(
+          SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)
+        ) || 0;
+      data.derivedStats.fatigue.total =
+        data.derivedStats.fatigue.value +
+        (Number(data.derivedStats.fatigue.modifier) || 0);
+    }
+  }
 
+  getAbilities() {
+    let items = this.items;
+    return items.filter((item) => item.type === "ability");
+  }
 
-    calculateDerivedValues() {
-        let data = this.getCSData();
+  getAbility(abilityName) {
+    let items = this.items;
+    const ability = items.find(
+      (item) =>
+        item.name.toLowerCase() === abilityName.toString().toLowerCase() &&
+        item.type === "ability"
+    );
+    return [ability, undefined];
+  }
 
-        // Combat defense and health exist on both character and unit data models
-        if (data.derivedStats?.combatDefense) {
-            data.derivedStats.combatDefense.value = this.calcCombatDefense() || 0;
-            data.derivedStats.combatDefense.total = data.derivedStats.combatDefense.value + (Number(data.derivedStats.combatDefense.modifier) || 0);
+  getAbilityBySpecialty(abilityName, specialtyName) {
+    let items = this.items;
+    let specialty = null;
+    const ability = items
+      .filter(
+        (item) =>
+          item.type === "ability" &&
+          item.name.toLowerCase() === abilityName.toString().toLowerCase()
+      )
+      .find(function (ability) {
+        let data = ability.getCSData();
+        if (data.specialties === undefined) return false;
+
+        // convert specialties list to array
+        let specialties = data.specialties;
+        let specialtiesArray = Object.keys(specialties).map(
+          (key) => specialties[key]
+        );
+
+        specialty = specialtiesArray.find(
+          (specialty) =>
+            specialty.name.toLowerCase() ===
+            specialtyName.toString().toLowerCase()
+        );
+        if (specialty !== null && specialty !== undefined) {
+          return true;
         }
-        if (data.derivedStats?.health) {
-            data.derivedStats.health.value = (this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)) || 0) * 3;
-            data.derivedStats.health.total = data.derivedStats.health.value + (Number(data.derivedStats.health.modifier) || 0);
-        }
+      });
 
-        // Intrigue, composure, frustration, and fatigue only exist on character data model
-        if (data.derivedStats?.intrigueDefense) {
-            data.derivedStats.intrigueDefense.value = this.calcIntrigueDefense() || 0;
-            data.derivedStats.intrigueDefense.total = data.derivedStats.intrigueDefense.value + (Number(data.derivedStats.intrigueDefense.modifier) || 0);
+    return [ability, specialty];
+  }
+
+  getModifier(type, includeDetail = false, includeModifierGlobal = false) {
+    this.updateTempModifiers();
+
+    let total = 0;
+    let detail = [];
+
+    if (this.modifiers[type]) {
+      this.modifiers[type].forEach((modifier) => {
+        total += modifier.mod;
+        if (includeDetail) {
+          let tempItem = modifier._id;
+          if (modifier.isDocument) {
+            tempItem = this.getEmbeddedDocument("Item", modifier._id);
+          }
+          if (tempItem) {
+            detail.push({ docName: tempItem.name, mod: modifier.mod });
+          }
         }
-        if (data.derivedStats?.composure) {
-            data.derivedStats.composure.value = (this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL)) || 0) * 3;
-            data.derivedStats.composure.total = data.derivedStats.composure.value + (Number(data.derivedStats.composure.modifier) || 0);
-        }
-        if (data.derivedStats?.frustration) {
-            data.derivedStats.frustration.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.WILL)) || 0;
-            data.derivedStats.frustration.total = data.derivedStats.frustration.value + (Number(data.derivedStats.frustration.modifier) || 0);
-        }
-        if (data.derivedStats?.fatigue) {
-            data.derivedStats.fatigue.value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)) || 0;
-            data.derivedStats.fatigue.total = data.derivedStats.fatigue.value + (Number(data.derivedStats.fatigue.modifier) || 0);
-        }
+      });
     }
 
-    getAbilities() {
-        let items = this.items;
-        return items.filter((item) => item.type === 'ability');
-    }
-
-    getAbility(abilityName) {
-        let items = this.items;
-        const ability = items.find((item) => item.name.toLowerCase() === abilityName.toString().toLowerCase() && item.type === 'ability');
-        return [ability, undefined];
-    }
-
-    getAbilityBySpecialty(abilityName, specialtyName) {
-        let items = this.items;
-        let specialty = null;
-        const ability = items.filter((item) => item.type === 'ability' && item.name.toLowerCase() === abilityName.toString().toLowerCase()).find(function (ability) {
-            let data = ability.getCSData();
-            if (data.specialties === undefined)
-                return false;
-
-            // convert specialties list to array
-            let specialties = data.specialties;
-            let specialtiesArray = Object.keys(specialties).map((key) => specialties[key]);
-
-            specialty = specialtiesArray.find((specialty) => specialty.name.toLowerCase() === specialtyName.toString().toLowerCase());
-            if (specialty !== null && specialty !== undefined) {
-                return true;
+    if (
+      includeModifierGlobal &&
+      this.modifiers[ChronicleSystem.modifiersConstants.ALL]
+    ) {
+      this.modifiers[ChronicleSystem.modifiersConstants.ALL].forEach(
+        (modifier) => {
+          total += modifier.mod;
+          if (includeDetail) {
+            let tempItem = modifier._id;
+            if (modifier.isDocument) {
+              tempItem = this.getEmbeddedDocument("Item", modifier._id);
             }
-        });
-
-        return [ability, specialty];
-    }
-
-    getModifier(type, includeDetail = false, includeModifierGlobal = false) {
-        this.updateTempModifiers();
-
-        let total = 0;
-        let detail = [];
-
-        if (this.modifiers[type]) {
-            this.modifiers[type].forEach((modifier) => {
-                total += modifier.mod;
-                if (includeDetail) {
-                    let tempItem = modifier._id;
-                    if (modifier.isDocument) {
-                        tempItem = this.getEmbeddedDocument('Item', modifier._id);
-                    }
-                    if (tempItem) {
-                        detail.push({docName: tempItem.name, mod: modifier.mod});
-                    }
-                }
-            });
+            if (tempItem)
+              detail.push({ docName: tempItem.name, mod: modifier.mod });
+          }
         }
+      );
+    }
 
-        if (includeModifierGlobal && this.modifiers[ChronicleSystem.modifiersConstants.ALL]) {
-            this.modifiers[ChronicleSystem.modifiersConstants.ALL].forEach((modifier) => {
-                total += modifier.mod;
-                if (includeDetail) {
-                    let tempItem = modifier._id;
-                    if (modifier.isDocument) {
-                        tempItem = this.getEmbeddedDocument('Item', modifier._id);
-                    }
-                    if (tempItem)
-                        detail.push({docName: tempItem.name, mod: modifier.mod});
-                }
-            });
+    return { total: total, detail: detail };
+  }
+
+  getPenalty(type, includeDetail = false, includeModifierGlobal = false) {
+    this.updateTempPenalties();
+
+    let total = 0;
+    let detail = [];
+
+    if (this.penalties[type]) {
+      this.penalties[type].forEach((penalty) => {
+        total += penalty.mod;
+        if (includeDetail) {
+          let tempItem = penalty._id;
+          if (penalty.isDocument) {
+            tempItem = this.getEmbeddedDocument("Item", penalty._id);
+          }
+          if (tempItem) {
+            detail.push({ docName: tempItem.name, mod: penalty.mod });
+          }
         }
-
-        return { total: total, detail: detail};
+      });
     }
 
-    getPenalty(type, includeDetail = false, includeModifierGlobal = false) {
-        this.updateTempPenalties();
-
-        let total = 0;
-        let detail = [];
-
-        if (this.penalties[type]) {
-            this.penalties[type].forEach((penalty) => {
-                total += penalty.mod;
-                if (includeDetail) {
-                    let tempItem = penalty._id;
-                    if (penalty.isDocument) {
-                        tempItem = this.getEmbeddedDocument('Item', penalty._id);
-                    }
-                    if (tempItem) {
-                        detail.push({docName: tempItem.name, mod: penalty.mod});
-                    }
-                }
-            });
-        }
-
-        if (includeModifierGlobal && this.penalties[ChronicleSystem.modifiersConstants.ALL]) {
-            this.penalties[ChronicleSystem.modifiersConstants.ALL].forEach((penalty) => {
-                total += penalty.mod;
-                if (includeDetail) {
-                    let tempItem = penalty._id;
-                    if (penalty.isDocument) {
-                        tempItem = this.getEmbeddedDocument('Item', penalty._id);
-                    }
-                    if (tempItem)
-                        detail.push({docName: tempItem.name, mod: penalty.mod});
-                }
-            });
-        }
-
-        return { total: total, detail: detail};
-    }
-
-    addModifier(type, documentId, value, isDocument = true, save = false) {
-        LOGGER.trace(`add ${documentId} modifier to ${type} | csCharacterActor.js`);
-
-        console.assert(this.modifiers, "call actor.updateTempModifiers before adding a modifier!");
-
-        if (!this.modifiers[type]) {
-            this.modifiers[type] = [];
-        }
-
-        let index = this.modifiers[type].findIndex((mod) => {
-            return mod._id === documentId
-        });
-        if (index >= 0) {
-            this.modifiers[type][index].mod = value;
-        } else {
-            this.modifiers[type].push({_id: documentId, mod: value, isDocument: isDocument});
-        }
-
-        if (save) {
-            this.update({"system.modifiers": this.modifiers});
-        }
-    }
-
-    addPenalty(type, documentId, value, isDocument = true, save = false) {
-        LOGGER.trace(`add ${documentId} penalty to ${type} | csCharacterActor.js`);
-
-        console.assert(this.penalties, "call actor.updateTempPenalties before adding a penalty!");
-
-        if (!this.penalties[type]) {
-            this.penalties[type] = [];
-        }
-
-        let index = this.penalties[type].findIndex((mod) => {
-            return mod._id === documentId
-        });
-
-        if (index >= 0) {
-            this.penalties[type][index].mod = value;
-        } else {
-            this.penalties[type].push({
-                _id: documentId,
-                mod: value,
-                isDocument: isDocument
-            });
-        }
-
-        if (save) {
-            this.update({"system.penalties": this.penalties});
-        }
-    }
-
-    removeModifier(type, documentId, save = false) {
-        LOGGER.trace(`remove ${documentId} modifier to ${type} | csCharacterActor.js`);
-
-        console.assert(this.modifiers, "call actor.updateTempModifiers before removing a modifier!");
-
-        if (this.modifiers[type]) {
-            let index = this.modifiers[type].findIndex((mod) => mod._id === documentId);
-            this.modifiers[type].splice(index, 1);
-        }
-        if (save)
-            this.update({"system.modifiers" : this.modifiers});
-    }
-
-    removePenalty(type, documentId, save = false) {
-        LOGGER.trace(`remove ${documentId} penalty to ${type} | csCharacterActor.js`);
-
-        console.assert(this.penalties, "call actor.updateTempPenalties before removing a penalty!");
-
-        if (this.penalties[type]) {
-            let index = this.penalties[type].findIndex((mod) => mod._id === documentId);
-            this.penalties[type].splice(index, 1);
-        }
-        if (save)
-            this.update({"system.penalties" : this.penalties});
-    }
-
-    getMaxInjuries() {
-        return this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE));
-    }
-
-    getMaxWounds() {
-        return this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE));
-    }
-
-    saveModifiers() {
-        console.assert(this.modifiers, "call actor.updateTempModifiers before saving the modifiers!");
-        this.update({"system.modifiers" : this.modifiers}, {diff:false});
-    }
-
-    savePenalties() {
-        console.assert(this.penalties, "call actor.updateTempPenalties before saving the penalties!");
-        this.update({"system.penalties" : this.penalties}, {diff:false});
-    }
-
-    getAbilityValue(abilityName) {
-        const [ability,] = this.getAbility(abilityName);
-        return ability !== undefined? ability.getCSData().rating : 2;
-    }
-
-    calcIntrigueDefense() {
-        return this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS)) +
-            this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.CUNNING)) +
-            this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.STATUS));
-    }
-
-    calcCombatDefense() {
-        let value = this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS)) +
-            this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.AGILITY)) +
-            this.getAbilityValue(SystemUtils.localize(ChronicleSystem.keyConstants.ATHLETICS));
-
-        if (game.settings.get(CSConstants.Settings.SYSTEM_NAME, CSConstants.Settings.ASOIAF_DEFENSE_STYLE)){
-            let mod = this.getModifier(ChronicleSystem.modifiersConstants.COMBAT_DEFENSE);
-            value += mod.total;
-        }
-
-        return value;
-    }
-
-    calculateMovementData() {
-        let data = this.getCSData();
-        // Movement only exists on the character data model, not on units
-        if (!data.movement) return;
-        data.movement.base = ChronicleSystem.defaultMovement;
-        let runFormula = ChronicleSystem.getActorAbilityFormula(this, SystemUtils.localize(ChronicleSystem.keyConstants.ATHLETICS), SystemUtils.localize(ChronicleSystem.keyConstants.RUN));
-        data.movement.runBonus = Math.floor(runFormula.bonusDice / 2);
-        let bulkMod = this.getModifier(SystemUtils.localize(ChronicleSystem.modifiersConstants.BULK));
-        data.movement.bulk = Math.floor(bulkMod.total/2);
-        data.movement.total = Math.max(data.movement.base + data.movement.runBonus - data.movement.bulk + (parseInt(data.movement.modifier) || 0), 1);
-        data.movement.sprintTotal = data.movement.total * (Number(data.movement.sprintMultiplier) || 4) - data.movement.bulk;
-    }
-
-    _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
-        super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
-        this.updateTempModifiers();
-        for (let i = 0; i < documents.length; i++) {
-            documents[i].onDiscardedFromActor(this, ids[0]);
-        }
-        this.saveModifiers();
-    }
-
-    _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
-        super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
-        this.updateTempModifiers();
-        for (let i = 0; i < documents.length; i++) {
-            documents[i].onObtained(this);
-        }
-
-        this.saveModifiers();
-    }
-
-    _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
-        super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
-        this.updateTempModifiers();
-        changes.forEach((doc) => {
-            let item = this.items.find((item) => item._id === doc._id);
-            if (item) {
-                item.onObtained(this);
-                item.onEquippedChanged(this, item.getCSData().equipped > 0);
+    if (
+      includeModifierGlobal &&
+      this.penalties[ChronicleSystem.modifiersConstants.ALL]
+    ) {
+      this.penalties[ChronicleSystem.modifiersConstants.ALL].forEach(
+        (penalty) => {
+          total += penalty.mod;
+          if (includeDetail) {
+            let tempItem = penalty._id;
+            if (penalty.isDocument) {
+              tempItem = this.getEmbeddedDocument("Item", penalty._id);
             }
-        })
-        this.saveModifiers();
+            if (tempItem)
+              detail.push({ docName: tempItem.name, mod: penalty.mod });
+          }
+        }
+      );
     }
 
-    updateTempModifiers() {
-        let data = this.getCSData()
-        this.modifiers = data.modifiers;
+    return { total: total, detail: detail };
+  }
+
+  addModifier(type, documentId, value, isDocument = true, save = false) {
+    LOGGER.trace(`add ${documentId} modifier to ${type} | csCharacterActor.js`);
+
+    console.assert(
+      this.modifiers,
+      "call actor.updateTempModifiers before adding a modifier!"
+    );
+
+    if (!this.modifiers[type]) {
+      this.modifiers[type] = [];
     }
 
-    updateTempPenalties() {
-        let data = this.getCSData()
-        this.penalties = data.penalties;
+    let index = this.modifiers[type].findIndex((mod) => {
+      return mod._id === documentId;
+    });
+    if (index >= 0) {
+      this.modifiers[type][index].mod = value;
+    } else {
+      this.modifiers[type].push({
+        _id: documentId,
+        mod: value,
+        isDocument: isDocument,
+      });
     }
+
+    if (save) {
+      this.update({ "system.modifiers": this.modifiers });
+    }
+  }
+
+  addPenalty(type, documentId, value, isDocument = true, save = false) {
+    LOGGER.trace(`add ${documentId} penalty to ${type} | csCharacterActor.js`);
+
+    console.assert(
+      this.penalties,
+      "call actor.updateTempPenalties before adding a penalty!"
+    );
+
+    if (!this.penalties[type]) {
+      this.penalties[type] = [];
+    }
+
+    let index = this.penalties[type].findIndex((mod) => {
+      return mod._id === documentId;
+    });
+
+    if (index >= 0) {
+      this.penalties[type][index].mod = value;
+    } else {
+      this.penalties[type].push({
+        _id: documentId,
+        mod: value,
+        isDocument: isDocument,
+      });
+    }
+
+    if (save) {
+      this.update({ "system.penalties": this.penalties });
+    }
+  }
+
+  removeModifier(type, documentId, save = false) {
+    LOGGER.trace(
+      `remove ${documentId} modifier to ${type} | csCharacterActor.js`
+    );
+
+    console.assert(
+      this.modifiers,
+      "call actor.updateTempModifiers before removing a modifier!"
+    );
+
+    if (this.modifiers[type]) {
+      let index = this.modifiers[type].findIndex(
+        (mod) => mod._id === documentId
+      );
+      this.modifiers[type].splice(index, 1);
+    }
+    if (save) this.update({ "system.modifiers": this.modifiers });
+  }
+
+  removePenalty(type, documentId, save = false) {
+    LOGGER.trace(
+      `remove ${documentId} penalty to ${type} | csCharacterActor.js`
+    );
+
+    console.assert(
+      this.penalties,
+      "call actor.updateTempPenalties before removing a penalty!"
+    );
+
+    if (this.penalties[type]) {
+      let index = this.penalties[type].findIndex(
+        (mod) => mod._id === documentId
+      );
+      this.penalties[type].splice(index, 1);
+    }
+    if (save) this.update({ "system.penalties": this.penalties });
+  }
+
+  getMaxInjuries() {
+    return this.getAbilityValue(
+      SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)
+    );
+  }
+
+  getMaxWounds() {
+    return this.getAbilityValue(
+      SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)
+    );
+  }
+
+  saveModifiers() {
+    console.assert(
+      this.modifiers,
+      "call actor.updateTempModifiers before saving the modifiers!"
+    );
+    this.update({ "system.modifiers": this.modifiers }, { diff: false });
+  }
+
+  savePenalties() {
+    console.assert(
+      this.penalties,
+      "call actor.updateTempPenalties before saving the penalties!"
+    );
+    this.update({ "system.penalties": this.penalties }, { diff: false });
+  }
+
+  getAbilityValue(abilityName) {
+    const [ability] = this.getAbility(abilityName);
+    return ability !== undefined ? ability.getCSData().rating : 2;
+  }
+
+  calcIntrigueDefense() {
+    return (
+      this.getAbilityValue(
+        SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS)
+      ) +
+      this.getAbilityValue(
+        SystemUtils.localize(ChronicleSystem.keyConstants.CUNNING)
+      ) +
+      this.getAbilityValue(
+        SystemUtils.localize(ChronicleSystem.keyConstants.STATUS)
+      )
+    );
+  }
+
+  calcCombatDefense() {
+    let value =
+      this.getAbilityValue(
+        SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS)
+      ) +
+      this.getAbilityValue(
+        SystemUtils.localize(ChronicleSystem.keyConstants.AGILITY)
+      ) +
+      this.getAbilityValue(
+        SystemUtils.localize(ChronicleSystem.keyConstants.ATHLETICS)
+      );
+
+    if (
+      game.settings.get(
+        CSConstants.Settings.SYSTEM_NAME,
+        CSConstants.Settings.ASOIAF_DEFENSE_STYLE
+      )
+    ) {
+      let mod = this.getModifier(
+        ChronicleSystem.modifiersConstants.COMBAT_DEFENSE
+      );
+      value += mod.total;
+    }
+
+    return value;
+  }
+
+  calculateMovementData() {
+    let data = this.getCSData();
+    // Movement only exists on the character data model, not on units
+    if (!data.movement) return;
+    data.movement.base = ChronicleSystem.defaultMovement;
+    let runFormula = ChronicleSystem.getActorAbilityFormula(
+      this,
+      SystemUtils.localize(ChronicleSystem.keyConstants.ATHLETICS),
+      SystemUtils.localize(ChronicleSystem.keyConstants.RUN)
+    );
+    data.movement.runBonus = Math.floor(runFormula.bonusDice / 2);
+    let bulkMod = this.getModifier(
+      SystemUtils.localize(ChronicleSystem.modifiersConstants.BULK)
+    );
+    data.movement.bulk = Math.floor(bulkMod.total / 2);
+    data.movement.total = Math.max(
+      data.movement.base +
+        data.movement.runBonus -
+        data.movement.bulk +
+        (parseInt(data.movement.modifier) || 0),
+      1
+    );
+    data.movement.sprintTotal =
+      data.movement.total * (Number(data.movement.sprintMultiplier) || 4) -
+      data.movement.bulk;
+  }
+
+  _onDeleteDescendantDocuments(
+    parent,
+    collection,
+    documents,
+    ids,
+    options,
+    userId
+  ) {
+    super._onDeleteDescendantDocuments(
+      parent,
+      collection,
+      documents,
+      ids,
+      options,
+      userId
+    );
+    this.updateTempModifiers();
+    for (let i = 0; i < documents.length; i++) {
+      documents[i].onDiscardedFromActor(this, ids[0]);
+    }
+    this.saveModifiers();
+  }
+
+  _onCreateDescendantDocuments(
+    parent,
+    collection,
+    documents,
+    data,
+    options,
+    userId
+  ) {
+    super._onCreateDescendantDocuments(
+      parent,
+      collection,
+      documents,
+      data,
+      options,
+      userId
+    );
+    this.updateTempModifiers();
+    for (let i = 0; i < documents.length; i++) {
+      documents[i].onObtained(this);
+    }
+
+    this.saveModifiers();
+  }
+
+  _onUpdateDescendantDocuments(
+    parent,
+    collection,
+    documents,
+    changes,
+    options,
+    userId
+  ) {
+    super._onUpdateDescendantDocuments(
+      parent,
+      collection,
+      documents,
+      changes,
+      options,
+      userId
+    );
+    this.updateTempModifiers();
+    changes.forEach((doc) => {
+      let item = this.items.find((item) => item._id === doc._id);
+      if (item) {
+        item.onObtained(this);
+        item.onEquippedChanged(this, item.getCSData().equipped > 0);
+      }
+    });
+    this.saveModifiers();
+  }
+
+  updateTempModifiers() {
+    let data = this.getCSData();
+    this.modifiers = data.modifiers;
+  }
+
+  updateTempPenalties() {
+    let data = this.getCSData();
+    this.penalties = data.penalties;
+  }
 }

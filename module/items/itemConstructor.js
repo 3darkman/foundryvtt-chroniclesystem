@@ -1,11 +1,11 @@
 import factory from "../utils/factory.js";
-import {CSWeaponItem} from "./csWeaponItem.js";
-import {CSItem} from "./csItem.js";
-import {CSAbilityItem} from "./csAbilityItem.js";
-import {CSArmorItem} from "./csArmorItem.js";
-import {CSEventItem} from "./csEventItem.js";
-import {CSHoldingItem} from "./cs-holding-item.js";
-import {CSTechniqueItem} from "./cs-technique-item.js";
+import { CSWeaponItem } from "./csWeaponItem.js";
+import { CSItem } from "./csItem.js";
+import { CSAbilityItem } from "./csAbilityItem.js";
+import { CSArmorItem } from "./csArmorItem.js";
+import { CSEventItem } from "./csEventItem.js";
+import { CSHoldingItem } from "./cs-holding-item.js";
+import { CSTechniqueItem } from "./cs-technique-item.js";
 
 const itemTypes = {};
 itemTypes.weapon = CSWeaponItem;
