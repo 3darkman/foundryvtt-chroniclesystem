@@ -1,0 +1,72 @@
+.chroniclesystem.sheet.item .form-group input {
+    margin: 0 0 0 5px;
+    height: 34px;
+}
+
+/* Keep label and input on a single line in item-sheet form groups
+   (v13 core gives inputs width:100%, which otherwise wraps them
+   onto their own line). */
+.chroniclesystem.sheet.item .form-group {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.chroniclesystem.sheet.item .form-group > label {
+    flex: 1 1 auto;
+}
+
+.chroniclesystem.sheet.item .form-group > input {
+    min-width: 0;
+}
+
+/* Left column: the old 1 : 2.5 proportional share, widened by 20px. */
+.chroniclesystem.sheet.item .sheet-body .item-stats {
+    flex: 0 0 calc(100% / 3.5 + 20px);
+}
+
+.chroniclesystem.sheet.item .sheet-body .description {
+    flex: 1 1 0;
+    min-width: 0;
+    /* Stack header + editor and let the editor fill the column so the
+       description resizes with the sheet height (restores the pre-v13
+       behaviour for the migrated <prose-mirror> editor). */
+    display: flex;
+    flex-direction: column;
+}
+
+.chroniclesystem.sheet.item .sheet-body .description .form-group {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+}
+
+.chroniclesystem.sheet.item .sheet-body .description prose-mirror,
+.chroniclesystem.sheet.item .sheet-body .description .editor-content {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.chroniclesystem.sheet.item .sheet-body .poison {
+    flex-grow: 2;
+}
+
+.chroniclesystem.sheet.item .sheet-header .item-control {
+    flex: 0 0 36px;
+    margin-left: 10px;
+    align-self: center;
+    align-items: center;
+    color: black;
+    line-height: normal;
+}
+
+.chroniclesystem.sheet.item {
+    min-width: 460px;
+    min-height: 400px;
+}
+
+.chroniclesystem.sheet.item .item-stats {
+    margin-right: 10px;
+}

@@ -18,6 +18,12 @@ import SystemUtils from "./systemUtils.js";
  */
 export default function factory(entities, baseClass) {
     return new Proxy(baseClass, {
+        // Without this trap the proxy's prototype chain never contains
+        // baseClass itself, so foundry.utils.isSubclass(documentClass, Actor)
+        // fails and core skips the ActorDelta redirect for unlinked token
+        // actors (server then rejects with "actors is not a valid embedded
+        // Document within the Token Document").
+        getPrototypeOf: () => baseClass,
         construct: (target, args) => {
             const [data, options] = args;
             const constructor = entities[data.type];
@@ -45,9 +51,9 @@ export default function factory(entities, baseClass) {
                 case Symbol.hasInstance:
                     // Applying the "instanceof" operator on the instance object
                     return (instance) => {
-                        const constr = entities[instance.type];
+                        const constr = entities[instance?.type];
                         if (!constr) {
-                            return false;
+                            return instance instanceof baseClass;
                         }
                         return instance instanceof constr;
                     };

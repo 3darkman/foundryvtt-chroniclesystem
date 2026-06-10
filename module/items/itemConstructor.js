@@ -17,5 +17,7 @@ itemTypes.equipment = CSItem;
 itemTypes.event = CSEventItem;
 itemTypes.holding = CSHoldingItem;
 itemTypes.technique = CSTechniqueItem;
+itemTypes.unitType = CSItem;
+itemTypes.poison = CSItem;
 const itemConstructor = factory(itemTypes, Item);
 export default itemConstructor;

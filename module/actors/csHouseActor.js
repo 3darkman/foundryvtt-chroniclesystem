@@ -53,21 +53,23 @@ export class CSHouseActor extends CSActor {
 
     async _regenerateResource(data, resource) {
         let roll = new Roll('8d6-2d6');
-        await roll.evaluate({ async: true });
+        await roll.evaluate();
         data[resource].startingValue = roll.total;
     }
 
-    _onCreateEmbeddedDocuments(
-        embeddedName,
+    _onCreateDescendantDocuments(
+        parent,
+        collection,
         documents,
-        result,
+        data,
         options,
         userId
     ) {
-        super._onCreateEmbeddedDocuments(
-            embeddedName,
+        super._onCreateDescendantDocuments(
+            parent,
+            collection,
             documents,
-            result,
+            data,
             options,
             userId
         );
@@ -77,17 +79,19 @@ export class CSHouseActor extends CSActor {
         if (isToUpdate) this._updateAllResourcesTotal();
     }
 
-    _onUpdateEmbeddedDocuments(
-        embeddedName,
+    _onUpdateDescendantDocuments(
+        parent,
+        collection,
         documents,
-        result,
+        changes,
         options,
         userId
     ) {
-        super._onUpdateEmbeddedDocuments(
-            embeddedName,
+        super._onUpdateDescendantDocuments(
+            parent,
+            collection,
             documents,
-            result,
+            changes,
             options,
             userId
         );
@@ -97,17 +101,19 @@ export class CSHouseActor extends CSActor {
         if (isToUpdate) this._updateAllResourcesTotal();
     }
 
-    _onDeleteEmbeddedDocuments(
-        embeddedName,
+    _onDeleteDescendantDocuments(
+        parent,
+        collection,
         documents,
-        result,
+        ids,
         options,
         userId
     ) {
-        super._onDeleteEmbeddedDocuments(
-            embeddedName,
+        super._onDeleteDescendantDocuments(
+            parent,
+            collection,
             documents,
-            result,
+            ids,
             options,
             userId
         );
@@ -168,8 +174,8 @@ export class CSHouseActor extends CSActor {
                 if (
                     this.getCSData().members[this.roleMap[role]].id === actorId
                 ) {
-                    let key = `data.members.${[this.roleMap[role]]}`;
-                    this.update({ [key]: '' });
+                    let key = `system.members.${[this.roleMap[role]]}`;
+                    this.update({ [key]: { id: '', description: '' } });
                     founded = true;
                 }
                 break;
@@ -182,7 +188,7 @@ export class CSHouseActor extends CSActor {
                     index = this._getMemberIndexIfExists(role, actorId, list);
                 if (index >= 0) {
                     list.splice(index);
-                    let key = `data.members.${[this.roleMap[role]]}`;
+                    let key = `system.members.${[this.roleMap[role]]}`;
                     this.update({
                         [key]: list,
                     });
@@ -199,7 +205,7 @@ export class CSHouseActor extends CSActor {
         data[resourceId].startingValue = parseInt(startingValue);
         data[resourceId].description = description;
         data[resourceId].total = this._updateResourceTotal(data, resourceId);
-        let key = `data.${resourceId}`;
+        let key = `system.${resourceId}`;
         this.update({ [key]: data[resourceId] });
     }
 
@@ -220,7 +226,7 @@ export class CSHouseActor extends CSActor {
                     );
                 }
             case 'STEWARD':
-                let key = `data.members.${[this.roleMap[role]]}`;
+                let key = `system.members.${[this.roleMap[role]]}`;
                 this.update({
                     [key]: { id: actorId, description: description },
                 });
@@ -232,7 +238,7 @@ export class CSHouseActor extends CSActor {
                 let list = this.getCSData().members[this.roleMap[role]];
                 if (this._getMemberIndexIfExists(role, actorId, list) < 0) {
                     list.push({ id: actorId, description: description });
-                    let key = `data.members.${[this.roleMap[role]]}`;
+                    let key = `system.members.${[this.roleMap[role]]}`;
                     this.update({
                         [key]: list,
                     });
@@ -274,7 +280,12 @@ export class CSHouseActor extends CSActor {
     }
 
     _getCharacterDataById(id) {
-        if (!id) return SystemUtils.localize('CS.messages.nobodyHasBeenChosen');
+        if (!id) {
+            return {
+                name: SystemUtils.localize('CS.messages.nobodyHasBeenChosen'),
+                age: 0,
+            };
+        }
         let actor = game.actors.get(id);
         let name = SystemUtils.localize('CS.messages.actorDoesntExists');
         let age = 0;
@@ -306,18 +317,18 @@ export class CSHouseActor extends CSActor {
         this._updateResourceTotal(data, 'wealth');
 
         this.update({
-            'data.defense': data.defense,
-            'data.influence': data.influence,
-            'data.lands': data.lands,
-            'data.law': data.law,
-            'data.population': data.population,
-            'data.power': data.power,
-            'data.wealth': data.wealth,
+            'system.defense': data.defense,
+            'system.influence': data.influence,
+            'system.lands': data.lands,
+            'system.law': data.law,
+            'system.population': data.population,
+            'system.power': data.power,
+            'system.wealth': data.wealth,
         });
     }
 
     _getAllEventModifiers(resource) {
-        let items = this.getEmbeddedCollection('Item').contents;
+        let items = this.items.contents;
         let events = items.filter((item) => item.type === 'event');
         let modifier = 0;
         events.forEach((event) => {
@@ -349,7 +360,7 @@ export class CSHouseActor extends CSActor {
     }
 
     getHoldingsDice() {
-        let holdings = this.getEmbeddedCollection('Item').contents.filter(
+        let holdings = this.items.contents.filter(
             (item) => item.type === 'holding'
         );
         let modifier = 0;
@@ -366,7 +377,7 @@ export class CSHouseActor extends CSActor {
     }
 
     getHoldingsModifier() {
-        let holdings = this.getEmbeddedCollection('Item').contents.filter(
+        let holdings = this.items.contents.filter(
             (item) => item.type === 'holding'
         );
         let modifier = 0;

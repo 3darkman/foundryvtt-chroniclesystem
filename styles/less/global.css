@@ -50,7 +50,7 @@
   margin: 0 4px;
 }
 .chroniclesystem.sheet.character .qualities-list .item .description {
-  display: none;
+  padding: 5px;
 }
 .chroniclesystem.sheet.character section.disposition {
   flex: 0 0 170px;
@@ -94,63 +94,8 @@
 .chroniclesystem.sheet.technique .work.item {
   margin-bottom: 8px;
 }
-.chroniclesystem.sheet.item {
-  min-width: 460px;
-  min-height: 400px;
-}
-.chroniclesystem.sheet.item .sheet-header .item-control {
-  flex: 0 0 36px;
-  margin-left: 10px;
-  align-self: center;
-  align-items: center;
+.chroniclesystem {
   color: black;
-  line-height: normal;
-}
-.chroniclesystem.sheet.item .sheet-body {
-  align-items: stretch;
-  height: auto;
-}
-.chroniclesystem.sheet.item .sheet-body .form-group input {
-  margin: 0 0 0 5px;
-  height: 34px;
-}
-.chroniclesystem.sheet.item .sheet-body .poison {
-  flex-grow: 2;
-}
-.chroniclesystem.sheet.item .sheet-body .poison .editor {
-  min-height: 150px;
-  padding: 0 3px;
-  background: white;
-  border: white 0;
-}
-.chroniclesystem.sheet.item .sheet-body .header-fields {
-  display: flex;
-}
-.chroniclesystem.sheet.item .sheet-body .form-group {
-  margin: 5px 0 0 5px;
-}
-.chroniclesystem.sheet.item .sheet-body .item-stats {
-  flex-grow: 1;
-  margin-right: 10px;
-}
-.chroniclesystem.sheet.item .sheet-body .description-text {
-  height: 65%;
-}
-.chroniclesystem.sheet.item .sheet-body .description {
-  flex-grow: 2.5;
-}
-.chroniclesystem.sheet.item .sheet-body .description .editor {
-  min-height: 100px;
-  max-height: 100%;
-  flex-grow: 1;
-  display: flex;
-  height: 100%;
-  width: 100%;
-  position: relative;
-  word-break: break-word;
-  padding: 0 3px;
-  background: white;
-  border: white 0;
 }
 .chroniclesystem .capitalize {
   text-transform: capitalize;
@@ -174,10 +119,27 @@
   padding: 0 !important;
 }
 .chroniclesystem.sheet .window-content {
-  height: 100%;
   padding: 5px 10px 5px 5px;
   overflow-y: hidden;
   background: #DCE2EF;
+  /* V2: .window-content contains a part wrapper div, then .editable/.locked.
+     The flex column layout must flow through the entire chain so that
+     .sheet-body can flex-grow into remaining space. */
+  display: flex;
+  flex-direction: column;
+}
+.chroniclesystem.sheet .window-content > [data-application-part] {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+.chroniclesystem.sheet .window-content .editable,
+.chroniclesystem.sheet .window-content .locked {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
 }
 .chroniclesystem.sheet .window-content .header-field {
   background: #005390;
@@ -301,6 +263,7 @@
 .chroniclesystem.sheet input {
   background: white;
   border: none;
+  color: black;
 }
 .chroniclesystem.sheet input:read-only {
   background: #DCE2EF;
@@ -310,6 +273,7 @@
 .chroniclesystem.sheet textarea {
   background: white;
   border: none;
+  color: black;
 }
 .chroniclesystem.sheet .size25 {
   width: 25px;

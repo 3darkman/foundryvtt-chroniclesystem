@@ -1,4 +1,4 @@
-<form class="{{cssClass}}" autocomplete="off">
+<section class="{{cssClass}}">
     {{!-- Item Sheet Header --}} {{>
     "systems/chroniclesystem/templates/items/partials/header-delete.hbs"}}
     <main class="sheet-body flexrow">
@@ -44,7 +44,7 @@
                     <span>Specialties</span>
                 </div>
                 <div class="header-field-add">
-                    <a class="specialty-create" data-type="skill"><i class="fa fa-plus"></i></a>
+                    <a data-action="createSpecialty" data-type="skill"><i class="fa fa-plus"></i></a>
                 </div>
             </header>
             <ol class="specialties-list list resizable" data-base-size="150">
@@ -79,11 +79,11 @@
                                 data-dtype="Number"
                         />
                         {{/if}}
-                        <a class="specialty-control item-controls" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                        <a class="item-controls" data-id="{{id}}" data-action="deleteSpecialty"><i class="fas fa-trash"></i></a>
                     </li>
                 {{/each}}
             </ol>
         </section>
 
     </main>
-</form>
+</section>

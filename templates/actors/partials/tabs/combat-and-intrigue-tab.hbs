@@ -9,8 +9,8 @@
             <section class="">
             </section>
             <section class="flexrow">
-                {{> (formGroup) labelText="Current:" id="system.destinyPoints.current" value=character.destinyPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
-                {{> (formGroup) labelText="Max:" id="system.destinyPoints.max" value=character.destinyPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
+                {{> (csFormGroup) labelText="Current:" id="system.destinyPoints.current" value=character.destinyPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
+                {{> (csFormGroup) labelText="Max:" id="system.destinyPoints.max" value=character.destinyPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
             </section>
         </section>
         <section class="intrigue">
@@ -26,12 +26,10 @@
                     <div class="form-group">
                         <span class="form-fields">
                               <input
-                                      name="system.derivedStats.intrigueDefense.value"
                                       type="text"
                                       value="{{character.derivedStats.intrigueDefense.value}}"
                                       placeholder="Value"
                                       readonly="readonly"
-                                      data-dtype="Number"
                               />
                             <b>+</b>
                               <input
@@ -43,12 +41,10 @@
                               />
                             <b>=</b>
                             <input
-                                    name="system.derivedStats.intrigueDefense.total"
                                     type="text"
                                     value="{{character.derivedStats.intrigueDefense.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                         </span>
                     </div>
@@ -58,12 +54,10 @@
                     <div class="form-group">
                         <span class="form-fields">
                             <input
-                                    name="system.derivedStats.composure.value"
                                     type="text"
                                     value="{{character.derivedStats.composure.value}}"
                                     placeholder="Value"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                             <b>+</b>
                             <input
@@ -75,16 +69,14 @@
                             />
                             <b>=</b>
                             <input
-                                    name="system.derivedStats.composure.value"
                                     type="text"
                                     value="{{character.derivedStats.composure.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                         </span>
                     </div>
-                    {{> (formGroup) labelText="Current:" id="system.derivedStats.composure.current" value=character.derivedStats.composure.current inputCssClass="" placeHolder="Current" dataType="Number" }}
+                    {{> (csFormGroup) labelText="Current:" id="system.derivedStats.composure.current" value=character.derivedStats.composure.current inputCssClass="" placeHolder="Current" dataType="Number" }}
                     <header class="subheader-field">
                         <span>Frustration</span>
                     </header>
@@ -102,7 +94,7 @@
                     </header>
                     <div class="disposition-list">
                         {{#each dispositions}}
-                                <div class="disposition option capitalize {{showIfEquals this.rating ../character.currentDisposition "selected"}}" data-id="{{this.rating}}">
+                                <div class="disposition option capitalize {{showIfEquals this.rating ../character.currentDisposition "selected"}}" data-id="{{this.rating}}" data-action="changeDisposition">
                                     {{this.rating}} - {{localize this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
                                 </div>
                         {{/each}}
@@ -126,8 +118,8 @@
                         <tr>
                             <td class="capitalize">{{this.name}}</td>
                             <td>{{this.influence}}</td>
-                            <td class="rollable" id="persuasion:{{this.name}}:{{formulaToStr this.persuasion}}"><a>{{format-formula this.persuasion}}</a></td>
-                            <td class="rollable" id="deception:{{this.name}}:{{formulaToStr this.deception}}"><a>{{format-formula this.deception}}</a></td>
+                            <td class="rollable" id="persuasion:{{this.name}}:{{formulaToStr this.persuasion}}" data-action="rollDice"><a>{{format-formula this.persuasion}}</a></td>
+                            <td class="rollable" id="deception:{{this.name}}:{{formulaToStr this.deception}}" data-action="rollDice"><a>{{format-formula this.deception}}</a></td>
                         </tr>
                         {{/each}}
                         </tbody>
@@ -147,12 +139,10 @@
                     <div class="form-group">
                         <span class="form-fields">
                             <input
-                                    name="system.derivedStats.combatDefense.value"
                                     type="text"
                                     value="{{character.derivedStats.combatDefense.value}}"
                                     placeholder="Value"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                             <b>+</b>
                             <input
@@ -164,12 +154,10 @@
                             />
                             <b>=</b>
                             <input
-                                    name="system.derivedStats.combatDefense.value"
                                     type="text"
                                     value="{{character.derivedStats.combatDefense.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                         </span>
                     </div>
@@ -179,12 +167,10 @@
                     <div class="form-group">
                         <span class="form-fields">
                             <input
-                                    name="system.derivedStats.health.value"
                                     type="text"
                                     value="{{character.derivedStats.health.value}}"
                                     placeholder="Value"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                             <b>+</b>
                             <input
@@ -196,12 +182,10 @@
                             />
                             <b>=</b>
                             <input
-                                    name="system.derivedStats.health.value"
                                     type="text"
                                     value="{{character.derivedStats.health.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                         </span>
                     </div>
@@ -227,30 +211,24 @@
                     <div class="form-group">
                         <span class="form-fields">
                             <input
-                                    name="system.movement.base"
                                     type="text"
                                     value="{{character.movement.base}}"
                                     placeholder="Base"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                             <b>+</b>
                             <input
-                                    name="system.derivedStats.movement.runBonus"
                                     type="text"
                                     value="{{character.movement.runBonus}}"
                                     placeholder="Run Bonus"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                             <b>-</b>
                             <input
-                                    name="system.movement.bulk"
                                     type="text"
                                     value="{{character.movement.bulk}}"
                                     placeholder="Bulk"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                             <b>+</b>
                             <input
@@ -262,12 +240,10 @@
                             />
                             <b>=</b>
                             <input
-                                    name="system.derivedStats.movement.total"
                                     type="text"
                                     value="{{character.movement.total}}"
                                     placeholder="Total"
                                     readonly="readonly"
-                                    data-dtype="Number"
                             />
                         </span>
                     </div>
@@ -278,7 +254,7 @@
                             <span>Injuries ({{currentInjuries}} / {{maxInjuries}})</span>
                         </div>
                         <div class="header-field-add">
-                            <a class="injury-create" data-type="skill"><i class="fa fa-plus"></i></a>
+                            <a class="injury-create" data-type="skill" data-action="createInjury"><i class="fa fa-plus"></i></a>
                         </div>
                     </header>
                     <ol class="injuries-list list resizable" data-base-size="150">
@@ -293,7 +269,7 @@
                                         placeholder="Description"
                                         data-dtype="String"
                                 />
-                                <a class="injury-control item-controls" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                                <a class="injury-control item-controls" data-id="{{id}}" data-action="deleteInjury"><i class="fas fa-trash"></i></a>
                             </li>
                         {{/each}}
                     </ol>
@@ -302,7 +278,7 @@
                             <span>Wounds ({{currentWounds}} / {{maxWounds}})</span>
                         </div>
                         <div class="header-field-add">
-                            <a class="wound-create" data-type="skill"><i class="fa fa-plus"></i></a>
+                            <a class="wound-create" data-type="skill" data-action="createWound"><i class="fa fa-plus"></i></a>
                         </div>
                     </header>
                     <ol class="wounds-list list resizable" data-base-size="150">
@@ -317,7 +293,7 @@
                                         placeholder="Description"
                                         data-dtype="String"
                                 />
-                                <a class="wound-control item-controls" data-id="{{id}}" data-action="delete"><i class="fas fa-trash"></i></a>
+                                <a class="wound-control item-controls" data-id="{{id}}" data-action="deleteWound"><i class="fas fa-trash"></i></a>
                             </li>
                         {{/each}}
                     </ol>
@@ -339,7 +315,7 @@
                             {{#ifDifferent weapon.system.equipped ../notEquipped}}
                                 <tr>
                                     <td>{{weapon.name}} {{showIfEquals weapon.system.equipped 3 "(Off-hand)" : ""}}</td>
-                                    <td class="rollable" id="weapon-test:{{weapon.name}}:{{formulaToStr weapon.formula}}">
+                                    <td class="rollable" id="weapon-test:{{weapon.name}}:{{formulaToStr weapon.formula}}" data-action="rollDice">
                                         <a>{{format-formula weapon.formula}}</a>
                                     </td>
                                     <td> {{weapon.damageValue}}</td>

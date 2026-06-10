@@ -1,15 +1,20 @@
 import {CSItemSheet} from "./csItemSheet.js";
 
 export class CSAbilityItemSheet extends CSItemSheet {
-    activateListeners(html) {
-        super.activateListeners(html);
+    static DEFAULT_OPTIONS = {
+        actions: {
+            createSpecialty: CSAbilityItemSheet._onCreateSpecialty,
+            deleteSpecialty: CSAbilityItemSheet._onDeleteSpecialty,
+        },
+    };
 
-        html.find('.specialty-create').on("click", this._onClickSpecialtyCreate.bind(this));
-        html.find(".specialties-list").on("click", ".specialty-control", this._onclickSpecialtyControl.bind(this));
-    }
-
-    async _onClickSpecialtyCreate(ev) {
-        const item = this.item;
+    /**
+     * Action handler: Create a new specialty entry on this ability item.
+     * For use with data-action="createSpecialty" in templates.
+     */
+    // eslint-disable-next-line no-unused-vars
+    static _onCreateSpecialty(event, target) {
+        const item = this.document;
         let specialty = {
             name: "",
             rating: 0,
@@ -17,22 +22,19 @@ export class CSAbilityItemSheet extends CSItemSheet {
         };
         let newSpec = Object.values(item.getCSData().specialties);
         newSpec.push(specialty);
-        item.update({"data.specialties" : newSpec});
+        item.update({"system.specialties" : newSpec});
     }
 
-    async _onclickSpecialtyControl(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-        const index = parseInt(a.dataset.id);
-        const action = a.dataset.action;
-
-        // Remove existing specialty
-        if ( action === "delete" ) {
-            const item = this.item;
-            let newSpec = Object.values(item.getCSData().specialties);
-            newSpec.splice(index,1);
-            item.update({"data.specialties" : newSpec});
-        }
+    /**
+     * Action handler: Delete a specialty entry from this ability item.
+     * For use with data-action="deleteSpecialty" in templates.
+     * Expects target to have data-id attribute with the specialty index.
+     */
+    static _onDeleteSpecialty(event, target) {
+        const item = this.document;
+        const index = parseInt(target.dataset.id);
+        let newSpec = Object.values(item.getCSData().specialties);
+        newSpec.splice(index, 1);
+        item.update({"system.specialties" : newSpec});
     }
-
 }

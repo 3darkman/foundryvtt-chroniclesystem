@@ -45,7 +45,7 @@ export const registerCustomHelpers = function () {
     });
 
     Handlebars.registerHelper('enrich', (content) => {
-        return new Handlebars.SafeString(TextEditor.enrichHTML(content, {async: false}));
+        return new Handlebars.SafeString(content || '');
     });
 
     Handlebars.registerHelper('str', (content) => {
@@ -105,7 +105,7 @@ export const registerCustomHelpers = function () {
             .join('');
     })
 
-    Handlebars.registerHelper('formGroup', function(options) {
+    Handlebars.registerHelper('csFormGroup', function(options) {
         return "systems/chroniclesystem/templates/actors/partials/form-group.hbs";
     });
 

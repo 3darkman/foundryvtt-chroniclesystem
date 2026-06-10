@@ -5,15 +5,15 @@
         </header>
         <ol  class="abilities-list">
             {{#each character.owned.abilities as |ability key|}}
-                <li  class="item ability flexrow" data-item-id="{{ability._id}}">
-                    <div class="ability-value rollable" id="ability:{{ability.name}}">
+                <li  class="item ability flexrow" data-item-id="{{ability._id}}" draggable="true">
+                    <div class="ability-value rollable" id="ability:{{ability.name}}" data-action="rollDice">
                         <a>{{ability.system.rating}}d{{modifier ability.system.modifier}}</a>
                     </div>
-                    <label class="ability-label item-edit"><a >{{ability.name}}</a></label>
+                    <label class="ability-label item-edit" data-action="editItem"><a >{{ability.name}}</a></label>
                     <div class="ability-specialities">
                         {{#each ability.system.specialties as |specialty key|}}
                             {{#if specialty.rating}}
-                            <div class="rollable" id="specialty:{{specialty.name}}:{{../this.name}}">
+                            <div class="rollable" id="specialty:{{specialty.name}}:{{../this.name}}" data-action="rollDice">
                                 <a>{{specialty.name}} {{specialty.rating}}B{{modifier specialty.modifier}}</a>&nbsp;
                             </div>
                             {{/if}}

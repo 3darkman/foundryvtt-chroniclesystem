@@ -1,37 +1,62 @@
 import {ChronicleSystem} from "../../system/ChronicleSystem.js";
 import LOGGER from "../../utils/logger.js";
 
-export class CSActorSheet extends ActorSheet {
+const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { ActorSheetV2 } = foundry.applications.sheets;
 
-    async _onDropActor(event, data) {
+export class CSActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
+
+    static DEFAULT_OPTIONS = {
+        classes: ["chroniclesystem", "sheet", "actor"],
+        form: {
+            submitOnChange: true
+        },
+        actions: {
+            editItem: CSActorSheet._onEditItem,
+            rollDice: CSActorSheet._onRollDice,
+            toggleDescription: CSActorSheet._onToggleDescription,
+        }
+    };
+
+    static PARTS = {};
+
+    /** @override */
+    async _onRender(context, options) {
+        await super._onRender(context, options);
+        // Re-apply active tab state after each render
+        for (const [group, tab] of Object.entries(this.tabGroups)) {
+            this.changeTab(tab, group, {force: true, updatePosition: false});
+        }
+    }
+
+    async _onDropActor(event, actor) {
         LOGGER.trace("On Drop Actor | CSActorSheet | csActorSheet.js");
     }
 
-    activateListeners(html) {
-        super.activateListeners(html);
-
-        // Everything below here is only needed if the sheet is editable
-        if (!this.options.editable) return;
-
-        html.find('.item .item-controls').on('click', (ev) => {
-            ev.preventDefault();
-            $(ev.currentTarget).parents('.item').find('.description').slideToggle();
-        });
-
-        // Update Inventory Item
-        html.find('.item-edit').click(this._showEmbeddedItemSheet.bind(this));
-        html.find('.rollable').click(this._onClickRoll.bind(this));
+    _attachPartListeners(partId, htmlElement, options) {
+        super._attachPartListeners(partId, htmlElement, options);
     }
 
-    async _onClickRoll(event, targets) {
-        await ChronicleSystem.eventHandleRoll(event, this.actor, targets);
-    }
-
-    _showEmbeddedItemSheet(event) {
+    static _onToggleDescription(event, target) {
         event.preventDefault();
-        const li = $(event.currentTarget).parents('.item');
-        const item = this.actor.items.get(li.data('itemId'));
-        item.sheet.render(true);
+        const description = target.closest('.item').querySelector('.description');
+        if (description) description.classList.toggle('hidden');
+    }
+
+    static _onEditItem(event, target) {
+        event.preventDefault();
+        const item = this.actor.items.get(target.closest('.item').dataset.itemId);
+        if (item) item.sheet.render({force: true});
+    }
+
+    static async _onRollDice(event, target) {
+        event.preventDefault();
+        let showModifierDialog = false;
+        if (event.shiftKey) {
+            showModifierDialog = true;
+        }
+        const rollType = target.id;
+        await ChronicleSystem.handleRollAsync(rollType, this.actor, showModifierDialog);
     }
 
     isItemPermitted(type) {
@@ -50,48 +75,40 @@ export class CSActorSheet extends ActorSheet {
         }
     }
 
-    setPosition(options={}) {
-        const position = super.setPosition(options);
-        const sheetBody = this.element.find(".sheet-body");
-        const bodyHeight = position.height - 192;
-        sheetBody.css("height", bodyHeight);
-        return position;
-    }
-
     _checkNull(items) {
         if (items && items.length) {
             return items;
         }
         return [];
     }
-    
-    async _onDropItemCreate(itemData) {
-        let embeddedItem = [];
-        let itemsToCreate = [];
-        let data = [];
-        data = data.concat(itemData);
-        data.forEach((doc) => {
-            const item = this.actor.items.find((i) => {
-                return i.name === doc.name;
-            });
-            if (item && item.type !== "weapon") {
-                embeddedItem.push(this.actor.getEmbeddedDocument("Item", item.data._id));
-            } else {
-                if (this.isItemPermitted(doc.type))
-                    itemsToCreate.push(doc);
-            }
-        });
 
-        if (itemsToCreate.length > 0) {
-            this.actor.createEmbeddedDocuments("Item", itemsToCreate)
-                .then(function(result) {
-                    result.forEach((item) => {
-                        item.onObtained(item.actor);
-                    });
-                    embeddedItem.concat(result);
-                });
+    async _onDropItem(event, item) {
+        if (!this.actor.isOwner) return null;
+
+        // If the item already belongs to this actor, handle sorting
+        if (this.actor.uuid === item.parent?.uuid) {
+            return this._onSortItem(event, item);
         }
 
-        return embeddedItem;
+        // Check for duplicate items by name. Weapons are allowed to stack as
+        // separate items, so a second weapon of the same name is not merged
+        // into the existing one.
+        const existingItem = this.actor.items.find(i => i.name === item.name);
+        if (existingItem && item.type !== "weapon") {
+            return existingItem;
+        }
+
+        // Check if item type is permitted
+        if (!this.isItemPermitted(item.type)) return null;
+
+        // Create the embedded item
+        const created = await this.actor.createEmbeddedDocuments("Item", [item.toObject()]);
+        if (created && created.length > 0) {
+            created.forEach((createdItem) => {
+                createdItem.onObtained(createdItem.actor);
+            });
+        }
+
+        return created;
     }
 }

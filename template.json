@@ -1,6 +1,6 @@
 {
   "Actor": {
-    "types": ["character", "house"],
+    "types": ["character", "house", "unit"],
     "templates": {
       "common": {
         "age": 0,
@@ -62,7 +62,7 @@
         }
       },
       "character-common": {
-        "ancestries": [],
+        "ancestries": "",
         "gender": "",
         "house": "",
         "height": "1.72",
@@ -149,17 +149,18 @@
       "historicalEvents": [],
       "motto": "",
       "members": {
-        "head": "",
-        "steward": "",
+        "head": { "id": "", "description": "" },
+        "steward": { "id": "", "description": "" },
         "heirs": [],
         "family": [],
         "retainers": [],
         "servants": []
       }
-    }
+    },
+    "unit": {}
   },
   "Item": {
-    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback", "event", "holding", "technique"],
+    "types": ["armor", "weapon", "ability", "equipment", "benefit", "drawback", "event", "holding", "technique", "unitType", "poison"],
     "templates": {
       "physicalItem": {
         "weight": 0
@@ -285,6 +286,7 @@
       "arts": [],
       "scales": "",
       "works": []
-    }
+    },
+    "unitType": {}
   }
 }

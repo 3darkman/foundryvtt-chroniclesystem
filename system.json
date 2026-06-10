@@ -1,41 +1,43 @@
 {
-  "title": "Chronicle System (Unofficial)",
-  "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
-  "version": "0.6.0",
-  "esmodules": [
-    "module/system/config.js"
-  ],
-  "styles": [
-    "styles/global.css",
-    "styles/actor-sheet.css",
-    "styles/less/global.css"
-  ],
-  "languages": [
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "lang/en.json",
-      "flags": {}
+    "title": "Chronicle System (Unofficial)",
+    "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
+    "version": "0.7.0",
+    "esmodules": ["module/system/config.js"],
+    "styles": [
+        "styles/global.css",
+        "styles/item-sheet.css",
+        "styles/actor-sheet.css",
+        "styles/less/global.css"
+    ],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "lang/en.json",
+            "flags": {}
+        }
+    ],
+    "grid": {
+        "distance": 5,
+        "units": "ft"
+    },
+    "primaryTokenAttribute": "health",
+    "secondaryTokenAttribute": "power",
+    "url": "https://github.com/3darkman/foundryvtt-chroniclesystem/",
+    "manifest": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/system.json",
+    "download": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/chroniclesystem.zip",
+    "license": "ISC",
+    "id": "chroniclesystem",
+    "authors": [
+        {
+            "name": "Kirlian '3darkman' Silvestre",
+            "discord": "Kirlian#1814",
+            "flags": {}
+        }
+    ],
+    "compatibility": {
+        "minimum": "12",
+        "verified": "14",
+        "maximum": "14"
     }
-  ],
-  "gridDistance": 5,
-  "gridUnits": "ft",
-  "primaryTokenAttribute": "health",
-  "secondaryTokenAttribute": "power",
-  "url": "https://github.com/3darkman/foundryvtt-chroniclesystem/",
-  "manifest": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/system.json",
-  "download": "https://raw.githubusercontent.com/3darkman/foundryvtt-chroniclesystem/master/chroniclesystem.zip",
-  "license": "ISC",
-  "id": "chroniclesystem",
-  "authors": [
-    {
-      "name": "Kirlian '3darkman' Silvestre",
-      "discord": "Kirlian#1814",
-      "flags": {}
-    }
-  ],
-  "compatibility": {
-    "minimum": "11",
-    "verified": "11.315"
-  }
 }

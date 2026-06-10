@@ -1,4 +1,4 @@
-<form class="{{cssClass}}" autocomplete="off">
+<section class="{{cssClass}}">
     {{!-- Item Sheet Header --}} {{>
 "systems/chroniclesystem/templates/items/partials/header-delete.hbs"}}
     <main class="sheet-body flexrow">
@@ -8,7 +8,7 @@
             </header>
 
             {{#if item.isOwned}}
-                {{> (formGroup)
+                {{> (csFormGroup)
                         id="system.modifiers.defense"
                         labelText="CS.sheets.house.resources.defense"
                         placeHolder="modifier"
@@ -16,7 +16,7 @@
                         value=item.system.modifiers.defense
                         dataType="Number"
                 }}
-                {{> (formGroup)
+                {{> (csFormGroup)
                         id="system.modifiers.influence"
                         labelText="CS.sheets.house.resources.influence"
                         placeHolder="modifier"
@@ -24,15 +24,15 @@
                         value=item.system.modifiers.influence
                         dataType="Number"
                 }}
-                {{> (formGroup)
-                        id="data.modifiers.lands"
+                {{> (csFormGroup)
+                        id="system.modifiers.lands"
                         labelText="CS.sheets.house.resources.lands"
                         placeHolder="modifier"
                         inputCssClass="small-field"
                         value=item.system.modifiers.lands
                         systemType="Number"
                 }}
-                {{> (formGroup)
+                {{> (csFormGroup)
                         id="system.modifiers.law"
                         labelText="CS.sheets.house.resources.law"
                         placeHolder="modifier"
@@ -40,7 +40,7 @@
                         value=item.system.modifiers.law
                         dataType="Number"
                 }}
-                {{> (formGroup)
+                {{> (csFormGroup)
                         id="system.modifiers.population"
                         labelText="CS.sheets.house.resources.population"
                         placeHolder="modifier"
@@ -48,7 +48,7 @@
                         value=item.system.modifiers.population
                         dataType="Number"
                 }}
-                {{> (formGroup)
+                {{> (csFormGroup)
                         id="system.modifiers.power"
                         labelText="CS.sheets.house.resources.power"
                         placeHolder="modifier"
@@ -56,7 +56,7 @@
                         value=item.system.modifiers.power
                         dataType="Number"
                 }}
-                {{> (formGroup)
+                {{> (csFormGroup)
                         id="system.modifiers.wealth"
                         labelText="CS.sheets.house.resources.wealth"
                         placeHolder="modifier"
@@ -67,18 +67,17 @@
             {{else}}
                 <div class="form-group">
                     <label for="system.playerChoice">{{localize "CS.sheets.eventItem.playerChoice"}}</label>
-                    <a class="checkButton size50 {{showIfEquals true item.system.playerChoice "activated" ""}}"><i class="fa fa-check"></i></a>
+                    <a class="checkButton size50 {{showIfEquals true item.system.playerChoice "activated" ""}}" data-action="togglePlayerChoice"><i class="fa fa-check"></i></a>
                 </div>
-            {{log item}}
                 {{#if item.system.playerChoice}}
-                    {{> (formGroup)
+                    {{> (csFormGroup)
                             id="system.numberOfChoices"
                             labelText="CS.sheets.eventItem.numberOfChoices"
                             inputCssClass="small-field"
                             value=item.system.numberOfChoices
                             dataType="Number"
                     }}
-                    {{> (formGroup)
+                    {{> (csFormGroup)
                             id="system.bonusToChoices"
                             labelText="CS.sheets.eventItem.bonusToChoices"
                             inputCssClass="size75"
@@ -86,49 +85,49 @@
                             dataType="String"
                     }}
                 {{else}}
-                    {{> (formGroup)
+                    {{> (csFormGroup)
                             id="system.formulas.defense"
                             labelText="CS.sheets.house.resources.defense"
                             inputCssClass="big-field"
                             value=item.system.formulas.defense
                             dataType="String"
                     }}
-                    {{> (formGroup)
+                    {{> (csFormGroup)
                             id="system.formulas.influence"
                             labelText="CS.sheets.house.resources.influence"
                             inputCssClass="big-field"
                             value=item.system.formulas.influence
                             dataType="String"
                     }}
-                    {{> (formGroup)
+                    {{> (csFormGroup)
                             id="system.formulas.lands"
                             labelText="CS.sheets.house.resources.lands"
                             inputCssClass="big-field"
                             value=item.system.formulas.lands
                             dataType="String"
                     }}
-                    {{> (formGroup)
+                    {{> (csFormGroup)
                             id="system.formulas.law"
                             labelText="CS.sheets.house.resources.law"
                             inputCssClass="big-field"
                             value=item.system.formulas.law
                             dataType="String"
                     }}
-                    {{> (formGroup)
+                    {{> (csFormGroup)
                             id="system.formulas.population"
                             labelText="CS.sheets.house.resources.population"
                             inputCssClass="big-field"
                             value=item.system.formulas.population
                             dataType="String"
                     }}
-                    {{> (formGroup)
+                    {{> (csFormGroup)
                             id="system.formulas.power"
                             labelText="CS.sheets.house.resources.power"
                             inputCssClass="big-field"
                             value=item.system.formulas.power
                             dataType="String"
                     }}
-                    {{> (formGroup)
+                    {{> (csFormGroup)
                             id="system.formulas.wealth"
                             labelText="CS.sheets.house.resources.wealth"
                             inputCssClass="big-field"
@@ -142,4 +141,4 @@
             {{> "systems/chroniclesystem/templates/items/partials/description.hbs"}}
         </section>
     </main>
-</form>
+</section>

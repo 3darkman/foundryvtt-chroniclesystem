@@ -19,7 +19,7 @@
                 <div class="flexrow">
                     <div class="field">
                     {{#if ../owner}}
-                        <div class="item-edit"><a>{{name}}</a></div>
+                        <div class="item-edit" data-action="editItem"><a>{{name}}</a></div>
                     {{else}}
                         <div>{{name}}</div>
                     {{/if}}
@@ -32,7 +32,7 @@
                         </div>
                     </div>
                     <div class="field size50 center">{{system.investment}}</div>
-                    <div class="item-controls"><a><i class="far fa-caret-square-down"></i></a></div>
+                    <div class="item-controls" data-action="toggleDescription"><a><i class="far fa-caret-square-down"></i></a></div>
                 </div>
                 <div class="field description hidden">{{enrich system.description}}</div>
             </li>

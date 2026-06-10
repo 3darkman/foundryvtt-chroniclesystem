@@ -3,9 +3,30 @@ plugins:
 extends:
   - eslint:recommended
   - plugin:prettier/recommended
+parserOptions:
+  sourceType: module
+  ecmaVersion: 2022
 env:
   es6: true
   node: true
   browser: true
+globals:
+  foundry: readonly
+  game: readonly
+  ui: readonly
+  canvas: readonly
+  CONFIG: readonly
+  CONST: readonly
+  Actor: readonly
+  Item: readonly
+  ChatMessage: readonly
+  Roll: readonly
+  Dialog: readonly
+  Hooks: readonly
+  Handlebars: readonly
+  Combat: readonly
+  Combatant: readonly
+  renderTemplate: readonly
+  getTemplate: readonly
 rules:
   prettier/prettier: error

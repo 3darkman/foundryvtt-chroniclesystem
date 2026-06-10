@@ -11,7 +11,7 @@
                 <span>{{localize "CS.sheets.house.labels.motto"}}</span>
             </header>
             <div>
-                <input  class="field center" type="text"  name="data.motto"  value="{{actor.system.motto}}"  data-dtype="String"/>
+                <input  class="field center" type="text"  name="system.motto"  value="{{actor.system.motto}}"  data-dtype="String"/>
             </div>
         </section>
         <section class="flex2">
@@ -29,15 +29,15 @@
                 </li>
                 {{#if actor.system.steward.id}}
                 <li class="item flexrow" data-item-id="{{actor.system.steward.id}}">
-                    <label  class="link-field member-name size75" data-id="{{actor.system.steward.id}}"><a>{{actor.system.steward.name}}</a></label>
+                    <label  class="link-field member-name size75" data-id="{{actor.system.steward.id}}" data-action="openActorSheet"><a>{{actor.system.steward.name}}</a></label>
                     <div class="center">{{actor.system.fortune.lawMod}}</div>
                     <div class="center">{{actor.system.fortune.populationMod}}</div>
                     <div class="center">{{actor.system.fortune.holdingsMod}}</div>
-                    <div class="rollable center" id="formula:{{localize "CS.constants.specialties.stewardship"}}:{{formulaToStr actor.system.fortune.formula}}">
+                    <div class="rollable center" data-action="rollDice" id="formula:{{localize "CS.constants.specialties.stewardship"}}:{{formulaToStr actor.system.fortune.formula}}">
                         <a>{{format-formula actor.system.fortune.formula}}</a>
                     </div>
                     <div class="field item-controls">
-                        <a class="item-control" data-id="{{actor.system.steward.id}}" data-role="STEWARD" data-action="delete"><i class="fas fa-trash"></i></a>
+                        <a class="item-control" data-id="{{actor.system.steward.id}}" data-role="STEWARD" data-action="removeMember"><i class="fas fa-trash"></i></a>
                     </div>
                 </li>
                 {{else}}
@@ -49,7 +49,7 @@
             <header class="header-field">
                 <span>{{localize "CS.sheets.house.resources.title"}}</span>
                 {{#if owner}}
-                    <span class="item-controls regenerate-resources"><a><i class="fas fa-sync"></i></a></span>
+                    <span class="item-controls regenerate-resources" data-action="regenerateResources"><a><i class="fas fa-sync"></i></a></span>
                 {{/if}}
             </header>
             <div class="resources-list list">

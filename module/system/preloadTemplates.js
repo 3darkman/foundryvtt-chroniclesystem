@@ -15,8 +15,6 @@ export const preloadHandlebarsTemplates = async function () {
         'systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.hbs',
         'systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.hbs',
         'systems/chroniclesystem/templates/actors/partials/tabs/description-tab.hbs',
-        'systems/chroniclesystem/templates/actors/partials/form-group.hbs',
-
         'systems/chroniclesystem/templates/actors/partials/tabs/resources-tab.hbs',
         'systems/chroniclesystem/templates/actors/partials/tabs/events-tab.hbs',
         'systems/chroniclesystem/templates/actors/partials/tabs/members-tab.hbs',
@@ -27,5 +25,13 @@ export const preloadHandlebarsTemplates = async function () {
         'systems/chroniclesystem/templates/components/member-list-item.hbs',
         'systems/chroniclesystem/templates/components/resource-holdings.hbs'
     ];
-    return loadTemplates(templatePaths);
+    await foundry.applications.handlebars.loadTemplates(templatePaths);
+
+    // Register form-group partial under its full path only.
+    // Using loadTemplates would also register it under the short name "form-group",
+    // which collides with Foundry's built-in partial used by Scene Config and other core dialogs.
+    const fgPath = 'systems/chroniclesystem/templates/actors/partials/form-group.hbs';
+    const fgResp = await fetch(fgPath);
+    const fgText = await fgResp.text();
+    Handlebars.registerPartial(fgPath, Handlebars.compile(fgText));
 };

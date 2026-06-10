@@ -5,6 +5,8 @@
 @import "./item-sheet.less";
 
 .chroniclesystem {
+  color: black;
+
   .capitalize {
     text-transform: capitalize;
   }
@@ -31,10 +33,29 @@
 
   &.sheet {
     .window-content {
-      height: 100%;
       padding: @medium-margin @biggest-margin @medium-margin @medium-margin;
       overflow-y: hidden;
       background: @background-color;
+
+      /* V2: .window-content contains a part wrapper div, then .editable/.locked.
+         The flex column layout must flow through the entire chain so that
+         .sheet-body can flex-grow into remaining space. */
+      display: flex;
+      flex-direction: column;
+
+      > [data-application-part] {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .editable, .locked {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+      }
 
       .header-field {
         background: @primary-color;
@@ -181,6 +202,7 @@
     input {
       background: @field-color;
       border: none;
+      color: black;
 
       &:read-only {
         background: @background-color;
@@ -192,6 +214,7 @@
     textarea {
       background: @field-color;
       border: none;
+      color: black;
     }
 
     .size25 {

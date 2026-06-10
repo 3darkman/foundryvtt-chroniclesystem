@@ -32,7 +32,7 @@ export default class CSChat {
 
         const csRoll = incomingRoll;
 
-        return renderTemplate(csRoll.rollCard, csRoll).then((html) => {
+        return foundry.applications.handlebars.renderTemplate(csRoll.rollCard, csRoll).then((html) => {
             const chatOptions = this.ChatDataSetup(html);
 
             if (csRoll.entityData !== undefined && csRoll.entityData !== null) {
