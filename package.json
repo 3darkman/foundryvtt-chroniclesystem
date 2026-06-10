@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "lint": "eslint module/",
+    "lint:fix": "eslint module/ --fix"
+  },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.280.0",
     "eslint": "^8.28.0",
