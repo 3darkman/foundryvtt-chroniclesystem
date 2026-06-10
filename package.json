@@ -1,7 +1,8 @@
 {
   "scripts": {
     "lint": "eslint module/",
-    "lint:fix": "eslint module/ --fix"
+    "lint:fix": "eslint module/ --fix",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.280.0",
@@ -9,12 +10,11 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.2",
+    "lint-staged": "^17.0.7",
     "pixi": "^0.3.1",
     "prettier": "^2.7.1"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint"
-    }
+  "lint-staged": {
+    "module/**/*.js": "eslint"
   }
 }
