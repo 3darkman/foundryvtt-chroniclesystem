@@ -1,3 +1,5 @@
+import { ChronicleSystem } from "../system/ChronicleSystem.js";
+
 export async function task030() {
     const actors = Array.from(game.actors?.values() || []);
     for (const actor of actors) {

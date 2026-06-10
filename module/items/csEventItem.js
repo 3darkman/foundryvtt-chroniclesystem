@@ -8,7 +8,6 @@ export class CSEventItem extends CSItem {
         let data = this.getCSData();
 
         if (data.playerChoice) {
-            console.log(choices);
             for (const choice of choices) {
                 await this._generateModifier(choice.toLowerCase(), data);
             }

@@ -187,7 +187,7 @@ export class CSHouseActor extends CSActor {
                 if (index < 0)
                     index = this._getMemberIndexIfExists(role, actorId, list);
                 if (index >= 0) {
-                    list.splice(index);
+                    list.splice(index, 1);
                     let key = `system.members.${[this.roleMap[role]]}`;
                     this.update({
                         [key]: list,

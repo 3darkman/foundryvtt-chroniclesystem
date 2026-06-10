@@ -94,7 +94,7 @@ Hooks.once("init", async function() {
 
     foundry.documents.collections.Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
     foundry.documents.collections.Items.registerSheet("chroniclesystem", CSItemSheet,
-        { label: SystemUtils.localize("CS.sheets.itemSheet"), types: ["armor", "weapon", "equipment", "benefit", "drawback", "unitType", "poison"], makeDefault: true });
+        { label: SystemUtils.localize("CS.sheets.itemSheet"), types: ["armor", "weapon", "equipment", "benefit", "drawback", "poison"], makeDefault: true });
     foundry.documents.collections.Items.registerSheet("chroniclesystem", CSAbilityItemSheet,
         { label: SystemUtils.localize("CS.sheets.abilityItemSheet"), types: ["ability"], makeDefault: true });
     foundry.documents.collections.Items.registerSheet("chroniclesystem", CSEventItemSheet,
