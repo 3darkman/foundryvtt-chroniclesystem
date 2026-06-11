@@ -226,6 +226,20 @@ ChronicleSystem.handleRoll = handleRoll;
 ChronicleSystem.handleRollAsync = handleRollAsync;
 ChronicleSystem.getActorAbilityFormula = getActorTestFormula;
 
+// Spike 006 — gate for the Active Effects PoC. Defensive: returns false if the
+// setting is not registered yet (e.g. called during very early data prep) so
+// the embedded PoC code stays inert with the gate OFF (FR-009 / SC-007).
+ChronicleSystem.isActiveEffectsPoCEnabled = function () {
+  try {
+    return !!game.settings.get(
+      CSConstants.Settings.SYSTEM_NAME,
+      CSConstants.Settings.USE_ACTIVE_EFFECTS_POC
+    );
+  } catch {
+    return false;
+  }
+};
+
 ChronicleSystem.dispositions = [
   new Disposition("CS.sheets.character.dispositions.affectionate", 1, -2, 5),
   new Disposition("CS.sheets.character.dispositions.friendly", 2, -1, 3),

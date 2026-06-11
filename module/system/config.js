@@ -22,6 +22,7 @@ import { CSTechniqueItemSheet } from "../items/sheets/cs-technique-item-sheet.js
 import { migrateData } from "../migrations/migration.js";
 import { CsCombat } from "../combat/cs-combat.js";
 import { CsCombatant } from "../combat/cs-combatant.js";
+import { CSActiveEffect } from "../effects/cs-active-effect.js";
 
 // TypeDataModel classes
 import CharacterData from "../data/actor/character-data.js";
@@ -62,6 +63,10 @@ Hooks.once("init", async function () {
   CONFIG.Item.documentClass = itemConstructor;
   CONFIG.Combat.documentClass = CsCombat;
   CONFIG.Combatant.documentClass = CsCombatant;
+  // Spike 006 — Active Effects PoC. Inert with the gate OFF: the subclass only
+  // overrides suppression, so a registered-but-unused CSActiveEffect behaves
+  // exactly like the core ActiveEffect for worlds without opt-in (SC-007).
+  CONFIG.ActiveEffect.documentClass = CSActiveEffect;
 
   // Register TypeDataModel schemas
   CONFIG.Actor.dataModels = {
@@ -174,7 +179,7 @@ Hooks.once("ready", async () => {
   await migrateData();
 });
 
-Hooks.on("createItem", (item, data) => {
+Hooks.on("createItem", (item) => {
   if (!item.isEmbedded) {
     item.img = `systems/chroniclesystem/assets/icons/${item.type}.png`;
   }

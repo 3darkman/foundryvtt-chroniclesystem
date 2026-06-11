@@ -1,4 +1,3 @@
-/* global game */
 import LOGGER from "../utils/logger.js";
 import { CSConstants } from "./csConstants.js";
 
@@ -85,6 +84,29 @@ const registerSystemSettings = () => {
       onChange: (value) => {
         LOGGER.log(
           `Changed ${CSConstants.Settings.MODIFIER_DIALOG_AS_DEFAULT} to ${value}`
+        );
+      },
+    }
+  );
+
+  // Spike 006 — Active Effects PoC gate. World-scoped, default OFF so that
+  // worlds without opt-in behave exactly as before (FR-009 / SC-007). When ON,
+  // the armor equip penalty flows through a native Active Effect instead of the
+  // built-in addModifier path. Reversible: removing this registration plus the
+  // module/effects/ directory restores the current behaviour.
+  game.settings.register(
+    CSConstants.Settings.SYSTEM_NAME,
+    CSConstants.Settings.USE_ACTIVE_EFFECTS_POC,
+    {
+      name: "CS.settings.useActiveEffectsPoC.name",
+      hint: "CS.settings.useActiveEffectsPoC.hint",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: false,
+      onChange: (value) => {
+        LOGGER.log(
+          `Changed ${CSConstants.Settings.USE_ACTIVE_EFFECTS_POC} to ${value}`
         );
       },
     }

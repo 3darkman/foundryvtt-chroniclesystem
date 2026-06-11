@@ -31,6 +31,7 @@ CSConstants.Settings = {
   DEBUG_LOGS: "debugLogs",
   CURRENT_VERSION: "version",
   MODIFIER_DIALOG_AS_DEFAULT: "isModifierDialogDefault",
+  USE_ACTIVE_EFFECTS_POC: "useActiveEffectsPoC",
 };
 
 CSConstants.HouseResources = {

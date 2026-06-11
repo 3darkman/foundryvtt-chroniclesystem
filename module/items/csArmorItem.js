@@ -10,6 +10,14 @@ export class CSArmorItem extends CSItem {
       } by the actor ${actor.name} | csArmorItem.js`
     );
     super.onEquippedChanged(actor, isEquipped);
+    // Spike 006 — Active Effects PoC gate. With the gate ON the armor penalty
+    // (AGILITY / COMBAT_DEFENSE / DAMAGE_TAKEN) is applied by the transferred
+    // Active Effect via the collector, so the built-in path must NOT run too —
+    // otherwise the penalty would be applied twice. BULK stays homemade
+    // (it originates in onObtained, not here). Gate OFF: unchanged behaviour.
+    if (ChronicleSystem.isActiveEffectsPoCEnabled()) {
+      return;
+    }
     if (isEquipped) {
       actor.addModifier(
         ChronicleSystem.modifiersConstants.AGILITY,

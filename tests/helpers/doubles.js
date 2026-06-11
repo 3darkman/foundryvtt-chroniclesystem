@@ -87,6 +87,38 @@ export function makeFakeActor({ abilities = [], data, modifiers = {} } = {}) {
 }
 
 /**
+ * A fake character actor that exercises the REAL modifier machinery
+ * (updateTempModifiers / addModifier / removeModifier / getModifier via the
+ * prototype) backed by a live `system.modifiers` object, plus an injectable
+ * `appliedEffects` list. Used by the Active Effects parity test (spec 006): it
+ * lets a test compare the homemade modifier total against the total pushed by
+ * the effect collector through the SAME read path (FR-012 / contract P5).
+ */
+export function makeModifierActor({ appliedEffects = [] } = {}) {
+  const system = { modifiers: {}, penalties: {} };
+  return {
+    system,
+    appliedEffects,
+    getCSData: () => system,
+    getEmbeddedDocument: () => null,
+    updateTempModifiers: proto.updateTempModifiers,
+    updateTempPenalties: proto.updateTempPenalties,
+    addModifier: proto.addModifier,
+    removeModifier: proto.removeModifier,
+    getModifier: proto.getModifier,
+    getPenalty: proto.getPenalty,
+  };
+}
+
+/**
+ * A minimal Active Effect double: an `id` plus a `changes` array. Mirrors the
+ * portable read path the collector uses (`effect.changes` with `{ key, value }`).
+ */
+export function makeFakeEffect(id, changes = []) {
+  return { id, changes };
+}
+
+/**
  * A fake weapon. `specialty` is read directly by the `weapon-test` helper;
  * `system.training` is read by adjustFormulaByWeapon; `getCSData()` feeds
  * updateDamageValue (damage formula, qualities, equipped slot).
