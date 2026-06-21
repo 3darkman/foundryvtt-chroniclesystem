@@ -3,6 +3,9 @@
     "notifications": {
       "dicePoolInvalid": "you cannot roll this test because your dice pool results in less than 1 die being kept."
     },
+    "effects": {
+      "armorPenalty": "Armor Penalty"
+    },
     "dialogs": {
       "characterRole": {
         "title": "Select the role of {actorName} in the house.",
@@ -66,6 +69,10 @@
       "isModifierDialogDefault": {
         "name": "Modifier Dialog as Default?",
         "hint": "if checked, when clicking on dice rolls on an actor's sheet, it will show the modifiers window, and will make the roll without showing the window when holding the SHIFT key. Each player defines his configuration."
+      },
+      "useActiveEffectsPoC": {
+        "name": "Use Active Effects (PoC)",
+        "hint": "EXPERIMENTAL spike gate. When ON, the armor equip penalty is applied through a native Active Effect instead of the built-in modifier path. Default OFF. Needs Foundry refresh (F5)."
       }
     },
     "sheets": {

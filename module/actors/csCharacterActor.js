@@ -3,6 +3,7 @@ import { CSActor } from "./csActor.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
 import { CSConstants } from "../system/csConstants.js";
+import { collectEffectModifiers } from "../effects/cs-effect-modifiers.js";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -19,6 +20,37 @@ export class CSCharacterActor extends CSActor {
 
   prepareEmbeddedDocuments() {
     super.prepareEmbeddedDocuments();
+  }
+
+  /**
+   * Spike 006 — Active Effects PoC. Version-safe override that runs the
+   * effect-modifier collector in the "initial" phase, BUT only when the gate is
+   * ON. With the gate OFF it is a pass-through that merely delegates to super —
+   * inert, and emitting NO compatibility warning across the supported v13+
+   * range (Constitution floor; T024).
+   * @override
+   */
+  applyActiveEffects(phase) {
+    const isV14 = (game.release?.generation ?? 0) >= 14;
+    // Delegate with the signature each version expects: a phase argument is
+    // harmlessly ignored by v13 (no parameter), while omitting it in v14 would
+    // emit a deprecation warning.
+    if (isV14) {
+      super.applyActiveEffects(phase);
+    } else {
+      super.applyActiveEffects();
+    }
+
+    if (!ChronicleSystem.isActiveEffectsPoCEnabled()) return;
+
+    // v13 runs a single phase-less pass; treat it as "initial".
+    const effectivePhase = isV14 ? phase : "initial";
+    if (effectivePhase !== "initial") return;
+
+    LOGGER.trace(
+      `AE PoC: applyActiveEffects("initial") with gate ON → running collector for ${this.name} | csCharacterActor.js`
+    );
+    collectEffectModifiers(this);
   }
 
   prepareDerivedData() {
