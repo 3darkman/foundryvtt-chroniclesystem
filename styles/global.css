@@ -342,3 +342,328 @@
 .chroniclesystem.sheet table td {
   padding: 1px 4px;
 }
+
+/* Active Effects tab (spec 007) — shared by item and actor sheets. A real column
+   GRID: the header and every row share ONE grid-template, so Name / Source /
+   Origin / actions line up exactly regardless of icon or name length. The Create
+   button sits in its own toolbar so it never distorts the columns. */
+.chroniclesystem .effects-tab .effects-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+  padding: 0 6px;
+}
+.chroniclesystem .effects-tab .effect-create {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+/* Neutralize the generic .list / .item margins for this grid: they inset the
+   ROWS (and add margin-left between children) but NOT the header, which threw the
+   columns out of alignment. The grid gap + a uniform 6px padding on the header AND
+   rows now provide a consistent, aligned inset (the same elegant look). */
+.chroniclesystem .effects-tab .effects-list.list {
+  margin: 0;
+}
+.chroniclesystem .effects-tab .effects-list .effect.item {
+  margin: 0;
+}
+.chroniclesystem .effects-tab .effects-list .effect.item > * {
+  margin-left: 0;
+}
+.chroniclesystem .effects-tab .effects-header,
+.chroniclesystem .effects-tab .effect {
+  display: grid;
+  grid-template-columns: minmax(4rem, 1fr) 7rem 7.5rem 4.5rem;
+  align-items: center;
+  gap: 6px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.chroniclesystem .effects-tab .effects-header {
+  border-bottom: 1px solid var(--color-border-light-primary, #999);
+  font-weight: bold;
+  margin-bottom: 4px;
+  padding-bottom: 2px;
+}
+.chroniclesystem .effects-tab .effects-header .effect-col-origin {
+  text-align: center;
+}
+.chroniclesystem .effects-tab .effects-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.chroniclesystem .effects-tab .effect {
+  padding: 3px 6px;
+}
+/* Name column = icon + name in one grid cell; the name fills the cell and
+   truncates with an ellipsis, while the icon keeps its intrinsic size. */
+.chroniclesystem .effects-tab .effect .effect-cell-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.chroniclesystem .effects-tab .effect .effect-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chroniclesystem .effects-tab .effect.effect-disabled .effect-name {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.chroniclesystem .effects-tab .effect-source {
+  min-width: 0;
+  font-size: 0.85em;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chroniclesystem .effects-tab .effect-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.chroniclesystem .effects-tab .effect-empty {
+  list-style: none;
+  opacity: 0.6;
+  padding: 6px 0;
+}
+.chroniclesystem .effects-tab .effect-lock {
+  opacity: 0.5;
+  padding: 0 4px;
+}
+
+/* Optional (dialog-toggled) roll effects — rendered inside the roll-modifier
+   DialogV2, which carries no .chroniclesystem class, so this is self-scoped. */
+.cs-optional-effects {
+  border: 1px solid var(--color-border-light-tertiary, #999);
+  border-radius: 4px;
+  margin-top: 6px;
+  padding: 4px 8px 6px;
+}
+.cs-optional-effects legend {
+  font-weight: bold;
+  padding: 0 4px;
+}
+.cs-optional-effect {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  padding: 2px 0;
+}
+.cs-optional-effect input[type="checkbox"] {
+  flex: 0 0 auto;
+}
+.cs-optional-effect .cs-optional-effect-name {
+  flex: 1;
+}
+.cs-optional-effect .cs-optional-effect-value {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+.cs-optional-effect .cs-optional-effect-condition {
+  flex: 0 0 auto;
+  font-size: 0.85em;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* CSActiveEffectConfig cascade (Wave 5) — the changes tab of the effect config. */
+
+/* Tab isolation for the subclassed V2 ActiveEffectConfig. The config drops the
+   `chroniclesystem` class on purpose (see CSActiveEffectConfig.DEFAULT_OPTIONS)
+   so the actor-sheet CSS no longer bleeds in and the core's tab-hiding works.
+   These rules just mirror the core (hide inactive, flex the active) as a safety
+   net; the `.active` class is synced by CSActiveEffectConfig._onRender. */
+.cs-effect-config .tab:not(.active) {
+  display: none;
+}
+.cs-effect-config .tab.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* System colour theme for the effect config. The sheet drops the
+   `chroniclesystem` class to keep the core's clean V2 layout, so re-apply ONLY
+   the palette here — backgrounds/colours (and minimal chip padding) — never
+   structural layout, or the breakage returns (overlapping header, vertical nav).
+   Values mirror the system's actor/item theme (less/global.css). */
+.cs-effect-config .window-content {
+  background: #dce2ef;
+}
+
+/* form controls: white fields, dark text (kills the core v13 dark form theme) */
+.cs-effect-config input,
+.cs-effect-config textarea,
+.cs-effect-config select,
+.cs-effect-config .editor,
+.cs-effect-config .editor-content,
+.cs-effect-config prose-mirror {
+  background: white;
+  border: none;
+  color: black;
+}
+.cs-effect-config input:read-only {
+  background: #dce2ef;
+  color: gray;
+  box-shadow: none;
+}
+
+/* labels / hints / legends: dark text (kills the themed cream) */
+.cs-effect-config label,
+.cs-effect-config .label,
+.cs-effect-config legend {
+  color: #191813;
+}
+.cs-effect-config .hint {
+  color: #4b4a44;
+}
+
+/* tab chips: system grey / active blue */
+.cs-effect-config nav.sheet-tabs {
+  gap: 4px;
+}
+.cs-effect-config nav [data-tab] {
+  background: #bbbbbb;
+  color: black;
+  text-shadow: none;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.cs-effect-config nav [data-tab].active {
+  background: #005390;
+  color: white;
+}
+
+/* primary action button: system blue */
+.cs-effect-config .sheet-footer button,
+.cs-effect-config button[type="submit"] {
+  background: #005390;
+  color: white;
+  border: none;
+}
+.cs-effect-config .sheet-footer button:hover,
+.cs-effect-config button[type="submit"]:hover {
+  background: #0067b3;
+}
+
+.cs-effect-changes .cs-effect-flags {
+  border: 1px solid var(--color-border-light-tertiary, #999);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+}
+.cs-effect-changes .cs-effect-flags .cs-effect-condition {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.cs-effect-changes .cs-changes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cs-effect-changes .cs-change {
+  align-items: flex-end;
+  border-bottom: 1px solid var(--color-border-light-tertiary, #ccc);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 0;
+}
+.cs-effect-changes .cs-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cs-effect-changes .cs-field label {
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+.cs-effect-changes .cs-change-delete {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+.cs-effect-changes .cs-change-add {
+  margin-top: 6px;
+}
+
+/* =============================================================================
+   Tabs — unified flat chips that fill the nav width. GLOBAL: every actor/item
+   sheet AND the Active Effect config. The v14 core restyled sheet tabs as chunky
+   shadowed buttons; this restores the flat system look (grey chip / blue active)
+   and stretches the chips to share the full available width. Consolidated here
+   (the global stylesheet already in the manifest) so it reloads on a plain
+   refresh and supersedes the older, scattered tab rules above / in less/global.css.
+   ========================================================================== */
+
+.chroniclesystem.sheet nav.sheet-tabs,
+.chroniclesystem.sheet nav.tabs,
+.cs-effect-config nav.sheet-tabs,
+.cs-effect-config nav.tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  gap: 4px;
+  padding: 4px 0;
+  margin: 0 0 4px;
+  border: none;
+  align-items: stretch;
+}
+
+/* Each tab: a flat chip that grows to fill the row (basis auto so long labels
+   keep their natural width instead of clipping). */
+.chroniclesystem.sheet nav.sheet-tabs .item,
+.chroniclesystem.sheet nav.tabs .item,
+.chroniclesystem.sheet nav [data-tab],
+.cs-effect-config nav [data-tab] {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #bbbbbb;
+  color: #191813;
+  border: 1px solid #9a927f;
+  border-radius: 3px;
+  box-shadow: none;
+  text-shadow: none;
+  text-decoration: none;
+  font-weight: normal;
+  line-height: normal;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chroniclesystem.sheet nav [data-tab]:hover,
+.chroniclesystem.sheet nav.sheet-tabs .item:hover,
+.cs-effect-config nav [data-tab]:hover {
+  background: #a9a9a9;
+  color: #191813;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.chroniclesystem.sheet nav .item.active,
+.chroniclesystem.sheet nav [data-tab].active,
+.cs-effect-config nav [data-tab].active {
+  background: #005390;
+  color: #ffffff;
+  border-color: #003d6b;
+  text-decoration: none;
+  font-weight: normal;
+  text-shadow: none;
+}
+.chroniclesystem.sheet nav [data-tab].active:hover,
+.cs-effect-config nav [data-tab].active:hover {
+  background: #005390;
+  color: #ffffff;
+}

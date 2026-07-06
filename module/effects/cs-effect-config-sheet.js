@@ -1,0 +1,306 @@
+// Authoring UI for Active Effects (Wave 5, docs/ae-effect-model-design.md §3) —
+// a real subclass of the core ActiveEffectConfig that replaces the raw
+// key/value/mode change rows with a friendly CASCADE:
+//
+//     TYPE (channel) → TARGET (conditional subselect) → VALUE (fixed | derived |
+//     quality-name)        + per-EFFECT optional?/condition flags.
+//
+// The cascade fields are SYNTHETIC (named `changes.<N>.*`, consumed only here);
+// `_processFormData` rebuilds the real `system.changes` array from them via the
+// pure row-model (cs-effect-row-model.js). Mirrors street-fighter's
+// effect-sheet.mjs pattern, adapted to the v14 ActiveEffect schema (changes live
+// in `system.changes` as `{key, type, value, phase}` — NOT a top-level `changes`
+// array, NOT the numeric `mode`; confirmed against the v14.363 bundle).
+//
+// Registration is GUARDED (this must never brick the effect sheet): the class
+// extends a dummy base when the V2 namespace is absent, and it is only registered
+// on v14+ (where the `system.changes` shape exists). v13 keeps the core config
+// plus the datalist enhancement (cs-active-effect-config.js).
+
+import {
+  EFFECT_CHANNELS,
+  TARGET_KINDS,
+  WEAPON_QUALITIES,
+  WEAPON_QUALITY_GROUPS,
+  slugify,
+  weaponTypeSlug,
+  weaponQualitySlug,
+  weaponQualityTakesParam,
+  isRollChannel,
+  isWeaponChannel,
+} from "./cs-effect-vocabulary.js";
+import {
+  CHANNEL_CHOICES,
+  ROLL_TARGETKIND_CHOICES,
+  WEAPON_TARGETKIND_CHOICES,
+  DERIVED_STAT_CHOICES,
+  VALUE_MODE_CHOICES,
+  DERIVED_FORM_CHOICES,
+  QUALITY_OTHER,
+  parseChangeRow,
+  buildChangeFromRow,
+} from "./cs-effect-row-model.js";
+import { readChanges, foundryGeneration } from "./cs-effect-compat.js";
+import { canUserModifyEffect } from "./cs-active-effect.js";
+
+/** Slug suggestions (datalist) — world items; free text is always allowed. */
+function collectSlugSuggestions() {
+  const abilities = new Set();
+  const specialties = new Set();
+  const weaponTypes = new Set();
+  for (const item of game.items ?? []) {
+    if (item.type === "ability") {
+      const slug = item.system?.slug || slugify(item.name);
+      if (slug) abilities.add(slug);
+      for (const sp of Object.values(item.system?.specialties ?? {})) {
+        const s = slugify(sp?.name);
+        if (s) specialties.add(s);
+      }
+    } else if (item.type === "weapon") {
+      const s = weaponTypeSlug(item.system?.specialty);
+      if (s) weaponTypes.add(s);
+    }
+  }
+  return {
+    abilitySlugs: [...abilities].sort(),
+    specialtySlugs: [...specialties].sort(),
+    weaponTypeSlugs: [...weaponTypes].sort(),
+  };
+}
+
+/** Localized label for a canonical quality — falls back to the English game
+ *  term when no i18n key is defined (so a missing entry never shows a raw key). */
+function localizeQualityLabel(name) {
+  const key = `CS.effects.weaponQualities.${weaponQualitySlug(name)}`;
+  const localized = game.i18n.localize(key);
+  return localized === key ? name : localized;
+}
+
+/**
+ * Build the grouped `<optgroup>` options for the quality dropdown, marking the
+ * one matching `selectedKind` (the "Other…" option is rendered separately). The
+ * groups' order mirrors {@link WEAPON_QUALITY_GROUPS} (feudal, then gunpowder).
+ * @param {string} selectedKind the row's current qualityKind
+ */
+function buildQualityOptionGroups(selectedKind) {
+  const groups = [
+    {
+      key: WEAPON_QUALITY_GROUPS.FEUDAL,
+      label: game.i18n.localize("CS.effects.authoring.qualityGroupFeudal"),
+    },
+    {
+      key: WEAPON_QUALITY_GROUPS.GUNPOWDER,
+      label: game.i18n.localize("CS.effects.authoring.qualityGroupGunpowder"),
+    },
+  ];
+  return groups.map((group) => ({
+    label: group.label,
+    options: WEAPON_QUALITIES.filter((q) => q.group === group.key).map((q) => ({
+      value: q.name,
+      label: localizeQualityLabel(q.name),
+      selected: q.name === selectedKind,
+    })),
+  }));
+}
+
+/* ---------------------------- the config sheet ---------------------------- */
+
+// Dummy base when the V2 namespace is absent (v12 / namespace change) — the
+// class still defines without throwing, and registration is guarded so it is
+// never instantiated there. On v14 the real ActiveEffectConfig is the base.
+const ActiveEffectConfigBase =
+  foundry.applications?.sheets?.ActiveEffectConfig ?? class {};
+
+export class CSActiveEffectConfig extends ActiveEffectConfigBase {
+  /** @override — only override the `changes` part; inherit header/details/duration/footer + addChange/deleteChange. */
+  static PARTS = {
+    ...super.PARTS,
+    changes: {
+      template: "systems/chroniclesystem/templates/effects/effect-changes.hbs",
+      scrollable: ["ol[data-changes]"],
+    },
+  };
+
+  /** @override */
+  static DEFAULT_OPTIONS = {
+    // Deliberately NOT "chroniclesystem": that class drags in the actor/item
+    // sheet CSS (blue header, h1.charname, nav, form-group layout) which is
+    // built for those sheets and badly breaks this core V2 ActiveEffectConfig
+    // (overlapping header, vertical nav, unstyled fields, and the
+    // `[data-application-part]{display:flex}` rule that stacked the tabs). With
+    // only our own scope the core's clean effect layout shows through and our
+    // cascade styling (.cs-effect-*) still applies.
+    classes: ["cs-effect-config"],
+  };
+
+  /** @override — fold the system permission rule into the core OWNER gate. */
+  get isEditable() {
+    return super.isEditable && canUserModifyEffect(game.user, this.document);
+  }
+
+  /** @override — inject the cascade data only for the changes part. */
+  async _preparePartContext(partId, context) {
+    const partContext = await super._preparePartContext(partId, context);
+    if (partId !== "changes") return partContext;
+
+    partContext.csChanges = readChanges(this.document).map((change, index) => {
+      const row = parseChangeRow(change, index);
+      // Attach the quality dropdown to EVERY row (not just quality ones): the
+      // Type select toggles visibility live without a re-render, so the options
+      // must already be in the DOM when a row is switched to "Grant weapon quality".
+      row.qualityGroups = buildQualityOptionGroups(row.qualityKind);
+      row.qualityOtherSelected = row.qualityKind === QUALITY_OTHER;
+      return row;
+    });
+    partContext.channelChoices = CHANNEL_CHOICES;
+    partContext.qualityOtherValue = QUALITY_OTHER;
+    partContext.rollTargetKindChoices = ROLL_TARGETKIND_CHOICES;
+    partContext.weaponTargetKindChoices = WEAPON_TARGETKIND_CHOICES;
+    partContext.derivedStatChoices = DERIVED_STAT_CHOICES;
+    partContext.valueModeChoices = VALUE_MODE_CHOICES;
+    partContext.derivedFormChoices = DERIVED_FORM_CHOICES;
+    Object.assign(partContext, collectSlugSuggestions());
+    partContext.effectOptional = !!this.document.getFlag(
+      "chroniclesystem",
+      "optional"
+    );
+    partContext.effectCondition =
+      this.document.getFlag("chroniclesystem", "condition") ?? "";
+    return partContext;
+  }
+
+  /** @override — live cascade: toggle the dependent sub-fields without submitting. */
+  _onChangeForm(formConfig, event) {
+    super._onChangeForm(formConfig, event);
+    const target = event?.target;
+    if (
+      target?.matches?.(
+        "select.cs-channel, select.cs-roll-targetkind, select.cs-weapon-targetkind, select.cs-value-mode, select.cs-quality-kind"
+      )
+    ) {
+      const row = target.closest("li.cs-change");
+      if (row) this._syncRowVisibility(row);
+    }
+  }
+
+  /** @override */
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    // When a subclass overrides PARTS, the core V2 tab framework does NOT
+    // reliably apply the `.active` class to the tab CONTENT sections after
+    // render, so every tab stacks vertically. Toggle it by hand on both the
+    // nav and the content (proven fix from street-fighter / fragged-empire,
+    // which hit the identical bug subclassing this same core config).
+    const activeTab = this.tabGroups?.sheet ?? "details";
+    this.element
+      ?.querySelectorAll(".sheet-tabs [data-tab]")
+      .forEach((el) =>
+        el.classList.toggle("active", el.dataset.tab === activeTab)
+      );
+    this.element
+      ?.querySelectorAll('.tab[data-group="sheet"]')
+      .forEach((el) =>
+        el.classList.toggle("active", el.dataset.tab === activeTab)
+      );
+    // Make every row's conditional fields match its current selects.
+    this.element
+      ?.querySelectorAll?.("li.cs-change")
+      .forEach((row) => this._syncRowVisibility(row));
+  }
+
+  /** Toggle one row's conditional groups from its current select values. */
+  _syncRowVisibility(row) {
+    const valueOf = (selector) => row.querySelector(selector)?.value;
+    const channel = valueOf("select.cs-channel");
+    if (channel === undefined) return; // verbatim/raw row — nothing to toggle
+    row.dataset.channel = channel; // keep the channel-colored rail in sync (CSS)
+    const rollKind = valueOf("select.cs-roll-targetkind");
+    const weaponKind = valueOf("select.cs-weapon-targetkind");
+    const valueMode = valueOf("select.cs-value-mode");
+    const isRoll = isRollChannel(channel);
+    const isWeapon = isWeaponChannel(channel);
+    const isQuality = channel === EFFECT_CHANNELS.QUALITY;
+
+    const show = (selector, condition) => {
+      const el = row.querySelector(selector);
+      if (el) el.style.display = condition ? "" : "none";
+    };
+    show(".cs-roll-target", isRoll);
+    show(
+      ".cs-roll-slug",
+      isRoll &&
+        (rollKind === TARGET_KINDS.ABILITY ||
+          rollKind === TARGET_KINDS.SPECIALTY)
+    );
+    show(".cs-stat-target", channel === EFFECT_CHANNELS.DERIVED_STAT);
+    show(".cs-armor-label", channel === EFFECT_CHANNELS.ARMOR_RATING);
+    show(".cs-bulk-label", channel === EFFECT_CHANNELS.BULK);
+    show(".cs-weapon-target", isWeapon);
+    show(
+      ".cs-weapon-slug",
+      isWeapon && weaponKind === TARGET_KINDS.WEAPON_TYPE
+    );
+    show(".cs-value-mode-field", !isQuality);
+    show(".cs-value-fixed", !isQuality && valueMode === "fixed");
+    show(".cs-value-derived", !isQuality && valueMode === "derived");
+    show(".cs-value-quality", isQuality);
+
+    // Quality sub-fields: the parameter input only for canonical qualities that
+    // take one; the free-text input only for the "Other…" pick.
+    const qualityKind = valueOf("select.cs-quality-kind");
+    show(
+      ".cs-quality-param",
+      isQuality &&
+        qualityKind !== QUALITY_OTHER &&
+        weaponQualityTakesParam(qualityKind)
+    );
+    show(".cs-quality-custom", isQuality && qualityKind === QUALITY_OTHER);
+  }
+
+  /** @override — rebuild the real `system.changes` from the synthetic rows. */
+  _processFormData(event, form, formData) {
+    const submitData = super._processFormData(event, form, formData);
+    const rows = submitData?.changes;
+    if (rows && typeof rows === "object") {
+      submitData.system = submitData.system ?? {};
+      submitData.system.changes = Object.values(rows).map(buildChangeFromRow);
+      delete submitData.changes; // drop the synthetic block — only system.changes persists
+    }
+    // An unchecked checkbox is omitted from form data; force the boolean so that
+    // turning "optional" OFF actually persists (Wave 3 reads this effect flag).
+    const optional = form?.querySelector?.(
+      'input[name="flags.chroniclesystem.optional"]'
+    );
+    if (optional) {
+      submitData.flags ??= {};
+      submitData.flags.chroniclesystem ??= {};
+      submitData.flags.chroniclesystem.optional = !!optional.checked;
+    }
+    return submitData;
+  }
+}
+
+/**
+ * Register the cascade authoring sheet as the default ActiveEffect config.
+ * Guarded so a missing V2 namespace or pre-v14 schema can never brick the sheet
+ * (v13 falls back to the core config + the datalist enhancement). Called from
+ * config.js during init.
+ */
+export function registerEffectConfigSheet() {
+  const namespace = foundry.applications?.sheets?.ActiveEffectConfig;
+  const registrar = foundry.applications?.apps?.DocumentSheetConfig;
+  if (!namespace || !registrar || foundryGeneration() < 14) return;
+  try {
+    registrar.registerSheet(
+      CONFIG.ActiveEffect.documentClass,
+      "chroniclesystem",
+      CSActiveEffectConfig,
+      { makeDefault: true, label: "CS.effects.authoring.sheetLabel" }
+    );
+  } catch (err) {
+    console.warn(
+      "chroniclesystem | CSActiveEffectConfig registration skipped:",
+      err
+    );
+  }
+}

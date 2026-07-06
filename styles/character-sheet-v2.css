@@ -1,0 +1,1370 @@
+/* =============================================================================
+   Character sheet — "clean and modern" redesign (scoped under .cs-sheet-v2 so
+   nothing here leaks into the House sheet or any other actor/item sheet).
+   ========================================================================== */
+
+/* Self-hosted per the design handoff (fonts/OFL.txt) — the design's whole
+   typographic identity (field/chip sizing was tuned to these metrics) reads
+   wrong with a system-font fallback, so these are not optional. */
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("fonts/IBMPlexSans-Variable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/IBMPlexMono-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/IBMPlexMono-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/IBMPlexMono-Bold.woff2") format("woff2");
+}
+
+.cs-sheet-v2 {
+  --csv2-primary: #015ea6;
+  --csv2-dark: #0a0405;
+  --csv2-secondary: #e6e6e8;
+  --csv2-text: #242021;
+  --csv2-bg: #ffffff;
+  --csv2-area: #dfe5f3;
+  --csv2-border: #d3d7e0;
+  --csv2-border-soft: #eef0f4;
+  --csv2-muted: #8a8688;
+  --csv2-muted-2: #5a5658;
+  --csv2-danger: #b04a4a;
+  --csv2-on-primary: #fff;
+  --csv2-input-border: #b9c2d6;
+  --csv2-callout-border: #c7d0e8;
+  --csv2-track-border: #c9ccd4;
+  --csv2-op-muted: #9aa2b4;
+  --csv2-grid-head-text: #cbd3e0;
+  --csv2-font-sans:
+    "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --csv2-font-mono:
+    "IBM Plex Mono", ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas,
+    monospace;
+
+  background: var(--csv2-bg);
+  color: var(--csv2-text);
+  font-family: var(--csv2-font-sans);
+  letter-spacing: normal;
+  word-spacing: normal;
+  /* Firefox / standard scrollbar props — v13 core sets `scrollbar-color` on
+     scroll containers, which takes precedence over ::-webkit-scrollbar in
+     Chromium, so we must set it here too (inherits down to .sheet-body). */
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 input,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 button {
+  font-family: inherit;
+}
+
+/* ---------------------------------------------------- legacy leak fixes ---
+   styles/less/global.css and styles/actor-sheet.css are pre-redesign
+   stylesheets still loaded (system.json) for the House sheet and old item
+   sheets. Their broad `.chroniclesystem.sheet ...` selectors also match
+   markup inside this v2 subtree; for any property THIS file doesn't itself
+   declare, the legacy declaration is the only one in the cascade and wins
+   regardless of specificity. The rules below neutralize every such leak
+   found so far (window frame, inputs, header height, tab-bar padding,
+   checkbox/checkButton flex-basis, form-group direction). */
+.chroniclesystem.character.sheet.actor .window-content {
+  padding: 0;
+  background: var(--csv2-bg);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 input,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 textarea {
+  color: var(--csv2-text);
+}
+
+.cs-sheet-v2 ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.cs-sheet-v2 ::-webkit-scrollbar-track {
+  background: var(--csv2-secondary);
+}
+
+.cs-sheet-v2 ::-webkit-scrollbar-thumb {
+  background: var(--csv2-dark);
+  border-radius: 6px;
+  border: 3px solid var(--csv2-secondary);
+}
+
+.cs-sheet-v2 ::-webkit-scrollbar-thumb:hover {
+  background: var(--csv2-primary);
+}
+
+/* The actual scroll container is .sheet-body; v13 core sets scrollbar-color
+   directly on it, so re-assert the design colors here (not just inherited). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .sheet-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
+}
+
+/* Legacy classes reused here for their functional/JS hooks (ability-label,
+   quality-label, attribute-label, disposition.option) still carry old solid-color
+   chip styling from actor-sheet.css / styles/less/global.css, at a specificity
+   that ties or beats this scoped file. !important neutralizes them decisively —
+   same pattern the project already uses for its .hidden utility in global.css. */
+.cs-sheet-v2 .ability-label {
+  display: block !important;
+  background: none !important;
+  flex: none !important;
+  align-self: auto !important;
+  margin: 0 !important;
+}
+
+.cs-sheet-v2 .ability-label a {
+  color: var(--csv2-dark) !important;
+  font-size: 13.5px !important;
+  text-align: left !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+.cs-sheet-v2 .ability-label a:first-letter {
+  font-size: inherit !important;
+}
+
+.cs-sheet-v2 .quality-label {
+  background: none !important;
+  background-color: transparent !important;
+  color: var(--csv2-dark) !important;
+  padding: 0 !important;
+}
+
+.cs-sheet-v2 .disposition.option,
+.cs-sheet-v2 .disposition.option:hover,
+.cs-sheet-v2 .disposition.option.selected {
+  background: none !important;
+  color: inherit !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.cs-sheet-v2 .disposition.option:hover .cs2-disposition-row {
+  border-color: var(--csv2-primary);
+}
+
+/* ------------------------------------------------------------------ header - */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .sheet-header {
+  background: var(--csv2-bg);
+  border-bottom: 1px solid var(--csv2-border);
+  padding: 14px 20px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .sheet-header .header-fields {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-avatar {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--csv2-border);
+  background: var(--csv2-primary);
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .charname {
+  margin: 0;
+  height: auto;
+  padding: 0;
+  border-bottom: 0;
+  /* The design renders the name as a bare input; the h1 wrapper's inherited
+     heading line-box (Foundry's h1 strut) would inflate the header height.
+     Flex drops the inline strut so the row is exactly the input's height. */
+  display: flex;
+  align-items: center;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  font: 500 12px var(--csv2-font-sans);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-header-meta-label {
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-header-meta-value {
+  color: var(--csv2-text);
+}
+
+/* House value is a link to the House actor's sheet (dark like a value; hints
+   interactivity on hover). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-house-link {
+  cursor: pointer;
+  color: var(--csv2-text);
+  text-decoration: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-house-link:hover {
+  color: var(--csv2-primary);
+  text-decoration: underline;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-header-meta input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--csv2-text);
+  font: 500 12px/1.4 var(--csv2-font-sans);
+  height: auto;
+  padding: 0;
+  margin: 0;
+  width: 80px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-header-meta input:hover,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-header-meta input:focus {
+  border-bottom-color: var(--csv2-border);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-header-meta-glory {
+  color: var(--csv2-primary);
+  font-weight: 700;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .charname input {
+  width: 100%;
+  height: auto;
+  border: none;
+  background: transparent;
+  font: 700 23px/1.2 var(--csv2-font-sans);
+  color: var(--csv2-dark);
+  padding: 0;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------- tab bar --- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .sheet-tabs {
+  background: var(--csv2-secondary);
+  border-bottom: 1px solid var(--csv2-border);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .sheet-tabs .item {
+  padding: 10px 15px;
+  margin: 0;
+  font: 600 13px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  text-decoration: none;
+  text-shadow: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .sheet-tabs .item.active {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  text-decoration: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .sheet-tabs .item:hover {
+  text-shadow: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .sheet-body {
+  background: var(--csv2-bg);
+  padding: 12px 16px 24px;
+}
+
+/* ------------------------------------------------------------- section title */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 12px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-section-title .cs2-rail {
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--csv2-primary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-section-title span {
+  font: 600 16px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+}
+
+/* ------------------------------------------------------------------- card -- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-card {
+  border: 1px solid var(--csv2-border);
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--csv2-bg);
+  margin-bottom: 10px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-card-header {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  font: 600 11px var(--csv2-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-card-header .cs2-count {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 1px 7px;
+  font: 700 9px var(--csv2-font-mono);
+}
+
+/* ----------------------------------------------------------------- callout - */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--csv2-area);
+  border: 1px solid var(--csv2-callout-border);
+  border-radius: 7px;
+  padding: 9px 14px;
+  margin-bottom: 12px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-callout .cs2-callout-label {
+  font: 700 11.5px var(--csv2-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--csv2-primary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-callout .cs2-fraction {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 700 15px var(--csv2-font-mono);
+  color: var(--csv2-muted-2);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-callout .cs2-fraction input {
+  width: 40px;
+  text-align: center;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-border);
+  border-radius: 3px;
+  padding: 4px 2px;
+  font: 600 15px var(--csv2-font-mono);
+  color: var(--csv2-text);
+}
+
+/* --------------------------------------------------------------- stat row -- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+  gap: 8px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-card > .cs2-stat-row:first-of-type {
+  border-top: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-stat-row .cs2-stat-label {
+  font: 500 12.5px var(--csv2-font-sans);
+}
+
+/* .cs2-stat-fields is deliberately NOT scoped to .cs2-stat-row — it is the
+   generic "value (+/-) value = total" field group, reused as-is by the
+   Movement row (which lives in a .cs2-track-block, not a .cs2-stat-row). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-stat-fields {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font: 700 13px var(--csv2-font-mono);
+  flex-wrap: nowrap;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-stat-fields .cs2-op {
+  color: var(--csv2-op-muted);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-stat-fields input {
+  width: 32px;
+  text-align: center;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 3px;
+  padding: 4px 2px;
+  font: 600 13px var(--csv2-font-mono);
+  color: var(--csv2-text);
+  box-sizing: border-box;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-stat-fields input[readonly] {
+  background: var(--csv2-secondary);
+  border-color: transparent;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-stat-fields .cs2-total {
+  width: 32px;
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--csv2-secondary);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 4px 2px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-stat-fields .cs2-current {
+  width: 32px;
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--csv2-area);
+  border: 1px solid var(--csv2-primary);
+  color: var(--csv2-primary);
+  border-radius: 3px;
+  padding: 4px 2px;
+}
+
+/* --------------------------------------------------------------- rollable -- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .rollable {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--csv2-bg);
+  color: var(--csv2-primary);
+  border: 1px solid var(--csv2-primary);
+  border-radius: 5px;
+  padding: 4px 9px;
+  font: 600 12px var(--csv2-font-mono);
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .rollable:hover {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .rollable::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  flex: none;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2.5' y='2.5' width='11' height='11' rx='3' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3Ccircle cx='5.6' cy='5.6' r='1.3'/%3E%3Ccircle cx='10.4' cy='10.4' r='1.3'/%3E%3Ccircle cx='8' cy='8' r='1.3'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2.5' y='2.5' width='11' height='11' rx='3' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3Ccircle cx='5.6' cy='5.6' r='1.3'/%3E%3Ccircle cx='10.4' cy='10.4' r='1.3'/%3E%3Ccircle cx='8' cy='8' r='1.3'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* --------------------------------------------------------------- track ---- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-track-block {
+  padding: 9px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-track-block .cs2-track-label {
+  font: 600 10px var(--csv2-font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+  margin-bottom: 6px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .custom-checkbox {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .custom-checkbox .square {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  margin: 0;
+  border-radius: 4px;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-track-border);
+  cursor: pointer;
+  font-size: 0;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .custom-checkbox .square.checked {
+  background: var(--csv2-primary);
+  border-color: var(--csv2-primary);
+}
+
+/* ----------------------------------------------------------- disposition -- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .disposition.option {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  text-transform: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .disposition.option::before {
+  content: "";
+  width: 6px;
+  border-radius: 3px;
+  flex: none;
+  background: var(--csv2-area);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(1)::before { background: var(--csv2-area); }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(2)::before { background: #b9cbe6; }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(3)::before { background: #7ea6d0; }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(4)::before { background: #3b7fb8; }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(5)::before { background: var(--csv2-primary); }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(6)::before { background: #073e6c; }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(7)::before { background: var(--csv2-dark); }
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .disposition.option .cs2-disposition-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: 1px solid #e2e4ea;
+  background: var(--csv2-bg);
+  color: var(--csv2-text);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .disposition.option .cs2-disposition-row .cs2-disposition-name {
+  font: 600 12px var(--csv2-font-sans);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .disposition.option .cs2-disposition-row .cs2-disposition-mods {
+  font: 600 11px var(--csv2-font-mono);
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .disposition.option.selected .cs2-disposition-row {
+  background: var(--csv2-primary);
+  border-color: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .disposition.option.selected .cs2-disposition-row .cs2-disposition-mods {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ---------------------------------------------------------------- chips --- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-chip {
+  font: 600 11.5px var(--csv2-font-sans);
+  padding: 5px 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--csv2-track-border);
+  background: var(--csv2-bg);
+  color: var(--csv2-muted-2);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-chip.selected {
+  border-color: var(--csv2-primary);
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+
+/* ---------------------------------------------------------------- grids --- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------- tables -- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid {
+  display: grid;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid-head {
+  background: var(--csv2-dark);
+  color: var(--csv2-grid-head-text);
+  font: 600 9.5px var(--csv2-font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid-head.center,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid-cell.center {
+  text-align: center;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid-cell {
+  padding: 7px 10px;
+  border-top: 1px solid var(--csv2-secondary);
+  display: flex;
+  align-items: center;
+  font: 500 12px var(--csv2-font-sans);
+  color: var(--csv2-text);
+  min-width: 0;
+}
+
+/* Zebra by nth-OF-TYPE, not nth-child: the column-header cells are <span>s and
+   the data rows are <div class="cs2-row">, so counting divs counts only rows.
+   nth-child would include the headers and flip parity on odd-column tables
+   (equipments, equipped weapons/armor), making the first data row grey. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid > .cs2-row:nth-of-type(even) .cs2-grid-cell {
+  background: var(--csv2-secondary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid-cell.mono {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid-cell.muted {
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid-cell .cs2-drag-handle {
+  color: #c2c5cc;
+  cursor: grab;
+  margin-right: 6px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tag {
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-border);
+  color: var(--csv2-muted-2);
+  font: 500 10px var(--csv2-font-sans);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid-scroll {
+  overflow-x: auto;
+}
+
+/* --------------------------------------------------------- equip toggles -- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .checkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 22px;
+  border: 1px solid var(--csv2-border);
+  border-radius: 4px;
+  color: var(--csv2-muted);
+  background: var(--csv2-bg);
+  margin-left: 4px;
+  padding: 0;
+  text-align: center;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .checkButton.activated {
+  background: var(--csv2-primary);
+  border-color: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+
+/* --------------------------------------------------------- accordion desc - */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-list-item {
+  border-top: 1px solid var(--csv2-border-soft);
+  padding: 9px 12px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-list-item:nth-child(even) {
+  background: var(--csv2-secondary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-list-item:first-child {
+  border-top: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-list-item .cs2-list-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-list-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Accordion chevron: blue, points down when expanded, rotates to point right
+   when the description is collapsed (.description.hidden). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-accordion-chevron {
+  flex: none;
+  color: var(--csv2-primary);
+  font-size: 11px;
+  transition: transform 0.15s ease;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-list-item:has(.description.hidden) .cs2-accordion-chevron {
+  transform: rotate(-90deg);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-list-item .cs2-list-item-head .quality-label,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-list-item .cs2-list-item-head label {
+  font: 600 12.5px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+  margin: 0;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .item-controls button.item-edit,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-icon-btn {
+  background: none;
+  border: 1px solid var(--csv2-border);
+  border-radius: 5px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  cursor: pointer;
+  color: var(--csv2-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .item-controls button.item-edit:hover,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-icon-btn:hover {
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .description {
+  font: 400 11.5px/1.5 var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  margin-top: 6px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .description.hidden {
+  display: none;
+}
+
+/* ----------------------------------------------------------- work / spell - */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-technique {
+  border: 1px solid var(--csv2-border);
+  border-radius: 7px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-technique .cs2-technique-header {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  padding: 8px 12px;
+  font: 600 13px var(--csv2-font-sans);
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-technique .cs2-works {
+  padding: 10px 12px;
+  background: var(--csv2-area);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-work {
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-callout-border);
+  border-left: 3px solid var(--csv2-primary);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-work-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-work-head b {
+  font: 600 13.5px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-work-cost {
+  margin-left: auto;
+  font: 600 11px var(--csv2-font-mono);
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-work-tests {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-work-tests .cs2-work-test-label {
+  font: 600 8px var(--csv2-font-mono);
+  color: var(--csv2-muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-work .resonance {
+  font: 400 11.5px/1.5 var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  margin-top: 10px;
+}
+
+/* -------------------------------------------------------------- currency -- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-currency {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font: 600 12px var(--csv2-font-mono);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-currency input {
+  width: 56px;
+  text-align: center;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 3px;
+  padding: 4px 2px;
+  font: 600 13px var(--csv2-font-mono);
+  color: var(--csv2-text);
+}
+
+/* -------------------------------------------------------------- injuries -- */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split > div:first-child {
+  border-right: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split-item {
+  padding: 7px 10px;
+  font: 500 11px var(--csv2-font-sans);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split-empty {
+  color: #a5a2a4;
+  font-style: italic;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split-add {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--csv2-border-soft);
+  padding: 6px 10px;
+  font: 600 10.5px var(--csv2-font-sans);
+  color: var(--csv2-primary);
+  cursor: pointer;
+  width: 100%;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split-item.flexrow {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split-item input {
+  width: 100%;
+  flex: 1;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-border);
+  border-radius: 3px;
+  padding: 4px 7px;
+  font: 500 11px var(--csv2-font-sans);
+  color: var(--csv2-text);
+}
+
+/* The row's delete control matches the input height (design), not the fixed
+   20px used by the accordion edit-pencil. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split-item .cs2-icon-btn {
+  height: auto;
+  align-self: stretch;
+  width: 26px;
+  flex: none;
+}
+
+/* ---------------------------------------------------------------- description */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .profile-picture {
+  /* The portrait column fills the row height set by the Appearance card WITHOUT
+     inflating it: this section is the positioning context and ALL of its content
+     (the image container) is absolutely positioned, so it contributes zero
+     intrinsic height. align-self:stretch + min-height:0 then make it take exactly
+     the row height the Appearance card defines.
+     `height: auto` is REQUIRED: the legacy actor-sheet.css rule
+     (.chroniclesystem.sheet.actor .tab.description .profile-picture) sets
+     height:300px at equal specificity — without this it wins per-property and
+     pins the section to 300px, defeating align-self:stretch. */
+  margin: 0;
+  position: relative;
+  align-self: stretch;
+  height: auto;
+  min-height: 0;
+  margin-bottom: 10px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .profile-img-container {
+  /* Absolutely fill the section — with no in-flow height, the portrait can never
+     stretch the grid row (height:auto overrides legacy .profile-img-container
+     { height:300px } from styles/less/global.css). */
+  position: absolute;
+  inset: 0;
+  height: auto;
+  border-radius: 7px;
+  overflow: hidden;
+  border: 1px solid var(--csv2-border);
+  background: var(--csv2-secondary);
+  align-content: flex-start;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .profile-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-grid + .cs2-field-grid {
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-grid .form-group {
+  padding: 9px 12px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-grid label {
+  flex: none;
+  font: 500 11px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  margin: 0;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-grid input {
+  width: 120px;
+  flex: none;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 3px;
+  padding: 4px 7px;
+  font: 500 12px var(--csv2-font-sans);
+  color: var(--csv2-text);
+  text-align: right;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-stack .form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 9px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+  margin: 0;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-stack .form-group:first-child {
+  border-top: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-stack label {
+  display: block;
+  flex: none;
+  font: 600 8.5px var(--csv2-font-mono);
+  color: var(--csv2-muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-stack input {
+  width: 100%;
+  flex: none;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 3px;
+  padding: 5px 8px;
+  font: 500 12px var(--csv2-font-sans);
+  color: var(--csv2-text);
+}
+
+/* Concept: a 2×2 grid (Vice|Virtue / Goal|Motivation) per the design, reusing
+   the field-stack label/input styling but laying the groups out in two columns
+   with a right rule on the left column and a top rule on the second row. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-concept-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-concept-grid .form-group:nth-child(-n + 2) {
+  border-top: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-concept-grid .form-group:nth-child(odd) {
+  border-right: 1px solid var(--csv2-border-soft);
+}
+
+/* Identity: single-row 3-col grid of stacked label+input cells (design). Reuses
+   cs2-field-stack's label/input styling; swaps the vertical stack for a 3-column
+   grid with vertical rules between cells (no top rules — it is a single row). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-field-stack.cs2-identity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-identity-grid .form-group {
+  border-top: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-identity-grid .form-group:not(:last-child) {
+  border-right: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-note-card .cs2-card-header {
+  font: 600 10px var(--csv2-font-mono);
+  padding: 6px 11px;
+}
+
+/* Note cards are free-text blocks — override the legacy .big-field 150px /
+   right-aligned form-fields so the input fills the card and reads left. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-note-card .form-group {
+  padding: 9px 11px;
+  margin: 0;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-note-card .form-fields {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-note-card .form-group input {
+  width: 100%;
+  flex: 1;
+  text-align: left;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 3px;
+  padding: 5px 8px;
+  font: 400 12px var(--csv2-font-sans);
+  color: var(--csv2-text);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-rich-text {
+  padding: 11px 12px;
+  font: 400 12.5px/1.6 var(--csv2-font-sans);
+}
+
+/* ------------------------------------------------------------ effects tab - */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-tab {
+  --cs-ink: var(--csv2-text);
+  --cs-azure: var(--csv2-primary);
+  --cs-azure-soft: var(--csv2-primary);
+  --cs-gold: var(--csv2-primary);
+  --cs-bronze: var(--csv2-muted);
+  --cs-crimson: var(--csv2-danger);
+  --cs-parchment: var(--csv2-secondary);
+  --cs-parchment-hi: var(--csv2-bg);
+  --cs-stone: var(--csv2-border);
+  --cs-stone-dark: var(--csv2-muted);
+  --cs-serif: var(--csv2-font-sans);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-toolbar {
+  margin-bottom: 10px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-toolbar .effect-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  border-radius: 5px;
+  padding: 6px 12px;
+  font: 600 12px var(--csv2-font-sans);
+  text-decoration: none;
+}
+
+/* Fixed Status/Actions tracks: the header and every row are SEPARATE grids, so
+   `auto` tracks (and therefore the two 1fr tracks) would size differently per
+   grid and columns would not line up. Explicit widths make all grids agree. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 100px 120px;
+  background: var(--csv2-dark);
+  color: var(--csv2-grid-head-text);
+  border-radius: 7px 7px 0 0;
+  overflow: hidden;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-header .effect-col {
+  padding: 7px 12px;
+  font: 600 9.5px var(--csv2-font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  /* NAME + ORIGIN read left; overrides the generic global.css rule that centers
+     .effect-col-origin. STATUS/ACTIONS re-center below (later, equal specificity). */
+  text-align: left;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-header .effect-col-status,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-header .effect-col-actions {
+  text-align: center;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--csv2-border);
+  border-top: none;
+  border-radius: 0 0 7px 7px;
+  overflow: hidden;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-list .effect {
+  display: grid;
+  grid-template-columns: 1fr 1fr 100px 120px;
+  align-items: center;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-list .effect:nth-child(even) {
+  background: var(--csv2-secondary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effects-list .effect.effect-disabled {
+  opacity: 0.55;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-cell-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font: 600 12.5px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-img {
+  border-radius: 4px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-origin-name {
+  padding: 8px 12px;
+  font: 400 12px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Status badge — Active (blue on light-blue) / Suppressed (muted on grey). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-status-badge {
+  font: 600 10px var(--csv2-font-mono);
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 4px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-status-badge.is-active {
+  background: var(--csv2-area);
+  color: var(--csv2-primary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-status-badge.is-suppressed {
+  background: var(--csv2-secondary);
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-control {
+  background: none;
+  border: 1px solid var(--csv2-border);
+  border-radius: 5px;
+  padding: 4px 7px;
+  color: var(--csv2-muted);
+  text-decoration: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-control:hover {
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+}
+
+/* Row action buttons are fixed-size icon buttons (design §7). Scoped to
+   .effect-controls so the toolbar "+ Create" (.effect-create) keeps its size. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-controls .effect-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 22px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* The enable toggle reads as a bare switch — no border box (design §7). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-controls .effect-toggle {
+  border: none;
+  width: 30px;
+  font-size: x-large;
+}
+
+/* Toggle reads on=blue / off=muted; delete warms to the danger colour. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-toggle.is-on {
+  color: var(--csv2-primary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-delete:hover {
+  border-color: var(--csv2-danger);
+  color: var(--csv2-danger);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-lock {
+  color: var(--csv2-muted);
+  padding: 4px 7px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .effect-empty {
+  padding: 12px;
+  text-align: center;
+  color: var(--csv2-muted);
+  font-style: italic;
+}

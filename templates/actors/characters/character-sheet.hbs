@@ -1,15 +1,20 @@
-<div class="{{cssClass}}" autocomplete="off">
+<div class="{{cssClass}} cs-sheet-v2" autocomplete="off">
     {{!-- Sheet Header --}}
     <header class="sheet-header">
         <div class="header-fields">
-            <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
-            <div class="complements flexrow">
-                <label  class="attribute-label"> Ancestry: </label>
-                <input  class="medium-field flex2" type="text"  name="system.ancestries"  value="{{character.ancestries}}"  data-dtype="String"/>
-                <label  class="attribute-label"> Age: </label>
-                <input  class="small-field"  type="text"  name="system.age"  value="{{character.age}}"  data-dtype="Number"/>
-                <label  class="attribute-label"> Gender: </label>
-                <input  class="medium-field"  type="text"  name="system.gender"  value="{{character.gender}}"  data-dtype="String"/>
+            <img class="cs2-avatar" src="{{tokenImg}}" alt="{{actor.name}}" data-action="configurePrototypeToken" title="Configure Token"/>
+            <div class="cs2-header-text">
+                <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+                <div class="cs2-header-meta">
+                    <span class="cs2-header-meta-item">
+                        <span class="cs2-header-meta-label">House</span>
+                        {{#if houseRole}}<a class="cs2-header-meta-value cs2-house-link" data-action="openHouse" data-actor-id="{{houseRole.houseId}}">{{houseRole.houseName}}</a>{{else}}<span class="cs2-header-meta-value">{{character.house}}</span>{{/if}}
+                    </span>
+                    {{#if houseRole}}
+                    <span class="cs2-header-meta-item"><span class="cs2-header-meta-label">Position</span> <span class="cs2-header-meta-value">{{houseRole.role}}{{#if houseRole.description}}/{{houseRole.description}}{{/if}}</span></span>
+                    {{/if}}
+                    <span class="cs2-header-meta-item"><span class="cs2-header-meta-label">Glory</span> <span class="cs2-header-meta-value cs2-header-meta-glory">{{character.glory}}</span></span>
+                </div>
             </div>
         </div>
     </header>
@@ -22,6 +27,7 @@
         <a class="item" data-tab="sorcery" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.sorcery"}}</a>
         <a  class="item"  data-tab="equipments" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.equipments"}}</a>
         <a  class="item"  data-tab="actor-description" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.description"}}</a>
+        <a  class="item"  data-tab="effects" data-group="primary" data-action="tab">{{localize "CS.effects.tab"}}</a>
     </nav>
 
     {{!-- Sheet Body --}}
@@ -32,5 +38,6 @@
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.hbs"}}
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.hbs"}}
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/description-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/components/effects-tab.hbs"}}
     </section>
 </div>

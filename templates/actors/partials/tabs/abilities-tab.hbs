@@ -1,26 +1,31 @@
-<div class="tab flexrow" data-group="primary" data-tab="abilities">
-    <section class="abilities flex3">
-        <header class="header-field">
-            <span>Abilities</span>
-        </header>
-        <ol  class="abilities-list">
+<div class="tab" data-group="primary" data-tab="abilities">
+    <div class="cs2-card">
+        <div class="cs2-card-header">{{localize "CS.sheets.character.tabs.abilities"}}</div>
+        <div class="cs2-grid" style="grid-template-columns: 74px 150px 1fr">
+            <span class="cs2-grid-head center">Test</span>
+            <span class="cs2-grid-head">Ability</span>
+            <span class="cs2-grid-head">Specialties</span>
             {{#each character.owned.abilities as |ability key|}}
-                <li  class="item ability flexrow" data-item-id="{{ability._id}}" draggable="true">
-                    <div class="ability-value rollable" id="ability:{{ability.name}}" data-action="rollDice">
-                        <a>{{ability.system.rating}}d{{modifier ability.system.modifier}}</a>
+                <div class="item ability cs2-row" data-item-id="{{ability._id}}" draggable="true" style="display:contents">
+                    <div class="cs2-grid-cell center">
+                        {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                            id=(concat "ability:" ability.name)
+                            label=(concat ability.system.rating "d" (modifier ability.system.modifier)) }}
                     </div>
-                    <label class="ability-label item-edit" data-action="editItem"><a >{{ability.name}}</a></label>
-                    <div class="ability-specialities">
+                    <div class="cs2-grid-cell">
+                        <label class="ability-label item-edit" data-action="editItem"><a>{{ability.name}}</a></label>
+                    </div>
+                    <div class="cs2-grid-cell cs2-tags">
                         {{#each ability.system.specialties as |specialty key|}}
                             {{#if specialty.rating}}
-                            <div class="rollable" id="specialty:{{specialty.name}}:{{../this.name}}" data-action="rollDice">
-                                <a>{{specialty.name}} {{specialty.rating}}B{{modifier specialty.modifier}}</a>&nbsp;
-                            </div>
+                            {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                                id=(concat "specialty:" specialty.name ":" ../this.name)
+                                label=(concat specialty.name " " specialty.rating "B" (modifier specialty.modifier)) }}
                             {{/if}}
                         {{/each}}
                     </div>
-                </li>
+                </div>
             {{/each}}
-        </ol>
-    </section>
+        </div>
+    </div>
 </div>

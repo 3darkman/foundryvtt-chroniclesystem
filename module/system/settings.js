@@ -1,4 +1,3 @@
-/* global game */
 import LOGGER from "../utils/logger.js";
 import { CSConstants } from "./csConstants.js";
 

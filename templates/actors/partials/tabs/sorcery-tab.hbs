@@ -1,75 +1,58 @@
 <div class="tab" data-group="primary" data-tab="sorcery">
-    <section class="sorcery">
-        <header class="header-field">
-            <span>Sorcery Points</span>
-        </header>
-        <section class="sorcery-points flexrow">
-            <section class="">
-            </section>
-            <section class="">
-            </section>
-            <section class="flexrow">
-                {{> (csFormGroup) labelText="Current:" id="system.sorceryPoints.current" value=character.sorceryPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
-                {{> (csFormGroup) labelText="Max:" id="system.sorceryPoints.max" value=character.sorceryPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
-            </section>
-        </section>
-        <header class="header-field">
-            <span>{{localize "CS.sheets.character.techniques"}}</span>
-        </header>
-        <ol class="techniques-list list">
-            <li class="list-header">
-                <div class="flexrow">
-                    <div class="field size150 bottom">{{localize "CS.sheets.generalLabels.name"}}</div>
-                    <div class="field size75 center bottom">{{localize "CS.sheets.techniqueItem.type"}}</div>
-                    <div class="field size200 center bottom">
-                        <div>{{localize "CS.sheets.techniqueItem.test.spellcasting"}}</div>
-                        <div class="flexrow bottom no-margin">
-                            <div class="no-margin">{{localize "CS.sheets.techniqueItem.test.alignment"}}</div>
-                            <div class="no-margin">{{localize "CS.sheets.techniqueItem.test.invocation"}}</div>
-                            <div class="no-margin">{{localize "CS.sheets.techniqueItem.test.unleashing"}}</div>
-                        </div>
-                    </div>
-                    <div class="field bottom">{{localize "CS.sheets.techniqueItem.cost"}}</div>
-                    <div class="item-controls"></div>
-                </div>
-            </li>
-            {{#each character.owned.techniques as |technique|}}
-                <li  class="item technique" data-item-id="{{_id}}" draggable="true">
-                    <div class="item-edit technique-header" data-action="editItem"><a>{{technique.name}}</a></div>
-                </li>
+    <div class="cs2-callout">
+        <span class="cs2-callout-label">Sorcery Points</span>
+        <div class="cs2-fraction">
+            <input name="system.sorceryPoints.current" type="text" value="{{character.sorceryPoints.current}}" placeholder="Current" data-dtype="Number"/>
+            <span class="cs2-op">/</span>
+            <input name="system.sorceryPoints.max" type="text" value="{{character.sorceryPoints.max}}" placeholder="Max" data-dtype="Number"/>
+        </div>
+    </div>
+
+    <div class="cs2-section-title"><span class="cs2-rail"></span><span>{{localize "CS.sheets.character.techniques"}}</span></div>
+
+    {{#each character.owned.techniques as |technique|}}
+        <div class="cs2-technique">
+            <div class="item technique item-edit cs2-technique-header" data-item-id="{{_id}}" data-action="editItem"><a>{{technique.name}}</a></div>
+            <div class="cs2-works">
                 {{#each technique.system.works as |work|}}
-                    <li  class="item work" data-item-id="{{_id}}">
-                        <div class="flexrow">
-                            <div class="field size150"><B>{{work.name}}</B></div>
-                            <div class="field size75 center">{{localize (lookup ../../techniquesTypes work.type)}}</div>
-                            {{#ifEquals work.type "SPELL"}}
-                                <div class="field size200 rollable center" id="formula:{{work.test.spellcasting}}:{{formulaToStr work.test.spellcastingFormula}}" data-action="rollDice">
-                                    <a>{{format-formula work.test.spellcastingFormula}}</a>
-                                </div>
-                            {{else}}
-                                <div class="field flexrow size200">
-                                    <div class="field size150 rollable center" id="formula:{{work.test.alignment}}:{{formulaToStr work.test.alignmentFormula}}" data-action="rollDice">
-                                        <a>{{format-formula work.test.alignmentFormula}}</a>
-                                    </div>
-                                    <div class="field size150 rollable center" id="formula:{{work.test.invocation}}:{{formulaToStr work.test.invocationFormula}}" data-action="rollDice">
-                                        <a>{{format-formula work.test.invocationFormula}}</a>
-                                    </div>
-                                    <div class="field size150 rollable center" id="formula:{{work.test.unleashing}}:{{formulaToStr work.test.unleashingFormula}}" data-action="rollDice">
-                                        <a>{{format-formula work.test.unleashingFormula}}</a>
-                                    </div>
-                                </div>
-                            {{/ifEquals}}
-                            <div class="field">{{localize (lookup ../../techniquesCosts work.cost)}}</div>
+                    <div class="item work cs2-work" data-item-id="{{_id}}">
+                        <div class="cs2-work-head">
+                            <b>{{work.name}}</b>
+                            <span class="cs2-tag">{{localize (lookup ../../techniquesTypes work.type)}}</span>
+                            <span class="cs2-work-cost">Cost {{localize (lookup ../../techniquesCosts work.cost)}}</span>
                             <div class="item-controls" data-action="toggleDescription"><a><i class="far fa-caret-square-down"></i></a></div>
                         </div>
-                        <div class="flexrow">
-                            <div class="field"></div>
-                            <div class="field size300 resonance"><b>{{localize "CS.sheets.techniqueItem.resonance"}}:</b> {{work.resonance}}</div>
-                        </div>
+                        {{#ifEquals work.type "SPELL"}}
+                            {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                                id=(concat "formula:" work.test.spellcasting ":" (formulaToStr work.test.spellcastingFormula))
+                                label=(format-formula work.test.spellcastingFormula) }}
+                        {{else}}
+                            <div class="cs2-work-tests">
+                                <div>
+                                    <div class="cs2-work-test-label">{{localize "CS.sheets.techniqueItem.test.alignment"}}</div>
+                                    {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                                        id=(concat "formula:" work.test.alignment ":" (formulaToStr work.test.alignmentFormula))
+                                        label=(format-formula work.test.alignmentFormula) }}
+                                </div>
+                                <div>
+                                    <div class="cs2-work-test-label">{{localize "CS.sheets.techniqueItem.test.invocation"}}</div>
+                                    {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                                        id=(concat "formula:" work.test.invocation ":" (formulaToStr work.test.invocationFormula))
+                                        label=(format-formula work.test.invocationFormula) }}
+                                </div>
+                                <div>
+                                    <div class="cs2-work-test-label">{{localize "CS.sheets.techniqueItem.test.unleashing"}}</div>
+                                    {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                                        id=(concat "formula:" work.test.unleashing ":" (formulaToStr work.test.unleashingFormula))
+                                        label=(format-formula work.test.unleashingFormula) }}
+                                </div>
+                            </div>
+                        {{/ifEquals}}
+                        <p class="resonance"><b>{{localize "CS.sheets.techniqueItem.resonance"}}:</b> {{work.resonance}}</p>
                         <div class="description hidden">{{enrich work.description}}</div>
-                    </li>
+                    </div>
                 {{/each}}
-            {{/each}}
-        </ol>
-    </section>
+            </div>
+        </div>
+    {{/each}}
 </div>

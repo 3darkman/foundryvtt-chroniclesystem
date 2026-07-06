@@ -4,4 +4,31 @@
     {{> (csFormGroup) id="reRoll" inputCssClass="size50" value=formula.reRoll placeHolder="CS.dialogs.rollModifier.reRoll" labelText="CS.dialogs.rollModifier.reRoll" dataType=Number }}
     {{> (csFormGroup) id="modifier" inputCssClass="size50" value=formula.modifier placeHolder="CS.dialogs.rollModifier.modifier" labelText="CS.dialogs.rollModifier.modifier" dataType=Number }}
     {{> (csFormGroup) id="dicePenalty" inputCssClass="size50" value=formula.dicePenalty placeHolder="CS.dialogs.rollModifier.dicePenalty" labelText="CS.dialogs.rollModifier.dicePenalty" dataType=Number }}
+    {{#if activeEffects.length}}
+    <fieldset class="cs-optional-effects cs-active-effects">
+        <legend>{{localize "CS.dialogs.rollModifier.activeEffects"}}</legend>
+        {{#each activeEffects}}
+        <label class="cs-optional-effect cs-active-effect" title="{{localize 'CS.dialogs.rollModifier.activeEffectHint'}}">
+            <input type="checkbox" checked disabled />
+            <span class="cs-optional-effect-name">{{this.name}}</span>
+            <span class="cs-optional-effect-value">{{this.displayValue}}</span>
+            {{#if this.condition}}<span class="cs-optional-effect-condition">{{this.condition}}</span>{{/if}}
+            <i class="fas fa-lock cs-active-effect-lock" aria-hidden="true"></i>
+        </label>
+        {{/each}}
+    </fieldset>
+    {{/if}}
+    {{#if optionalEffects.length}}
+    <fieldset class="cs-optional-effects">
+        <legend>{{localize "CS.dialogs.rollModifier.optionalEffects"}}</legend>
+        {{#each optionalEffects}}
+        <label class="cs-optional-effect">
+            <input type="checkbox" data-field="{{this.formulaField}}" data-value="{{this.value}}" data-effect-id="{{this.effectId}}" />
+            <span class="cs-optional-effect-name">{{this.name}}</span>
+            <span class="cs-optional-effect-value">{{this.displayValue}}</span>
+            {{#if this.condition}}<span class="cs-optional-effect-condition">{{this.condition}}</span>{{/if}}
+        </label>
+        {{/each}}
+    </fieldset>
+    {{/if}}
 </div>

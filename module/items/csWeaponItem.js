@@ -1,18 +1,15 @@
 import { CSItem } from "./csItem.js";
 import { ChronicleSystem } from "../system/ChronicleSystem.js";
-import LOGGER from "../utils/logger.js";
+import { weaponTypeSlug } from "../effects/cs-effect-vocabulary.js";
 
+/**
+ * Weapon item. Its bulk contribution is no longer applied imperatively: the
+ * modifier collector (`cs-effect-modifiers.js`) reads the `bulk` quality live
+ * from this item's data on every prepareData. `updateDamageValue` (a transient
+ * display computation, not a modifier) also folds in any authored `damage`
+ * Active Effects for this weapon's type (Wave 4).
+ */
 export class CSWeaponItem extends CSItem {
-  onEquippedChanged(actor, isEquipped) {
-    LOGGER.trace(
-      `Weapon ${this._id} ${
-        isEquipped ? "equipped" : "unequipped"
-      } by the actor ${actor.name} | csWeaponItem.js`
-    );
-    super.onEquippedChanged(actor, isEquipped);
-    //TODO: implement the onEquippedChanged from CSWeaponItem
-  }
-
   updateDamageValue(actor) {
     let matches = this.getCSData().damage.match(
       "@([a-zsA-Z]*)([-+/*]*)([0-9]*)"
@@ -31,40 +28,14 @@ export class CSWeaponItem extends CSItem {
         ) {
           this.damageValue += 1;
         }
+        // Wave 4: authored `damage` effects targeting this weapon's type (its
+        // combat specialty) or all weapons. Optional-chained so the unit tests'
+        // bare actor double (no getWeaponDamageBonus) simply contributes 0.
+        this.damageValue +=
+          actor.getWeaponDamageBonus?.(
+            weaponTypeSlug(this.getCSData().specialty)
+          ) ?? 0;
       }
     }
-  }
-
-  onObtained(actor) {
-    LOGGER.trace(
-      `Weapon ${this._id} obtained by the actor ${actor.name} | csWeaponItem.js`
-    );
-    super.onObtained(actor);
-    let qualities = this.getCSData().qualities;
-    Object.values(qualities).forEach((quality) => {
-      switch (quality.name.toLowerCase()) {
-        case ChronicleSystem.modifiersConstants.BULK:
-          actor.addModifier(
-            ChronicleSystem.modifiersConstants.BULK,
-            this._id,
-            parseInt(quality.parameter)
-          );
-          break;
-      }
-    });
-  }
-
-  onDiscardedFromActor(actor, oldId) {
-    LOGGER.trace(`Weapon ${oldId} Discarded from actor | csWeaponItem.js`);
-    super.onDiscardedFromActor(actor, oldId);
-    let qualities = this.getCSData().qualities;
-    console.log(qualities);
-    Object.values(qualities).forEach((quality) => {
-      switch (quality.name.toLowerCase()) {
-        case ChronicleSystem.modifiersConstants.BULK:
-          actor.removeModifier(ChronicleSystem.modifiersConstants.BULK, oldId);
-          break;
-      }
-    });
   }
 }

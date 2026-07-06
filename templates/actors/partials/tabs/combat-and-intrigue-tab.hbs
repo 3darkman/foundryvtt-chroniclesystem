@@ -1,354 +1,189 @@
-<div class="tab flexrow" data-group="primary" data-tab="combat-and-intrigue">
-    <section class="derived-statistics">
-        <header class="header-field">
-            <span>Destiny Points</span>
-        </header>
-        <section class="destiny flexrow">
-            <section class="">
-            </section>
-            <section class="">
-            </section>
-            <section class="flexrow">
-                {{> (csFormGroup) labelText="Current:" id="system.destinyPoints.current" value=character.destinyPoints.current inputCssClass="small-field" placeHOlder="Current" dataType="Number" }}
-                {{> (csFormGroup) labelText="Max:" id="system.destinyPoints.max" value=character.destinyPoints.max inputCssClass="small-field" placeHOlder="Max" dataType="Number" }}
-            </section>
-        </section>
-        <section class="intrigue">
-            <header class="header-field">
-                <span>Intrigue</span>
-            </header>
-            <section class="content flexrow">
-                <section class="stats">
-                    <header class="subheader-field">
-                        <span>Intrigue Defense</span>
-                    </header>
+<div class="tab" data-group="primary" data-tab="combat-and-intrigue">
+    <div class="cs2-callout">
+        <span class="cs2-callout-label">Destiny Points</span>
+        <div class="cs2-fraction">
+            <input name="system.destinyPoints.current" type="text" value="{{character.destinyPoints.current}}" placeholder="Current" data-dtype="Number"/>
+            <span class="cs2-op">/</span>
+            <input name="system.destinyPoints.max" type="text" value="{{character.destinyPoints.max}}" placeholder="Max" data-dtype="Number"/>
+        </div>
+    </div>
 
-                    <div class="form-group">
-                        <span class="form-fields">
-                              <input
-                                      type="text"
-                                      value="{{character.derivedStats.intrigueDefense.value}}"
-                                      placeholder="Value"
-                                      readonly="readonly"
-                              />
-                            <b>+</b>
-                              <input
-                                      name="system.derivedStats.intrigueDefense.modifier"
-                                      type="text"
-                                      value="{{character.derivedStats.intrigueDefense.modifier}}"
-                                      placeholder="Value"
-                                      data-dtype="Number"
-                              />
-                            <b>=</b>
-                            <input
-                                    type="text"
-                                    value="{{character.derivedStats.intrigueDefense.total}}"
-                                    placeholder="Total"
-                                    readonly="readonly"
-                            />
-                        </span>
-                    </div>
-                    <header class="subheader-field">
-                        <span>Composure</span>
-                    </header>
-                    <div class="form-group">
-                        <span class="form-fields">
-                            <input
-                                    type="text"
-                                    value="{{character.derivedStats.composure.value}}"
-                                    placeholder="Value"
-                                    readonly="readonly"
-                            />
-                            <b>+</b>
-                            <input
-                                    name="system.derivedStats.composure.modifier"
-                                    type="text"
-                                    value="{{character.derivedStats.composure.modifier}}"
-                                    placeholder="Modifier"
-                                    data-dtype="Number"
-                            />
-                            <b>=</b>
-                            <input
-                                    type="text"
-                                    value="{{character.derivedStats.composure.total}}"
-                                    placeholder="Total"
-                                    readonly="readonly"
-                            />
-                        </span>
-                    </div>
-                    {{> (csFormGroup) labelText="Current:" id="system.derivedStats.composure.current" value=character.derivedStats.composure.current inputCssClass="" placeHolder="Current" dataType="Number" }}
-                    <header class="subheader-field">
-                        <span>Frustration</span>
-                    </header>
-                    {{> (ratingCheckbox) max=character.derivedStats.frustration.total currentValue=character.derivedStats.frustration.current dataType="Frustration" }}
-                    <section class="stress flexrow">
-                    <header class="subheader-field">
-                        <span>Stress</span>
-                    </header>
-                    {{> (ratingCheckbox) max=2 currentValue=character.currentStress dataType="Stress" }}
-                    </section>
-                </section>
-                <section class="disposition">
-                    <header class="subheader-field">
-                        <span>Current Disposition</span>
-                    </header>
-                    <div class="disposition-list">
-                        {{#each dispositions}}
-                                <div class="disposition option capitalize {{showIfEquals this.rating ../character.currentDisposition "selected"}}" data-id="{{this.rating}}" data-action="changeDisposition">
-                                    {{this.rating}} - {{localize this.name}} ({{this.persuasionModifier}} / {{this.deceptionModifier}})
-                                </div>
-                        {{/each}}
-                    </div>
-                </section>
-                <section class="techniques">
-                    <header class="subheader-field">
-                        <span>Techniques</span>
-                    </header>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Technique</th>
-                            <th>Influence</th>
-                            <th>Persuasion</th>
-                            <th>Deception</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{#each techniques}}
-                        <tr>
-                            <td class="capitalize">{{this.name}}</td>
-                            <td>{{this.influence}}</td>
-                            <td class="rollable" id="persuasion:{{this.name}}:{{formulaToStr this.persuasion}}" data-action="rollDice"><a>{{format-formula this.persuasion}}</a></td>
-                            <td class="rollable" id="deception:{{this.name}}:{{formulaToStr this.deception}}" data-action="rollDice"><a>{{format-formula this.deception}}</a></td>
-                        </tr>
-                        {{/each}}
-                        </tbody>
-                    </table>
-                </section>
-            </section>
-        </section>
-        <section class="combat">
-            <header class="header-field">
-                <span>Combat</span>
-            </header>
-            <section class="content flexrow">
-                <section class="stats">
-                    <header class="subheader-field">
-                        <span>Combat Defense</span>
-                    </header>
-                    <div class="form-group">
-                        <span class="form-fields">
-                            <input
-                                    type="text"
-                                    value="{{character.derivedStats.combatDefense.value}}"
-                                    placeholder="Value"
-                                    readonly="readonly"
-                            />
-                            <b>+</b>
-                            <input
-                                    name="system.derivedStats.combatDefense.modifier"
-                                    type="text"
-                                    value="{{character.derivedStats.combatDefense.modifier}}"
-                                    placeholder="Modifier"
-                                    data-dtype="Number"
-                            />
-                            <b>=</b>
-                            <input
-                                    type="text"
-                                    value="{{character.derivedStats.combatDefense.total}}"
-                                    placeholder="Total"
-                                    readonly="readonly"
-                            />
-                        </span>
-                    </div>
-                    <header class="subheader-field">
-                        <span>Health</span>
-                    </header>
-                    <div class="form-group">
-                        <span class="form-fields">
-                            <input
-                                    type="text"
-                                    value="{{character.derivedStats.health.value}}"
-                                    placeholder="Value"
-                                    readonly="readonly"
-                            />
-                            <b>+</b>
-                            <input
-                                    name="system.derivedStats.health.modifier"
-                                    type="text"
-                                    value="{{character.derivedStats.health.modifier}}"
-                                    placeholder="Modifier"
-                                    data-dtype="Number"
-                            />
-                            <b>=</b>
-                            <input
-                                    type="text"
-                                    value="{{character.derivedStats.health.total}}"
-                                    placeholder="Total"
-                                    readonly="readonly"
-                            />
-                        </span>
-                    </div>
-                    <div class="form-group">
-                        <label for="system.derivedStats.health.current">Current</label>
-                        <span class="form-fields">
-                            <input
-                                    name="system.derivedStats.health.current"
-                                    type="text"
-                                    value="{{character.derivedStats.health.current}}"
-                                    placeholder="Current"
-                                    data-dtype="Number"
-                            />
-                        </span>
-                    </div>
-                    <header class="subheader-field">
-                        <span>Fatigue</span>
-                    </header>
-                    {{> (ratingCheckbox) max=character.derivedStats.fatigue.total currentValue=character.derivedStats.fatigue.current dataType="Fatigue" }}
-                    <header class="subheader-field">
-                        <span>Movement</span>
-                    </header>
-                    <div class="form-group">
-                        <span class="form-fields">
-                            <input
-                                    type="text"
-                                    value="{{character.movement.base}}"
-                                    placeholder="Base"
-                                    readonly="readonly"
-                            />
-                            <b>+</b>
-                            <input
-                                    type="text"
-                                    value="{{character.movement.runBonus}}"
-                                    placeholder="Run Bonus"
-                                    readonly="readonly"
-                            />
-                            <b>-</b>
-                            <input
-                                    type="text"
-                                    value="{{character.movement.bulk}}"
-                                    placeholder="Bulk"
-                                    readonly="readonly"
-                            />
-                            <b>+</b>
-                            <input
-                                    name="system.movement.modifier"
-                                    type="text"
-                                    value="{{character.movement.modifier}}"
-                                    placeholder="Modifier"
-                                    data-dtype="Number"
-                            />
-                            <b>=</b>
-                            <input
-                                    type="text"
-                                    value="{{character.movement.total}}"
-                                    placeholder="Total"
-                                    readonly="readonly"
-                            />
-                        </span>
-                    </div>
-                </section>
-                <section class="healthState">
-                    <header class="subheader-field flexrow">
-                        <div class="header-title">
-                            <span>Injuries ({{currentInjuries}} / {{maxInjuries}})</span>
+    <div class="cs2-columns">
+        {{!-- ============================================================ INTRIGUE --}}
+        <div class="cs2-card">
+            <div class="cs2-card-header">Intrigue</div>
+
+            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+                label="Intrigue Defense"
+                value=character.derivedStats.intrigueDefense.value
+                modifierName="system.derivedStats.intrigueDefense.modifier"
+                modifierValue=character.derivedStats.intrigueDefense.modifier
+                total=character.derivedStats.intrigueDefense.total }}
+
+            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+                label="Composure"
+                value=character.derivedStats.composure.value
+                modifierName="system.derivedStats.composure.modifier"
+                modifierValue=character.derivedStats.composure.modifier
+                total=character.derivedStats.composure.total
+                currentName="system.derivedStats.composure.current"
+                current=character.derivedStats.composure.current }}
+
+            <div class="cs2-track-block">
+                <div class="cs2-track-label">Frustration</div>
+                {{> (ratingCheckbox) max=character.derivedStats.frustration.total currentValue=character.derivedStats.frustration.current dataType="Frustration" }}
+            </div>
+
+            <div class="cs2-track-block">
+                <div class="cs2-track-label">Stress</div>
+                {{> (ratingCheckbox) max=2 currentValue=character.currentStress dataType="Stress" }}
+            </div>
+
+            <div class="cs2-card-header">Current Disposition</div>
+            <div class="cs2-disposition-list">
+                {{#each dispositions}}
+                    <div class="disposition option capitalize {{showIfEquals this.rating ../character.currentDisposition "selected"}}" data-id="{{this.rating}}" data-action="changeDisposition">
+                        <div class="cs2-disposition-row">
+                            <span class="cs2-disposition-name">{{this.rating}} &middot; {{localize this.name}}</span>
+                            <span class="cs2-disposition-mods">{{this.persuasionModifier}} / {{this.deceptionModifier}}</span>
                         </div>
-                        <div class="header-field-add">
-                            <a class="injury-create" data-type="skill" data-action="createInjury"><i class="fa fa-plus"></i></a>
+                    </div>
+                {{/each}}
+            </div>
+
+            <div class="cs2-card-header">Techniques</div>
+            <div class="cs2-grid" style="grid-template-columns: 1fr auto auto auto">
+                <span class="cs2-grid-head">Name</span>
+                <span class="cs2-grid-head center">Influence</span>
+                <span class="cs2-grid-head center">Persuasion</span>
+                <span class="cs2-grid-head center">Deception</span>
+                {{#each techniques}}
+                <div class="cs2-row" style="display:contents">
+                    <div class="cs2-grid-cell capitalize">{{this.name}}</div>
+                    <div class="cs2-grid-cell center mono">{{this.influence}}</div>
+                    <div class="cs2-grid-cell center">
+                        {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                            id=(concat "persuasion:" this.name ":" (formulaToStr this.persuasion))
+                            label=(format-formula this.persuasion) }}
+                    </div>
+                    <div class="cs2-grid-cell center">
+                        {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                            id=(concat "deception:" this.name ":" (formulaToStr this.deception))
+                            label=(format-formula this.deception) }}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+
+        {{!-- ============================================================= COMBAT --}}
+        <div class="cs2-card">
+            <div class="cs2-card-header">Combat</div>
+
+            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+                label="Combat Defense"
+                value=character.derivedStats.combatDefense.value
+                modifierName="system.derivedStats.combatDefense.modifier"
+                modifierValue=character.derivedStats.combatDefense.modifier
+                total=character.derivedStats.combatDefense.total }}
+
+            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+                label="Health"
+                value=character.derivedStats.health.value
+                modifierName="system.derivedStats.health.modifier"
+                modifierValue=character.derivedStats.health.modifier
+                total=character.derivedStats.health.total
+                currentName="system.derivedStats.health.current"
+                current=character.derivedStats.health.current }}
+
+            <div class="cs2-track-block">
+                <div class="cs2-track-label">Fatigue</div>
+                {{> (ratingCheckbox) max=character.derivedStats.fatigue.total currentValue=character.derivedStats.fatigue.current dataType="Fatigue" }}
+            </div>
+
+            <div class="cs2-track-block">
+                <div class="cs2-track-label">Movement</div>
+                <div class="cs2-stat-fields">
+                    <input type="text" value="{{character.movement.base}}" placeholder="Base" readonly="readonly"/>
+                    <span class="cs2-op">+</span>
+                    <input type="text" value="{{character.movement.runBonus}}" placeholder="Run Bonus" readonly="readonly"/>
+                    <span class="cs2-op">&minus;</span>
+                    <input type="text" value="{{character.movement.bulk}}" placeholder="Bulk" readonly="readonly"/>
+                    <span class="cs2-op">+</span>
+                    <input name="system.movement.modifier" type="text" value="{{character.movement.modifier}}" placeholder="Modifier" data-dtype="Number"/>
+                    <span class="cs2-op">=</span>
+                    <span class="cs2-total">{{character.movement.total}}</span>
+                </div>
+            </div>
+
+            <div class="cs2-split">
+                <div>
+                    <div class="cs2-card-header">
+                        Injuries
+                        <span class="cs2-count">{{currentInjuries}} / {{maxInjuries}}</span>
+                    </div>
+                    {{#each character.injuries as |injury id|}}
+                        <div class="cs2-split-item flexrow">
+                            <input type="text" name="system.injuries.{{id}}" value="{{injury}}" placeholder="Description" data-dtype="String"/>
+                            <a class="cs2-icon-btn injury-control" data-id="{{id}}" data-action="deleteInjury"><i class="fas fa-trash"></i></a>
                         </div>
-                    </header>
-                    <ol class="injuries-list list resizable" data-base-size="150">
-                        {{#each character.injuries as |injury id|}}
-                            <li class="injury flexrow" data-item-id="{{id}}">
-                                <!--suppress HtmlFormInputWithoutLabel -->
-                                <input
-                                        class="big-field"
-                                        type="text"
-                                        name="system.injuries.{{id}}"
-                                        value="{{injury}}"
-                                        placeholder="Description"
-                                        data-dtype="String"
-                                />
-                                <a class="injury-control item-controls" data-id="{{id}}" data-action="deleteInjury"><i class="fas fa-trash"></i></a>
-                            </li>
-                        {{/each}}
-                    </ol>
-                    <header class="subheader-field flexrow">
-                        <div class="header-title">
-                            <span>Wounds ({{currentWounds}} / {{maxWounds}})</span>
+                    {{else}}
+                        <div class="cs2-split-item cs2-split-empty">&mdash;</div>
+                    {{/each}}
+                    <a class="cs2-split-add injury-create" data-type="skill" data-action="createInjury"><i class="fa fa-plus"></i> Add</a>
+                </div>
+                <div>
+                    <div class="cs2-card-header">
+                        Wounds
+                        <span class="cs2-count">{{currentWounds}} / {{maxWounds}}</span>
+                    </div>
+                    {{#each character.wounds as |wound id|}}
+                        <div class="cs2-split-item flexrow">
+                            <input type="text" name="system.wounds.{{id}}" value="{{wound}}" placeholder="Description" data-dtype="String"/>
+                            <a class="cs2-icon-btn wound-control" data-id="{{id}}" data-action="deleteWound"><i class="fas fa-trash"></i></a>
                         </div>
-                        <div class="header-field-add">
-                            <a class="wound-create" data-type="skill" data-action="createWound"><i class="fa fa-plus"></i></a>
+                    {{else}}
+                        <div class="cs2-split-item cs2-split-empty">&mdash;</div>
+                    {{/each}}
+                    <a class="cs2-split-add wound-create" data-type="skill" data-action="createWound"><i class="fa fa-plus"></i> Add</a>
+                </div>
+            </div>
+
+            <div class="cs2-card-header">Equipped Weapons</div>
+            <div class="cs2-grid" style="grid-template-columns: 1fr auto auto">
+                <span class="cs2-grid-head">Weapon</span>
+                <span class="cs2-grid-head center">Test</span>
+                <span class="cs2-grid-head center">Dmg</span>
+                {{#each character.owned.weapons as |weapon index|}}
+                    {{#ifDifferent weapon.system.equipped ../notEquipped}}
+                        <div class="cs2-row" style="display:contents">
+                            <div class="cs2-grid-cell">{{weapon.name}} {{showIfEquals weapon.system.equipped 3 "(Off-hand)" : ""}}</div>
+                            <div class="cs2-grid-cell center">
+                                {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                                    id=(concat "weapon-test:" weapon.name ":" (formulaToStr weapon.formula))
+                                    label=(format-formula weapon.formula) }}
+                            </div>
+                            <div class="cs2-grid-cell center mono">{{weapon.damageValue}}</div>
                         </div>
-                    </header>
-                    <ol class="wounds-list list resizable" data-base-size="150">
-                        {{#each character.wounds as |wound id|}}
-                            <li class="wound flexrow" data-item-id="{{id}}">
-                                <!--suppress HtmlFormInputWithoutLabel -->
-                                <input
-                                        class="big-field"
-                                        type="text"
-                                        name="system.wounds.{{id}}"
-                                        value="{{wound}}"
-                                        placeholder="Description"
-                                        data-dtype="String"
-                                />
-                                <a class="wound-control item-controls" data-id="{{id}}" data-action="deleteWound"><i class="fas fa-trash"></i></a>
-                            </li>
-                        {{/each}}
-                    </ol>
-                </section>
-                <section class="weapons">
-                    <header class="subheader-field">
-                        <span>Current Equipped Weapons</span>
-                    </header>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Weapon</th>
-                            <th>Test</th>
-                            <th>Damage</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{#each character.owned.weapons as |weapon index|}}
-                            {{#ifDifferent weapon.system.equipped ../notEquipped}}
-                                <tr>
-                                    <td>{{weapon.name}} {{showIfEquals weapon.system.equipped 3 "(Off-hand)" : ""}}</td>
-                                    <td class="rollable" id="weapon-test:{{weapon.name}}:{{formulaToStr weapon.formula}}" data-action="rollDice">
-                                        <a>{{format-formula weapon.formula}}</a>
-                                    </td>
-                                    <td> {{weapon.damageValue}}</td>
-                                </tr>
-                            {{/ifDifferent}}
-                        {{/each}}
-                        </tbody>
-                    </table>
-                    <header class="subheader-field">
-                        <span>Current Equipped Armor</span>
-                    </header>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Armor</th>
-                            <th>Rating</th>
-                            <th>Penalty</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{#each character.owned.armors as |armor index|}}
-                            {{#ifDifferent armor.system.equipped ../notEquipped}}
-                                <tr>
-                                    <td>{{armor.name}}</td>
-                                    <td>{{armor.system.rating}}</td>
-                                    <td>{{armor.system.penalty}}</td>
-                                </tr>
-                            {{/ifDifferent}}
-                        {{/each}}
-                        </tbody>
-                    </table>
-                </section>
-            </section>
-        </section>
-    </section>
+                    {{/ifDifferent}}
+                {{/each}}
+            </div>
+
+            <div class="cs2-card-header">Equipped Armor</div>
+            <div class="cs2-grid" style="grid-template-columns: 1fr auto auto">
+                <span class="cs2-grid-head">Armor</span>
+                <span class="cs2-grid-head center">Rating</span>
+                <span class="cs2-grid-head center">Penalty</span>
+                {{#each character.owned.armors as |armor index|}}
+                    {{#ifDifferent armor.system.equipped ../notEquipped}}
+                        <div class="cs2-row" style="display:contents">
+                            <div class="cs2-grid-cell">{{armor.name}}</div>
+                            <div class="cs2-grid-cell center mono">{{armor.system.rating}}</div>
+                            <div class="cs2-grid-cell center mono muted">{{armor.system.penalty}}</div>
+                        </div>
+                    {{/ifDifferent}}
+                {{/each}}
+            </div>
+        </div>
+    </div>
 </div>

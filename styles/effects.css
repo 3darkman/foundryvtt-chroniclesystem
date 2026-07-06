@@ -1,0 +1,361 @@
+/* =============================================================================
+   Active Effects — authoring cascade, effects tab & roll-dialog modifiers.
+   Heraldic direction (spec 007 Wave 5 redesign): each change is a "clause" card
+   with a channel-colored rail; the flags row reads as a wax-seal banner; the
+   whole thing sits on cold parchment with a serif accent — deliberately not a
+   raw form. Scoped to .cs-effect-config / .effects-tab / the dialog sections so
+   nothing leaks into the actor/item sheets or the core AppV2 config chrome.
+   ========================================================================== */
+
+:root {
+  --cs-ink: #1b2330;
+  --cs-azure: #345b86;
+  --cs-azure-soft: #5a7ba3;
+  --cs-gold: #a8813c;
+  --cs-bronze: #8a5a3b;
+  --cs-crimson: #7a2e2e;
+  --cs-parchment: #ece7db;
+  --cs-parchment-hi: #f5f1e7;
+  --cs-stone: #c9c2b2;
+  --cs-stone-dark: #9a927f;
+  --cs-serif: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+}
+
+/* ---------------------------------------------------------------- cascade -- */
+
+.cs-effect-config .cs-effect-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  color: var(--cs-ink);
+}
+
+.cs-effect-config .cs-effect-changes > .hint {
+  margin: 0;
+  font-family: var(--cs-serif);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--cs-azure);
+}
+
+/* Flags banner — reads like a sealed decree header. */
+.cs-effect-config .cs-effect-flags {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--cs-stone);
+  border-left: 4px solid var(--cs-gold);
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--cs-parchment-hi), var(--cs-parchment));
+}
+
+.cs-effect-config .cs-effect-optional {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.cs-effect-config .cs-effect-flags > .hint {
+  grid-column: 2;
+  margin: 0;
+  font-family: var(--cs-serif);
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--cs-stone-dark);
+}
+
+.cs-effect-config .cs-effect-condition {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cs-azure);
+}
+
+.cs-effect-config .cs-effect-condition input {
+  flex: 1 1 auto;
+}
+
+/* Clause list + cards. */
+.cs-effect-config .cs-changes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  /* Cap the list and scroll internally (AppV2 tracks scroll via the
+     `scrollable: ["ol[data-changes]"]` part option) so many clauses never push
+     the Submit footer off-screen. */
+  max-height: min(24rem, 50vh);
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.cs-effect-config .cs-change {
+  position: relative;
+  display: block;
+  padding: 0.65rem 2.2rem 0.7rem 0.85rem;
+  border: 1px solid var(--cs-stone);
+  border-left: 5px solid var(--cs-gold);
+  border-radius: 4px;
+  background: var(--cs-parchment-hi);
+  box-shadow: 0 1px 2px rgba(27, 35, 48, 0.08);
+  text-align: left;
+}
+
+/* Channel-colored rail (data-channel kept in sync live by _syncRowVisibility). */
+.cs-effect-config .cs-change[data-channel="result"],
+.cs-effect-config .cs-change[data-channel="testdice"],
+.cs-effect-config .cs-change[data-channel="bonusdice"],
+.cs-effect-config .cs-change[data-channel="reroll"] {
+  border-left-color: var(--cs-azure);
+}
+.cs-effect-config .cs-change[data-channel="penalty"] {
+  border-left-color: var(--cs-crimson);
+}
+.cs-effect-config .cs-change[data-channel="derivedstat"],
+.cs-effect-config .cs-change[data-channel="armorrating"] {
+  border-left-color: var(--cs-gold);
+}
+.cs-effect-config .cs-change[data-channel="damage"],
+.cs-effect-config .cs-change[data-channel="quality"] {
+  border-left-color: var(--cs-bronze);
+}
+.cs-effect-config .cs-change[data-channel="bulk"] {
+  border-left-color: var(--cs-stone-dark);
+}
+
+/* Each field: an eyebrow label stacked over a full-width control. Deliberately
+   BLOCK layout (not flex) with an explicit width — a flex/inline label fights the
+   core ActiveEffectConfig's own field CSS and collapses the controls. */
+.cs-effect-config .cs-field {
+  display: block;
+  margin: 0 0 0.45rem;
+}
+.cs-effect-config .cs-field:last-child {
+  margin-bottom: 0;
+}
+
+.cs-effect-config .cs-field > label {
+  display: block;
+  margin: 0 0 0.15rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--cs-azure);
+  text-align: left;
+}
+
+.cs-effect-config .cs-field select,
+.cs-effect-config .cs-field input[type="text"],
+.cs-effect-config .cs-field input[type="number"] {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  height: 1.7rem;
+  margin: 0;
+  background: #fff;
+  border: 1px solid var(--cs-stone);
+  border-radius: 3px;
+}
+
+/* TYPE names the clause — a touch louder. */
+.cs-effect-config .cs-channel-field > label {
+  color: var(--cs-ink);
+}
+.cs-effect-config .cs-channel-field select {
+  font-weight: 600;
+}
+
+/* Multi-control value rows (derived = form + slug; quality = kind + rating +
+   custom) stack their controls full-width — same block treatment as every other
+   field, so they never collapse the way an inline flex row did against the core. */
+.cs-effect-config .cs-value-derived,
+.cs-effect-config .cs-value-quality {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+.cs-effect-config .cs-value-quality .cs-quality-param {
+  max-width: 6rem;
+}
+
+.cs-effect-config .cs-static-target {
+  display: inline-block;
+  font-family: var(--cs-serif);
+  font-style: italic;
+  color: var(--cs-stone-dark);
+}
+
+/* Delete: a quiet corner control that warms to crimson on hover. */
+.cs-effect-config .cs-change-delete {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--cs-stone-dark);
+  cursor: pointer;
+  line-height: 1;
+}
+.cs-effect-config .cs-change-delete:hover {
+  background: rgba(122, 46, 46, 0.1);
+  color: var(--cs-crimson);
+  box-shadow: none;
+  text-shadow: none;
+}
+
+/* Verbatim/raw rows read as "advanced" — hatched neutral rail. */
+.cs-effect-config .cs-change-raw {
+  border-left-color: var(--cs-stone-dark);
+  border-left-style: dashed;
+  background: var(--cs-parchment);
+}
+
+/* Add clause — a gold-ruled call to action. */
+.cs-effect-config .cs-change-add {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--cs-gold);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--cs-gold);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+.cs-effect-config .cs-change-add:hover {
+  background: var(--cs-gold);
+  color: #fff;
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------ effects tab -- */
+
+.effects-tab .effect-origin {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.effects-tab .effect-origin::before {
+  font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
+  font-weight: 900;
+}
+.effects-tab .effect-origin-intrinsic {
+  color: var(--cs-gold);
+  background: rgba(168, 129, 60, 0.12);
+  border-color: rgba(168, 129, 60, 0.4);
+}
+.effects-tab .effect-origin-intrinsic::before {
+  content: "\f3ed"; /* shield */
+}
+.effects-tab .effect-origin-player {
+  color: var(--cs-azure);
+  background: rgba(52, 91, 134, 0.12);
+  border-color: rgba(52, 91, 134, 0.4);
+}
+.effects-tab .effect-origin-player::before {
+  content: "\f007"; /* user */
+}
+.effects-tab .effect-origin-item {
+  color: var(--cs-bronze);
+  background: rgba(138, 90, 59, 0.12);
+  border-color: rgba(138, 90, 59, 0.4);
+}
+.effects-tab .effect-origin-item::before {
+  content: "\f0c1"; /* link */
+}
+
+/* ------------------------------------------------- roll-dialog modifiers -- */
+
+.cs-optional-effects {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--cs-stone);
+  border-radius: 4px;
+}
+.cs-optional-effects > legend {
+  padding: 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cs-azure);
+}
+.cs-active-effects {
+  border-left: 4px solid var(--cs-gold);
+}
+
+.cs-optional-effect {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.15rem 0.2rem;
+  border-radius: 3px;
+}
+.cs-optional-effect:hover {
+  background: rgba(52, 91, 134, 0.08);
+}
+.cs-optional-effect-name {
+  flex: 1 1 auto;
+  font-family: var(--cs-serif);
+}
+.cs-optional-effect-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--cs-azure);
+}
+.cs-optional-effect-condition {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--cs-stone-dark);
+}
+
+/* Active (permanent) rows: always-on, locked — muted and non-interactive. */
+.cs-active-effect {
+  color: var(--cs-stone-dark);
+  cursor: default;
+}
+.cs-active-effect:hover {
+  background: rgba(168, 129, 60, 0.08);
+}
+.cs-active-effect .cs-optional-effect-value {
+  color: var(--cs-gold);
+}
+.cs-active-effect input[type="checkbox"] {
+  accent-color: var(--cs-gold);
+}
+.cs-active-effect-lock {
+  font-size: 0.7rem;
+  color: var(--cs-stone-dark);
+}

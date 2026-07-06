@@ -15,7 +15,7 @@ export class CSTechniqueItemSheet extends CSItemSheet {
 
   static TABS = {
     primary: {
-      tabs: ["details", "works"],
+      tabs: ["details", "works", "effects"],
       initial: "details",
     },
   };

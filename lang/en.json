@@ -24,7 +24,10 @@
         "bonusDice": "Bonus Dice",
         "modifier": "Modifiers",
         "dicePenalty": "Penalties",
-        "reRoll": "Re-Roll 1s"
+        "reRoll": "Re-Roll 1s",
+        "optionalEffects": "Optional Modifiers",
+        "activeEffects": "Active Effects",
+        "activeEffectHint": "Always on — already applied to this roll."
       },
       "addingHouseEvent": {
         "title": "Should the event generate the modifiers automatically?",
@@ -66,6 +69,135 @@
       "isModifierDialogDefault": {
         "name": "Modifier Dialog as Default?",
         "hint": "if checked, when clicking on dice rolls on an actor's sheet, it will show the modifiers window, and will make the roll without showing the window when holding the SHIFT key. Each player defines his configuration."
+      }
+    },
+    "effects": {
+      "tab": "Effects",
+      "create": "Create Effect",
+      "edit": "Edit Effect",
+      "delete": "Delete Effect",
+      "toggle": "Toggle Effect",
+      "empty": "No effects defined.",
+      "columns": {
+        "name": "Name",
+        "source": "Source",
+        "origin": "Origin",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "suppressed": "Suppressed"
+      },
+      "locked": "Locked — only the GM can modify this effect.",
+      "permission": {
+        "blockedGmOnly": "Only the GM can modify this effect.",
+        "blockedOther": "You can only modify effects you created."
+      },
+      "origin": {
+        "intrinsic": "Intrinsic",
+        "player": "Player",
+        "item": "Item",
+        "hint": {
+          "intrinsic": "A standing modifier on this character — set by the GM, not from an item.",
+          "player": "Created by a player; only its author can edit it.",
+          "item": "Granted by an owned item; edit it on that item."
+        }
+      },
+      "channels": {
+        "result": "Result modifier (±N)",
+        "testdice": "Test dice (+#D)",
+        "bonusdice": "Bonus dice (+#B)",
+        "reroll": "Re-roll 1s",
+        "penalty": "Dice penalty (−#D)",
+        "derivedstat": "Derived stat",
+        "armorrating": "Armor rating",
+        "damage": "Weapon damage",
+        "quality": "Grant weapon quality",
+        "bulk": "Bulk (movement)"
+      },
+      "targetKinds": {
+        "all": "All / global",
+        "ability": "An ability",
+        "specialty": "A specialty",
+        "self": "This item (self)",
+        "weapon": "All weapons",
+        "weapontype": "A weapon type"
+      },
+      "derivedStats": {
+        "combat_defense": "Combat Defense",
+        "intrigue_defense": "Intrigue Defense",
+        "health": "Health",
+        "composure": "Composure",
+        "movement": "Movement"
+      },
+      "valueModes": {
+        "fixed": "Fixed number",
+        "derived": "Derived from a characteristic"
+      },
+      "valueForms": {
+        "rank": "Rank of",
+        "half": "Half (round up) of",
+        "bonusdice": "Bonus dice of"
+      },
+      "authoring": {
+        "sheetLabel": "Chronicle Effect",
+        "hint": "Each change pulls one lever. Pick the type, its target, then the value.",
+        "type": "Type",
+        "target": "Target",
+        "slug": "Ability / specialty",
+        "slugPlaceholder": "e.g. fighting",
+        "weaponType": "Weapon type",
+        "weaponTypePlaceholder": "e.g. axes",
+        "value": "Value",
+        "qualityName": "Quality",
+        "qualityNamePlaceholder": "e.g. Shattering, Piercing 1",
+        "qualityParameter": "Rating",
+        "qualityGroupFeudal": "Feudal",
+        "qualityGroupGunpowder": "Gunpowder (Spark to Powder)",
+        "qualityOther": "Other…",
+        "rawKey": "Raw key (advanced)",
+        "addChange": "Add Change",
+        "optionalLabel": "Optional (offered as a roll-dialog toggle)",
+        "optionalHint": "When on, this effect is not applied automatically — it appears as a checkbox in the roll dialog.",
+        "conditionLabel": "Condition tag",
+        "conditionPlaceholder": "e.g. vs-cover, first-round"
+      },
+      "weaponQualities": {
+        "adaptable": "Adaptable",
+        "bulk": "Bulk",
+        "close_range": "Close Range",
+        "defensive": "Defensive",
+        "entangling": "Entangling",
+        "fast": "Fast",
+        "fragile": "Fragile",
+        "grab": "Grab",
+        "impale": "Impale",
+        "long_range": "Long Range",
+        "mounted": "Mounted",
+        "off_hand": "Off-hand",
+        "piercing": "Piercing",
+        "powerful": "Powerful",
+        "reach": "Reach",
+        "reload": "Reload",
+        "set_for_charge_only": "Set for Charge Only",
+        "shattering": "Shattering",
+        "slow": "Slow",
+        "staggering": "Staggering",
+        "two_handed": "Two-Handed",
+        "unwieldy": "Unwieldy",
+        "vicious": "Vicious",
+        "inaccurate": "Inaccurate",
+        "longarm": "Longarm",
+        "penetrating": "Penetrating",
+        "penetration": "Penetration",
+        "reliable": "Reliable",
+        "smoke": "Smoke",
+        "snaphance": "Snaphance",
+        "snaplock": "Snaplock",
+        "treacherous": "Treacherous",
+        "vulnerable_to_wet": "Vulnerable to Wet",
+        "wheel_lock": "Wheel-Lock"
       }
     },
     "sheets": {

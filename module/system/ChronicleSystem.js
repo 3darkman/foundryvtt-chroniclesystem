@@ -86,6 +86,56 @@ function _getFormula(roll_definition, actor) {
   return formula;
 }
 
+/**
+ * Resolve the ability/specialty a roll targets so the dialog can offer the
+ * matching optional effects. Only ability/specialty rolls carry that context;
+ * the formula-string rolls (weapon-test, persuasion, deception, formula) resolve
+ * to nulls, so only ALL-targeted optional effects apply to them (design §4 MVP).
+ * @param {string[]} roll_definition
+ * @returns {{abilityName: string|null, specialtyName: string|null}}
+ */
+function _resolveRollTarget(roll_definition) {
+  switch (roll_definition[0]) {
+    case "ability":
+      return { abilityName: roll_definition[1], specialtyName: null };
+    case "specialty":
+      return {
+        abilityName: roll_definition[2],
+        specialtyName: roll_definition[1],
+      };
+    default:
+      return { abilityName: null, specialtyName: null };
+  }
+}
+
+/**
+ * Add the dialog's checked optional effects to the formula. Each checkbox is a
+ * `DiceRollFormula` lever (`data-field`) and a resolved value (`data-value`);
+ * `formula[field] += value` is safe because every formula accessor parses ints.
+ * @param {HTMLFormElement} form
+ * @param {DiceRollFormula} formula
+ */
+/** Formula fields measured in DICE (as opposed to a flat result modifier). Their
+ *  roll-dialog display gets a "d" suffix so a +2 dice bonus reads "+2d", while a
+ *  flat result modifier stays "+2". Re-roll is a threshold, not a die count. */
+const DICE_FORMULA_FIELDS = new Set(["pool", "bonusDice", "dicePenalty"]);
+
+function _applyCheckedOptionalEffects(form, formula) {
+  if (!form?.querySelectorAll) return;
+  // Only ENABLED, checked toggles are applied here. The permanent "active
+  // effects" render as disabled+checked (visual only) and already entered the
+  // formula via the read-side buffer, so `:not([disabled])` prevents a double count.
+  const checked = form.querySelectorAll(
+    ".cs-optional-effect input[type=checkbox]:checked:not([disabled])"
+  );
+  checked.forEach((checkbox) => {
+    const field = checkbox.dataset.field;
+    const value = parseInt(checkbox.dataset.value);
+    if (!field || Number.isNaN(value)) return;
+    formula[field] += value;
+  });
+}
+
 function handleRoll(rollType, actor) {
   const roll_definition = rollType.split(":");
   if (roll_definition.length < 2) return;
@@ -96,10 +146,16 @@ function handleRoll(rollType, actor) {
   return csRoll.doRoll(actor, false);
 }
 
-async function _showModifierDialog(formula) {
+async function _showModifierDialog(
+  formula,
+  optionalEffects = [],
+  activeEffects = []
+) {
   const template = CSConstants.Templates.Dialogs.ROLL_MODIFIER;
   const html = await foundry.applications.handlebars.renderTemplate(template, {
     formula: formula,
+    optionalEffects: optionalEffects,
+    activeEffects: activeEffects,
   });
 
   return foundry.applications.api.DialogV2.wait({
@@ -136,7 +192,35 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
   );
 
   if (showModifierDialog ? !revertModifierDialog : revertModifierDialog) {
-    let formData = await _showModifierDialog(formula);
+    // Lazy import: a static one would close the eval-time cycle
+    // ChronicleSystem → cs-effect-modifiers → cs-effect-vocabulary →
+    // ChronicleSystem (vocabulary reads modifiersConstants at module-eval time).
+    const { collectOptionalRollEffects, collectPermanentRollEffects } =
+      await import("../effects/cs-effect-modifiers.js");
+    const { abilityName, specialtyName } = _resolveRollTarget(roll_definition);
+    const withDisplayValue = (effect) => {
+      const sign = effect.value >= 0 ? `+${effect.value}` : `${effect.value}`;
+      const unit = DICE_FORMULA_FIELDS.has(effect.formulaField) ? "d" : "";
+      return { ...effect, displayValue: `${sign}${unit}` };
+    };
+    const optionalEffects = collectOptionalRollEffects(
+      actor,
+      abilityName,
+      specialtyName
+    ).map(withDisplayValue);
+    // Permanent roll effects already entered the formula via the read-side buffer;
+    // surface them as LOCKED (disabled+checked) rows so the player sees the source.
+    const activeEffects = collectPermanentRollEffects(
+      actor,
+      abilityName,
+      specialtyName
+    ).map(withDisplayValue);
+
+    let formData = await _showModifierDialog(
+      formula,
+      optionalEffects,
+      activeEffects
+    );
     if (formData) {
       const formulaChanged = new DiceRollFormula();
       formulaChanged.pool = formData.pool.value;
@@ -144,6 +228,11 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
       formulaChanged.reRoll = formData.reRoll.value;
       formulaChanged.modifier = formData.modifier.value;
       formulaChanged.dicePenalty = formData.dicePenalty.value;
+
+      // Permanent effects already entered the formula via the read-side buffer;
+      // the checked optional effects are added here (default off). No double
+      // counting — permanent effects are never optional (design §4).
+      _applyCheckedOptionalEffects(formData, formulaChanged);
 
       if (formulaChanged.toStr() !== formula.toStr()) {
         formulaChanged.isUserChanged = true;
@@ -189,33 +278,36 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
       [ability, specialty] = actor.getAbility(abilityName);
     }
   }
-  let formula = new DiceRollFormula();
-
   let specValue = 0;
   let specModifier = 0;
   if (specialty !== undefined) {
     specValue = specialty.rating ? specialty.rating : 0;
     specModifier = specialty.modifier ? specialty.modifier : 0;
   }
-  formula.reRoll = 0;
-  if (ability !== undefined) {
-    let penalties = actor.getPenalty(ability.name.toLowerCase(), false, true);
-    formula.pool = ability.getCSData().rating;
-    formula.dicePenalty = penalties.total;
 
-    let modifiers = actor.getModifier(ability.name.toLowerCase(), false, true);
-    formula.modifier =
-      ability.getCSData().modifier + specModifier + modifiers.total;
-    formula.bonusDice = specValue;
-  } else {
-    let penalties = actor.getPenalty(abilityName.toLowerCase(), false, true);
-    formula.pool = 2;
-    formula.dicePenalty = penalties.total;
+  // Sum an effect channel across the targeted ability (including the global ALL
+  // bucket) and the targeted specialty (excluding ALL, to avoid double-counting
+  // it). The new-channel getters are optional-chained so non-character actors
+  // (and the test doubles) simply contribute 0.
+  const abilityKey = (ability ? ability.name : abilityName).toLowerCase();
+  const specialtyKey = specialty?.name ? specialty.name.toLowerCase() : null;
+  const channelTotal = (getter) => {
+    const fromAbility = actor[getter]?.(abilityKey, false, true)?.total ?? 0;
+    const fromSpecialty = specialtyKey
+      ? actor[getter]?.(specialtyKey, false, false)?.total ?? 0
+      : 0;
+    return fromAbility + fromSpecialty;
+  };
 
-    let modifiers = actor.getModifier(abilityName.toLowerCase(), false, true);
-    formula.modifier = specModifier + modifiers.total;
-    formula.bonusDice = specValue;
-  }
+  const formula = new DiceRollFormula();
+  const basePool = ability ? ability.getCSData().rating : 2;
+  const baseModifier = ability ? ability.getCSData().modifier : 0;
+
+  formula.pool = basePool + channelTotal("getTestDice");
+  formula.dicePenalty = channelTotal("getPenalty");
+  formula.modifier = baseModifier + specModifier + channelTotal("getModifier");
+  formula.bonusDice = specValue + channelTotal("getBonusDice");
+  formula.reRoll = channelTotal("getReRoll");
 
   return formula;
 }

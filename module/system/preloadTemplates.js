@@ -20,7 +20,10 @@ export const preloadHandlebarsTemplates = async function () {
     "systems/chroniclesystem/templates/actors/partials/tabs/members-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/holdings-tab.hbs",
 
+    "systems/chroniclesystem/templates/components/effects-tab.hbs",
     "systems/chroniclesystem/templates/components/rating-checkbox.hbs",
+    "systems/chroniclesystem/templates/components/rollable-chip.hbs",
+    "systems/chroniclesystem/templates/components/stat-row.hbs",
     "systems/chroniclesystem/templates/components/house-resource-item.hbs",
     "systems/chroniclesystem/templates/components/member-list-item.hbs",
     "systems/chroniclesystem/templates/components/resource-holdings.hbs",

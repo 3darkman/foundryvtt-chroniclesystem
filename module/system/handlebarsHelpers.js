@@ -6,7 +6,7 @@ export const registerCustomHelpers = function () {
   Handlebars.registerHelper("modifier", (str) => {
     str = str === "" || str === null ? "0" : str;
     let value = typeof str == "string" ? parseInt(str) : str;
-    return value === 0 ? "" : value > 0 ? ` + ${value}` : ` - ${-value}`;
+    return value === 0 ? "" : value > 0 ? `+${value}` : `-${-value}`;
   });
 
   Handlebars.registerHelper("csCompare", (v1, operator, v2) => {
@@ -88,14 +88,14 @@ export const registerCustomHelpers = function () {
 
   Handlebars.registerHelper(
     "showIfEquals",
-    function (arg1, arg2, result1, result2 = "", options) {
+    function (arg1, arg2, result1, result2 = "") {
       return arg1 == arg2 ? result1 : result2;
     }
   );
 
   Handlebars.registerHelper(
     "showIfContains",
-    function (arg1, arg2, result, result2 = "", options) {
+    function (arg1, arg2, result, result2 = "") {
       let array = arg1.split("|");
       return array.includes(arg2.toString()) ? result : result2;
     }
@@ -103,33 +103,33 @@ export const registerCustomHelpers = function () {
 
   Handlebars.registerHelper(
     "showIfDifferent",
-    function (arg1, arg2, result1, result2 = "", options) {
+    function (arg1, arg2, result1, result2 = "") {
       return arg1 != arg2 ? result1 : result2;
     }
   );
 
   Handlebars.registerHelper("concat", function (...positional) {
-    const options = positional.splice(-1, 1);
+    positional.splice(-1, 1); // drop the trailing Handlebars options object
     return positional.map(SystemUtils.normalizeTextValue).join("");
   });
 
-  Handlebars.registerHelper("csFormGroup", function (options) {
+  Handlebars.registerHelper("csFormGroup", function () {
     return "systems/chroniclesystem/templates/actors/partials/form-group.hbs";
   });
 
-  Handlebars.registerHelper("ratingCheckbox", function (options) {
+  Handlebars.registerHelper("ratingCheckbox", function () {
     return "systems/chroniclesystem/templates/components/rating-checkbox.hbs";
   });
 
-  Handlebars.registerHelper("houseResourceItem", function (options) {
+  Handlebars.registerHelper("houseResourceItem", function () {
     return "systems/chroniclesystem/templates/components/house-resource-item.hbs";
   });
 
-  Handlebars.registerHelper("memberListItem", function (options) {
+  Handlebars.registerHelper("memberListItem", function () {
     return "systems/chroniclesystem/templates/components/member-list-item.hbs";
   });
 
-  Handlebars.registerHelper("resourceHoldings", function (options) {
+  Handlebars.registerHelper("resourceHoldings", function () {
     return "systems/chroniclesystem/templates/components/resource-holdings.hbs";
   });
 
@@ -141,14 +141,14 @@ export const registerCustomHelpers = function () {
 
   Handlebars.registerHelper(
     "showIfLessEquals",
-    function (arg1, arg2, result, result2 = "", options) {
+    function (arg1, arg2, result, result2 = "") {
       return new Handlebars.SafeString(arg1 <= arg2 ? result : result2);
     }
   );
 
   Handlebars.registerHelper(
     "showIfLess",
-    function (arg1, arg2, result, result2 = "", options) {
+    function (arg1, arg2, result, result2 = "") {
       return new Handlebars.SafeString(arg1 < arg2 ? result : result2);
     }
   );

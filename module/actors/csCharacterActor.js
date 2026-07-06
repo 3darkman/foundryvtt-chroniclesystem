@@ -1,16 +1,64 @@
 import { ChronicleSystem } from "../system/ChronicleSystem.js";
 import { CSActor } from "./csActor.js";
 import SystemUtils from "../utils/systemUtils.js";
-import LOGGER from "../utils/logger.js";
 import { CSConstants } from "../system/csConstants.js";
+import {
+  collectEffectModifiers,
+  applyOwnedItemEffects,
+} from "../effects/cs-effect-modifiers.js";
+import { DERIVED_STATS } from "../effects/cs-effect-vocabulary.js";
+
+/**
+ * Read-side aggregation of one buffer — the inverse of the collector. Sums the
+ * entries keyed by `type`, plus the global ALL bucket when `includeGlobal`.
+ * Module-level so the five getters (modifier/penalty/test dice/bonus dice/reroll)
+ * share one implementation (DRY, constitution §III) and stay testable.
+ * @returns {{total: number, detail: Array<{docName: string, mod: number}>}}
+ */
+function collectFromBuffer(
+  buffer,
+  type,
+  includeDetail,
+  includeGlobal,
+  resolveDoc
+) {
+  let total = 0;
+  const detail = [];
+  const accumulate = (entries) => {
+    entries.forEach((entry) => {
+      total += entry.mod;
+      if (includeDetail) {
+        let tempItem = entry._id;
+        if (entry.isDocument) tempItem = resolveDoc(entry._id);
+        if (tempItem) detail.push({ docName: tempItem.name, mod: entry.mod });
+      }
+    });
+  };
+  if (buffer[type]) accumulate(buffer[type]);
+  const ALL = ChronicleSystem.modifiersConstants.ALL;
+  if (includeGlobal && buffer[ALL]) accumulate(buffer[ALL]);
+  return { total, detail };
+}
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {CSActor}
  */
 export class CSCharacterActor extends CSActor {
+  // Transient roll-channel buffers, recomputed each prepareData by the collector
+  // and read by getModifier/getPenalty/getTestDice/getBonusDice/getReRoll.
   modifiers;
   penalties;
+  testDice;
+  bonusDice;
+  reRolls;
+  // Wave 4 non-roll buffers: derived-stat deltas (read by getDerivedStatBonus in
+  // calculateDerivedValues), weapon damage (read by getWeaponDamageBonus in
+  // updateDamageValue), and granted weapon qualities (applied by
+  // applyOwnedItemEffects in prepareDerivedData).
+  derivedStats;
+  weaponDamage;
+  weaponQuality;
 
   prepareData() {
     super.prepareData();
@@ -24,11 +72,38 @@ export class CSCharacterActor extends CSActor {
   prepareDerivedData() {
     super.prepareDerivedData();
     this.calculateDerivedValues();
+    // Transient owned-item pass (Wave 4): grant qualities to weapons and apply
+    // each armour's own armorrating to its rating. Items are already prepared at
+    // this point; the writes are transient and reset next cycle.
+    applyOwnedItemEffects(this);
   }
 
   /** @override */
   getRollData() {
     return super.getRollData();
+  }
+
+  /**
+   * Run the modifier collector as the single writer of the transient buffer.
+   * v14 calls this with phase "initial"/"final"; v13 calls it once (undefined).
+   * The collector runs in the "initial" phase — before prepareDerivedData reads
+   * getModifier/getPenalty (counters/equipment are base data, available then).
+   * The buffer is recomputed from scratch each cycle and never persisted.
+   * @override
+   */
+  applyActiveEffects(phase) {
+    super.applyActiveEffects(phase);
+    if (phase === "initial" || phase === undefined) {
+      const collected = collectEffectModifiers(this);
+      this.modifiers = collected.modifiers;
+      this.penalties = collected.penalties;
+      this.testDice = collected.testDice;
+      this.bonusDice = collected.bonusDice;
+      this.reRolls = collected.reRolls;
+      this.derivedStats = collected.derivedStats;
+      this.weaponDamage = collected.weaponDamage;
+      this.weaponQuality = collected.weaponQuality;
+    }
   }
 
   calculateDerivedValues() {
@@ -39,7 +114,8 @@ export class CSCharacterActor extends CSActor {
       data.derivedStats.combatDefense.value = this.calcCombatDefense() || 0;
       data.derivedStats.combatDefense.total =
         data.derivedStats.combatDefense.value +
-        (Number(data.derivedStats.combatDefense.modifier) || 0);
+        (Number(data.derivedStats.combatDefense.modifier) || 0) +
+        this.getDerivedStatBonus(DERIVED_STATS.COMBAT_DEFENSE);
     }
     if (data.derivedStats?.health) {
       data.derivedStats.health.value =
@@ -48,7 +124,8 @@ export class CSCharacterActor extends CSActor {
         ) || 0) * 3;
       data.derivedStats.health.total =
         data.derivedStats.health.value +
-        (Number(data.derivedStats.health.modifier) || 0);
+        (Number(data.derivedStats.health.modifier) || 0) +
+        this.getDerivedStatBonus(DERIVED_STATS.HEALTH);
     }
 
     // Intrigue, composure, frustration, and fatigue only exist on character data model
@@ -56,7 +133,8 @@ export class CSCharacterActor extends CSActor {
       data.derivedStats.intrigueDefense.value = this.calcIntrigueDefense() || 0;
       data.derivedStats.intrigueDefense.total =
         data.derivedStats.intrigueDefense.value +
-        (Number(data.derivedStats.intrigueDefense.modifier) || 0);
+        (Number(data.derivedStats.intrigueDefense.modifier) || 0) +
+        this.getDerivedStatBonus(DERIVED_STATS.INTRIGUE_DEFENSE);
     }
     if (data.derivedStats?.composure) {
       data.derivedStats.composure.value =
@@ -65,7 +143,8 @@ export class CSCharacterActor extends CSActor {
         ) || 0) * 3;
       data.derivedStats.composure.total =
         data.derivedStats.composure.value +
-        (Number(data.derivedStats.composure.modifier) || 0);
+        (Number(data.derivedStats.composure.modifier) || 0) +
+        this.getDerivedStatBonus(DERIVED_STATS.COMPOSURE);
     }
     if (data.derivedStats?.frustration) {
       data.derivedStats.frustration.value =
@@ -136,187 +215,138 @@ export class CSCharacterActor extends CSActor {
 
   getModifier(type, includeDetail = false, includeModifierGlobal = false) {
     this.updateTempModifiers();
-
-    let total = 0;
-    let detail = [];
-
-    if (this.modifiers[type]) {
-      this.modifiers[type].forEach((modifier) => {
-        total += modifier.mod;
-        if (includeDetail) {
-          let tempItem = modifier._id;
-          if (modifier.isDocument) {
-            tempItem = this.getEmbeddedDocument("Item", modifier._id);
-          }
-          if (tempItem) {
-            detail.push({ docName: tempItem.name, mod: modifier.mod });
-          }
-        }
-      });
-    }
-
-    if (
-      includeModifierGlobal &&
-      this.modifiers[ChronicleSystem.modifiersConstants.ALL]
-    ) {
-      this.modifiers[ChronicleSystem.modifiersConstants.ALL].forEach(
-        (modifier) => {
-          total += modifier.mod;
-          if (includeDetail) {
-            let tempItem = modifier._id;
-            if (modifier.isDocument) {
-              tempItem = this.getEmbeddedDocument("Item", modifier._id);
-            }
-            if (tempItem)
-              detail.push({ docName: tempItem.name, mod: modifier.mod });
-          }
-        }
-      );
-    }
-
-    return { total: total, detail: detail };
+    return collectFromBuffer(
+      this.modifiers,
+      type,
+      includeDetail,
+      includeModifierGlobal,
+      (id) => this.getEmbeddedDocument("Item", id)
+    );
   }
 
   getPenalty(type, includeDetail = false, includeModifierGlobal = false) {
     this.updateTempPenalties();
-
-    let total = 0;
-    let detail = [];
-
-    if (this.penalties[type]) {
-      this.penalties[type].forEach((penalty) => {
-        total += penalty.mod;
-        if (includeDetail) {
-          let tempItem = penalty._id;
-          if (penalty.isDocument) {
-            tempItem = this.getEmbeddedDocument("Item", penalty._id);
-          }
-          if (tempItem) {
-            detail.push({ docName: tempItem.name, mod: penalty.mod });
-          }
-        }
-      });
-    }
-
-    if (
-      includeModifierGlobal &&
-      this.penalties[ChronicleSystem.modifiersConstants.ALL]
-    ) {
-      this.penalties[ChronicleSystem.modifiersConstants.ALL].forEach(
-        (penalty) => {
-          total += penalty.mod;
-          if (includeDetail) {
-            let tempItem = penalty._id;
-            if (penalty.isDocument) {
-              tempItem = this.getEmbeddedDocument("Item", penalty._id);
-            }
-            if (tempItem)
-              detail.push({ docName: tempItem.name, mod: penalty.mod });
-          }
-        }
-      );
-    }
-
-    return { total: total, detail: detail };
-  }
-
-  addModifier(type, documentId, value, isDocument = true, save = false) {
-    LOGGER.trace(`add ${documentId} modifier to ${type} | csCharacterActor.js`);
-
-    console.assert(
-      this.modifiers,
-      "call actor.updateTempModifiers before adding a modifier!"
-    );
-
-    if (!this.modifiers[type]) {
-      this.modifiers[type] = [];
-    }
-
-    let index = this.modifiers[type].findIndex((mod) => {
-      return mod._id === documentId;
-    });
-    if (index >= 0) {
-      this.modifiers[type][index].mod = value;
-    } else {
-      this.modifiers[type].push({
-        _id: documentId,
-        mod: value,
-        isDocument: isDocument,
-      });
-    }
-
-    if (save) {
-      this.update({ "system.modifiers": this.modifiers });
-    }
-  }
-
-  addPenalty(type, documentId, value, isDocument = true, save = false) {
-    LOGGER.trace(`add ${documentId} penalty to ${type} | csCharacterActor.js`);
-
-    console.assert(
+    return collectFromBuffer(
       this.penalties,
-      "call actor.updateTempPenalties before adding a penalty!"
+      type,
+      includeDetail,
+      includeModifierGlobal,
+      (id) => this.getEmbeddedDocument("Item", id)
     );
-
-    if (!this.penalties[type]) {
-      this.penalties[type] = [];
-    }
-
-    let index = this.penalties[type].findIndex((mod) => {
-      return mod._id === documentId;
-    });
-
-    if (index >= 0) {
-      this.penalties[type][index].mod = value;
-    } else {
-      this.penalties[type].push({
-        _id: documentId,
-        mod: value,
-        isDocument: isDocument,
-      });
-    }
-
-    if (save) {
-      this.update({ "system.penalties": this.penalties });
-    }
   }
 
-  removeModifier(type, documentId, save = false) {
-    LOGGER.trace(
-      `remove ${documentId} modifier to ${type} | csCharacterActor.js`
+  getTestDice(type, includeDetail = false, includeModifierGlobal = false) {
+    if (!this.testDice) this.testDice = {};
+    return collectFromBuffer(
+      this.testDice,
+      type,
+      includeDetail,
+      includeModifierGlobal,
+      (id) => this.getEmbeddedDocument("Item", id)
     );
-
-    console.assert(
-      this.modifiers,
-      "call actor.updateTempModifiers before removing a modifier!"
-    );
-
-    if (this.modifiers[type]) {
-      let index = this.modifiers[type].findIndex(
-        (mod) => mod._id === documentId
-      );
-      this.modifiers[type].splice(index, 1);
-    }
-    if (save) this.update({ "system.modifiers": this.modifiers });
   }
 
-  removePenalty(type, documentId, save = false) {
-    LOGGER.trace(
-      `remove ${documentId} penalty to ${type} | csCharacterActor.js`
+  getBonusDice(type, includeDetail = false, includeModifierGlobal = false) {
+    if (!this.bonusDice) this.bonusDice = {};
+    return collectFromBuffer(
+      this.bonusDice,
+      type,
+      includeDetail,
+      includeModifierGlobal,
+      (id) => this.getEmbeddedDocument("Item", id)
     );
+  }
 
-    console.assert(
-      this.penalties,
-      "call actor.updateTempPenalties before removing a penalty!"
+  getReRoll(type, includeDetail = false, includeModifierGlobal = false) {
+    if (!this.reRolls) this.reRolls = {};
+    return collectFromBuffer(
+      this.reRolls,
+      type,
+      includeDetail,
+      includeModifierGlobal,
+      (id) => this.getEmbeddedDocument("Item", id)
     );
+  }
 
-    if (this.penalties[type]) {
-      let index = this.penalties[type].findIndex(
-        (mod) => mod._id === documentId
-      );
-      this.penalties[type].splice(index, 1);
+  /**
+   * Authored `derivedstat` AE total for one stat slug (Wave 4). Separate buffer
+   * from `modifiers`, so it never double-counts the armour penalty the ASOIAF
+   * combat-defense path reads via getModifier(COMBAT_DEFENSE).
+   * @param {string} statSlug e.g. DERIVED_STATS.COMBAT_DEFENSE
+   * @returns {number}
+   */
+  getDerivedStatBonus(statSlug) {
+    if (!this.derivedStats) this.derivedStats = {};
+    return collectFromBuffer(this.derivedStats, statSlug, false, false, (id) =>
+      this.getEmbeddedDocument("Item", id)
+    ).total;
+  }
+
+  /**
+   * Authored `damage` AE total for a weapon type (Wave 4): the type bucket plus
+   * the global ALL (all-weapons) bucket. Read by `updateDamageValue` at render.
+   * @param {string} typeSlug the weapon's specialty-derived type slug
+   * @returns {number}
+   */
+  getWeaponDamageBonus(typeSlug) {
+    if (!this.weaponDamage) this.weaponDamage = {};
+    // Skip the global merge when the type slug IS the ALL bucket, so a weapon
+    // whose specialty slugs to "all" doesn't count the all-weapons damage twice
+    // (mirrors the guard in grantWeaponQualities).
+    const includeGlobal = typeSlug !== ChronicleSystem.modifiersConstants.ALL;
+    return collectFromBuffer(
+      this.weaponDamage,
+      typeSlug,
+      false,
+      includeGlobal,
+      (id) => this.getEmbeddedDocument("Item", id)
+    ).total;
+  }
+
+  /**
+   * Finds the House (if any) that lists this character among its members and
+   * returns its localized role label. House membership is stored only on the
+   * House actor (system.members.*), so this is a reverse lookup across
+   * game.actors rather than a stored field on the character.
+   * @returns {{houseId: string, houseName: string, role: string, description: string} | null}
+   */
+  getHouseRole() {
+    const roleLabelKeys = {
+      head: "CS.sheets.house.character.roles.head",
+      steward: "CS.sheets.house.character.roles.steward",
+      heirs: "CS.sheets.house.character.roles.heir",
+      family: "CS.sheets.house.character.roles.family",
+      retainers: "CS.sheets.house.character.roles.retainer",
+      servants: "CS.sheets.house.character.roles.servant",
+    };
+    for (const house of game.actors.filter((a) => a.type === "house")) {
+      const members = house.getCSData().members;
+      if (!members) continue;
+      for (const [key, labelKey] of Object.entries(roleLabelKeys)) {
+        const value = members[key];
+        const member = Array.isArray(value)
+          ? value.find((m) => m.id === this.id)
+          : value?.id === this.id
+          ? value
+          : null;
+        if (member) {
+          const roleLabel = SystemUtils.localize(labelKey);
+          // The member's own title (e.g. "Captain") shown as Role/Title; skip it
+          // when it just repeats the role label (the HEAD default description).
+          const description =
+            member.description && member.description !== roleLabel
+              ? member.description
+              : "";
+          return {
+            houseId: house.id,
+            houseName: house.name,
+            role: roleLabel,
+            description,
+          };
+        }
+      }
     }
-    if (save) this.update({ "system.penalties": this.penalties });
+    return null;
   }
 
   getMaxInjuries() {
@@ -329,22 +359,6 @@ export class CSCharacterActor extends CSActor {
     return this.getAbilityValue(
       SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)
     );
-  }
-
-  saveModifiers() {
-    console.assert(
-      this.modifiers,
-      "call actor.updateTempModifiers before saving the modifiers!"
-    );
-    this.update({ "system.modifiers": this.modifiers }, { diff: false });
-  }
-
-  savePenalties() {
-    console.assert(
-      this.penalties,
-      "call actor.updateTempPenalties before saving the penalties!"
-    );
-    this.update({ "system.penalties": this.penalties }, { diff: false });
   }
 
   getAbilityValue(abilityName) {
@@ -412,7 +426,8 @@ export class CSCharacterActor extends CSActor {
       data.movement.base +
         data.movement.runBonus -
         data.movement.bulk +
-        (parseInt(data.movement.modifier) || 0),
+        (parseInt(data.movement.modifier) || 0) +
+        this.getDerivedStatBonus(DERIVED_STATS.MOVEMENT),
       1
     );
     data.movement.sprintTotal =
@@ -420,87 +435,20 @@ export class CSCharacterActor extends CSActor {
       data.movement.bulk;
   }
 
-  _onDeleteDescendantDocuments(
-    parent,
-    collection,
-    documents,
-    ids,
-    options,
-    userId
-  ) {
-    super._onDeleteDescendantDocuments(
-      parent,
-      collection,
-      documents,
-      ids,
-      options,
-      userId
-    );
-    this.updateTempModifiers();
-    for (let i = 0; i < documents.length; i++) {
-      documents[i].onDiscardedFromActor(this, ids[0]);
-    }
-    this.saveModifiers();
-  }
+  // Item lifecycle (onObtained/onEquippedChanged/onDiscardedFromActor) and the
+  // persisted modifier map are gone: the collector recomputes the buffer from
+  // owned items + counters on every prepareData, so embedded-document changes
+  // (create/update/delete, equip/unequip) are picked up automatically by the
+  // re-render. No _on*DescendantDocuments overrides are needed.
 
-  _onCreateDescendantDocuments(
-    parent,
-    collection,
-    documents,
-    data,
-    options,
-    userId
-  ) {
-    super._onCreateDescendantDocuments(
-      parent,
-      collection,
-      documents,
-      data,
-      options,
-      userId
-    );
-    this.updateTempModifiers();
-    for (let i = 0; i < documents.length; i++) {
-      documents[i].onObtained(this);
-    }
-
-    this.saveModifiers();
-  }
-
-  _onUpdateDescendantDocuments(
-    parent,
-    collection,
-    documents,
-    changes,
-    options,
-    userId
-  ) {
-    super._onUpdateDescendantDocuments(
-      parent,
-      collection,
-      documents,
-      changes,
-      options,
-      userId
-    );
-    this.updateTempModifiers();
-    changes.forEach((doc) => {
-      let item = this.items.find((item) => item._id === doc._id);
-      if (item) {
-        item.onObtained(this);
-        item.onEquippedChanged(this, item.getCSData().equipped > 0);
-      }
-    });
-    this.saveModifiers();
-  }
-
+  // Kept for the read-side: getModifier/getPenalty call these at their start.
+  // The collector owns the buffer (populated in applyActiveEffects); these only
+  // guarantee the maps exist and never reload from a persisted source.
   updateTempModifiers() {
-    let data = this.getCSData();
-    this.modifiers = data.modifiers;
+    if (!this.modifiers) this.modifiers = {};
   }
 
   updateTempPenalties() {
-    let data = this.getCSData();
-    this.penalties = data.penalties;
+    if (!this.penalties) this.penalties = {};
   }
 }

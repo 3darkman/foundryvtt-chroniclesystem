@@ -56,7 +56,11 @@ const defaultActorData = () => ({
  * `specialties` is a map { key: { name, rating, modifier } }, e.g.
  *   makeAbilityItem("athletics", 3, { specialties: { run: { name: "run", rating: 4, modifier: 0 } } })
  */
-export function makeAbilityItem(name, rating, { modifier = 0, specialties = {} } = {}) {
+export function makeAbilityItem(
+  name,
+  rating,
+  { modifier = 0, specialties = {} } = {}
+) {
   return {
     name,
     type: "ability",
@@ -83,6 +87,9 @@ export function makeFakeActor({ abilities = [], data, modifiers = {} } = {}) {
     calcIntrigueDefense: proto.calcIntrigueDefense,
     getModifier: (type) => ({ total: modifiers[type] ?? 0, detail: [] }),
     getPenalty: () => ({ total: 0, detail: [] }),
+    // Wave 4: neutral AE contributions keep the characterized totals unchanged.
+    getDerivedStatBonus: () => 0,
+    getWeaponDamageBonus: () => 0,
   };
 }
 

@@ -1,0 +1,161 @@
+{{!-- CSActiveEffectConfig "changes" tab (Wave 5). Cascade per row:
+      TYPE(channel) → TARGET(conditional) → VALUE(fixed|derived|quality).
+      Synthetic field names changes.<index>.* are rebuilt into system.changes by
+      _processFormData. Single root <section> (V2 — never a nested <form>). --}}
+<section class="tab cs-effect-changes {{#if tab.active}}active{{/if}}" data-group="sheet" data-tab="changes">
+  <p class="hint">{{localize "CS.effects.authoring.hint"}}</p>
+
+  {{!-- per-EFFECT flags (not per-change): optional toggle + condition tag --}}
+  <fieldset class="cs-effect-flags">
+    <label class="cs-effect-optional">
+      <input type="checkbox" name="flags.chroniclesystem.optional" {{#if effectOptional}}checked{{/if}} />
+      {{localize "CS.effects.authoring.optionalLabel"}}
+    </label>
+    <span class="hint">{{localize "CS.effects.authoring.optionalHint"}}</span>
+    <label class="cs-effect-condition">
+      {{localize "CS.effects.authoring.conditionLabel"}}
+      <input type="text" name="flags.chroniclesystem.condition" value="{{effectCondition}}"
+        placeholder="{{localize 'CS.effects.authoring.conditionPlaceholder'}}" />
+    </label>
+  </fieldset>
+
+  {{!-- slug suggestions (free text still allowed) --}}
+  <datalist id="cs-roll-slugs">
+    {{#each abilitySlugs}}<option value="{{this}}"></option>{{/each}}
+    {{#each specialtySlugs}}<option value="{{this}}"></option>{{/each}}
+  </datalist>
+  <datalist id="cs-weapontype-slugs">
+    {{#each weaponTypeSlugs}}<option value="{{this}}"></option>{{/each}}
+  </datalist>
+
+  <ol class="cs-changes-list" data-changes>
+    {{#each csChanges as |change|}}
+    {{#if change.isRaw}}
+    {{!-- Verbatim row: a change the cascade can't represent (foreign/legacy key
+          or a value form the dropdown omits). Preserved as-is; editable raw. --}}
+    <li class="cs-change cs-change-raw" data-index="{{change.index}}">
+      <div class="cs-field cs-raw-key">
+        <label>{{localize "CS.effects.authoring.rawKey"}}</label>
+        <input type="text" name="changes.{{change.index}}.rawKey" value="{{change.rawKey}}" />
+      </div>
+      <div class="cs-field cs-raw-value">
+        <label>{{localize "CS.effects.authoring.value"}}</label>
+        <input type="text" name="changes.{{change.index}}.rawValue" value="{{change.rawValue}}" />
+      </div>
+      <input type="hidden" name="changes.{{change.index}}.rawType" value="{{change.rawType}}" />
+      <input type="hidden" name="changes.{{change.index}}.rawPhase" value="{{change.rawPhase}}" />
+      <button type="button" class="cs-change-delete" data-action="deleteChange" data-index="{{change.index}}"
+        title="{{localize 'CS.effects.delete'}}">
+        <i class="fas fa-trash"></i>
+      </button>
+    </li>
+    {{else}}
+    <li class="cs-change" data-index="{{change.index}}" data-channel="{{change.channel}}">
+
+      {{!-- TYPE: channel --}}
+      <div class="cs-field cs-channel-field">
+        <label>{{localize "CS.effects.authoring.type"}}</label>
+        <select name="changes.{{change.index}}.channel" class="cs-channel" data-index="{{change.index}}">
+          {{selectOptions ../channelChoices selected=change.channel localize=true}}
+        </select>
+      </div>
+
+      {{!-- TARGET: roll channels (all / ability / specialty) --}}
+      <div class="cs-field cs-roll-target" style="{{#unless change.isRoll}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.target"}}</label>
+        <select name="changes.{{change.index}}.rollTargetKind" class="cs-roll-targetkind">
+          {{selectOptions ../rollTargetKindChoices selected=change.rollTargetKind localize=true}}
+        </select>
+      </div>
+      <div class="cs-field cs-roll-slug" style="{{#unless change.showRollSlug}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.slug"}}</label>
+        <input type="text" name="changes.{{change.index}}.rollSlug" value="{{change.rollSlug}}"
+          list="cs-roll-slugs" placeholder="{{localize 'CS.effects.authoring.slugPlaceholder'}}" />
+      </div>
+
+      {{!-- TARGET: derived stat --}}
+      <div class="cs-field cs-stat-target" style="{{#unless change.isDerivedStat}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.target"}}</label>
+        <select name="changes.{{change.index}}.statTarget" class="cs-stat">
+          {{selectOptions ../derivedStatChoices selected=change.statTarget localize=true}}
+        </select>
+      </div>
+
+      {{!-- TARGET: armorrating (self) / bulk (all) — static labels --}}
+      <div class="cs-field cs-armor-label" style="{{#unless change.isArmorRating}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.target"}}</label>
+        <span class="cs-static-target">{{localize "CS.effects.targetKinds.self"}}</span>
+      </div>
+      <div class="cs-field cs-bulk-label" style="{{#unless change.isBulk}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.target"}}</label>
+        <span class="cs-static-target">{{localize "CS.effects.targetKinds.all"}}</span>
+      </div>
+
+      {{!-- TARGET: weapon (all / weapontype) --}}
+      <div class="cs-field cs-weapon-target" style="{{#unless change.isWeapon}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.target"}}</label>
+        <select name="changes.{{change.index}}.weaponTargetKind" class="cs-weapon-targetkind">
+          {{selectOptions ../weaponTargetKindChoices selected=change.weaponTargetKind localize=true}}
+        </select>
+      </div>
+      <div class="cs-field cs-weapon-slug" style="{{#unless change.showWeaponSlug}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.weaponType"}}</label>
+        <input type="text" name="changes.{{change.index}}.weaponSlug" value="{{change.weaponSlug}}"
+          list="cs-weapontype-slugs" placeholder="{{localize 'CS.effects.authoring.weaponTypePlaceholder'}}" />
+      </div>
+
+      {{!-- VALUE: fixed | derived (hidden for quality) --}}
+      <div class="cs-field cs-value-mode-field" style="{{#if change.isQuality}}display:none{{/if}}">
+        <label>{{localize "CS.effects.authoring.value"}}</label>
+        <select name="changes.{{change.index}}.valueMode" class="cs-value-mode">
+          {{selectOptions ../valueModeChoices selected=change.valueMode localize=true}}
+        </select>
+      </div>
+      <div class="cs-field cs-value-fixed" style="{{#unless change.valueIsFixed}}display:none{{/unless}}">
+        <input type="number" step="1" name="changes.{{change.index}}.fixedValue" value="{{change.fixedValue}}" />
+      </div>
+      <div class="cs-field cs-value-derived" style="{{#unless change.valueIsDerived}}display:none{{/unless}}">
+        <select name="changes.{{change.index}}.derivedForm" class="cs-derived-form">
+          {{selectOptions ../derivedFormChoices selected=change.derivedForm localize=true}}
+        </select>
+        <input type="text" name="changes.{{change.index}}.derivedSlug" value="{{change.derivedSlug}}"
+          list="cs-roll-slugs" placeholder="{{localize 'CS.effects.authoring.slugPlaceholder'}}" />
+      </div>
+
+      {{!-- VALUE: quality (only for quality channel) — grouped dropdown + param,
+            with an "Other…" pick that reveals a free-text field. --}}
+      <div class="cs-field cs-value-quality" style="{{#unless change.isQuality}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.qualityName"}}</label>
+        <select name="changes.{{change.index}}.qualityKind" class="cs-quality-kind">
+          {{#each change.qualityGroups as |group|}}
+          <optgroup label="{{group.label}}">
+            {{#each group.options as |opt|}}
+            <option value="{{opt.value}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
+            {{/each}}
+          </optgroup>
+          {{/each}}
+          <option value="{{@root.qualityOtherValue}}" {{#if change.qualityOtherSelected}}selected{{/if}}>
+            {{localize "CS.effects.authoring.qualityOther"}}
+          </option>
+        </select>
+        <input type="text" name="changes.{{change.index}}.qualityParam" value="{{change.qualityParam}}"
+          class="cs-quality-param" placeholder="{{localize 'CS.effects.authoring.qualityParameter'}}"
+          style="{{#unless change.qualityTakesParam}}display:none{{/unless}}" />
+        <input type="text" name="changes.{{change.index}}.qualityCustom" value="{{change.qualityCustom}}"
+          class="cs-quality-custom" placeholder="{{localize 'CS.effects.authoring.qualityNamePlaceholder'}}"
+          style="{{#unless change.qualityIsOther}}display:none{{/unless}}" />
+      </div>
+
+      <button type="button" class="cs-change-delete" data-action="deleteChange" data-index="{{change.index}}"
+        title="{{localize 'CS.effects.delete'}}">
+        <i class="fas fa-trash"></i>
+      </button>
+    </li>
+    {{/if}}
+    {{/each}}
+  </ol>
+
+  <button type="button" class="cs-change-add" data-action="addChange">
+    <i class="fas fa-plus"></i> {{localize "CS.effects.authoring.addChange"}}
+  </button>
+</section>

@@ -33,6 +33,10 @@ export class CSCharacterActorSheet extends CSActorSheet {
       createWound: CSCharacterActorSheet._onClickWoundCreate,
       deleteWound: CSCharacterActorSheet._onClickWoundDelete,
       clickSquare: CSCharacterActorSheet._onClickSquare,
+      openHouse: CSCharacterActorSheet._onOpenHouse,
+      // NOTE: `editImage` (portrait) and `configurePrototypeToken` (header
+      // avatar) are inherited from DocumentSheetV2/ActorSheetV2 and merged in
+      // additively — no need to redeclare them here.
     },
   };
 
@@ -53,6 +57,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
         "sorcery",
         "equipments",
         "actor-description",
+        "effects",
       ],
       initial: "abilities",
     },
@@ -72,6 +77,13 @@ export class CSCharacterActorSheet extends CSActorSheet {
     context.owner = actor.isOwner;
     context.cssClass = this.isEditable ? "editable" : "locked";
     context.editable = this.isEditable;
+
+    // Header avatar shows the prototype token art (falls back to the portrait
+    // when the token is still the default mystery-man); clicking it opens the
+    // prototype token config (inherited `configurePrototypeToken` action).
+    const tokenSrc = actor.prototypeToken?.texture?.src;
+    context.tokenImg =
+      !tokenSrc || tokenSrc === CONST.DEFAULT_TOKEN ? actor.img : tokenSrc;
 
     // Split items by type (reuse base class helper)
     this.splitItemsByType(context);
@@ -158,6 +170,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
       : 0;
     context.maxInjuries = this.actor.getMaxInjuries();
     context.maxWounds = this.actor.getMaxWounds();
+    context.houseRole = this.actor.getHouseRole();
     context.character = character;
 
     // Pre-enrich HTML descriptions for benefit and drawback items
@@ -212,6 +225,9 @@ export class CSCharacterActorSheet extends CSActorSheet {
       character.motto || "",
       { async: true, relativeTo: actor }
     );
+
+    // Effects tab (shared across all actor types)
+    this._prepareEffectsContext(context);
 
     // Prepare tab state
     context.tabs = this._getTabs();
@@ -377,6 +393,10 @@ export class CSCharacterActorSheet extends CSActorSheet {
     // No manual event listeners needed here.
   }
 
+  // The dynamic conditions only update their COUNTER; the modifier collector
+  // (cs-effect-modifiers.js) reads that counter live and applies the D1
+  // channel/sign mapping on the next prepareData. No imperative add/removePenalty.
+
   async setFrustrationValue(newValue) {
     if (!this.actor.getCSData().derivedStats?.frustration) return;
     let value = Math.max(
@@ -386,36 +406,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
       ),
       0
     );
-
-    this.actor.updateTempPenalties();
-
-    if (value > 0) {
-      this.actor.addPenalty(
-        ChronicleSystem.modifiersConstants.DECEPTION,
-        ChronicleSystem.keyConstants.FRUSTRATION,
-        value,
-        false
-      );
-      this.actor.addPenalty(
-        ChronicleSystem.modifiersConstants.PERSUASION,
-        ChronicleSystem.keyConstants.FRUSTRATION,
-        value,
-        false
-      );
-    } else {
-      this.actor.removePenalty(
-        ChronicleSystem.modifiersConstants.DECEPTION,
-        ChronicleSystem.keyConstants.FRUSTRATION
-      );
-      this.actor.removePenalty(
-        ChronicleSystem.modifiersConstants.PERSUASION,
-        ChronicleSystem.keyConstants.FRUSTRATION
-      );
-    }
-
     this.actor.update({
       "system.derivedStats.frustration.current": value,
-      "system.penalties": this.actor.penalties,
     });
   }
 
@@ -428,31 +420,15 @@ export class CSCharacterActorSheet extends CSActorSheet {
       ),
       0
     );
-
-    this.actor.updateTempModifiers();
-
-    if (value > 0) {
-      this.actor.addModifier(
-        ChronicleSystem.modifiersConstants.ALL,
-        ChronicleSystem.keyConstants.FATIGUE,
-        -value,
-        false
-      );
-    } else {
-      this.actor.removeModifier(
-        ChronicleSystem.modifiersConstants.ALL,
-        ChronicleSystem.keyConstants.FATIGUE
-      );
-    }
-
     this.actor.update({
       "system.derivedStats.fatigue.current": value,
-      "system.modifiers": this.actor.modifiers,
     });
   }
 
   async setStressValue(newValue) {
     if (!this.actor.getCSData().derivedStats?.frustration) return;
+    // Parity note: legacy caps stress at `frustration.total` (a known
+    // pre-existing bug). Replicated as-is; the oracle is the legacy output.
     let value = Math.max(
       Math.min(
         parseInt(newValue),
@@ -460,46 +436,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
       ),
       0
     );
-
-    this.actor.updateTempPenalties();
-
-    if (value > 0) {
-      this.actor.addPenalty(
-        ChronicleSystem.modifiersConstants.AWARENESS,
-        ChronicleSystem.keyConstants.STRESS,
-        value,
-        false
-      );
-      this.actor.addPenalty(
-        ChronicleSystem.modifiersConstants.CUNNING,
-        ChronicleSystem.keyConstants.STRESS,
-        value,
-        false
-      );
-      this.actor.addPenalty(
-        ChronicleSystem.modifiersConstants.STATUS,
-        ChronicleSystem.keyConstants.STRESS,
-        value,
-        false
-      );
-    } else {
-      this.actor.removePenalty(
-        ChronicleSystem.modifiersConstants.AWARENESS,
-        ChronicleSystem.keyConstants.STRESS
-      );
-      this.actor.removePenalty(
-        ChronicleSystem.modifiersConstants.CUNNING,
-        ChronicleSystem.keyConstants.STRESS
-      );
-      this.actor.removePenalty(
-        ChronicleSystem.modifiersConstants.STATUS,
-        ChronicleSystem.keyConstants.STRESS
-      );
-    }
-
     this.actor.update({
       "system.currentStress": value,
-      "system.penalties": this.actor.penalties,
     });
   }
 
@@ -520,25 +458,15 @@ export class CSCharacterActorSheet extends CSActorSheet {
    * @param {Event} event    The originating click event
    * @param {HTMLElement} target  The element that was clicked
    */
+  // eslint-disable-next-line no-unused-vars
   static async _onClickWoundCreate(event, target) {
     event.preventDefault();
     const data = this.actor.getCSData();
     if (!data.wounds) return;
-    let wound = "";
     let wounds = Object.values(data.wounds);
     if (wounds.length >= this.actor.getMaxWounds()) return;
-    wounds.push(wound);
-    this.actor.updateTempPenalties();
-    this.actor.addPenalty(
-      ChronicleSystem.modifiersConstants.ALL,
-      ChronicleSystem.keyConstants.WOUNDS,
-      wounds.length,
-      false
-    );
-    this.actor.update({
-      "system.wounds": wounds,
-      "system.penalties": this.actor.penalties,
-    });
+    wounds.push("");
+    this.actor.update({ "system.wounds": wounds });
   }
 
   /**
@@ -554,25 +482,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     if (!data.wounds) return;
     let wounds = Object.values(data.wounds);
     wounds.splice(index, 1);
-
-    this.actor.updateTempPenalties();
-    if (wounds.length === 0) {
-      this.actor.removePenalty(
-        ChronicleSystem.modifiersConstants.ALL,
-        ChronicleSystem.keyConstants.WOUNDS
-      );
-    } else {
-      this.actor.addPenalty(
-        ChronicleSystem.modifiersConstants.ALL,
-        ChronicleSystem.keyConstants.WOUNDS,
-        wounds.length,
-        false
-      );
-    }
-    this.actor.update({
-      "system.wounds": wounds,
-      "system.penalties": this.actor.penalties,
-    });
+    this.actor.update({ "system.wounds": wounds });
   }
 
   /**
@@ -580,28 +490,15 @@ export class CSCharacterActorSheet extends CSActorSheet {
    * @param {Event} event    The originating click event
    * @param {HTMLElement} target  The element that was clicked
    */
+  // eslint-disable-next-line no-unused-vars
   static async _onClickInjuryCreate(event, target) {
     event.preventDefault();
     const data = this.actor.getCSData();
     if (!data.injuries) return;
-    let injury = "";
     let injuries = Object.values(data.injuries);
     if (injuries.length >= this.actor.getMaxInjuries()) return;
-
-    injuries.push(injury);
-
-    this.actor.updateTempModifiers();
-    this.actor.addModifier(
-      ChronicleSystem.modifiersConstants.ALL,
-      ChronicleSystem.keyConstants.INJURY,
-      -injuries.length,
-      false
-    );
-
-    this.actor.update({
-      "system.injuries": injuries,
-      "system.modifiers": this.actor.modifiers,
-    });
+    injuries.push("");
+    this.actor.update({ "system.injuries": injuries });
   }
 
   /**
@@ -617,26 +514,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     if (!data.injuries) return;
     let injuries = Object.values(data.injuries);
     injuries.splice(index, 1);
-
-    this.actor.updateTempModifiers();
-    if (injuries.length === 0) {
-      this.actor.removeModifier(
-        ChronicleSystem.modifiersConstants.ALL,
-        ChronicleSystem.keyConstants.INJURY
-      );
-    } else {
-      this.actor.addModifier(
-        ChronicleSystem.modifiersConstants.ALL,
-        ChronicleSystem.keyConstants.INJURY,
-        -injuries.length,
-        false
-      );
-    }
-
-    this.actor.update({
-      "system.injuries": injuries,
-      "system.modifiers": this.actor.modifiers,
-    });
+    this.actor.update({ "system.injuries": injuries });
   }
 
   /**
@@ -653,8 +531,6 @@ export class CSCharacterActorSheet extends CSActorSheet {
     let isArmor =
       parseInt(eventData.hand) === ChronicleSystem.equippedConstants.WEARING;
     let isUnequipping = parseInt(eventData.hand) === 0;
-
-    this.actor.updateTempModifiers();
 
     if (isUnequipping) {
       let adaptableQuality = Object.values(
@@ -729,8 +605,6 @@ export class CSCharacterActorSheet extends CSActorSheet {
       }
     }
 
-    this.actor.saveModifiers();
-
     this.actor.updateEmbeddedDocuments("Item", collection);
   }
 
@@ -785,6 +659,18 @@ export class CSCharacterActorSheet extends CSActorSheet {
     this.actor.update({
       "system.currentDisposition": parseInt(target.dataset.id),
     });
+  }
+
+  /**
+   * Static action handler: open the linked House actor's sheet from the header
+   * House label. The house id comes from `getHouseRole()` (data-actor-id).
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  static _onOpenHouse(event, target) {
+    event.preventDefault();
+    const house = game.actors.get(target.dataset.actorId);
+    if (house) house.sheet.render({ force: true });
   }
 
   /* -------------------------------------------- */

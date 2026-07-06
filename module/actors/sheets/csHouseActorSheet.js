@@ -3,7 +3,6 @@ import { CSConstants } from "../../system/csConstants.js";
 import SystemUtils from "../../utils/systemUtils.js";
 import LOGGER from "../../utils/logger.js";
 import { ChronicleSystem } from "../../system/ChronicleSystem.js";
-import { CSHoldingItem } from "../../items/cs-holding-item.js";
 
 export class CSHouseActorSheet extends CSActorSheet {
   itemTypesPermitted = ["event", "holding"];
@@ -30,7 +29,7 @@ export class CSHouseActorSheet extends CSActorSheet {
 
   static TABS = {
     primary: {
-      tabs: ["resources", "events", "members", "holdings"],
+      tabs: ["resources", "events", "members", "holdings", "effects"],
       initial: "resources",
     },
   };
@@ -84,6 +83,9 @@ export class CSHouseActorSheet extends CSActorSheet {
         }
       }
     }
+
+    // Effects tab (shared across all actor types)
+    this._prepareEffectsContext(context);
 
     // Prepare tab state
     context.tabs = this._getTabs();
@@ -252,6 +254,7 @@ export class CSHouseActorSheet extends CSActorSheet {
    * @param {Event} event    The originating click event
    * @param {HTMLElement} target  The element that was clicked
    */
+  // eslint-disable-next-line no-unused-vars
   static async _onRegenerateResources(event, target) {
     event.preventDefault();
     await this.document.regenerateAllStartingResources();

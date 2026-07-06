@@ -1,47 +1,51 @@
-<div class="tab flexrow" data-group="primary" data-tab="qualities">
-    <section class="benefits">
-        <header class="header-field">
-            <span>Benefits</span>
-        </header>
-        <ol  class="qualities-list">
-            {{#each character.owned.benefits}}
-                <li  class="item quality" data-item-id="{{_id}}" draggable="true">
-                    <div class="quality-label item-name" data-action="toggleDescription">
-                        <label class="flex3">{{name}} </label>
-                        {{#if ../owner}}
-                        <div class='item-controls'>
-                            <button type='button' class='item-edit' data-action="editItem">
-                                <i class='fas fa-edit'></i>
-                            </button>
-                        </div>
-                        {{/if}}
-                    </div>
-
-                    <div class="description hidden">{{enrich system.description}}</div>
-                </li>
-            {{/each}}
-        </ol>
-    </section>
-    <section class="drawbacks">
-        <header class="header-field">
-            <span>Drawbacks</span>
-        </header>
-        <ol  class="qualities-list">
-            {{#each character.owned.drawbacks}}
-                <li  class="item quality" data-item-id="{{_id}}" draggable="true">
-                    <div class="quality-label item-name" data-action="toggleDescription">
-                        <label class="flex3">{{name}} </label>
-                        {{#if ../owner}}
+<div class="tab" data-group="primary" data-tab="qualities">
+    <div class="cs2-columns">
+        <div class="cs2-card">
+            <div class="cs2-card-header">Benefits</div>
+            <ol class="qualities-list">
+                {{#each character.owned.benefits}}
+                    <li  class="item quality cs2-list-item" data-item-id="{{_id}}" draggable="true">
+                        <div class="quality-label item-name cs2-list-item-head" data-action="toggleDescription">
+                            <div class="cs2-list-item-title">
+                                <i class="fas fa-chevron-down cs2-accordion-chevron"></i>
+                                <label class="flex3">{{name}} </label>
+                            </div>
+                            {{#if ../owner}}
                             <div class='item-controls'>
                                 <button type='button' class='item-edit' data-action="editItem">
                                     <i class='fas fa-edit'></i>
                                 </button>
                             </div>
-                        {{/if}}
-                    </div>
-                    <div class="description hidden">{{enrich system.description }}</div>
-                </li>
-            {{/each}}
-        </ol>
-    </section>
+                            {{/if}}
+                        </div>
+
+                        <div class="description hidden">{{enrich system.description}}</div>
+                    </li>
+                {{/each}}
+            </ol>
+        </div>
+        <div class="cs2-card">
+            <div class="cs2-card-header">Drawbacks</div>
+            <ol class="qualities-list">
+                {{#each character.owned.drawbacks}}
+                    <li  class="item quality cs2-list-item" data-item-id="{{_id}}" draggable="true">
+                        <div class="quality-label item-name cs2-list-item-head" data-action="toggleDescription">
+                            <div class="cs2-list-item-title">
+                                <i class="fas fa-chevron-down cs2-accordion-chevron"></i>
+                                <label class="flex3">{{name}} </label>
+                            </div>
+                            {{#if ../owner}}
+                                <div class='item-controls'>
+                                    <button type='button' class='item-edit' data-action="editItem">
+                                        <i class='fas fa-edit'></i>
+                                    </button>
+                                </div>
+                            {{/if}}
+                        </div>
+                        <div class="description hidden">{{enrich system.description }}</div>
+                    </li>
+                {{/each}}
+            </ol>
+        </div>
+    </div>
 </div>

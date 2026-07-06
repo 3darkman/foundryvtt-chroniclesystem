@@ -1,4 +1,9 @@
 <section class="{{cssClass}}">
+    <nav class="sheet-tabs tabs" data-group="primary">
+        <a class="item" data-group="primary" data-tab="details" data-action="tab">{{localize "CS.sheets.generalLabels.details"}}</a>
+        <a class="item" data-group="primary" data-tab="effects" data-action="tab">{{localize "CS.effects.tab"}}</a>
+    </nav>
+    <div class="tab" data-group="primary" data-tab="details">
     {{> "systems/chroniclesystem/templates/items/partials/header-delete.hbs"}}
     <main class="sheet-body flexrow">
         <section class="item-stats">
@@ -86,4 +91,6 @@
             {{/if}}
         </section>
     </main>
+    </div>
+    {{> "systems/chroniclesystem/templates/components/effects-tab.hbs"}}
 </section>

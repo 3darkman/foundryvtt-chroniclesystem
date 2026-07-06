@@ -1,0 +1,16 @@
+{{!-- Shared "value + modifier = total [current]" derived-stat row (spec: character
+      sheet redesign). Single source of markup for Intrigue/Combat Defense,
+      Composure and Health so all four render identically. --}}
+<div class="cs2-stat-row">
+    <span class="cs2-stat-label">{{label}}</span>
+    <div class="cs2-stat-fields">
+        <input type="text" value="{{value}}" placeholder="Value" readonly="readonly"/>
+        <span class="cs2-op">+</span>
+        <input name="{{modifierName}}" type="text" value="{{modifierValue}}" placeholder="Modifier" data-dtype="Number"/>
+        <span class="cs2-op">=</span>
+        <span class="cs2-total">{{total}}</span>
+        {{#if currentName}}
+        <input class="cs2-current" name="{{currentName}}" type="text" value="{{current}}" placeholder="Current" data-dtype="Number" title="current"/>
+        {{/if}}
+    </div>
+</div>

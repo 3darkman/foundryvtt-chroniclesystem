@@ -5,11 +5,12 @@
     <nav  class="sheet-tabs flexrow tabs" data-group="primary">
         <a  class="item"  data-tab="details" data-group="primary" data-action="tab">{{localize "CS.sheets.techniqueItem.tabs.details"}}</a>
         <a  class="item size150"  data-tab="works" data-group="primary" data-action="tab">{{localize "CS.sheets.techniqueItem.tabs.works"}}</a>
+        <a  class="item"  data-tab="effects" data-group="primary" data-action="tab">{{localize "CS.effects.tab"}}</a>
     </nav>
-
 
     <main class="sheet-body flexrow">
         {{> "systems/chroniclesystem/templates/items/tabs/technique-details-tab.hbs"}}
         {{> "systems/chroniclesystem/templates/items/tabs/technique-works-tab.hbs"}}
     </main>
+    {{> "systems/chroniclesystem/templates/components/effects-tab.hbs"}}
 </section>

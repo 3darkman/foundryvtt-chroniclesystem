@@ -1,5 +1,5 @@
 import { CSConstants } from "../system/csConstants.js";
-import { task030 } from "./task030.js";
+import { migrateWorldToAE } from "./task080-ae-unification.js";
 
 export async function migrateData() {
   if (!game.user?.isGM) {
@@ -35,4 +35,7 @@ export function registerTask(version, task) {
   migrationRoutines[version] = task;
 }
 
-registerTask("0.3.0", task030);
+// task030 (combat-defense → persisted map) is retired: the persisted map no
+// longer exists, and its imperative writers (addModifier/saveModifiers) were
+// removed. The 0.8.0 task strips the residual map and unifies on the collector.
+registerTask("0.8.0", migrateWorldToAE);

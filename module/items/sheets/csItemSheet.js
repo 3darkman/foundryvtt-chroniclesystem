@@ -1,3 +1,9 @@
+import {
+  buildEffectContext,
+  buildNewEffectData,
+  canUserModifyEffect,
+} from "../../effects/cs-active-effect.js";
+
 /**
  * Extend the basic ItemSheetV2 with some very simple modifications
  * @extends {ItemSheetV2}
@@ -15,8 +21,40 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
       deleteItem: CSItemSheet._onDeleteItem,
       createQuality: CSItemSheet._onCreateQuality,
       deleteQuality: CSItemSheet._onDeleteQuality,
+      effectCreate: CSItemSheet._onEffectCreate,
+      effectEdit: CSItemSheet._onEffectEdit,
+      effectDelete: CSItemSheet._onEffectDelete,
+      effectToggle: CSItemSheet._onEffectToggle,
     },
   };
+
+  // Every item sheet gains a universal "Effects" tab alongside its details
+  // (SC-003 — the tab exists on all 10 item types).
+  static TABS = {
+    primary: {
+      tabs: ["details", "effects"],
+      initial: "details",
+    },
+  };
+
+  /** @override */
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    // Restore the active tab after each re-render (V2 tab system).
+    for (const [group, tab] of Object.entries(this.tabGroups)) {
+      this.changeTab(tab, group, { force: true, updatePosition: false });
+    }
+  }
+
+  /** Tab state for template rendering. */
+  _getTabs() {
+    const tabGroup = this.constructor.TABS.primary;
+    const activeTab = this.tabGroups?.primary ?? tabGroup.initial;
+    return tabGroup.tabs.reduce((tabs, tab) => {
+      tabs[tab] = { active: tab === activeTab };
+      return tabs;
+    }, {});
+  }
 
   /** @override */
   // eslint-disable-next-line no-unused-vars
@@ -65,7 +103,45 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
         })
       : "";
 
+    // Effects tab — pass the item as the viewing doc so its OWN effects show "—"
+    // as source (not the item's own name).
+    context.effects = Array.from(item.effects).map((e) =>
+      buildEffectContext(e, game.user, item)
+    );
+    context.tabs = this._getTabs();
+
     return context;
+  }
+
+  /* -------------------------------------------- */
+
+  /** Action: create a new Active Effect on this item. */
+  // eslint-disable-next-line no-unused-vars
+  static async _onEffectCreate(event, target) {
+    const item = this.document;
+    await item.createEmbeddedDocuments("ActiveEffect", [
+      buildNewEffectData(item, game.user),
+    ]);
+  }
+
+  /** Action: open an effect's config sheet. */
+  static _onEffectEdit(event, target) {
+    const effect = this.document.effects.get(target.dataset.effectId);
+    if (effect) effect.sheet.render(true);
+  }
+
+  /** Action: delete an effect (permission-guarded). */
+  static async _onEffectDelete(event, target) {
+    const effect = this.document.effects.get(target.dataset.effectId);
+    if (effect && canUserModifyEffect(game.user, effect)) await effect.delete();
+  }
+
+  /** Action: toggle an effect's disabled state (permission-guarded). */
+  static async _onEffectToggle(event, target) {
+    const effect = this.document.effects.get(target.dataset.effectId);
+    if (effect && canUserModifyEffect(game.user, effect)) {
+      await effect.update({ disabled: !effect.disabled });
+    }
   }
 
   /* -------------------------------------------- */

@@ -22,6 +22,13 @@ import { CSTechniqueItemSheet } from "../items/sheets/cs-technique-item-sheet.js
 import { migrateData } from "../migrations/migration.js";
 import { CsCombat } from "../combat/cs-combat.js";
 import { CsCombatant } from "../combat/cs-combatant.js";
+import {
+  CSActiveEffect,
+  canUserModifyEffect,
+  effectBlockMessageKey,
+} from "../effects/cs-active-effect.js";
+import { registerEffectConfigEnhancements } from "../effects/cs-active-effect-config.js";
+import { registerEffectConfigSheet } from "../effects/cs-effect-config-sheet.js";
 
 // TypeDataModel classes
 import CharacterData from "../data/actor/character-data.js";
@@ -62,6 +69,12 @@ Hooks.once("init", async function () {
   CONFIG.Item.documentClass = itemConstructor;
   CONFIG.Combat.documentClass = CsCombat;
   CONFIG.Combatant.documentClass = CsCombatant;
+  // ActiveEffect is resolved directly from CONFIG (no Factory Proxy needed —
+  // the core has no isSubclass(documentClass, ActiveEffect) check). The collector
+  // reads `effect.system.changes` directly in CSCharacterActor#applyActiveEffects,
+  // so no `applyActiveEffect` hook is registered (that hook only fires for
+  // `type: "custom"` changes — confirmed against the v14 bundle).
+  CONFIG.ActiveEffect.documentClass = CSActiveEffect;
 
   // Register TypeDataModel schemas
   CONFIG.Actor.dataModels = {
@@ -167,14 +180,50 @@ Hooks.once("init", async function () {
   );
 
   registerSystemSettings();
+  // Cascade authoring sheet (Wave 5) on v14+; the datalist enhancement stays as
+  // the v13 fallback (and is harmless under the custom sheet — no .key input).
+  registerEffectConfigSheet();
+  registerEffectConfigEnhancements();
   await preloadHandlebarsTemplates();
+});
+
+/* -------------------------------------------- */
+/*  Active Effect permission guards (FR-021)    */
+/*  Authoritative data-layer enforcement; the   */
+/*  sheet UI mirrors these as a convenience.    */
+/* -------------------------------------------- */
+
+Hooks.on("preCreateActiveEffect", (effect, data, options, userId) => {
+  const user = game.users?.get(userId);
+  if (!user || user.isGM) return; // GM-authored effects default to origin "item"
+  // Stamp player authorship so the permission rule lets them manage their own.
+  if (!effect.getFlag("chroniclesystem", "origin")) {
+    effect.updateSource({
+      "flags.chroniclesystem.origin": "player",
+      "flags.chroniclesystem.authorId": userId,
+    });
+  }
+});
+
+Hooks.on("preUpdateActiveEffect", (effect, changes, options, userId) => {
+  const user = game.users?.get(userId);
+  if (canUserModifyEffect(user, effect)) return;
+  ui.notifications?.warn(SystemUtils.localize(effectBlockMessageKey(effect)));
+  return false; // cancel
+});
+
+Hooks.on("preDeleteActiveEffect", (effect, options, userId) => {
+  const user = game.users?.get(userId);
+  if (canUserModifyEffect(user, effect)) return;
+  ui.notifications?.warn(SystemUtils.localize(effectBlockMessageKey(effect)));
+  return false; // cancel
 });
 
 Hooks.once("ready", async () => {
   await migrateData();
 });
 
-Hooks.on("createItem", (item, data) => {
+Hooks.on("createItem", (item) => {
   if (!item.isEmbedded) {
     item.img = `systems/chroniclesystem/assets/icons/${item.type}.png`;
   }

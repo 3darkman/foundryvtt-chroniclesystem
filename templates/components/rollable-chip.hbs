@@ -1,0 +1,4 @@
+{{!-- Shared "rollable" dice chip (spec: character sheet redesign). Single source
+      of markup so every roll button across the sheet renders identically —
+      id carries the roll formula string parsed by CSActorSheet._onRollDice. --}}
+<div class="rollable" id="{{id}}" data-action="rollDice"><a>{{label}}</a></div>
