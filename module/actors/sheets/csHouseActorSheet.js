@@ -23,7 +23,11 @@ export class CSHouseActorSheet extends CSActorSheet {
     form: {
       template:
         "systems/chroniclesystem/templates/actors/houses/house-sheet.hbs",
-      scrollable: [""],
+      // `.sheet-body` is the real scroll container; an empty selector targets the
+      // overflow:hidden part-root wrapper, so the scroll would reset to the top on
+      // every re-render. Point it at the actual scroller (same fix as the
+      // character sheet).
+      scrollable: [".sheet-body"],
     },
   };
 

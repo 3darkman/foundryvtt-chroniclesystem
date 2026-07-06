@@ -60,9 +60,9 @@
             {{#each character.owned.armors as |armor index|}}
                 <div class="item weapon cs2-row" data-item-id="{{_id}}" draggable="true" style="display:contents">
                     <div class="cs2-grid-cell armor-label item-edit" data-action="editItem"><a>{{armor.name}}</a></div>
-                    <div class="cs2-grid-cell center mono armor-rating"><a>{{armor.system.rating}}</a></div>
-                    <div class="cs2-grid-cell center mono muted armor-penalty"><a>{{armor.system.penalty}}</a></div>
-                    <div class="cs2-grid-cell center mono muted armor-bulk"><a>{{armor.system.bulk}}</a></div>
+                    <div class="cs2-grid-cell center mono armor-rating">{{armor.system.rating}}</div>
+                    <div class="cs2-grid-cell center mono muted armor-penalty">{{armor.system.penalty}}</div>
+                    <div class="cs2-grid-cell center mono muted armor-bulk">{{armor.system.bulk}}</div>
                     <div class="cs2-grid-cell center muted">{{armor.system.weight}} lb</div>
                     <div class="cs2-grid-cell center muted">{{armor.system.cost}}</div>
                     <div class="cs2-grid-cell cs2-tags">

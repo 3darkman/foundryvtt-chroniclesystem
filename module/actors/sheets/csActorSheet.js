@@ -82,12 +82,30 @@ export class CSActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static PARTS = {};
 
+  // Remembers the `.sheet-body` scroll offset across re-renders. `submitOnChange`
+  // re-renders the whole part on every field edit; the native `scrollable`
+  // part-state sync restores scroll *inside* _replaceHTML — before _onRender
+  // re-activates the tab — and re-activating the tab changes the body height,
+  // which clamps the freshly-restored offset back to 0. So we track it ourselves
+  // and restore it AFTER changeTab, once the active tab is visible and measured.
+  #bodyScrollTop = 0;
+
   /** @override */
   async _onRender(context, options) {
     await super._onRender(context, options);
     // Re-apply active tab state after each render
     for (const [group, tab] of Object.entries(this.tabGroups)) {
       this.changeTab(tab, group, { force: true, updatePosition: false });
+    }
+    // Restore the body scroll now that the active tab is laid out, then keep
+    // tracking it. Setting scrollTop before attaching the listener avoids the
+    // assignment feeding a clamped value straight back into #bodyScrollTop.
+    const body = this.element?.querySelector(".sheet-body");
+    if (body) {
+      body.scrollTop = this.#bodyScrollTop;
+      body.addEventListener("scroll", () => {
+        this.#bodyScrollTop = body.scrollTop;
+      });
     }
   }
 

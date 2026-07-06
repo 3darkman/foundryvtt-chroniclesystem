@@ -555,6 +555,18 @@
   border-color: var(--csv2-primary);
 }
 
+/* The first square (index 0) is the "zero" baseline: clicking it resets the
+   track to 0. The widget marks every square with index <= current value as
+   "checked", so at value 0 the zero-square is checked and reads as a filled
+   point — which confused players. Pin it to the same grey used for read-only
+   values so it never reads as an active point, whatever the current value.
+   Overrides `.square.checked` above via the extra `:first-child` specificity. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .custom-checkbox .square:first-child,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .custom-checkbox .square:first-child.checked {
+  background: var(--csv2-secondary);
+  border-color: var(--csv2-track-border);
+}
+
 /* ----------------------------------------------------------- disposition -- */
 
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list {
@@ -1172,6 +1184,187 @@
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-rich-text {
   padding: 11px 12px;
   font: 400 12.5px/1.6 var(--csv2-font-sans);
+}
+
+/* ----------------------------------------------------- prose-mirror editor -
+   The <prose-mirror button="true"> editor ships with core's generic (dark)
+   chrome that clashes with this light card theme. Restyle ONLY the visual
+   surfaces the design cares about — the edit button, the toolbar, and the
+   reading/editing backgrounds — never structure: core rebuilds the inner nodes
+   on every edit toggle (see HTMLProseMirrorElement), so any structural
+   dependency would be lost. State is read from the host classes core sets:
+   `prose-mirror.inactive` (reading) / `prose-mirror.active` (editing). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror {
+  position: relative;
+  display: block;
+}
+
+/* Reading + editing content share the sheet's ink colour. Reserve room on the
+   right in read mode so wrapped text never runs under the corner edit button. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-content {
+  color: var(--csv2-text);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror.inactive .editor-content {
+  padding-right: 30px;
+}
+
+/* Edit toggle (the pencil) — a compact icon button matching the design's other
+   icon buttons; parked top-right so it never overlaps the text baseline. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror > button.toggle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--csv2-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  color: var(--csv2-muted);
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror > button.toggle:hover {
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+}
+
+/* Core disables the toggle while editing — mute it so it doesn't read active. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror > button.toggle:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Editing mode: give the editor a bordered white box so it reads as a field. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror.active {
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  overflow: hidden;
+}
+
+/* Toolbar (the <menu class="editor-menu">) — a light bar on the card palette.
+   Right padding keeps its controls clear of the corner edit button. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu {
+  background: var(--csv2-secondary);
+  border-bottom: 1px solid var(--csv2-border);
+  color: var(--csv2-text);
+  padding-right: 30px;
+}
+
+/* Core ships the toolbar controls with gold/yellow glyphs; force them to the
+   sheet ink (black) so they read on the light bar, and give them the exact
+   roll-button hover (blue fill, white glyph). Covers the toggle buttons,
+   dropdown triggers, their labels/icons, and any popped-out dropdown list. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu button,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu a,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu i,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu span {
+  color: var(--csv2-dark);
+  text-shadow: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu button:hover,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu a:hover {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu button:hover i,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu button:hover span,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu a:hover i,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-menu a:hover span {
+  color: var(--csv2-on-primary);
+}
+
+/* The editable surface — white background, sheet ink, scroll past a few lines. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .editor-container {
+  background: var(--csv2-bg);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .ProseMirror {
+  min-height: 120px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 8px 10px;
+  background: var(--csv2-bg);
+  color: var(--csv2-text);
+  /* This editable area has its own scrollbar; v13+ core sets `scrollbar-color`
+     directly on scroll containers (which beats ::-webkit-scrollbar in Chromium),
+     so re-assert the design colours here — same fix already used for
+     `.sheet-body` — otherwise it falls back to core's default scrollbar. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 prose-mirror .ProseMirror:focus {
+  outline: none;
+}
+
+/* ------------------------------------------ prose-mirror dropdown submenus -
+   The toolbar dropdowns (Format, Table, …) do NOT open inside .editor-menu:
+   core clones their <ul> into a body-level `<div id="prosemirror-dropdown">`,
+   OUTSIDE the .cs-sheet-v2 subtree. So this block cannot be scoped under the
+   sheet and cannot read the --csv2-* tokens (out of scope) — the literals below
+   mirror those tokens (documented SSOT deviation, unavoidable for a body-level
+   popup). Intentionally NOT qualified by `.theme-*`: the popup inherits the
+   window-frame theme, but this sheet's design is always light, so we force the
+   light look regardless of the user's interface theme (otherwise a dark-frame
+   user gets a dark popup against the light sheet). The popup is a single shared
+   element with no system class, so this harmonizes every prose-mirror dropdown
+   while the Chronicle System is active. `!important` on the essentials beats
+   core's variable-driven theme rules decisively. Item markup per core:
+   <li data-action> + <span> label; current item flagged by a child
+   <i.fa-check>; group separators are <li.divider>. */
+#prosemirror-dropdown {
+  background: #ffffff !important;
+  border: 1px solid #d3d7e0 !important;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(10, 4, 5, 0.18);
+  color: #242021 !important;
+  font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+#prosemirror-dropdown ul {
+  background: #ffffff !important;
+  color: #242021 !important;
+}
+
+#prosemirror-dropdown li[data-action] {
+  color: #242021 !important;
+  padding: 4px 10px;
+}
+
+#prosemirror-dropdown li[data-action] span {
+  color: #242021 !important;
+}
+
+/* Roll-button hover: blue fill, white glyphs. Use the CHILD combinator (> span,
+   > i) so hovering a parent item that owns a nested submenu recolours only its
+   OWN label — a descendant `span` would also whiten every nested item's label
+   (they start invisible on white until hovered), since opening a submenu means
+   its parent is hovered. */
+#prosemirror-dropdown li[data-action]:hover {
+  background: #015ea6 !important;
+  color: #ffffff !important;
+}
+
+#prosemirror-dropdown li[data-action]:hover > span,
+#prosemirror-dropdown li[data-action]:hover > i {
+  color: #ffffff !important;
+}
+
+#prosemirror-dropdown li.divider {
+  border-top: 1px solid #eef0f4 !important;
+}
+
+/* The current selection is marked by a check glyph — tint it the sheet blue. */
+#prosemirror-dropdown li > i.fa-check {
+  color: #015ea6 !important;
 }
 
 /* ------------------------------------------------------------ effects tab - */

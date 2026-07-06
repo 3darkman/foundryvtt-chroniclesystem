@@ -44,7 +44,12 @@ export class CSCharacterActorSheet extends CSActorSheet {
     form: {
       template:
         "systems/chroniclesystem/templates/actors/characters/character-sheet.hbs",
-      scrollable: [""],
+      // The scroll container is `.sheet-body` (the only overflow-y:auto element),
+      // a descendant of the part. An empty selector targets the part root — the
+      // `[data-application-part]` wrapper, which is overflow:hidden — so its
+      // scrollTop is always 0 and nothing gets restored, resetting the scroll to
+      // the top on every submitOnChange re-render. Point it at the real scroller.
+      scrollable: [".sheet-body"],
     },
   };
 
