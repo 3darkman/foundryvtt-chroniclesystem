@@ -1,4 +1,4 @@
-import { itemDescriptionFields } from "../fields.js";
+import { itemDescriptionFields, normalizeSlugSource } from "../fields.js";
 
 const fields = foundry.data.fields;
 
@@ -18,5 +18,10 @@ export default class AbilityData extends foundry.abstract.TypeDataModel {
       }),
       specialties: new fields.ArrayField(new fields.ObjectField()),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

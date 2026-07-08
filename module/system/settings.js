@@ -71,6 +71,19 @@ const registerSystemSettings = () => {
     }
   );
 
+  // Actionable post-migration review list (spec 008, FR-014): core items whose
+  // derived slug isn't canonical. Persisted across sessions; not user-facing.
+  game.settings.register(
+    CSConstants.Settings.SYSTEM_NAME,
+    CSConstants.Settings.SLUG_REVIEW,
+    {
+      scope: "world",
+      config: false,
+      type: Array,
+      default: [],
+    }
+  );
+
   game.settings.register(
     CSConstants.Settings.SYSTEM_NAME,
     CSConstants.Settings.MODIFIER_DIALOG_AS_DEFAULT,

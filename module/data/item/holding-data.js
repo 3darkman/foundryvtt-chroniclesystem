@@ -1,8 +1,11 @@
+import { identityField, normalizeSlugSource } from "../fields.js";
+
 const fields = foundry.data.fields;
 
 export default class HoldingData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
+      ...identityField(),
       description: new fields.StringField({ required: true, initial: "" }),
       investment: new fields.NumberField({
         required: true,
@@ -19,5 +22,10 @@ export default class HoldingData extends foundry.abstract.TypeDataModel {
         integer: true,
       }),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

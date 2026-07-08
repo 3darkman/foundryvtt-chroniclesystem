@@ -4,6 +4,8 @@ import LOGGER from "../utils/logger.js";
 import { CSRoll } from "../rolls/cs-roll.js";
 import { CSConstants } from "./csConstants.js";
 import SystemUtils from "../utils/systemUtils.js";
+import { slugify } from "../effects/cs-slugify.js";
+import { scopedSpecialtySlug } from "../vocabulary/cs-canonical-abilities.js";
 
 export const ChronicleSystem = {};
 
@@ -267,30 +269,46 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
   console.assert(abilityName, "ability name is invalid!");
   let ability;
   let specialty;
+  // Resolve by display NAME first (roll buttons carry the current name), then
+  // fall back to the STABLE slug (initiative constants and renamed abilities
+  // pass a slug). The slug resolvers are optional-chained so the pure-logic test
+  // doubles (which omit them) keep the legacy name-only resolution.
   if (specialtyName === null) {
     [ability, specialty] = actor.getAbility(abilityName);
+    if (!ability && actor.getAbilityBySlug)
+      [ability, specialty] = actor.getAbilityBySlug(abilityName);
   } else {
     [ability, specialty] = actor.getAbilityBySpecialty(
       abilityName,
       specialtyName
     );
+    if (ability === undefined && actor.getAbilityBySpecialtySlug)
+      [ability, specialty] = actor.getAbilityBySpecialtySlug(specialtyName);
     if (ability === undefined) {
       [ability, specialty] = actor.getAbility(abilityName);
+      if (!ability && actor.getAbilityBySlug)
+        [ability, specialty] = actor.getAbilityBySlug(abilityName);
     }
   }
   let specValue = 0;
   let specModifier = 0;
-  if (specialty !== undefined) {
+  if (specialty !== undefined && specialty !== null) {
     specValue = specialty.rating ? specialty.rating : 0;
     specModifier = specialty.modifier ? specialty.modifier : 0;
   }
 
   // Sum an effect channel across the targeted ability (including the global ALL
   // bucket) and the targeted specialty (excluding ALL, to avoid double-counting
-  // it). The new-channel getters are optional-chained so non-character actors
-  // (and the test doubles) simply contribute 0.
-  const abilityKey = (ability ? ability.name : abilityName).toLowerCase();
-  const specialtyKey = specialty?.name ? specialty.name.toLowerCase() : null;
+  // it). Buffers are keyed by STABLE SLUG (spec 008) — the same identity the
+  // fixed sources (armour/conditions) and authored effects push by — so the
+  // math survives a rename to any language. The new-channel getters are
+  // optional-chained so non-character actors (and the doubles) contribute 0.
+  const abilityData = ability?.getCSData?.() ?? ability?.system;
+  const abilityKey = abilityData?.slug || slugify(ability?.name ?? abilityName);
+  const specialtyKey =
+    specialty != null
+      ? specialty.slug || scopedSpecialtySlug(abilityKey, specialty.name)
+      : null;
   const channelTotal = (getter) => {
     const fromAbility = actor[getter]?.(abilityKey, false, true)?.total ?? 0;
     const fromSpecialty = specialtyKey

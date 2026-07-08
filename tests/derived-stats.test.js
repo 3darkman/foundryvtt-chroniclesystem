@@ -76,6 +76,49 @@ describe("derived stats — i18n constant trap (localize reads en.json)", () => 
   });
 });
 
+describe("derived stats — slug parity across mixed languages (E1, spec 008)", () => {
+  it("3.12 resolves each ability by stable slug even when some are renamed", () => {
+    // A sheet with one ability renamed (Agilidade, slug agility) and the rest in
+    // English resolves every ability by slug → the same numbers as all-English.
+    const mixed = makeFakeActor({
+      abilities: [
+        makeAbilityItem("Awareness", 2),
+        makeAbilityItem("Agilidade", 3, { slug: "agility" }), // renamed
+        makeAbilityItem("Athletics", 4),
+        makeAbilityItem("Endurance", 5),
+        makeAbilityItem("Will", 6),
+        makeAbilityItem("Cunning", 1, { slug: "cunning" }),
+        makeAbilityItem("Estado", 2, { slug: "status" }), // renamed
+      ],
+    });
+    // Combat Defense = Awareness + Agility + Athletics = 2 + 3 + 4 = 9.
+    expect(proto.calcCombatDefense.call(mixed)).toBe(9);
+    // Intrigue Defense = Awareness + Cunning + Status = 2 + 1 + 2 = 5.
+    expect(proto.calcIntrigueDefense.call(mixed)).toBe(5);
+    proto.calculateDerivedValues.call(mixed);
+    const stats = mixed.getCSData().derivedStats;
+    expect(stats.health.value).toBe(15); // Endurance 5 × 3
+    expect(stats.composure.value).toBe(18); // Will 6 × 3
+  });
+
+  it("3.13 a renamed Athletics keeps its Run specialty movement bonus", () => {
+    // Movement runBonus reads Athletics:Run by scoped slug (athletics_run).
+    const actor = makeFakeActor({
+      abilities: [
+        makeAbilityItem("Atletismo", 3, {
+          slug: "athletics",
+          specialties: {
+            run: { name: "Corrida", slug: "athletics_run", rating: 4 },
+          },
+        }),
+      ],
+      data: { movement: { sprintMultiplier: 4, modifier: 0 } },
+    });
+    proto.calculateMovementData.call(actor);
+    expect(actor.getCSData().movement.runBonus).toBe(2); // floor(4 / 2)
+  });
+});
+
 describe("derived stats — movement (runBonus & bulk are DERIVED)", () => {
   it("3.8 / 3.9 total = max(base + runBonus − bulk + modifier, 1); sprint = total × mult − bulk", () => {
     // Athletics with a `run` specialty rating 4 → runBonus = floor(4/2) = 2.

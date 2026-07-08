@@ -84,7 +84,8 @@ describe("collectOptionalRollEffects (dialog-toggled effects)", () => {
     });
     const eff = fakeEffect({
       id: "ax",
-      changes: [{ key: "cs.bonusdice.specialty.axes", value: "1" }],
+      // Specialty slugs are SCOPED by their ability (spec 008, Decision 4).
+      changes: [{ key: "cs.bonusdice.specialty.fighting_axes", value: "1" }],
     });
     const actor = fakeActor([eff], [fighting]);
 

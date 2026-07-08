@@ -2,6 +2,7 @@ import {
   itemDescriptionFields,
   physicalItemFields,
   equipmentItemFields,
+  normalizeSlugSource,
 } from "../fields.js";
 
 const fields = foundry.data.fields;
@@ -27,5 +28,10 @@ export default class WeaponData extends foundry.abstract.TypeDataModel {
         integer: true,
       }),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

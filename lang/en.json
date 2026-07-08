@@ -198,7 +198,14 @@
         "treacherous": "Treacherous",
         "vulnerable_to_wet": "Vulnerable to Wet",
         "wheel_lock": "Wheel-Lock"
-      }
+      },
+      "groups": {
+        "abilities": "Abilities",
+        "specialties": "Specialties",
+        "custom": "Custom",
+        "world": "In this world"
+      },
+      "customTarget": "Custom (type a slug)…"
     },
     "sheets": {
       "characterSheet": "Character Sheet",
@@ -367,6 +374,158 @@
         "stress": "Stress",
         "fatigue": "Fatigue"
       }
+    },
+    "abilities": {
+      "agility": "Agility",
+      "animal_handling": "Animal Handling",
+      "athletics": "Athletics",
+      "awareness": "Awareness",
+      "cunning": "Cunning",
+      "deception": "Deception",
+      "endurance": "Endurance",
+      "fighting": "Fighting",
+      "healing": "Healing",
+      "knowledge": "Knowledge",
+      "language": "Language",
+      "marksmanship": "Marksmanship",
+      "persuasion": "Persuasion",
+      "status": "Status",
+      "stealth": "Stealth",
+      "survival": "Survival",
+      "thievery": "Thievery",
+      "warfare": "Warfare",
+      "will": "Will"
+    },
+    "specialties": {
+      "agility": {
+        "acrobatics": "Acrobatics",
+        "balance": "Balance",
+        "contortions": "Contortions",
+        "dodge": "Dodge",
+        "quickness": "Quickness"
+      },
+      "animal_handling": {
+        "charm": "Charm",
+        "drive": "Drive",
+        "ride": "Ride",
+        "train": "Train"
+      },
+      "athletics": {
+        "climb": "Climb",
+        "jump": "Jump",
+        "run": "Run",
+        "strength": "Strength",
+        "swim": "Swim",
+        "throw": "Throw"
+      },
+      "awareness": {
+        "empathy": "Empathy",
+        "notice": "Notice"
+      },
+      "cunning": {
+        "decipher": "Decipher",
+        "logic": "Logic",
+        "memory": "Memory"
+      },
+      "deception": {
+        "act": "Act",
+        "bluff": "Bluff",
+        "cheat": "Cheat",
+        "disguise": "Disguise"
+      },
+      "endurance": {
+        "resilience": "Resilience",
+        "stamina": "Stamina"
+      },
+      "fighting": {
+        "axes": "Axes",
+        "bludgeons": "Bludgeons",
+        "brawling": "Brawling",
+        "fencing": "Fencing",
+        "long_blades": "Long Blades",
+        "pole_arms": "Pole-Arms",
+        "shields": "Shields",
+        "short_blades": "Short Blades",
+        "spears": "Spears"
+      },
+      "healing": {
+        "diagnose": "Diagnose",
+        "treat_ailment": "Treat Ailment",
+        "treat_injury": "Treat Injury"
+      },
+      "knowledge": {
+        "education": "Education",
+        "research": "Research",
+        "streetwise": "Streetwise"
+      },
+      "language": {
+        "eloquence": "Eloquence",
+        "literacy": "Literacy"
+      },
+      "marksmanship": {
+        "bows": "Bows",
+        "crossbows": "Crossbows",
+        "longarms": "Longarms",
+        "siege": "Siege",
+        "thrown": "Thrown"
+      },
+      "persuasion": {
+        "bargain": "Bargain",
+        "charm": "Charm",
+        "convince": "Convince",
+        "incite": "Incite",
+        "intimidate": "Intimidate",
+        "seduce": "Seduce",
+        "taunt": "Taunt"
+      },
+      "status": {
+        "breeding": "Breeding",
+        "reputation": "Reputation",
+        "stewardship": "Stewardship",
+        "tournaments": "Tournaments"
+      },
+      "stealth": {
+        "blend_in": "Blend In",
+        "sneak": "Sneak"
+      },
+      "survival": {
+        "forage": "Forage",
+        "hunt": "Hunt",
+        "orientation": "Orientation",
+        "track": "Track"
+      },
+      "thievery": {
+        "pick_lock": "Pick Lock",
+        "sleight_of_hand": "Sleight of Hand",
+        "steal": "Steal"
+      },
+      "warfare": {
+        "cannon": "Cannon",
+        "command": "Command",
+        "strategy": "Strategy",
+        "tactics": "Tactics"
+      },
+      "will": {
+        "concentrate": "Concentrate",
+        "coordinate": "Coordinate",
+        "courage": "Courage",
+        "dedication": "Dedication"
+      }
+    },
+    "slug": {
+      "label": "Slug (stable identity)",
+      "hint": "Stable identity, independent of the display name. Lowercase, words joined by _ , no accents (e.g. agility). Leave blank to derive it automatically from the name."
+    },
+    "warnings": {
+      "slugCollision": "The slug \"{slug}\" is already used by another entry in the same scope. It was saved anyway — rename it to keep each identity unique."
+    },
+    "migration": {
+      "slugReview": "Chronicle System: one or more core abilities appear to have been renamed and no longer match their canonical identity, so armour/condition/effect routing may miss them. Open the review to correct their slug (nothing was changed automatically).",
+      "slugReviewTitle": "Slug review — core abilities to check",
+      "slugReviewIntro": "Some canonical core abilities are missing — their slug drifted off-canon, most likely from a rename. The abilities below are the candidates: click a row to open its sheet and set the correct canonical slug (e.g. agility). Nothing was rewritten automatically.",
+      "slugReviewColName": "Item",
+      "slugReviewColSlug": "Derived slug",
+      "slugReviewClose": "Close"
     }
   }
 }

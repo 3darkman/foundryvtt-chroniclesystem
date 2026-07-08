@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import CharacterData from "../module/data/actor/character-data.js";
 import HouseData from "../module/data/actor/house-data.js";
+import { deriveWorldSlugs } from "../module/migrations/task090-slug-identity.js";
+import { CANONICAL_ABILITIES } from "../module/vocabulary/cs-canonical-abilities.js";
 import {
   makeLegacyCharacter,
   makeValidCharacter,
@@ -127,5 +129,124 @@ describe("HouseData.migrateData — members head/steward", () => {
     const once = HouseData.migrateData(makeLegacyHouse());
     const twice = HouseData.migrateData(structuredClone(once));
     expect(twice).toEqual(once);
+  });
+});
+
+// Spec 008 / US3 — the 0.9.0 world slug backfill (pure `deriveWorldSlugs`).
+// Non-destructive (blank-only), idempotent, and flags renamed CORE items for
+// review WITHOUT silently rewriting to a canonical slug (FR-014). Quickstart §A.6.
+describe("deriveWorldSlugs — spec 008 backfill", () => {
+  const items = () => [
+    { _id: "a1", uuid: "Item.a1", name: "Agility", type: "ability", system: { specialties: [] } },
+    { _id: "a2", uuid: "Item.a2", name: "Agilidade", type: "ability", system: { specialties: [] } },
+    { _id: "l1", uuid: "Item.l1", name: "Language (High Valyrian)", type: "ability", system: { specialties: [] } },
+    { _id: "w1", uuid: "Item.w1", name: "Longsword", type: "weapon", system: {} },
+  ];
+
+  it("backfills a blank slug from the name (every item type — FR-011)", () => {
+    const { updates } = deriveWorldSlugs(items());
+    expect(updates.find((u) => u._id === "a1")["system.slug"]).toBe("agility");
+    expect(updates.find((u) => u._id === "w1")["system.slug"]).toBe("longsword");
+  });
+
+  it("is idempotent — applying then re-deriving yields no updates (FR-008)", () => {
+    const first = deriveWorldSlugs(items());
+    const applied = items().map((it) => {
+      const u = first.updates.find((x) => x._id === it._id);
+      if (!u) return it;
+      const system = { ...it.system, slug: u["system.slug"] };
+      if (u["system.specialties"]) system.specialties = u["system.specialties"];
+      return { ...it, system };
+    });
+    expect(deriveWorldSlugs(applied).updates).toEqual([]);
+  });
+
+  it("flags a renamed CORE ability in review, but NOT an English one (FR-014)", () => {
+    // The fixture is missing most canonical abilities, so the review is active
+    // and lists the non-canonical (renamed) ability, never the English one.
+    const { review } = deriveWorldSlugs(items());
+    const abilityNames = review
+      .filter((r) => r.kind === "ability")
+      .map((r) => r.name);
+    expect(abilityNames).toContain("Agilidade");
+    expect(abilityNames).not.toContain("Agility");
+    expect(review.find((r) => r.name === "Agilidade")).toMatchObject({
+      uuid: "Item.a2",
+      derivedSlug: "agilidade",
+      kind: "ability",
+    });
+  });
+
+  it("does NOT alert for homebrew when every canonical ability is present", () => {
+    // The user's case: a world with all 19 canonical abilities + custom content
+    // must NOT raise the review — homebrew never removes a canonical slug.
+    const canonical = CANONICAL_ABILITIES.map((a, i) => ({
+      _id: `c${i}`,
+      uuid: `Item.c${i}`,
+      name: a.slug,
+      type: "ability",
+      system: { slug: a.slug, specialties: [] },
+    }));
+    const homebrew = {
+      _id: "fe",
+      uuid: "Item.fe",
+      name: "Fé",
+      type: "ability",
+      system: { specialties: [] },
+    };
+    const { review, updates } = deriveWorldSlugs([...canonical, homebrew]);
+    expect(review).toEqual([]); // all canonical present → no alert
+    // …but the homebrew slug is still backfilled (FR-011).
+    expect(updates.find((u) => u.uuid === "Item.fe")["system.slug"]).toBe("fe");
+  });
+
+  it("does NOT flag a custom specialty on a canonical ability (no specialty review)", () => {
+    // Add all canonical abilities so the world isn't 'missing' any, plus a
+    // canonical ability carrying a homebrew specialty → still silent.
+    const canonical = CANONICAL_ABILITIES.map((a, i) => ({
+      _id: `c${i}`,
+      uuid: `Item.c${i}`,
+      name: a.slug,
+      type: "ability",
+      system: {
+        slug: a.slug,
+        specialties:
+          a.slug === "persuasion" ? [{ name: "Smooth Talk", rating: 2 }] : [],
+      },
+    }));
+    const { review } = deriveWorldSlugs(canonical);
+    expect(review).toEqual([]);
+  });
+
+  it("does NOT flag a Language variant (parameterized identity, Decision 5)", () => {
+    const { review } = deriveWorldSlugs(items());
+    expect(review.some((r) => String(r.name).startsWith("Language"))).toBe(false);
+  });
+
+  it("G2 — an accented rename keeps its slugify'd slug, no silent canonical rewrite", () => {
+    const { updates, review } = deriveWorldSlugs([
+      { _id: "aw", uuid: "Item.aw", name: "Percepção", type: "ability", system: { specialties: [] } },
+    ]);
+    expect(updates[0]["system.slug"]).toBe("percepcao"); // NOT "awareness"
+    expect(review).toContainEqual({
+      uuid: "Item.aw",
+      name: "Percepção",
+      derivedSlug: "percepcao",
+      kind: "ability",
+    });
+  });
+
+  it("scopes and backfills blank specialty slugs on a canonical ability", () => {
+    const { updates, review } = deriveWorldSlugs([
+      {
+        _id: "p",
+        uuid: "Item.p",
+        name: "Persuasion",
+        type: "ability",
+        system: { specialties: [{ name: "Charm", rating: 2 }] },
+      },
+    ]);
+    expect(updates[0]["system.specialties"][0].slug).toBe("persuasion_charm");
+    expect(review).toEqual([]); // canonical ability + canonical specialty
   });
 });

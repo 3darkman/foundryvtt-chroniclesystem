@@ -69,8 +69,22 @@
       </div>
       <div class="cs-field cs-roll-slug" style="{{#unless change.showRollSlug}}display:none{{/unless}}">
         <label>{{localize "CS.effects.authoring.slug"}}</label>
-        <input type="text" name="changes.{{change.index}}.rollSlug" value="{{change.rollSlug}}"
-          list="cs-roll-slugs" placeholder="{{localize 'CS.effects.authoring.slugPlaceholder'}}" />
+        <select name="changes.{{change.index}}.rollSlug" class="cs-roll-slug-select">
+          {{#each change.rollSlugGroups as |group|}}
+          <optgroup label="{{group.label}}">
+            {{#each group.options as |opt|}}
+            <option value="{{opt.value}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
+            {{/each}}
+          </optgroup>
+          {{/each}}
+          <option value="{{@root.rollSlugCustomValue}}" {{#if change.rollSlugCustomSelected}}selected{{/if}}>
+            {{localize "CS.effects.customTarget"}}
+          </option>
+        </select>
+      </div>
+      <div class="cs-field cs-roll-slug-custom" style="{{#unless change.showRollSlugCustom}}display:none{{/unless}}">
+        <input type="text" name="changes.{{change.index}}.rollSlugCustom" value="{{change.rollSlugCustom}}"
+          placeholder="{{localize 'CS.effects.authoring.slugPlaceholder'}}" />
       </div>
 
       {{!-- TARGET: derived stat --}}

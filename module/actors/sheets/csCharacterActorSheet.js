@@ -254,63 +254,57 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   _calculateIntrigueTechniques(data, actor) {
-    let cunningValue = actor.getAbilityValue(
-      SystemUtils.localize(ChronicleSystem.keyConstants.CUNNING)
-    );
-    let willValue = actor.getAbilityValue(
-      SystemUtils.localize(ChronicleSystem.keyConstants.WILL)
-    );
-    let persuasionValue = actor.getAbilityValue(
-      SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION)
-    );
-    let awarenessValue = actor.getAbilityValue(
-      SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS)
-    );
+    // Resolve intrigue inputs by STABLE SLUG (spec 008) so the panel survives a
+    // rename to any language. keyConstants stays only as the display LABEL below.
+    let cunningValue = actor.getAbilityValueBySlug("cunning");
+    let willValue = actor.getAbilityValueBySlug("will");
+    let persuasionValue = actor.getAbilityValueBySlug("persuasion");
+    let awarenessValue = actor.getAbilityValueBySlug("awareness");
 
     let bluffFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
-      SystemUtils.localize(ChronicleSystem.keyConstants.DECEPTION),
-      SystemUtils.localize(ChronicleSystem.keyConstants.BLUFF)
+      "deception",
+      "deception_bluff"
     );
     let actFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
-      SystemUtils.localize(ChronicleSystem.keyConstants.DECEPTION),
-      SystemUtils.localize(ChronicleSystem.keyConstants.ACT)
+      "deception",
+      "deception_act"
     );
     let bargainFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
-      SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION),
-      SystemUtils.localize(ChronicleSystem.keyConstants.BARGAIN)
+      "persuasion",
+      "persuasion_bargain"
     );
     let charmFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
-      SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION),
-      SystemUtils.localize(ChronicleSystem.keyConstants.CHARM)
+      "persuasion",
+      "persuasion_charm"
     );
     let convinceFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
-      SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION),
-      SystemUtils.localize(ChronicleSystem.keyConstants.CONVINCE)
+      "persuasion",
+      "persuasion_convince"
     );
     let inciteFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
-      SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION),
-      SystemUtils.localize(ChronicleSystem.keyConstants.INCITE)
+      "persuasion",
+      "persuasion_incite"
     );
     let intimidateFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
-      SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION),
-      SystemUtils.localize(ChronicleSystem.keyConstants.INTIMIDATE)
+      "persuasion",
+      "persuasion_intimidate"
     );
     let seduceFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
-      SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION),
-      SystemUtils.localize(ChronicleSystem.keyConstants.SEDUCE)
+      "persuasion",
+      "persuasion_seduce"
     );
     let tauntFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
-      SystemUtils.localize(ChronicleSystem.keyConstants.PERSUASION),
-      SystemUtils.localize(ChronicleSystem.keyConstants.TAUNT)
+      "persuasion",
+      "persuasion_taunt"
     );
 
     let intimidateDeceptionFormula =

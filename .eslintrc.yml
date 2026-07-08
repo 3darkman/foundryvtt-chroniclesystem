@@ -24,6 +24,7 @@ globals:
   Dialog: readonly
   Hooks: readonly
   Handlebars: readonly
+  fromUuid: readonly
   Combat: readonly
   Combatant: readonly
   renderTemplate: readonly

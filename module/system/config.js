@@ -20,6 +20,7 @@ import { CSEventItemSheet } from "../items/sheets/csEventItemSheet.js";
 import { CSHoldingItemSheet } from "../items/sheets/csHoldingItemSheet.js";
 import { CSTechniqueItemSheet } from "../items/sheets/cs-technique-item-sheet.js";
 import { migrateData } from "../migrations/migration.js";
+import { showSlugReviewAlert } from "../migrations/slug-review-alert.js";
 import { CsCombat } from "../combat/cs-combat.js";
 import { CsCombatant } from "../combat/cs-combatant.js";
 import {
@@ -29,6 +30,7 @@ import {
 } from "../effects/cs-active-effect.js";
 import { registerEffectConfigEnhancements } from "../effects/cs-active-effect-config.js";
 import { registerEffectConfigSheet } from "../effects/cs-effect-config-sheet.js";
+import { registerSlugLifecycleHooks } from "../data/slug-lifecycle.js";
 
 // TypeDataModel classes
 import CharacterData from "../data/actor/character-data.js";
@@ -184,6 +186,8 @@ Hooks.once("init", async function () {
   // the v13 fallback (and is harmless under the custom sheet — no .key input).
   registerEffectConfigSheet();
   registerEffectConfigEnhancements();
+  // Derive the stable slug from the name on item create/rename (spec 008, US2).
+  registerSlugLifecycleHooks();
   await preloadHandlebarsTemplates();
 });
 
@@ -221,6 +225,8 @@ Hooks.on("preDeleteActiveEffect", (effect, options, userId) => {
 
 Hooks.once("ready", async () => {
   await migrateData();
+  // spec 008 (FR-014): surface the actionable slug-review list, if any.
+  showSlugReviewAlert();
 });
 
 Hooks.on("createItem", (item) => {

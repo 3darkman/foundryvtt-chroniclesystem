@@ -1,4 +1,8 @@
-import { itemDescriptionFields, physicalItemFields } from "../fields.js";
+import {
+  itemDescriptionFields,
+  physicalItemFields,
+  normalizeSlugSource,
+} from "../fields.js";
 
 const fields = foundry.data.fields;
 
@@ -29,5 +33,10 @@ export default class ArmorData extends foundry.abstract.TypeDataModel {
         integer: true,
       }),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

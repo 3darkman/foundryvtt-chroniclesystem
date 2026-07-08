@@ -1,3 +1,5 @@
+import { identityField, normalizeSlugSource } from "../fields.js";
+
 const fields = foundry.data.fields;
 
 export default class UnitTypeData extends foundry.abstract.TypeDataModel {
@@ -31,6 +33,7 @@ export default class UnitTypeData extends foundry.abstract.TypeDataModel {
       });
 
     return {
+      ...identityField(),
       description: new fields.StringField({ required: true, initial: "" }),
       powerCost: new fields.NumberField({
         required: true,
@@ -69,5 +72,10 @@ export default class UnitTypeData extends foundry.abstract.TypeDataModel {
       startingEquipment: equipmentField(),
       upgradedEquipment: equipmentField(),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

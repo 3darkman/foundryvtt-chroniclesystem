@@ -59,12 +59,15 @@ const defaultActorData = () => ({
 export function makeAbilityItem(
   name,
   rating,
-  { modifier = 0, specialties = {} } = {}
+  { modifier = 0, specialties = {}, slug } = {}
 ) {
+  const data = { rating, modifier, specialties };
+  if (slug !== undefined) data.slug = slug; // spec 008: stable identity
   return {
     name,
     type: "ability",
-    getCSData: () => ({ rating, modifier, specialties }),
+    system: data,
+    getCSData: () => data,
   };
 }
 
@@ -82,6 +85,10 @@ export function makeFakeActor({ abilities = [], data, modifiers = {} } = {}) {
     getAbility: proto.getAbility,
     getAbilityValue: proto.getAbilityValue,
     getAbilityBySpecialty: proto.getAbilityBySpecialty, // required by calculateMovementData
+    // spec 008: the derived stats / movement now resolve by stable slug.
+    getAbilityBySlug: proto.getAbilityBySlug,
+    getAbilityValueBySlug: proto.getAbilityValueBySlug,
+    getAbilityBySpecialtySlug: proto.getAbilityBySpecialtySlug,
     // calculateDerivedValues computes combat/intrigue defense too, calling these:
     calcCombatDefense: proto.calcCombatDefense,
     calcIntrigueDefense: proto.calcIntrigueDefense,

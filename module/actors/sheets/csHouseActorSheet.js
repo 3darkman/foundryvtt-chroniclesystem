@@ -152,10 +152,11 @@ export class CSHouseActorSheet extends CSActorSheet {
         : "";
 
     const steward = game.actors.get(house.steward.id);
+    // Resolve Status:Stewardship by stable slug (spec 008) — survives a rename.
     let stewardshipFormula = ChronicleSystem.getActorAbilityFormula(
       steward,
-      SystemUtils.localize(ChronicleSystem.keyConstants.STATUS),
-      SystemUtils.localize(ChronicleSystem.keyConstants.STEWARDSHIP)
+      "status",
+      "status_stewardship"
     );
     stewardshipFormula.pool += house.fortune.holdingsDice;
     stewardshipFormula.modifier =

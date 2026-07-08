@@ -29,6 +29,18 @@ import {
   buildValueString,
   VALUE_FORMS,
 } from "./cs-effect-value.js";
+import {
+  isCanonicalAbilitySlug,
+  isCanonicalSpecialtySlug,
+} from "../vocabulary/cs-canonical-abilities.js";
+
+/** Sentinel `rollSlug` for the free-text "Custom…" option (homebrew slugs). */
+export const ROLL_SLUG_CUSTOM = "__custom__";
+
+/** True when a slug is offered by the canonical roll-target dropdown. */
+function isCanonicalRollSlug(slug) {
+  return isCanonicalAbilitySlug(slug) || isCanonicalSpecialtySlug(slug);
+}
 
 /* --- choice maps (value → i18n key); consumed by the {{selectOptions}} helper --- */
 
@@ -104,6 +116,11 @@ function withRowFlags(row) {
       isRoll &&
       (row.rollTargetKind === TARGET_KINDS.ABILITY ||
         row.rollTargetKind === TARGET_KINDS.SPECIALTY),
+    showRollSlugCustom:
+      isRoll &&
+      (row.rollTargetKind === TARGET_KINDS.ABILITY ||
+        row.rollTargetKind === TARGET_KINDS.SPECIALTY) &&
+      row.rollSlug === ROLL_SLUG_CUSTOM,
     showWeaponSlug:
       isWeapon && row.weaponTargetKind === TARGET_KINDS.WEAPON_TYPE,
     valueIsFixed: !isQuality && row.valueMode === "fixed",
@@ -155,6 +172,7 @@ export function parseChangeRow(change, index) {
     channel,
     rollTargetKind: TARGET_KINDS.ALL,
     rollSlug: "",
+    rollSlugCustom: "",
     statTarget: DERIVED_STATS.COMBAT_DEFENSE,
     weaponTargetKind: TARGET_KINDS.WEAPON_ALL,
     weaponSlug: "",
@@ -169,7 +187,16 @@ export function parseChangeRow(change, index) {
 
   if (isRollChannel(channel)) {
     row.rollTargetKind = parsed?.targetKind ?? TARGET_KINDS.ALL;
-    row.rollSlug = parsed?.target ?? "";
+    const target = parsed?.target ?? "";
+    // A canonical slug preselects the dropdown; anything else falls to "Custom…"
+    // with the raw slug in the free-text field (homebrew, FR-005).
+    if (target && isCanonicalRollSlug(target)) {
+      row.rollSlug = target;
+      row.rollSlugCustom = "";
+    } else {
+      row.rollSlug = target ? ROLL_SLUG_CUSTOM : "";
+      row.rollSlugCustom = target;
+    }
   } else if (channel === EFFECT_CHANNELS.DERIVED_STAT) {
     row.statTarget = parsed?.target ?? DERIVED_STATS.COMBAT_DEFENSE;
   } else if (isWeaponChannel(channel)) {
@@ -218,8 +245,10 @@ export function buildChangeFromRow(row) {
   let key = "";
   if (isRollChannel(channel)) {
     const targetKind = row.rollTargetKind || TARGET_KINDS.ALL;
-    const target =
-      targetKind === TARGET_KINDS.ALL ? null : slugify(row.rollSlug);
+    // The dropdown value is a canonical slug; "Custom…" defers to the free text.
+    const rawSlug =
+      row.rollSlug === ROLL_SLUG_CUSTOM ? row.rollSlugCustom : row.rollSlug;
+    const target = targetKind === TARGET_KINDS.ALL ? null : slugify(rawSlug);
     key = buildEffectKey({ channel, targetKind, target });
   } else if (channel === EFFECT_CHANNELS.DERIVED_STAT) {
     key = buildEffectKey({
