@@ -3,6 +3,7 @@ export const preloadHandlebarsTemplates = async function () {
     "systems/chroniclesystem/templates/items/partials/header.hbs",
     "systems/chroniclesystem/templates/items/partials/header-delete.hbs",
     "systems/chroniclesystem/templates/items/partials/description.hbs",
+    "systems/chroniclesystem/templates/items/partials/slug-field.hbs",
     "systems/chroniclesystem/templates/items/partials/physical-item.hbs",
     "systems/chroniclesystem/templates/items/partials/equipment-item.hbs",
 

@@ -65,6 +65,16 @@
                                 data-dtype="String"
                         />
                         <!--suppress HtmlFormInputWithoutLabel -->
+                        <input
+                                class="small-field"
+                                type="text"
+                                name="system.specialties.{{id}}.slug"
+                                value="{{specialty.slug}}"
+                                placeholder="{{localize 'CS.slug.label'}}"
+                                title="{{localize 'CS.slug.hint'}}"
+                                data-dtype="String"
+                        />
+                        <!--suppress HtmlFormInputWithoutLabel -->
                         {{#if ../item.isOwned}}
                         <input
                                 class="small-field"

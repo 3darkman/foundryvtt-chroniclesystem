@@ -1,0 +1,17 @@
+{{!-- Stable identity (slug) field, shared by every item sheet (spec 008,
+      FR-011/FR-005). Leave blank to auto-derive from the name on save. --}}
+<div class="form-group cs-slug-field">
+    <label for="system.slug">{{localize "CS.slug.label"}}:</label>
+    <span class="form-fields">
+        <input
+                id="system.slug"
+                class="big-field"
+                type="text"
+                name="system.slug"
+                value="{{item.system.slug}}"
+                placeholder="{{localize 'CS.slug.hint'}}"
+                data-dtype="String"
+        />
+    </span>
+    <p class="hint">{{localize "CS.slug.hint"}}</p>
+</div>
