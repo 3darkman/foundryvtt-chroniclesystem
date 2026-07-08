@@ -37,29 +37,89 @@ import {
   VALUE_MODE_CHOICES,
   DERIVED_FORM_CHOICES,
   QUALITY_OTHER,
+  ROLL_SLUG_CUSTOM,
   parseChangeRow,
   buildChangeFromRow,
 } from "./cs-effect-row-model.js";
 import { readChanges, foundryGeneration } from "./cs-effect-compat.js";
 import { canUserModifyEffect } from "./cs-active-effect.js";
+import {
+  CANONICAL_ABILITIES,
+  ABILITY_SLUGS,
+  SPECIALTY_SLUGS,
+  scopedSpecialtySlug,
+} from "../vocabulary/cs-canonical-abilities.js";
 
-/** Slug suggestions (datalist) — world items; free text is always allowed. */
+/**
+ * Grouped `<optgroup>` options for the roll-target dropdown (spec 008, FR-006):
+ * the canonical abilities and their scoped specialties, from the SSOT vocabulary.
+ * Plus an "In this world" group of the non-canonical (homebrew) slugs that
+ * actually exist, so world-specific identities are pickable directly from the
+ * dropdown (no datalist needed on the free-text field). The "Custom…" pick is
+ * rendered separately by the template.
+ * @param {string} selectedSlug the row's current rollSlug
+ * @param {string[]} worldSlugs non-canonical ability/specialty slugs in the world
+ */
+function buildRollSlugOptionGroups(selectedSlug, worldSlugs = []) {
+  const groups = [
+    {
+      label: game.i18n.localize("CS.effects.groups.abilities"),
+      options: CANONICAL_ABILITIES.map((a) => ({
+        value: a.slug,
+        label: game.i18n.localize(a.nameKey),
+        selected: a.slug === selectedSlug,
+      })),
+    },
+    {
+      label: game.i18n.localize("CS.effects.groups.specialties"),
+      options: CANONICAL_ABILITIES.flatMap((a) =>
+        a.specialties.map((s) => ({
+          value: s.slug,
+          label: game.i18n.localize(s.nameKey),
+          selected: s.slug === selectedSlug,
+        }))
+      ),
+    },
+  ];
+  if (worldSlugs.length) {
+    groups.push({
+      label: game.i18n.localize("CS.effects.groups.world"),
+      options: worldSlugs.map((slug) => ({
+        value: slug,
+        label: slug,
+        selected: slug === selectedSlug,
+      })),
+    });
+  }
+  return groups;
+}
+
+/**
+ * Slug suggestions (datalist) — EVERY ability / specialty / weapon-type slug that
+ * actually exists in the world: world-directory items AND items embedded on
+ * actors (where most abilities live). Uses the persisted / scoped slugs, so the
+ * "Custom…" field autocompletes to real identities. Free text stays allowed.
+ */
 function collectSlugSuggestions() {
   const abilities = new Set();
   const specialties = new Set();
   const weaponTypes = new Set();
-  for (const item of game.items ?? []) {
+  const addItem = (item) => {
     if (item.type === "ability") {
-      const slug = item.system?.slug || slugify(item.name);
-      if (slug) abilities.add(slug);
+      const abilitySlug = item.system?.slug || slugify(item.name);
+      if (abilitySlug) abilities.add(abilitySlug);
       for (const sp of Object.values(item.system?.specialties ?? {})) {
-        const s = slugify(sp?.name);
+        const s = sp?.slug || scopedSpecialtySlug(abilitySlug, sp?.name);
         if (s) specialties.add(s);
       }
     } else if (item.type === "weapon") {
       const s = weaponTypeSlug(item.system?.specialty);
       if (s) weaponTypes.add(s);
     }
+  };
+  for (const item of game.items ?? []) addItem(item);
+  for (const actor of game.actors ?? []) {
+    for (const item of actor.items ?? []) addItem(item);
   }
   return {
     abilitySlugs: [...abilities].sort(),
@@ -143,6 +203,17 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     const partContext = await super._preparePartContext(partId, context);
     if (partId !== "changes") return partContext;
 
+    // Homebrew slugs present in the world (not already in the canonical dropdown),
+    // offered as an "In this world" optgroup so the free-text field needs no
+    // datalist (which rendered a misaligned browser arrow).
+    const suggestions = collectSlugSuggestions();
+    const canonicalSet = new Set([...ABILITY_SLUGS, ...SPECIALTY_SLUGS]);
+    const worldSlugs = [
+      ...new Set([...suggestions.abilitySlugs, ...suggestions.specialtySlugs]),
+    ]
+      .filter((slug) => !canonicalSet.has(slug))
+      .sort();
+
     partContext.csChanges = readChanges(this.document).map((change, index) => {
       const row = parseChangeRow(change, index);
       // Attach the quality dropdown to EVERY row (not just quality ones): the
@@ -150,16 +221,20 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
       // must already be in the DOM when a row is switched to "Grant weapon quality".
       row.qualityGroups = buildQualityOptionGroups(row.qualityKind);
       row.qualityOtherSelected = row.qualityKind === QUALITY_OTHER;
+      // Roll-target dropdown: canonical vocabulary + world homebrew + "Custom…".
+      row.rollSlugGroups = buildRollSlugOptionGroups(row.rollSlug, worldSlugs);
+      row.rollSlugCustomSelected = row.rollSlug === ROLL_SLUG_CUSTOM;
       return row;
     });
     partContext.channelChoices = CHANNEL_CHOICES;
     partContext.qualityOtherValue = QUALITY_OTHER;
+    partContext.rollSlugCustomValue = ROLL_SLUG_CUSTOM;
     partContext.rollTargetKindChoices = ROLL_TARGETKIND_CHOICES;
     partContext.weaponTargetKindChoices = WEAPON_TARGETKIND_CHOICES;
     partContext.derivedStatChoices = DERIVED_STAT_CHOICES;
     partContext.valueModeChoices = VALUE_MODE_CHOICES;
     partContext.derivedFormChoices = DERIVED_FORM_CHOICES;
-    Object.assign(partContext, collectSlugSuggestions());
+    Object.assign(partContext, suggestions);
     partContext.effectOptional = !!this.document.getFlag(
       "chroniclesystem",
       "optional"
@@ -175,7 +250,7 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     const target = event?.target;
     if (
       target?.matches?.(
-        "select.cs-channel, select.cs-roll-targetkind, select.cs-weapon-targetkind, select.cs-value-mode, select.cs-quality-kind"
+        "select.cs-channel, select.cs-roll-targetkind, select.cs-roll-slug-select, select.cs-weapon-targetkind, select.cs-value-mode, select.cs-quality-kind"
       )
     ) {
       const row = target.closest("li.cs-change");
@@ -226,11 +301,16 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
       if (el) el.style.display = condition ? "" : "none";
     };
     show(".cs-roll-target", isRoll);
-    show(
-      ".cs-roll-slug",
+    const rollNeedsSlug =
       isRoll &&
-        (rollKind === TARGET_KINDS.ABILITY ||
-          rollKind === TARGET_KINDS.SPECIALTY)
+      (rollKind === TARGET_KINDS.ABILITY ||
+        rollKind === TARGET_KINDS.SPECIALTY);
+    show(".cs-roll-slug", rollNeedsSlug);
+    // The free-text slug only when the dropdown is on the "Custom…" pick.
+    const rollSlugValue = valueOf("select.cs-roll-slug-select");
+    show(
+      ".cs-roll-slug-custom",
+      rollNeedsSlug && rollSlugValue === ROLL_SLUG_CUSTOM
     );
     show(".cs-stat-target", channel === EFFECT_CHANNELS.DERIVED_STAT);
     show(".cs-armor-label", channel === EFFECT_CHANNELS.ARMOR_RATING);

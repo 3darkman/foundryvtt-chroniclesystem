@@ -196,3 +196,48 @@ describe("write path normalises free-text slugs", () => {
     expect(out.key).toBe(""); // collector ignores it (inert, not a crash)
   });
 });
+
+// Spec 008 / US2 — the roll-target dropdown offers the canonical vocabulary
+// (optgroups) + a "Custom…" free-text pick, with a preserved round-trip.
+describe("roll-target dropdown — canonical vocabulary + custom (spec 008)", () => {
+  it("preselects a canonical ability slug (no custom text)", () => {
+    const row = parseChangeRow(
+      { key: "cs.result.ability.persuasion", value: "1" },
+      0
+    );
+    expect(row.rollSlug).toBe("persuasion"); // dropdown value
+    expect(row.rollSlugCustom).toBe("");
+    expect(row.showRollSlugCustom).toBe(false);
+  });
+
+  it("preselects a canonical SCOPED specialty slug and round-trips it", () => {
+    const change = { key: "cs.result.specialty.persuasion_charm", value: "3" };
+    const row = parseChangeRow(change, 0);
+    expect(row.rollTargetKind).toBe("specialty");
+    expect(row.rollSlug).toBe("persuasion_charm");
+    expect(row.rollSlugCustom).toBe("");
+    expect(buildChangeFromRow(row)).toMatchObject({ key: change.key, value: "3" });
+  });
+
+  it("routes a non-canonical (homebrew) slug to the '__custom__' free text", () => {
+    const change = { key: "cs.result.ability.fe", value: "2" };
+    const row = parseChangeRow(change, 0);
+    expect(row.rollSlug).toBe("__custom__");
+    expect(row.rollSlugCustom).toBe("fe");
+    expect(row.showRollSlugCustom).toBe(true);
+    // Round-trip preserved (custom text → slugified back into the key).
+    expect(buildChangeFromRow(row)).toMatchObject({ key: change.key });
+  });
+
+  it("writes the slugified custom text when the dropdown is on '__custom__'", () => {
+    const out = buildChangeFromRow({
+      channel: "result",
+      rollTargetKind: "ability",
+      rollSlug: "__custom__",
+      rollSlugCustom: "Fé",
+      valueMode: "fixed",
+      fixedValue: 1,
+    });
+    expect(out.key).toBe("cs.result.ability.fe");
+  });
+});

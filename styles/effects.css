@@ -169,6 +169,13 @@
   border-radius: 3px;
 }
 
+/* Hide the browser's datalist dropdown indicator (a small arrow that renders
+   misaligned against our 1.7rem inputs). The datalist still autocompletes as the
+   user types; the visible arrow just added clutter. */
+.cs-effect-config .cs-field input[list]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
 /* TYPE names the clause — a touch louder. */
 .cs-effect-config .cs-channel-field > label {
   color: var(--cs-ink);
