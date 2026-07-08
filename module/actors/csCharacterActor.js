@@ -6,7 +6,8 @@ import {
   collectEffectModifiers,
   applyOwnedItemEffects,
 } from "../effects/cs-effect-modifiers.js";
-import { DERIVED_STATS } from "../effects/cs-effect-vocabulary.js";
+import { DERIVED_STATS, slugify } from "../effects/cs-effect-vocabulary.js";
+import { scopedSpecialtySlug } from "../vocabulary/cs-canonical-abilities.js";
 
 /**
  * Read-side aggregation of one buffer — the inverse of the collector. Sums the
@@ -119,9 +120,7 @@ export class CSCharacterActor extends CSActor {
     }
     if (data.derivedStats?.health) {
       data.derivedStats.health.value =
-        (this.getAbilityValue(
-          SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)
-        ) || 0) * 3;
+        (this.getAbilityValueBySlug("endurance") || 0) * 3;
       data.derivedStats.health.total =
         data.derivedStats.health.value +
         (Number(data.derivedStats.health.modifier) || 0) +
@@ -138,9 +137,7 @@ export class CSCharacterActor extends CSActor {
     }
     if (data.derivedStats?.composure) {
       data.derivedStats.composure.value =
-        (this.getAbilityValue(
-          SystemUtils.localize(ChronicleSystem.keyConstants.WILL)
-        ) || 0) * 3;
+        (this.getAbilityValueBySlug("will") || 0) * 3;
       data.derivedStats.composure.total =
         data.derivedStats.composure.value +
         (Number(data.derivedStats.composure.modifier) || 0) +
@@ -148,18 +145,14 @@ export class CSCharacterActor extends CSActor {
     }
     if (data.derivedStats?.frustration) {
       data.derivedStats.frustration.value =
-        this.getAbilityValue(
-          SystemUtils.localize(ChronicleSystem.keyConstants.WILL)
-        ) || 0;
+        this.getAbilityValueBySlug("will") || 0;
       data.derivedStats.frustration.total =
         data.derivedStats.frustration.value +
         (Number(data.derivedStats.frustration.modifier) || 0);
     }
     if (data.derivedStats?.fatigue) {
       data.derivedStats.fatigue.value =
-        this.getAbilityValue(
-          SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)
-        ) || 0;
+        this.getAbilityValueBySlug("endurance") || 0;
       data.derivedStats.fatigue.total =
         data.derivedStats.fatigue.value +
         (Number(data.derivedStats.fatigue.modifier) || 0);
@@ -211,6 +204,56 @@ export class CSCharacterActor extends CSActor {
       });
 
     return [ability, specialty];
+  }
+
+  /**
+   * Resolve an ability by its STABLE slug (`system.slug || slugify(name)`) —
+   * language-independent, unlike {@link getAbility} (which matches the display
+   * name). The internal read-side consumers key by slug so a renamed ability
+   * still resolves. Returns `[ability|undefined, undefined]`.
+   * @param {string} slug
+   */
+  getAbilityBySlug(slug) {
+    const ability = this.items.find(
+      (item) =>
+        item.type === "ability" &&
+        (item.getCSData?.().slug || slugify(item.name)) === slug
+    );
+    return [ability, undefined];
+  }
+
+  /**
+   * Ability rating by canonical slug; default 2 when absent (silent no-op
+   * parity). Slug variant of {@link getAbilityValue} used by the derived stats.
+   * @param {string} slug
+   * @returns {number}
+   */
+  getAbilityValueBySlug(slug) {
+    const [ability] = this.getAbilityBySlug(slug);
+    return ability !== undefined ? ability.getCSData().rating : 2;
+  }
+
+  /**
+   * Resolve a specialty by its SCOPED slug (`<abilitySlug>_<spec>`) inside any
+   * ability the actor owns. Slug variant of {@link getAbilityBySpecialty}.
+   * Returns `[ability|undefined, specialty|undefined]`.
+   * @param {string} specialtySlug
+   */
+  getAbilityBySpecialtySlug(specialtySlug) {
+    let foundSpecialty;
+    const ability = this.items.find((item) => {
+      if (item.type !== "ability") return false;
+      const data = item.getCSData?.() ?? {};
+      const abilitySlug = data.slug || slugify(item.name);
+      const specialties = data.specialties ?? {};
+      foundSpecialty = Object.values(specialties).find(
+        (sp) =>
+          (sp?.slug || scopedSpecialtySlug(abilitySlug, sp?.name)) ===
+          specialtySlug
+      );
+      return foundSpecialty !== undefined;
+    });
+    return [ability, foundSpecialty];
   }
 
   getModifier(type, includeDetail = false, includeModifierGlobal = false) {
@@ -350,15 +393,11 @@ export class CSCharacterActor extends CSActor {
   }
 
   getMaxInjuries() {
-    return this.getAbilityValue(
-      SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)
-    );
+    return this.getAbilityValueBySlug("endurance");
   }
 
   getMaxWounds() {
-    return this.getAbilityValue(
-      SystemUtils.localize(ChronicleSystem.keyConstants.ENDURANCE)
-    );
+    return this.getAbilityValueBySlug("endurance");
   }
 
   getAbilityValue(abilityName) {
@@ -368,29 +407,17 @@ export class CSCharacterActor extends CSActor {
 
   calcIntrigueDefense() {
     return (
-      this.getAbilityValue(
-        SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS)
-      ) +
-      this.getAbilityValue(
-        SystemUtils.localize(ChronicleSystem.keyConstants.CUNNING)
-      ) +
-      this.getAbilityValue(
-        SystemUtils.localize(ChronicleSystem.keyConstants.STATUS)
-      )
+      this.getAbilityValueBySlug("awareness") +
+      this.getAbilityValueBySlug("cunning") +
+      this.getAbilityValueBySlug("status")
     );
   }
 
   calcCombatDefense() {
     let value =
-      this.getAbilityValue(
-        SystemUtils.localize(ChronicleSystem.keyConstants.AWARENESS)
-      ) +
-      this.getAbilityValue(
-        SystemUtils.localize(ChronicleSystem.keyConstants.AGILITY)
-      ) +
-      this.getAbilityValue(
-        SystemUtils.localize(ChronicleSystem.keyConstants.ATHLETICS)
-      );
+      this.getAbilityValueBySlug("awareness") +
+      this.getAbilityValueBySlug("agility") +
+      this.getAbilityValueBySlug("athletics");
 
     if (
       game.settings.get(
@@ -412,15 +439,15 @@ export class CSCharacterActor extends CSActor {
     // Movement only exists on the character data model, not on units
     if (!data.movement) return;
     data.movement.base = ChronicleSystem.defaultMovement;
+    // Resolve Athletics:Run by canonical slug (scoped specialty) so movement
+    // survives a rename; getActorAbilityFormula accepts a slug or a display name.
     let runFormula = ChronicleSystem.getActorAbilityFormula(
       this,
-      SystemUtils.localize(ChronicleSystem.keyConstants.ATHLETICS),
-      SystemUtils.localize(ChronicleSystem.keyConstants.RUN)
+      "athletics",
+      "athletics_run"
     );
     data.movement.runBonus = Math.floor(runFormula.bonusDice / 2);
-    let bulkMod = this.getModifier(
-      SystemUtils.localize(ChronicleSystem.modifiersConstants.BULK)
-    );
+    let bulkMod = this.getModifier(ChronicleSystem.modifiersConstants.BULK);
     data.movement.bulk = Math.floor(bulkMod.total / 2);
     data.movement.total = Math.max(
       data.movement.base +

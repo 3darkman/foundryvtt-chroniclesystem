@@ -1,4 +1,8 @@
-import { itemDescriptionFields, equipmentItemFields } from "../fields.js";
+import {
+  itemDescriptionFields,
+  equipmentItemFields,
+  normalizeSlugSource,
+} from "../fields.js";
 
 const fields = foundry.data.fields;
 
@@ -23,5 +27,10 @@ export default class PoisonData extends foundry.abstract.TypeDataModel {
       effects: new fields.StringField({ required: true, initial: "" }),
       recovery: new fields.StringField({ required: true, initial: "" }),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

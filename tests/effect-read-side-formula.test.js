@@ -83,7 +83,9 @@ describe("getActorTestFormula — global ALL counted exactly once across ability
       specialties: { s1: { name: "Axes", rating: 0, modifier: 0 } },
       ...getters,
     });
-  const buckets = { fighting: 1, axes: 10, all: 100 }; // → 1 + 100(once) + 10 = 111
+  // Specialty buffers are keyed by the SCOPED slug (spec 008): Axes under
+  // Fighting → `fighting_axes`.
+  const buckets = { fighting: 1, fighting_axes: 10, all: 100 }; // → 1 + 100(once) + 10 = 111
 
   it("modifier lever", () => {
     expect(
@@ -126,7 +128,7 @@ describe("getActorTestFormula — ability and specialty both contribute (channel
         modifier: 0,
         specialties: { s1: { name: "Axes", rating: 2, modifier: 0 } },
         getBonusDice: (type) => ({
-          total: { fighting: 1, axes: 2 }[type] ?? 0,
+          total: { fighting: 1, fighting_axes: 2 }[type] ?? 0,
           detail: [],
         }),
       }),

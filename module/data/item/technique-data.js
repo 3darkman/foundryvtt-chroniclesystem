@@ -1,8 +1,11 @@
+import { identityField, normalizeSlugSource } from "../fields.js";
+
 const fields = foundry.data.fields;
 
 export default class TechniqueData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
+      ...identityField(),
       type: new fields.StringField({ required: true, initial: "" }),
       description: new fields.StringField({ required: true, initial: "" }),
       learning: new fields.SchemaField({
@@ -17,5 +20,10 @@ export default class TechniqueData extends foundry.abstract.TypeDataModel {
       scales: new fields.StringField({ required: true, initial: "" }),
       works: new fields.ArrayField(new fields.ObjectField()),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

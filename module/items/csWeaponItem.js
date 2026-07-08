@@ -1,6 +1,6 @@
 import { CSItem } from "./csItem.js";
 import { ChronicleSystem } from "../system/ChronicleSystem.js";
-import { weaponTypeSlug } from "../effects/cs-effect-vocabulary.js";
+import { weaponTypeSlug, slugify } from "../effects/cs-effect-vocabulary.js";
 
 /**
  * Weapon item. Its bulk contribution is no longer applied imperatively: the
@@ -16,7 +16,9 @@ export class CSWeaponItem extends CSItem {
     );
     if (matches) {
       if (matches.length === 4) {
-        let ability = actor.getAbilityValue(matches[1]);
+        // Resolve the `@Ability` token by stable slug (spec 008) so the damage
+        // formula survives a rename to any language.
+        let ability = actor.getAbilityValueBySlug(slugify(matches[1]));
         this.damageValue = eval(`${ability}${matches[2]}${matches[3]}`);
         let adaptableQuality = Object.values(this.getCSData().qualities).filter(
           (quality) => quality.name.toLowerCase() === "adaptable"

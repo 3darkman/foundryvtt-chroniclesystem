@@ -1,4 +1,4 @@
-import { itemDescriptionFields } from "../fields.js";
+import { itemDescriptionFields, normalizeSlugSource } from "../fields.js";
 
 const fields = foundry.data.fields;
 
@@ -12,5 +12,10 @@ export default class DrawbackData extends foundry.abstract.TypeDataModel {
       flawAttribute: new fields.StringField({ required: true, initial: "" }),
       requirements: new fields.StringField({ required: true, initial: "" }),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

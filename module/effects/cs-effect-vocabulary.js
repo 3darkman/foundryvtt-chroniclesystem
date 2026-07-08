@@ -6,6 +6,13 @@
 // `ChronicleSystem.modifiersConstants` for the shared buffer ids it overlaps.
 
 import { ChronicleSystem } from "../system/ChronicleSystem.js";
+import { slugify } from "./cs-slugify.js";
+
+// Re-export the shared slug normaliser (its definition moved to the
+// dependency-free cs-slugify.js so ChronicleSystem can key by slug without an
+// eval-time import cycle). Existing `import { slugify } from
+// "./cs-effect-vocabulary.js"` sites keep working.
+export { slugify };
 
 /** Namespace prefix of every Chronicle effect key. */
 export const EFFECT_KEY_PREFIX = "cs.";
@@ -99,25 +106,6 @@ const VALID_CHANNELS = new Set(Object.values(EFFECT_CHANNELS));
  * silently no-op. Membership-gating turns that authoring typo into a rejected key.
  */
 const VALID_DERIVED_STATS = new Set(Object.values(DERIVED_STATS));
-
-/**
- * Stable, localization-independent slug. Normalises a name: strip accents,
- * lowercase, collapse every run of non-alphanumeric characters (whitespace,
- * punctuation, dots) to a single `_`, trimming leading/trailing `_`. Dots are
- * removed so a slug can never collide with the `.` key separator. Shared by
- * ability, specialty and weapon-type targets (DRY, constitution §III).
- * @param {string} name
- * @returns {string}
- */
-export function slugify(name) {
-  if (!name || typeof name !== "string") return "";
-  return name
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
 
 /** Back-compat alias — ability slug is just a slug. */
 export const toAbilitySlug = slugify;

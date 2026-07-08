@@ -28,6 +28,7 @@ import {
   slugify,
   weaponTypeSlug,
 } from "./cs-effect-vocabulary.js";
+import { scopedSpecialtySlug } from "../vocabulary/cs-canonical-abilities.js";
 import { resolveEffectValue } from "./cs-effect-value.js";
 import {
   readChanges,
@@ -113,9 +114,14 @@ function resolveAbility(actor, slug) {
 function resolveSpecialty(actor, slug) {
   for (const item of actor?.items ?? []) {
     if (item.type !== "ability") continue;
-    const specialties = itemData(item).specialties ?? {};
-    for (const specialty of Object.values(specialties)) {
-      if (slugify(specialty?.name) === slug) {
+    const data = itemData(item);
+    const abilitySlug = data.slug || slugify(item.name);
+    for (const specialty of Object.values(data.specialties ?? {})) {
+      // Read the persisted SCOPED slug (fallback to the derived scoped slug) —
+      // mirrors resolveAbility's `slug || slugify(name)` (fixes the asymmetry).
+      const spSlug =
+        specialty?.slug || scopedSpecialtySlug(abilitySlug, specialty?.name);
+      if (spSlug === slug) {
         return { name: specialty.name, rating: Number(specialty.rating) || 0 };
       }
     }
@@ -152,26 +158,70 @@ function optionalCondition(effect) {
 }
 
 /**
- * Buffer key for a roll-channel target, bridged to the localized name the
- * read-side keys by (`getActorTestFormula` uses `ability.name.toLowerCase()`).
+ * Buffer key for a roll-channel target: the STABLE SLUG (spec 008). The read-side
+ * (`getActorTestFormula`) now keys by the same slug, so the effect and the roll
+ * align under ANY display language. `parsed.target` is already the slug for
+ * ability (canonical) and specialty (scoped).
  * @returns {string|null}
  */
-function rollBufferKey(actor, parsed) {
+function rollBufferKey(parsed) {
   if (parsed.targetKind === TARGET_KINDS.ALL) {
     return ChronicleSystem.modifiersConstants.ALL;
   }
-  if (parsed.targetKind === TARGET_KINDS.ABILITY) {
-    return (
-      resolveAbility(actor, parsed.target)?.name.toLowerCase() ?? parsed.target
-    );
-  }
-  if (parsed.targetKind === TARGET_KINDS.SPECIALTY) {
-    return (
-      resolveSpecialty(actor, parsed.target)?.name.toLowerCase() ??
-      parsed.target
-    );
+  if (
+    parsed.targetKind === TARGET_KINDS.ABILITY ||
+    parsed.targetKind === TARGET_KINDS.SPECIALTY
+  ) {
+    return parsed.target;
   }
   return null;
+}
+
+/**
+ * Resolve the slug of a rolled ability from a name-or-slug reference (roll
+ * buttons pass the display name; initiative/renamed content passes a slug).
+ * Matches by persisted slug, by slugified name, or by display name, falling back
+ * to `slugify(ref)`. @returns {string|null}
+ */
+function abilitySlugForRef(actor, ref) {
+  if (ref == null) return null;
+  const refStr = String(ref);
+  const refLower = refStr.toLowerCase();
+  const refSlug = slugify(refStr);
+  for (const item of actor?.items ?? []) {
+    if (item.type !== "ability") continue;
+    const slug = itemData(item).slug || slugify(item.name);
+    if (
+      slug === refStr ||
+      slug === refSlug ||
+      item.name?.toLowerCase() === refLower
+    )
+      return slug;
+  }
+  return refSlug;
+}
+
+/**
+ * Resolve the SCOPED slug of a rolled specialty from a name-or-slug reference.
+ * @returns {string|null}
+ */
+function specialtySlugForRef(actor, abilitySlug, ref) {
+  if (ref == null) return null;
+  const refStr = String(ref);
+  const refLower = refStr.toLowerCase();
+  for (const item of actor?.items ?? []) {
+    if (item.type !== "ability") continue;
+    const data = itemData(item);
+    const aSlug = data.slug || slugify(item.name);
+    for (const sp of Object.values(data.specialties ?? {})) {
+      const spSlug = sp?.slug || scopedSpecialtySlug(aSlug, sp?.name);
+      if (spSlug === refStr || sp?.name?.toLowerCase() === refLower)
+        return spSlug;
+    }
+  }
+  return abilitySlug
+    ? scopedSpecialtySlug(abilitySlug, refStr)
+    : slugify(refStr);
 }
 
 /** Maps each roll channel to the buffer name it feeds. */
@@ -295,7 +345,7 @@ function collectAuthoredEffects(actor, buffers) {
       if (bufferName) {
         const value = resolveEffectValue(change.value, accessors);
         if (!value) continue;
-        const bufferKey = rollBufferKey(actor, parsed);
+        const bufferKey = rollBufferKey(parsed);
         if (!bufferKey) continue;
         pushEntry(buffers[bufferName], bufferKey, effect.id, value, false);
         continue;
@@ -484,18 +534,22 @@ export function applyOwnedItemEffects(actor) {
  * (`formulaField`). Permanent effects are NEVER optional, so the two public
  * collectors partition the applied effects and can never double-count one.
  * @param {object} actor
- * @param {string|null} abilityName localized name of the rolled ability (or null)
- * @param {string|null} specialtyName localized name of the rolled specialty (or null)
+ * @param {string|null} abilityRef name-or-slug of the rolled ability (or null)
+ * @param {string|null} specialtyRef name-or-slug of the rolled specialty (or null)
  * @param {boolean} wantOptional true → optional (dialog-toggle) effects; false → permanent
  * @returns {Array<{name: string, effectId: string, channel: string, formulaField: string, value: number, condition: string}>}
  */
-function collectRollEffects(actor, abilityName, specialtyName, wantOptional) {
+function collectRollEffects(actor, abilityRef, specialtyRef, wantOptional) {
   const accessors = actorValueAccessors(actor);
   const ALL = ChronicleSystem.modifiersConstants.ALL;
-  const abilityKey = abilityName ? String(abilityName).toLowerCase() : null;
-  const specialtyKey = specialtyName
-    ? String(specialtyName).toLowerCase()
-    : null;
+  // Resolve the rolled ability/specialty to their STABLE slugs (spec 008) so the
+  // dialog matches the same identity the buffer keys by — under any language.
+  const abilityKey =
+    abilityRef != null ? abilitySlugForRef(actor, abilityRef) : null;
+  const specialtyKey =
+    specialtyRef != null
+      ? specialtySlugForRef(actor, abilityKey, specialtyRef)
+      : null;
 
   const results = [];
   for (const effect of actor?.appliedEffects ?? []) {
@@ -509,7 +563,7 @@ function collectRollEffects(actor, abilityName, specialtyName, wantOptional) {
       const formulaField = ROLL_CHANNEL_TO_FORMULA_FIELD[parsed.channel];
       if (!formulaField) continue; // only roll channels surface in the dialog
 
-      const bufferKey = rollBufferKey(actor, parsed);
+      const bufferKey = rollBufferKey(parsed);
       const applies =
         bufferKey === ALL ||
         bufferKey === abilityKey ||

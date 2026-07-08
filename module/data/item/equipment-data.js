@@ -1,4 +1,8 @@
-import { itemDescriptionFields, equipmentItemFields } from "../fields.js";
+import {
+  itemDescriptionFields,
+  equipmentItemFields,
+  normalizeSlugSource,
+} from "../fields.js";
 
 export default class EquipmentData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -6,5 +10,10 @@ export default class EquipmentData extends foundry.abstract.TypeDataModel {
       ...itemDescriptionFields(),
       ...equipmentItemFields(),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

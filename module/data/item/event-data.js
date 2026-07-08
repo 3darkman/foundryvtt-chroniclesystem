@@ -1,8 +1,11 @@
+import { identityField, normalizeSlugSource } from "../fields.js";
+
 const fields = foundry.data.fields;
 
 export default class EventData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
+      ...identityField(),
       description: new fields.StringField({ required: true, initial: "" }),
       formulas: new fields.SchemaField({
         defense: new fields.StringField({ required: true, initial: "" }),
@@ -58,5 +61,10 @@ export default class EventData extends foundry.abstract.TypeDataModel {
       }),
       bonusToChoices: new fields.StringField({ required: true, initial: "" }),
     };
+  }
+
+  static migrateData(source) {
+    normalizeSlugSource(source);
+    return super.migrateData(source);
   }
 }

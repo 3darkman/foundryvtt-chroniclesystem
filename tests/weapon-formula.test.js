@@ -11,7 +11,8 @@ import { makeFakeWeapon, makeFakeActor } from "./helpers/doubles.js";
 // existing behavior — including eval — without changing module/** (FR-014).
 
 const updateDamage = CSWeaponItem.prototype.updateDamageValue;
-const ability4 = { getAbilityValue: () => 4 };
+// spec 008: weapon damage resolves the @Ability token by slug.
+const ability4 = { getAbilityValueBySlug: () => 4 };
 
 describe("weapon damage — updateDamageValue (eval-based, characterized)", () => {
   it("4.1 @Ability+1 → value + 1", () => {

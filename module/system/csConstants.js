@@ -31,6 +31,7 @@ CSConstants.Settings = {
   DEBUG_LOGS: "debugLogs",
   CURRENT_VERSION: "version",
   MODIFIER_DIALOG_AS_DEFAULT: "isModifierDialogDefault",
+  SLUG_REVIEW: "slugReview",
 };
 
 CSConstants.HouseResources = {
@@ -49,10 +50,13 @@ CSConstants.InitiativeTypes = {
   WARFARE: "CS.dialogs.initiativeSelector.warfare", //"specialty:strategy:warfare"
 };
 
+// Roll definitions use the canonical SCOPED specialty slug (spec 008) so
+// initiative resolves by stable identity — surviving a rename to any language.
+// Format: `specialty:<specialtySlug>:<abilitySlug>`.
 CSConstants.InitiativeTypeRolls = {
-  COMBAT: "specialty:quickness:agility",
-  INTRIGUE: "specialty:reputation:status",
-  WARFARE: "specialty:strategy:warfare",
+  COMBAT: "specialty:agility_quickness:agility",
+  INTRIGUE: "specialty:status_reputation:status",
+  WARFARE: "specialty:warfare_strategy:warfare",
 };
 
 CSConstants.TechniqueType = {
