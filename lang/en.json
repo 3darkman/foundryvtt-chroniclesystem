@@ -246,7 +246,16 @@
         "conditionMeta": "Condition",
         "yes": "Yes",
         "no": "No",
-        "durationHint": "Leave the duration blank for a permanent effect. Combat-based durations require an active encounter to track rounds and turns."
+        "durationHint": "Leave the duration blank for a permanent effect. Combat-based durations require an active encounter to track rounds and turns.",
+        "iconTint": "Icon Tint Color",
+        "suspendedTitle": "Effect Suspended",
+        "suspendedHint": "Temporarily disable this effect without deleting it.",
+        "applyTitle": "Apply Effect to Actor",
+        "applyHint": "If checked, this Effect is applied to any Actor that owns this Effect's parent Item.",
+        "statusConditions": "Status Conditions",
+        "showIcon": "Show Icon?",
+        "showIconHint": "Should the icon representing this Effect be displayed in the UI while this effect is active?",
+        "startNow": "Now"
       }
     },
     "intrigue": {

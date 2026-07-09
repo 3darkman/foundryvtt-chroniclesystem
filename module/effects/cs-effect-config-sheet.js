@@ -193,7 +193,9 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     },
     changes: {
       template: "systems/chroniclesystem/templates/effects/effect-changes.hbs",
-      scrollable: ["ol[data-changes]"],
+      // The fixed-height `.cs-changes-scroll` region scrolls internally (window stays
+      // auto-sized); track its scroll position across re-renders.
+      scrollable: [".cs-changes-scroll"],
     },
     footer: { template: "templates/generic/form-footer.hbs" },
   };
@@ -209,6 +211,9 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     // cascade styling (.cs-effect-*) still applies. `cs-v2` pulls in the shared
     // design tokens/components (US6) so this window matches the character sheet.
     classes: ["cs-effect-config", "cs-v2"],
+    // The handoff sizes the window at 660px; height stays auto (the Changes list
+    // scrolls internally so many changes never push the footer off-screen).
+    position: { width: 660, height: "auto" },
   };
 
   /** @override — fold the system permission rule into the core OWNER gate. */
@@ -409,6 +414,17 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
         weaponQualityTakesParam(qualityKind)
     );
     show(".cs-quality-custom", isQuality && qualityKind === QUALITY_OTHER);
+  }
+
+  /** @override — the handoff always shows the "Effect Start" section; core returns
+   *  null for a not-yet-started effect, so fall back to a localized "Now" so the
+   *  section (Start Time: Now) is always present, matching the proposed layout. */
+  async _prepareStartContext() {
+    return (
+      (await super._prepareStartContext()) ?? {
+        time: game.i18n.localize("CS.effects.redesign.startNow"),
+      }
+    );
   }
 
   /** @override — rebuild the real `system.changes` from the synthetic rows. */

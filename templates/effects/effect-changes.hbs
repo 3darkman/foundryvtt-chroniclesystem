@@ -5,6 +5,9 @@
 <section class="tab cs-effect-changes {{#if tab.active}}active{{/if}}" data-group="sheet" data-tab="changes">
   <p class="hint">{{localize "CS.effects.authoring.hint"}}</p>
 
+  {{!-- Fixed-height scroll region: the optional callout AND the change cards scroll
+        together inside the tab (the window stays auto-sized) — items 9.c / 9.d. --}}
+  <div class="cs-changes-scroll" data-changes-scroll>
   {{!-- per-EFFECT flags (not per-change): optional toggle + condition tag --}}
   <fieldset class="cs-effect-flags">
     <label class="cs-effect-optional">
@@ -13,7 +16,7 @@
     </label>
     <span class="hint">{{localize "CS.effects.authoring.optionalHint"}}</span>
     <label class="cs-effect-condition">
-      {{localize "CS.effects.authoring.conditionLabel"}}
+      <span class="cs-condition-label">{{localize "CS.effects.authoring.conditionLabel"}}</span>
       <input type="text" name="flags.chroniclesystem.condition" value="{{effectCondition}}"
         placeholder="{{localize 'CS.effects.authoring.conditionPlaceholder'}}" />
     </label>
@@ -35,7 +38,13 @@
           or a value form the dropdown omits). Preserved as-is; editable raw. --}}
     <li class="cs-change cs-change-raw" data-index="{{change.index}}">
       <div class="cs-field cs-raw-key">
-        <label>{{localize "CS.effects.authoring.rawKey"}}</label>
+        <div class="cs-change-head">
+          <label>{{localize "CS.effects.authoring.rawKey"}}</label>
+          <button type="button" class="cs-change-delete" data-action="deleteChange" data-index="{{change.index}}"
+            title="{{localize 'CS.effects.delete'}}">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
         <input type="text" name="changes.{{change.index}}.rawKey" value="{{change.rawKey}}" />
       </div>
       <div class="cs-field cs-raw-value">
@@ -44,17 +53,19 @@
       </div>
       <input type="hidden" name="changes.{{change.index}}.rawType" value="{{change.rawType}}" />
       <input type="hidden" name="changes.{{change.index}}.rawPhase" value="{{change.rawPhase}}" />
-      <button type="button" class="cs-change-delete" data-action="deleteChange" data-index="{{change.index}}"
-        title="{{localize 'CS.effects.delete'}}">
-        <i class="fas fa-trash"></i>
-      </button>
     </li>
     {{else}}
     <li class="cs-change" data-index="{{change.index}}" data-channel="{{change.channel}}">
 
       {{!-- TYPE: channel --}}
       <div class="cs-field cs-channel-field">
-        <label>{{localize "CS.effects.authoring.type"}}</label>
+        <div class="cs-change-head">
+          <label>{{localize "CS.effects.authoring.type"}}</label>
+          <button type="button" class="cs-change-delete" data-action="deleteChange" data-index="{{change.index}}"
+            title="{{localize 'CS.effects.delete'}}">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
         <select name="changes.{{change.index}}.channel" class="cs-channel" data-index="{{change.index}}">
           {{selectOptions ../channelChoices selected=change.channel localize=true}}
         </select>
@@ -181,11 +192,6 @@
           class="cs-quality-custom" placeholder="{{localize 'CS.effects.authoring.qualityNamePlaceholder'}}"
           style="{{#unless change.qualityIsOther}}display:none{{/unless}}" />
       </div>
-
-      <button type="button" class="cs-change-delete" data-action="deleteChange" data-index="{{change.index}}"
-        title="{{localize 'CS.effects.delete'}}">
-        <i class="fas fa-trash"></i>
-      </button>
     </li>
     {{/if}}
     {{/each}}
@@ -194,4 +200,5 @@
   <button type="button" class="cs-change-add" data-action="addChange">
     <i class="fas fa-plus"></i> {{localize "CS.effects.authoring.addChange"}}
   </button>
+  </div>
 </section>

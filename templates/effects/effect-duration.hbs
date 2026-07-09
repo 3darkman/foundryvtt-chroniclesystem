@@ -1,43 +1,40 @@
-{{!-- Redesigned Duration tab (US6). Reproduces the CORE duration.hbs field set
-      VERBATIM ({{formInput}}/{{formGroup}} keep every schema name), re-wrapped in
-      the shared section-card idiom. Tab binding on the root is the no-stacking fix. --}}
+{{!-- Redesigned Duration tab (US6). Rows (label left, control right) via .csv2-row
+      so the labels follow the handoff instead of core's form-group layout. Every
+      control keeps its schema `name` through {{formInput}} (persistence intact). --}}
 <section class="tab{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
     {{#if start}}
     <div class="csv2-card">
         <div class="csv2-card-header">{{localize "EFFECT.START.Header"}}</div>
-        <div class="csv2-card-body">
-            <div class="form-group">
-                <span class="label">{{localize "EFFECT.FIELDS.start.time.label"}}</span>
-                <div class="form-fields">{{start.time}}</div>
-            </div>
-            {{#if start.combat}}
-            <div class="form-group">
-                <span class="label">{{localize "DOCUMENT.Combat"}}</span>
-                <div class="form-fields">{{localize "EFFECT.START.Combat" round=start.round turn=start.turn}}</div>
-            </div>
-            {{/if}}
+        <div class="csv2-row">
+            <span class="csv2-row-label">{{localize "EFFECT.FIELDS.start.time.label"}}</span>
+            <span class="cs-start-value">{{start.time}}</span>
         </div>
+        {{#if start.combat}}
+        <div class="csv2-row">
+            <span class="csv2-row-label">{{localize "DOCUMENT.Combat"}}</span>
+            <span class="cs-start-value">{{localize "EFFECT.START.Combat" round=start.round turn=start.turn}}</span>
+        </div>
+        {{/if}}
     </div>
     {{/if}}
 
     <div class="csv2-card">
         <div class="csv2-card-header">{{localize "EFFECT.DURATION.Header"}}</div>
-        <div class="csv2-card-body">
-            <div class="form-group slim duration" data-duration>
-                <label class="flexrow" for="{{rootId}}-duration.value">
-                    <span>{{localize "EFFECT.DURATION.Label"}}</span>
-                    <span class="warning" hidden><i class="fa-duotone fa-triangle-exclamation"></i></span>
-                </label>
-                <div class="form-fields">
-                    {{formInput fields.duration.fields.value value=source.duration.value id=(concat rootId "-duration.value")
-                                aria=(object label=(localize "EFFECT.FIELDS.duration.value.label"))}}
-                    {{formInput fields.duration.fields.units value=source.duration.units id=(concat rootId "-duration.units")
-                                options=durationUnits aria=(object label=(localize "EFFECT.FIELDS.duration.units.label"))}}
-                </div>
+        <div class="csv2-row" data-duration>
+            <span class="csv2-row-label">{{localize "EFFECT.DURATION.Label"}}</span>
+            <div class="cs-duration-fields">
+                {{formInput fields.duration.fields.value value=source.duration.value}}
+                {{formInput fields.duration.fields.units value=source.duration.units options=durationUnits}}
             </div>
-            {{formGroup fields.duration.fields.expiry choices=expiryEvents value=source.duration.expiry rootId=rootId}}
+        </div>
+        <div class="csv2-row">
+            <span class="csv2-row-label">{{localize "EFFECT.FIELDS.duration.expiry.label"}}</span>
+            <div class="cs-duration-expiry">
+                {{formInput fields.duration.fields.expiry choices=expiryEvents value=source.duration.expiry}}
+            </div>
         </div>
     </div>
 
-    <p class="csv2-help">{{localize "CS.effects.redesign.durationHint"}}</p>
+    <p class="csv2-help cs-duration-hint">{{localize "CS.effects.redesign.durationHint"}}</p>
 </section>

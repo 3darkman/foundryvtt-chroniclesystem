@@ -47,9 +47,12 @@
   src: url("fonts/IBMPlexMono-Bold.woff2") format("woff2");
 }
 
-/* --- Token SSOT: consumed by the character sheet AND the effect window. ----- */
+/* --- Token SSOT: consumed by the character sheet AND the effect window. Also
+       exposed on `.chroniclesystem` so the generalized editor/checkbox rules
+       (US6 items 1-2) resolve the tokens in EVERY system window (item, House…). */
 .cs-v2,
-.cs-sheet-v2 {
+.cs-sheet-v2,
+.chroniclesystem {
   --csv2-primary: #015ea6;
   --csv2-primary-dark: #013f70;
   --csv2-dark: #0a0405;
@@ -85,6 +88,10 @@
 
 .cs-effect-config.cs-v2 {
   --csv2-title-bg: var(--csv2-dark);
+  /* Recolor the core scrollbar (core sets `* { scrollbar-color: var(--color-scrollbar) … }`
+     with a maroon default #782e22) to the v2 palette — dark thumb on a light track. */
+  --color-scrollbar: var(--csv2-dark);
+  --color-scrollbar-track: var(--csv2-secondary);
   color: var(--csv2-text);
   font-family: var(--csv2-font-sans);
   background: var(--csv2-bg);
@@ -95,6 +102,13 @@
 .cs-effect-config.cs-v2 .window-content {
   background: var(--csv2-bg);
   padding: 0;
+  /* Kill core's `.standard-form { gap: 1rem }` (contentClasses on the window-content)
+     — that 16px gap between every part (header / nav / tab / footer) was the trio of
+     over-large blank bands; the parts' own borders separate them instead. */
+  gap: 0;
+  /* Thin v2 scrollbar palette (the actual scroll lives on the .scrollable tabs). */
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
 }
 
 /* The AppV2 window already provides the title bar; tint it near-black. */
@@ -136,10 +150,16 @@
   min-width: 0;
   flex: 1 1 auto;
 }
-.cs-effect-config.cs-v2 .cs-effect-name-input {
+/* Higher specificity than the generic `input[type=text]` rule below so the big
+   heading font wins; height:auto defeats core's fixed `height: var(--input-height)`
+   so the name input + meta line together fill the 52px icon height beside it. */
+.cs-effect-config.cs-v2 .cs-effect-headings .cs-effect-name-input {
+  width: 100%;
   border: none;
   background: transparent;
   padding: 0;
+  height: auto;
+  line-height: 1.15;
   font-family: var(--csv2-font-sans);
   font-weight: 700;
   font-size: 23px;
@@ -194,15 +214,35 @@
   font-weight: 600;
 }
 
-/* ④ Tab body + section-card idiom (shared with the character sheet). */
+/* ④ Tab body + section-card idiom (shared with the character sheet). The redesign
+   OWNS tab visibility at (0,4,0) so no tab-root layout rule (e.g. the Changes tab's
+   own display:flex) can tie `.tab:not(.active){display:none}` and win on load order
+   — that tie is what stacked every tab on top of each other. */
 .cs-effect-config.cs-v2 .tab {
-  padding: 16px 20px;
+  padding: 12px 20px 18px;
+}
+.cs-effect-config.cs-v2 .tab:not(.active) {
+  display: none;
+}
+/* Scrollable tabs (Details + Changes) scroll themselves. Core's `.scrollable`
+   already places the scrollbar in a `--scroll-margin` gutter beside the content
+   (negative margin-right + padding-right); just recolor it thin + v2 (items 9.c/9.d). */
+.cs-effect-config.cs-v2 .tab.scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
+}
+.cs-effect-config.cs-v2 .tab.active {
+  display: flex;
+  flex-direction: column;
+  /* Uniform spacing between every tab child (cards, hints) — replaces the cards'
+     own margin so the trailing hints don't read as over-spaced (items 8 / 9.a). */
+  gap: 12px;
 }
 .cs-effect-config.cs-v2 .csv2-card {
   border: 1px solid var(--csv2-border);
   border-radius: 7px;
   overflow: hidden;
-  margin-bottom: 14px;
+  margin: 0;
   background: var(--csv2-bg);
 }
 .cs-effect-config.cs-v2 .csv2-card-header {
@@ -239,6 +279,10 @@
 .cs-effect-config.cs-v2 select {
   box-sizing: border-box;
   width: 100%;
+  /* height:auto + line-height defeat core's `height/line-height: var(--input-height)`
+     (32px) which, with our padding, pushed the text down and clipped it (issue #6). */
+  height: auto;
+  min-height: 0;
   border: 1px solid var(--csv2-input-border);
   background: var(--csv2-bg);
   border-radius: 5px;
@@ -246,6 +290,7 @@
   font-family: var(--csv2-font-sans);
   font-weight: 500;
   font-size: 13px;
+  line-height: 1.4;
   color: var(--csv2-text);
 }
 .cs-effect-config.cs-v2 select {
@@ -256,10 +301,91 @@
   background-repeat: no-repeat;
   background-position: right 10px center;
 }
-.cs-effect-config.cs-v2 input[type="checkbox"] {
+/* Generalized checkbox (US6 item 2): core renders checkboxes as FontAwesome
+   glyphs (appearance:none + ::before/::after, themed cool/warm). Draw a clean
+   square instead — white with a light border when UNCHECKED, solid blue with a
+   white tick when checked — matching the character sheet's rating squares, across
+   every system window (effect config, item, House…). */
+:is(.chroniclesystem, .cs-v2) input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  flex: 0 0 auto;
   width: 18px;
   height: 18px;
-  accent-color: var(--csv2-primary);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--csv2-track-border);
+  border-radius: 4px;
+  background: var(--csv2-bg);
+  box-shadow: none;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+:is(.chroniclesystem, .cs-v2) input[type="checkbox"]::before,
+:is(.chroniclesystem, .cs-v2) input[type="checkbox"]::after {
+  content: none;
+}
+:is(.chroniclesystem, .cs-v2) input[type="checkbox"]:checked {
+  background: var(--csv2-primary);
+  border-color: var(--csv2-primary);
+}
+:is(.chroniclesystem, .cs-v2) input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 4px;
+  height: 9px;
+  border: solid var(--csv2-on-primary);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Color picker (icon tint) — the text input grows; the native swatch becomes a
+   compact rounded square beside it. `background:transparent` kills the dark
+   `--input-background-color` core paints behind the whole element, and the swatch
+   pseudo-elements drop the black inner border (item 3). */
+.cs-effect-config.cs-v2 color-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+.cs-effect-config.cs-v2 color-picker > input[type="text"] {
+  flex: 1 1 auto;
+}
+.cs-effect-config.cs-v2 color-picker > input[type="color"],
+.cs-effect-config.cs-v2 input[type="color"] {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  cursor: pointer;
+  overflow: hidden;
+}
+.cs-effect-config.cs-v2 input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.cs-effect-config.cs-v2 input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+.cs-effect-config.cs-v2 input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 4px;
 }
 /* Hide the browser's datalist arrow on the slug free-text fields (renders
    misaligned); the datalist still autocompletes as the user types. */
@@ -298,6 +424,104 @@
   font-size: 13px;
   color: var(--csv2-dark);
 }
+/* The title + hint block on the left of a toggle row (Suspended / Apply). */
+.cs-effect-config.cs-v2 .csv2-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cs-effect-config.cs-v2 .csv2-row-text .csv2-help {
+  margin: 0;
+}
+
+/* Core {{formGroup}} field-sets (Details/Duration) — eyebrow label over a
+   full-width control, hint below (handoff items 4/6). */
+.cs-effect-config.cs-v2 .form-group {
+  display: flex;
+  flex-direction: column;
+  /* align-items:stretch kills core's `align-items:center`, which — in this column —
+     centered the labels horizontally (item: Details labels centered). */
+  align-items: stretch;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+}
+.cs-effect-config.cs-v2 .form-group > label,
+.cs-effect-config.cs-v2 .form-group > .label {
+  flex: 0 0 auto;
+  /* line-height:1.3 defeats core's `line-height: var(--input-height)` (32px), which
+     made the label tall and far from its input; left-align it too. */
+  line-height: 1.3;
+  text-align: left;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+.cs-effect-config.cs-v2 .form-group > .form-fields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cs-effect-config.cs-v2 .form-group > .hint {
+  margin: 0;
+}
+/* Description card: the card header IS the title, so hide the editor's own
+   duplicated label (item 4). */
+.cs-effect-config.cs-v2 .cs-desc-body > .form-group > label {
+  display: none;
+}
+.cs-effect-config.cs-v2 .cs-desc-body > .form-group {
+  gap: 0;
+}
+/* Keep the description editor full-width (the generic `.form-fields{display:flex}`
+   would otherwise shrink the <prose-mirror> to its content). */
+.cs-effect-config.cs-v2 .cs-desc-body .form-fields {
+  display: block;
+}
+/* Core's statuses/show-icon formGroups render their OWN hint inside the narrow
+   grid column (which overflowed the window edge). Hide them — the full-width
+   .cs-details-hint below the grid is the single, correct one (item 6). */
+.cs-effect-config.cs-v2 .csv2-two-col .form-group > .hint {
+  display: none;
+}
+/* The show-icon hint tucks up under the two-column block (handoff item 6). */
+.cs-effect-config.cs-v2 .cs-details-hint {
+  margin: -4px 0 0;
+}
+
+/* Duration tab rows (item 7) — control group on the right of each .csv2-row. */
+.cs-effect-config.cs-v2 .cs-duration-fields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.cs-effect-config.cs-v2 .cs-duration-fields > input {
+  width: 70px;
+  text-align: center;
+}
+.cs-effect-config.cs-v2 .cs-duration-fields > select {
+  width: 150px;
+}
+.cs-effect-config.cs-v2 .cs-duration-expiry {
+  flex: 0 0 auto;
+}
+.cs-effect-config.cs-v2 .cs-duration-expiry > select {
+  width: 228px;
+}
+.cs-effect-config.cs-v2 .cs-start-value {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--csv2-text);
+}
+.cs-effect-config.cs-v2 .cs-duration-hint {
+  margin: 0;
+}
 
 /* ⑤ Footer — full-width primary Submit button (core form-footer.hbs). */
 .cs-effect-config.cs-v2 .form-footer {
@@ -328,9 +552,9 @@
    Changes-tab look: the legacy heraldic rules (effects.css / global.css
    `.cs-effect-config …`) were removed so nothing competes.
    ======================================================================== */
+/* No `display` here — the `.tab.active` rule above owns it (setting display:flex on
+   this tab root would re-introduce the tab-stacking tie). Only the gap/color. */
 .cs-effect-config.cs-v2 .cs-effect-changes {
-  display: flex;
-  flex-direction: column;
   gap: 14px;
   color: var(--csv2-text);
 }
@@ -343,8 +567,13 @@
   color: var(--csv2-muted-2);
 }
 
-/* Optional / condition callout — the tinted card from the handoff. */
+/* Optional / condition callout — the tinted card from the handoff. `min-inline-size`
+   + border-box stop the <fieldset> default (min-content) from over-widening it so
+   it fits the padded content with the scrollbar beside (items 9.a / 9.c). */
 .cs-effect-config.cs-v2 .cs-effect-flags {
+  box-sizing: border-box;
+  width: 100%;
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -375,6 +604,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+/* Fixed-width eyebrow label so the tag input keeps its own line (item 9.b). */
+.cs-effect-config.cs-v2 .cs-condition-label {
+  flex: 0 0 auto;
+  width: 96px;
   font-family: var(--csv2-font-mono);
   font-weight: 600;
   font-size: 10px;
@@ -384,12 +618,27 @@
 }
 .cs-effect-config.cs-v2 .cs-effect-condition input {
   flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
   font-family: var(--csv2-font-mono);
-  text-transform: none;
-  letter-spacing: 0;
 }
 
 /* Change list + cards. */
+/* Fixed-height internal scroll region (flags + cards + add-button). Capping the
+   region's height (not the window) keeps the window auto-sized while the content
+   scrolls INSIDE the tab; the negative margin-right + padding-right park the thin
+   scrollbar in a gutter beside every element (the optional callout AND the cards). */
+.cs-effect-config.cs-v2 .cs-changes-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 440px;
+  overflow-y: auto;
+  margin-right: -0.75rem;
+  padding-right: 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
+}
 .cs-effect-config.cs-v2 .cs-changes-list {
   list-style: none;
   margin: 0;
@@ -397,8 +646,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: min(28rem, 55vh);
-  overflow-y: auto;
 }
 .cs-effect-config.cs-v2 .cs-change {
   position: relative;
@@ -415,9 +662,17 @@
   box-shadow: none;
   text-align: left;
 }
-/* Reserve the card's top-right corner for the delete button. */
-.cs-effect-config.cs-v2 .cs-change > .cs-field:first-child {
-  padding-right: 32px;
+/* The first field carries a header row: eyebrow label on the left, delete button
+   on the right — so the TYPE control stays full-width below it (item 9.e / handoff). */
+.cs-effect-config.cs-v2 .cs-change-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.cs-effect-config.cs-v2 .cs-change-head > label {
+  margin-bottom: 0;
 }
 /* Verbatim/raw rows read as "advanced" — neutral dashed rail. */
 .cs-effect-config.cs-v2 .cs-change-raw {
@@ -431,9 +686,11 @@
   display: block;
   margin: 0;
 }
-.cs-effect-config.cs-v2 .cs-change .cs-field > label {
+/* Eyebrow label — descendant selector so it also styles the label inside
+   `.cs-change-head` (a grandchild of .cs-field); the margin is added only to
+   direct-child labels (the header supplies its own bottom margin). */
+.cs-effect-config.cs-v2 .cs-change .cs-field label {
   display: block;
-  margin-bottom: 6px;
   font-family: var(--csv2-font-mono);
   font-weight: 600;
   font-size: 10px;
@@ -441,14 +698,19 @@
   text-transform: uppercase;
   color: var(--csv2-muted);
 }
+.cs-effect-config.cs-v2 .cs-change .cs-field > label {
+  margin-bottom: 6px;
+}
 /* TYPE names the clause — a touch darker. */
-.cs-effect-config.cs-v2 .cs-change .cs-channel-field > label {
+.cs-effect-config.cs-v2 .cs-change .cs-channel-field label {
   color: var(--csv2-muted-2);
 }
-/* Multi-control value rows (derived = form + slug; quality = kind + param)
-   stack their controls full-width. */
-.cs-effect-config.cs-v2 .cs-value-derived,
-.cs-effect-config.cs-v2 .cs-value-quality {
+/* Multi-control value rows (derived = form + slug; quality = kind + param) stack
+   their controls full-width. Scoped under `.cs-change` (0,4,0) so it beats the
+   `.cs-change .cs-field { display:block }` rule above — otherwise the derived
+   sub-controls collapse to block and lose their spacing (item 9.g). */
+.cs-effect-config.cs-v2 .cs-change .cs-value-derived,
+.cs-effect-config.cs-v2 .cs-change .cs-value-quality {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -464,27 +726,39 @@
   color: var(--csv2-muted-2);
 }
 
-/* Delete: a quiet outline button in the card's top-right (handoff). */
+/* Delete: a quiet outline button in the first field's header row (handoff). Core
+   buttons force height/min-height: var(--button-size) and a themed bg — override
+   fully and pin the icon so it centers (issue #5). */
 .cs-effect-config.cs-v2 .cs-change-delete {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  position: static;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0;
   width: 26px;
   height: 26px;
+  min-width: 0;
+  min-height: 0;
   padding: 0;
   border: 1px solid var(--csv2-border);
   border-radius: 5px;
   background: var(--csv2-bg);
   color: var(--csv2-danger);
+  font-size: 12px;
+  line-height: 1;
   cursor: pointer;
   box-shadow: none;
+}
+.cs-effect-config.cs-v2 .cs-change-delete > i {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1;
 }
 .cs-effect-config.cs-v2 .cs-change-delete:hover {
   border-color: var(--csv2-danger);
   background: #fbeeee;
+  color: var(--csv2-danger);
   box-shadow: none;
   text-shadow: none;
 }
@@ -495,7 +769,13 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 9px 16px;
+  /* Core pins the height with `height: var(--button-size)` (32px in .standard-form)
+     and box-sizing:border-box eats the vertical padding. `min-height` always wins
+     over a smaller `height`, so it sets the real button height; align-items:center
+     centers the label/icon in it. */
+  height: auto;
+  min-height: 40px;
+  padding: 0 18px;
   border: 1px solid var(--csv2-primary);
   border-radius: 6px;
   background: var(--csv2-bg);
@@ -572,4 +852,108 @@
 .cs-difficulty-editor .cs-difficulty-add:hover {
   background: var(--csv2-primary);
   color: var(--csv2-on-primary);
+}
+
+/* =========================================================================
+   Generalized ProseMirror editor (US6 item 1) — the character sheet's clean
+   editor look, DE-SCOPED so every system window (item, House, effect config…)
+   shares it. The character sheet keeps its own higher-specificity rules, so it
+   is unchanged. All selectors carry the `body.game .app` prefix so they clear
+   core's own high-specificity rules — core HIDES `button.toggle` with
+   `body.game .app prose-mirror button.toggle{display:none}` (0,3,3) and forces
+   the dark interface theme's white text; both must be beaten here (items 1.a/1.b).
+   ======================================================================== */
+/* Flex column (NOT block) so the 42px toolbar (flex:0 0 var(--menu-height)) and
+   the flex:1 editor container size correctly — block collapsed them (item 1.c). */
+:is(.chroniclesystem, .cs-v2) prose-mirror {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+/* Force the editing/reading text to the sheet ink even under the dark theme
+   (item 1.a — the text rendered white while editing). */
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-content,
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-content *,
+:is(.chroniclesystem, .cs-v2) prose-mirror .ProseMirror,
+:is(.chroniclesystem, .cs-v2) prose-mirror .ProseMirror * {
+  color: var(--csv2-text);
+}
+:is(.chroniclesystem, .cs-v2) prose-mirror.inactive .editor-content {
+  padding-right: 30px;
+}
+/* Edit toggle (the pencil / exit) — force it VISIBLE over core's display:none,
+   parked top-right (item 1.b). */
+:is(.chroniclesystem, .cs-v2) prose-mirror > button.toggle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--csv2-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  color: var(--csv2-muted);
+  cursor: pointer;
+  z-index: 2;
+}
+:is(.chroniclesystem, .cs-v2) prose-mirror > button.toggle:hover {
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+  background: var(--csv2-bg);
+}
+:is(.chroniclesystem, .cs-v2) prose-mirror > button.toggle:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+/* Editing mode: a bordered white box so the editor reads as a field. */
+:is(.chroniclesystem, .cs-v2) prose-mirror.active {
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  overflow: hidden;
+}
+/* Toolbar — a light bar on the card palette; force core's gold glyphs to ink. */
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu {
+  background: var(--csv2-secondary);
+  border-bottom: 1px solid var(--csv2-border);
+  color: var(--csv2-text);
+  padding-right: 34px;
+}
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu button,
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu a,
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu i,
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu span {
+  color: var(--csv2-dark);
+  text-shadow: none;
+}
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu button:hover,
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu a:hover {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu button:hover i,
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu button:hover span,
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu a:hover i,
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-menu a:hover span {
+  color: var(--csv2-on-primary);
+}
+:is(.chroniclesystem, .cs-v2) prose-mirror .editor-container {
+  background: var(--csv2-bg);
+}
+:is(.chroniclesystem, .cs-v2) prose-mirror .ProseMirror {
+  min-height: 120px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 8px 10px;
+  background: var(--csv2-bg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
+}
+:is(.chroniclesystem, .cs-v2) prose-mirror .ProseMirror:focus {
+  outline: none;
 }
