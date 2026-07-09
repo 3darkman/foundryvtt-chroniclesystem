@@ -264,7 +264,16 @@ function adjustFormulaByWeapon(actor, formula, weapon) {
   return formula;
 }
 
-function getActorTestFormula(actor, abilityName, specialtyName = null) {
+/**
+ * Resolve a rolled ability/specialty to its base capacity — the SSOT shared by
+ * both the effective ({@link getActorTestFormula}) and RAW
+ * ({@link getActorRawTestFormula}) formula builders (US2). Returns the stable
+ * slugs (for channel matching) plus the trait's own base pool/modifier and the
+ * specialty's rating/modifier — WITHOUT any effect channel.
+ * @returns {{abilityKey: string, specialtyKey: string|null, basePool: number,
+ *   baseModifier: number, specValue: number, specModifier: number}}
+ */
+function resolveTraitBase(actor, abilityName, specialtyName = null) {
   console.assert(actor, "actor is invalid!");
   console.assert(abilityName, "ability name is invalid!");
   let ability;
@@ -297,18 +306,41 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
     specModifier = specialty.modifier ? specialty.modifier : 0;
   }
 
-  // Sum an effect channel across the targeted ability (including the global ALL
-  // bucket) and the targeted specialty (excluding ALL, to avoid double-counting
-  // it). Buffers are keyed by STABLE SLUG (spec 008) — the same identity the
-  // fixed sources (armour/conditions) and authored effects push by — so the
-  // math survives a rename to any language. The new-channel getters are
-  // optional-chained so non-character actors (and the doubles) contribute 0.
   const abilityData = ability?.getCSData?.() ?? ability?.system;
   const abilityKey = abilityData?.slug || slugify(ability?.name ?? abilityName);
   const specialtyKey =
     specialty != null
       ? specialty.slug || scopedSpecialtySlug(abilityKey, specialty.name)
       : null;
+  const basePool = ability ? ability.getCSData().rating : 2;
+  const baseModifier = ability ? ability.getCSData().modifier : 0;
+
+  return {
+    abilityKey,
+    specialtyKey,
+    basePool,
+    baseModifier,
+    specValue,
+    specModifier,
+  };
+}
+
+function getActorTestFormula(actor, abilityName, specialtyName = null) {
+  const {
+    abilityKey,
+    specialtyKey,
+    basePool,
+    baseModifier,
+    specValue,
+    specModifier,
+  } = resolveTraitBase(actor, abilityName, specialtyName);
+
+  // Sum an effect channel across the targeted ability (including the global ALL
+  // bucket) and the targeted specialty (excluding ALL, to avoid double-counting
+  // it). Buffers are keyed by STABLE SLUG (spec 008) — the same identity the
+  // fixed sources (armour/conditions) and authored effects push by — so the
+  // math survives a rename to any language. The new-channel getters are
+  // optional-chained so non-character actors (and the doubles) contribute 0.
   const channelTotal = (getter) => {
     const fromAbility = actor[getter]?.(abilityKey, false, true)?.total ?? 0;
     const fromSpecialty = specialtyKey
@@ -318,9 +350,6 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
   };
 
   const formula = new DiceRollFormula();
-  const basePool = ability ? ability.getCSData().rating : 2;
-  const baseModifier = ability ? ability.getCSData().modifier : 0;
-
   formula.pool = basePool + channelTotal("getTestDice");
   formula.dicePenalty = channelTotal("getPenalty");
   formula.modifier = baseModifier + specModifier + channelTotal("getModifier");
@@ -330,11 +359,34 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
   return formula;
 }
 
+/**
+ * The RAW test formula (US2): the trait's own capacity ONLY — no effect channels
+ * — so the roll dialog can show the true base read-only and itemize every
+ * always-on source separately (the itemized entries sum back to the effective
+ * formula, SC-001). NEVER regresses content without effects (FR-032/SC-009).
+ * @returns {DiceRollFormula}
+ */
+function getActorRawTestFormula(actor, abilityName, specialtyName = null) {
+  const { basePool, baseModifier, specValue, specModifier } = resolveTraitBase(
+    actor,
+    abilityName,
+    specialtyName
+  );
+  const formula = new DiceRollFormula();
+  formula.pool = basePool;
+  formula.dicePenalty = 0;
+  formula.modifier = baseModifier + specModifier;
+  formula.bonusDice = specValue;
+  formula.reRoll = 0;
+  return formula;
+}
+
 ChronicleSystem.adjustFormulaByWeapon = adjustFormulaByWeapon;
 ChronicleSystem.eventHandleRoll = eventHandleRoll;
 ChronicleSystem.handleRoll = handleRoll;
 ChronicleSystem.handleRollAsync = handleRollAsync;
 ChronicleSystem.getActorAbilityFormula = getActorTestFormula;
+ChronicleSystem.getActorRawTestFormula = getActorRawTestFormula;
 
 ChronicleSystem.dispositions = [
   new Disposition("CS.sheets.character.dispositions.affectionate", 1, -2, 5),

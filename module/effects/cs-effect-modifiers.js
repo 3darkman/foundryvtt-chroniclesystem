@@ -666,3 +666,89 @@ export function collectPermanentRollEffects(
 ) {
   return collectRollEffects(actor, abilityName, specialtyName, false);
 }
+
+/**
+ * Itemize EVERY always-on contribution to one roll, LABELED BY ORIGIN (US2). The
+ * three source collectors are run into FRESH buffers so each contribution keeps
+ * its origin (condition / equipment / effect) instead of being merged. An entry
+ * matches when its buffer key is the global ALL bucket, the rolled ability slug,
+ * or the rolled specialty slug (the same slug identity the buffers key by). The
+ * result is the roll dialog's itemized list; its per-field sums equal the
+ * effective formula minus the raw base (SC-001). Sources are disjoint, so no
+ * contribution is double-counted.
+ * @param {object} actor
+ * @param {string|null} abilityRef name-or-slug of the rolled ability (or null)
+ * @param {string|null} specialtyRef name-or-slug of the rolled specialty (or null)
+ * @returns {Array<{sourceLabel: string, origin: "condition"|"equipment"|"effect",
+ *   field: string, value: number, condition: string}>}
+ */
+export function collectItemizedAlwaysOn(
+  actor,
+  abilityRef = null,
+  specialtyRef = null
+) {
+  const ALL = ChronicleSystem.modifiersConstants.ALL;
+  const abilityKey =
+    abilityRef != null ? abilitySlugForRef(actor, abilityRef) : null;
+  const specialtyKey =
+    specialtyRef != null
+      ? specialtySlugForRef(actor, abilityKey, specialtyRef)
+      : null;
+  const applies = (key) =>
+    key === ALL ||
+    key === abilityKey ||
+    (specialtyKey !== null && key === specialtyKey);
+
+  const localize = (key) => game?.i18n?.localize?.(key) ?? key;
+  const itemName = new Map((actor?.items ?? []).map((it) => [it._id, it.name]));
+
+  const items = [];
+  const pushBuffer = (buffer, field, origin, labelFor) => {
+    for (const [key, entries] of Object.entries(buffer)) {
+      if (!applies(key)) continue;
+      for (const entry of entries) {
+        items.push({
+          sourceLabel: labelFor(entry),
+          origin,
+          field,
+          value: entry.mod,
+          condition: "",
+        });
+      }
+    }
+  };
+
+  // 1 — dynamic conditions (modifier + penalty buffers; `_id` is a i18n key).
+  const condMods = {};
+  const condPens = {};
+  collectConditionModifiers(actor, condMods, condPens);
+  pushBuffer(condMods, "modifier", "condition", (e) => localize(e._id));
+  pushBuffer(condPens, "dicePenalty", "condition", (e) => localize(e._id));
+
+  // 2 — owned equipment (armour penalty → agility/combat-defence modifier;
+  //     `_id` is the item id → resolve to its display name).
+  const equipMods = {};
+  collectItemModifiers(actor, equipMods);
+  pushBuffer(
+    equipMods,
+    "modifier",
+    "equipment",
+    (e) => itemName.get(e._id) ?? e._id
+  );
+
+  // 3 — permanent authored effects (already resolved per-effect, per-field).
+  for (const eff of collectPermanentRollEffects(
+    actor,
+    abilityRef,
+    specialtyRef
+  )) {
+    items.push({
+      sourceLabel: eff.name,
+      origin: "effect",
+      field: eff.formulaField,
+      value: eff.value,
+      condition: eff.condition,
+    });
+  }
+  return items;
+}
