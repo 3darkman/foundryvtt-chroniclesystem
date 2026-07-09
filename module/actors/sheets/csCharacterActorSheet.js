@@ -132,6 +132,26 @@ export class CSCharacterActorSheet extends CSActorSheet {
       weapon.formula = formula;
     });
 
+    // US1: expose the EFFECTIVE roll formula (base + non-optional effects) per
+    // ability and per specialty so the chips show what a quick roll would total
+    // (paridade chip↔jogada, FR-003/SC-001) — the SAME getActorAbilityFormula
+    // the weapon/intrigue/sorcery/Fortune chips already consume.
+    character.owned.abilities.forEach((ability) => {
+      ability.rollFormula = ChronicleSystem.getActorAbilityFormula(
+        actor,
+        ability.name,
+        null
+      );
+      for (const specialty of Object.values(ability.system.specialties ?? {})) {
+        if (!specialty.rating) continue;
+        specialty.rollFormula = ChronicleSystem.getActorAbilityFormula(
+          actor,
+          ability.name,
+          specialty.name
+        );
+      }
+    });
+
     character.owned.techniques.forEach((technique) => {
       let techniqueData = technique.system;
       let works = (context.currentInjuries = Object.values(

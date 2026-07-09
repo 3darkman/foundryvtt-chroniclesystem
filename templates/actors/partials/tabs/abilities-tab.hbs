@@ -10,7 +10,7 @@
                     <div class="cs2-grid-cell center">
                         {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
                             id=(concat "ability:" ability.name)
-                            label=(concat ability.system.rating "d" (modifier ability.system.modifier)) }}
+                            label=(format-formula ability.rollFormula) }}
                     </div>
                     <div class="cs2-grid-cell">
                         <label class="ability-label item-edit" data-action="editItem"><a>{{ability.name}}</a></label>
@@ -20,7 +20,7 @@
                             {{#if specialty.rating}}
                             {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
                                 id=(concat "specialty:" specialty.name ":" ../this.name)
-                                label=(concat specialty.name " " specialty.rating "B" (modifier specialty.modifier)) }}
+                                label=(concat specialty.name " " (format-formula specialty.rollFormula)) }}
                             {{/if}}
                         {{/each}}
                     </div>
