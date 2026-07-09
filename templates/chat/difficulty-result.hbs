@@ -1,0 +1,19 @@
+{{!-- Difficulty verdict card (US3). Rendered as the ChatMessage content; the
+      dice mechanic is appended by the message's `rolls`. --}}
+<div class="cs-difficulty-card {{#if success}}is-success{{else}}is-failure{{/if}}">
+    <header class="cs-difficulty-verdict">
+        <i class="fas {{#if success}}fa-circle-check{{else}}fa-circle-xmark{{/if}}"></i>
+        <span class="cs-difficulty-outcome">
+            {{#if success}}{{localize "CS.difficulty.result.success"}}{{else}}{{localize "CS.difficulty.result.failure"}}{{/if}}
+        </span>
+        <span class="cs-difficulty-degree">{{degree}}</span>
+    </header>
+    <div class="cs-difficulty-numbers">
+        {{#if difficultyName}}
+        <span class="cs-difficulty-name">{{difficultyName}}</span>
+        {{/if}}
+        <span class="cs-difficulty-cell">{{localize "CS.difficulty.result.total"}}: <b>{{total}}</b></span>
+        <span class="cs-difficulty-cell">{{localize "CS.difficulty.result.target"}}: <b>{{target}}</b></span>
+        <span class="cs-difficulty-cell">{{localize "CS.difficulty.result.margin"}}: <b>{{marginText}}</b></span>
+    </div>
+</div>

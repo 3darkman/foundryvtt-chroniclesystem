@@ -27,7 +27,17 @@
         "reRoll": "Re-Roll 1s",
         "optionalEffects": "Optional Modifiers",
         "activeEffects": "Active Effects",
-        "activeEffectHint": "Always on — already applied to this roll."
+        "activeEffectHint": "Always on — already applied to this roll.",
+        "baseTitle": "Base (raw capacity)",
+        "itemizedTitle": "Always-on modifiers",
+        "extrasTitle": "Your extra modifiers",
+        "extrasHint": "Added on top of the base — flagged as your change.",
+        "difficulty": "Difficulty",
+        "origin": {
+          "condition": "Condition",
+          "equipment": "Equipment",
+          "effect": "Effect"
+        }
       },
       "addingHouseEvent": {
         "title": "Should the event generate the modifiers automatically?",
@@ -69,6 +79,19 @@
       "isModifierDialogDefault": {
         "name": "Modifier Dialog as Default?",
         "hint": "if checked, when clicking on dice rolls on an actor's sheet, it will show the modifiers window, and will make the roll without showing the window when holding the SHIFT key. Each player defines his configuration."
+      },
+      "difficulty": {
+        "name": "Difficulty Table",
+        "menuName": "Difficulty Table",
+        "menuLabel": "Configure Difficulties",
+        "menuHint": "Edit the difficulty ladder players choose from in the roll dialog, and pick a default.",
+        "restore": "Restore Factory Defaults",
+        "addRow": "Add Difficulty",
+        "deleteRow": "Remove",
+        "columnName": "Name (or i18n key)",
+        "columnTarget": "Target",
+        "columnDefault": "Default",
+        "defaultLabel": "Default difficulty pre-selected in the roll dialog"
       }
     },
     "effects": {

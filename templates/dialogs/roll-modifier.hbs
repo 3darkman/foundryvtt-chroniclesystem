@@ -1,23 +1,45 @@
-<div>
-    {{> (csFormGroup) id="pool" inputCssClass="size50" value=formula.pool placeHolder="CS.dialogs.rollModifier.pool" labelText="CS.dialogs.rollModifier.pool" dataType=Number }}
-    {{> (csFormGroup) id="bonusDice" inputCssClass="size50" value=formula.bonusDice placeHolder="CS.dialogs.rollModifier.bonusDice" labelText="CS.dialogs.rollModifier.bonusDice" dataType=Number }}
-    {{> (csFormGroup) id="reRoll" inputCssClass="size50" value=formula.reRoll placeHolder="CS.dialogs.rollModifier.reRoll" labelText="CS.dialogs.rollModifier.reRoll" dataType=Number }}
-    {{> (csFormGroup) id="modifier" inputCssClass="size50" value=formula.modifier placeHolder="CS.dialogs.rollModifier.modifier" labelText="CS.dialogs.rollModifier.modifier" dataType=Number }}
-    {{> (csFormGroup) id="dicePenalty" inputCssClass="size50" value=formula.dicePenalty placeHolder="CS.dialogs.rollModifier.dicePenalty" labelText="CS.dialogs.rollModifier.dicePenalty" dataType=Number }}
-    {{#if activeEffects.length}}
-    <fieldset class="cs-optional-effects cs-active-effects">
-        <legend>{{localize "CS.dialogs.rollModifier.activeEffects"}}</legend>
-        {{#each activeEffects}}
-        <label class="cs-optional-effect cs-active-effect" title="{{localize 'CS.dialogs.rollModifier.activeEffectHint'}}">
-            <input type="checkbox" checked disabled />
-            <span class="cs-optional-effect-name">{{this.name}}</span>
-            <span class="cs-optional-effect-value">{{this.displayValue}}</span>
-            {{#if this.condition}}<span class="cs-optional-effect-condition">{{this.condition}}</span>{{/if}}
-            <i class="fas fa-lock cs-active-effect-lock" aria-hidden="true"></i>
-        </label>
+{{!-- Roll dialog (spec 009 US2/US3). Root is a <div> (NEVER a nested <form> — the
+      DialogV2 frame owns the form). The BASE inputs are read-only and carry NO
+      name (v13 submits readonly inputs that HAVE a name), so only the difficulty
+      selector, the optional-effect checkboxes and the user-extra inputs submit. --}}
+<div class="cs-roll-dialog">
+    {{#if difficultyOptions.length}}
+    <div class="cs-roll-difficulty">
+        <label for="difficultyIndex">{{localize "CS.dialogs.rollModifier.difficulty"}}</label>
+        <select id="difficultyIndex" name="difficultyIndex">
+            <option value="-1" {{#if noneSelected}}selected{{/if}}>{{localize "CS.difficulty.none"}}</option>
+            {{#each difficultyOptions}}
+            <option value="{{this.index}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+        </select>
+    </div>
+    {{/if}}
+
+    <fieldset class="cs-roll-base">
+        <legend>{{localize "CS.dialogs.rollModifier.baseTitle"}}</legend>
+        <div class="cs-roll-grid">
+            <label>{{localize "CS.dialogs.rollModifier.pool"}}<input type="number" value="{{base.pool}}" readonly tabindex="-1" /></label>
+            <label>{{localize "CS.dialogs.rollModifier.bonusDice"}}<input type="number" value="{{base.bonusDice}}" readonly tabindex="-1" /></label>
+            <label>{{localize "CS.dialogs.rollModifier.modifier"}}<input type="number" value="{{base.modifier}}" readonly tabindex="-1" /></label>
+            <label>{{localize "CS.dialogs.rollModifier.dicePenalty"}}<input type="number" value="{{base.dicePenalty}}" readonly tabindex="-1" /></label>
+            <label>{{localize "CS.dialogs.rollModifier.reRoll"}}<input type="number" value="{{base.reRoll}}" readonly tabindex="-1" /></label>
+        </div>
+    </fieldset>
+
+    {{#if itemizedAlwaysOn.length}}
+    <fieldset class="cs-roll-itemized">
+        <legend>{{localize "CS.dialogs.rollModifier.itemizedTitle"}}</legend>
+        {{#each itemizedAlwaysOn}}
+        <div class="cs-itemized-row cs-origin-{{this.origin}}">
+            <span class="cs-itemized-origin">{{this.originLabel}}</span>
+            <span class="cs-itemized-source">{{this.sourceLabel}}</span>
+            <span class="cs-itemized-value">{{this.displayValue}}</span>
+            {{#if this.condition}}<span class="cs-itemized-condition">{{this.condition}}</span>{{/if}}
+        </div>
         {{/each}}
     </fieldset>
     {{/if}}
+
     {{#if optionalEffects.length}}
     <fieldset class="cs-optional-effects">
         <legend>{{localize "CS.dialogs.rollModifier.optionalEffects"}}</legend>
@@ -31,4 +53,16 @@
         {{/each}}
     </fieldset>
     {{/if}}
+
+    <fieldset class="cs-roll-extras">
+        <legend>{{localize "CS.dialogs.rollModifier.extrasTitle"}}</legend>
+        <p class="cs-roll-extras-hint">{{localize "CS.dialogs.rollModifier.extrasHint"}}</p>
+        <div class="cs-roll-grid">
+            <label>{{localize "CS.dialogs.rollModifier.pool"}}<input type="number" name="extraPool" value="0" /></label>
+            <label>{{localize "CS.dialogs.rollModifier.bonusDice"}}<input type="number" name="extraBonusDice" value="0" /></label>
+            <label>{{localize "CS.dialogs.rollModifier.modifier"}}<input type="number" name="extraModifier" value="0" /></label>
+            <label>{{localize "CS.dialogs.rollModifier.dicePenalty"}}<input type="number" name="extraDicePenalty" value="0" /></label>
+            <label>{{localize "CS.dialogs.rollModifier.reRoll"}}<input type="number" name="extraReRoll" value="0" /></label>
+        </div>
+    </fieldset>
 </div>

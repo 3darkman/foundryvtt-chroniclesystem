@@ -123,19 +123,82 @@ function _resolveRollTarget(roll_definition) {
 const DICE_FORMULA_FIELDS = new Set(["pool", "bonusDice", "dicePenalty"]);
 
 function _applyCheckedOptionalEffects(form, formula) {
-  if (!form?.querySelectorAll) return;
-  // Only ENABLED, checked toggles are applied here. The permanent "active
-  // effects" render as disabled+checked (visual only) and already entered the
-  // formula via the read-side buffer, so `:not([disabled])` prevents a double count.
+  if (!form?.querySelectorAll) return false;
+  // Only ENABLED, checked toggles are applied here. The always-on itemized rows
+  // are display-only (no checkbox), so they can never be re-applied here — the
+  // effective formula already embeds them (SC-001).
   const checked = form.querySelectorAll(
     ".cs-optional-effect input[type=checkbox]:checked:not([disabled])"
   );
+  let applied = false;
   checked.forEach((checkbox) => {
     const field = checkbox.dataset.field;
     const value = parseInt(checkbox.dataset.value);
     if (!field || Number.isNaN(value)) return;
     formula[field] += value;
+    applied = true;
   });
+  return applied;
+}
+
+/**
+ * Add the dialog's user-EXTRA fields to the formula (marked as user changes,
+ * FR-009). Each extra is a small signed number the player types on top of the
+ * always-on base. @returns {boolean} whether any non-zero extra was applied.
+ */
+function _applyUserExtras(form, formula) {
+  let changed = false;
+  const apply = (name, field) => {
+    const value = parseInt(form?.[name]?.value);
+    if (!Number.isNaN(value) && value !== 0) {
+      formula[field] += value;
+      changed = true;
+    }
+  };
+  apply("extraPool", "pool");
+  apply("extraBonusDice", "bonusDice");
+  apply("extraModifier", "modifier");
+  apply("extraDicePenalty", "dicePenalty");
+  apply("extraReRoll", "reRoll");
+  return changed;
+}
+
+/**
+ * The dialog's read-only BASE formula (US2): the raw trait capacity for
+ * ability/specialty rolls; for formula-string rolls, derived by subtracting the
+ * itemized always-on from the effective formula so `base + Σ itemized` always
+ * equals the effective formula we roll from (SC-001).
+ */
+function _rawFormulaForDialog(
+  actor,
+  effectiveFormula,
+  abilityName,
+  specialtyName,
+  itemized
+) {
+  if (abilityName)
+    return getActorRawTestFormula(actor, abilityName, specialtyName);
+  const raw = new DiceRollFormula();
+  raw.pool = effectiveFormula.pool;
+  raw.bonusDice = effectiveFormula.bonusDice;
+  raw.modifier = effectiveFormula.modifier;
+  raw.dicePenalty = effectiveFormula.dicePenalty;
+  raw.reRoll = effectiveFormula.reRoll ?? 0;
+  for (const item of itemized) raw[item.field] -= item.value;
+  return raw;
+}
+
+/** Resolve the difficulty descriptor at `index` in the sanitized table, or null
+ *  (free roll). Label is the GM literal when set, else the canonical i18n key. */
+function _difficultyAt(table, index) {
+  const i = Number(index);
+  if (!Number.isInteger(i) || i < 0 || i >= table.entries.length) return null;
+  const entry = table.entries[i];
+  return {
+    target: entry.target,
+    label: entry.label ?? null,
+    labelKey: entry.label ? null : entry.labelKey,
+  };
 }
 
 function handleRoll(rollType, actor) {
@@ -148,17 +211,12 @@ function handleRoll(rollType, actor) {
   return csRoll.doRoll(actor, false);
 }
 
-async function _showModifierDialog(
-  formula,
-  optionalEffects = [],
-  activeEffects = []
-) {
+async function _showModifierDialog(context) {
   const template = CSConstants.Templates.Dialogs.ROLL_MODIFIER;
-  const html = await foundry.applications.handlebars.renderTemplate(template, {
-    formula: formula,
-    optionalEffects: optionalEffects,
-    activeEffects: activeEffects,
-  });
+  const html = await foundry.applications.handlebars.renderTemplate(
+    template,
+    context
+  );
 
   return foundry.applications.api.DialogV2.wait({
     window: {
@@ -186,7 +244,15 @@ async function _showModifierDialog(
 async function handleRollAsync(rollType, actor, showModifierDialog = false) {
   const roll_definition = rollType.split(":");
   if (roll_definition.length < 2) return;
-  let formula = _getFormula(roll_definition, actor);
+  let formula = _getFormula(roll_definition, actor); // effective = base + always-on
+
+  // Difficulty table (US3): drives the dialog selector and the quick-roll default
+  // (defaultIndex). cs-difficulty imports only csConstants — no eval-time cycle.
+  const { readDifficultyTable, entryLabel } = await import(
+    "../difficulty/cs-difficulty.js"
+  );
+  const difficultyTable = readDifficultyTable();
+  let difficulty = _difficultyAt(difficultyTable, difficultyTable.defaultIndex);
 
   const revertModifierDialog = game.settings.get(
     CSConstants.Settings.SYSTEM_NAME,
@@ -197,55 +263,79 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
     // Lazy import: a static one would close the eval-time cycle
     // ChronicleSystem → cs-effect-modifiers → cs-effect-vocabulary →
     // ChronicleSystem (vocabulary reads modifiersConstants at module-eval time).
-    const { collectOptionalRollEffects, collectPermanentRollEffects } =
+    const { collectOptionalRollEffects, collectItemizedAlwaysOn } =
       await import("../effects/cs-effect-modifiers.js");
     const { abilityName, specialtyName } = _resolveRollTarget(roll_definition);
-    const withDisplayValue = (effect) => {
-      const sign = effect.value >= 0 ? `+${effect.value}` : `${effect.value}`;
-      const unit = DICE_FORMULA_FIELDS.has(effect.formulaField) ? "d" : "";
-      return { ...effect, displayValue: `${sign}${unit}` };
-    };
+
+    const signed = (v) => (v >= 0 ? `+${v}` : `${v}`);
+    const withUnit = (v, field) =>
+      `${signed(v)}${DICE_FORMULA_FIELDS.has(field) ? "d" : ""}`;
+    const withDisplayValue = (effect) => ({
+      ...effect,
+      displayValue: withUnit(effect.value, effect.formulaField),
+    });
+    const withItemDisplay = (item) => ({
+      ...item,
+      displayValue: withUnit(item.value, item.field),
+      originLabel: SystemUtils.localize(
+        `CS.dialogs.rollModifier.origin.${item.origin}`
+      ),
+    });
+
+    // US2: itemize every always-on source (labeled by origin); show the RAW base
+    // read-only. `base + Σ itemized` equals the effective formula we roll from.
+    const itemizedAlwaysOn = collectItemizedAlwaysOn(
+      actor,
+      abilityName,
+      specialtyName
+    ).map(withItemDisplay);
+    const base = _rawFormulaForDialog(
+      actor,
+      formula,
+      abilityName,
+      specialtyName,
+      itemizedAlwaysOn
+    );
     const optionalEffects = collectOptionalRollEffects(
       actor,
       abilityName,
       specialtyName
     ).map(withDisplayValue);
-    // Permanent roll effects already entered the formula via the read-side buffer;
-    // surface them as LOCKED (disabled+checked) rows so the player sees the source.
-    const activeEffects = collectPermanentRollEffects(
-      actor,
-      abilityName,
-      specialtyName
-    ).map(withDisplayValue);
+    const difficultyOptions = difficultyTable.entries.map((entry, index) => ({
+      index,
+      label: entryLabel(entry, SystemUtils.localize),
+      selected: index === difficultyTable.defaultIndex,
+    }));
 
-    let formData = await _showModifierDialog(
-      formula,
+    const formData = await _showModifierDialog({
+      base,
+      itemizedAlwaysOn,
       optionalEffects,
-      activeEffects
+      difficultyOptions,
+      noneSelected: difficultyTable.defaultIndex < 0,
+    });
+    if (!formData) return null;
+
+    // Roll from the EFFECTIVE formula (= base + itemized), then add the checked
+    // optional effects (default off) and the user's extras.
+    const rolled = new DiceRollFormula();
+    rolled.pool = formula.pool;
+    rolled.bonusDice = formula.bonusDice;
+    rolled.modifier = formula.modifier;
+    rolled.dicePenalty = formula.dicePenalty;
+    rolled.reRoll = formula.reRoll ?? 0;
+    const optionalApplied = _applyCheckedOptionalEffects(formData, rolled);
+    const extrasApplied = _applyUserExtras(formData, rolled);
+    rolled.isUserChanged = optionalApplied || extrasApplied;
+    formula = rolled;
+
+    difficulty = _difficultyAt(
+      difficultyTable,
+      formData.difficultyIndex?.value ?? difficultyTable.defaultIndex
     );
-    if (formData) {
-      const formulaChanged = new DiceRollFormula();
-      formulaChanged.pool = formData.pool.value;
-      formulaChanged.bonusDice = formData.bonusDice.value;
-      formulaChanged.reRoll = formData.reRoll.value;
-      formulaChanged.modifier = formData.modifier.value;
-      formulaChanged.dicePenalty = formData.dicePenalty.value;
-
-      // Permanent effects already entered the formula via the read-side buffer;
-      // the checked optional effects are added here (default off). No double
-      // counting — permanent effects are never optional (design §4).
-      _applyCheckedOptionalEffects(formData, formulaChanged);
-
-      if (formulaChanged.toStr() !== formula.toStr()) {
-        formulaChanged.isUserChanged = true;
-        formula = formulaChanged;
-      }
-    } else {
-      return null;
-    }
   }
 
-  let csRoll = new CSRoll(roll_definition[1], formula);
+  let csRoll = new CSRoll(roll_definition[1], formula, difficulty);
   return await csRoll.doRoll(actor, true);
 }
 
