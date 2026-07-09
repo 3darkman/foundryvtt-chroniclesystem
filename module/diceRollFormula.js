@@ -91,14 +91,16 @@ export class DiceRollFormula {
   }
 
   ToFormattedStr() {
+    // COMPACT format (no spaces) — the character-sheet redesign made the chips
+    // compact on purpose; spacing them out ("3d6 + 2B + 1") reintroduces a huge
+    // gap between value and sign in the roll chips. Keep it tight: "3d6+2B+1".
     let pool = Math.max(this.pool - this.dicePenalty, 1);
     let result = `${pool}d6`;
     if (this.bonusDice > 0) {
-      result += ` + ${this.bonusDice}B`;
+      result += `+${this.bonusDice}B`;
     }
     if (this.modifier !== 0) {
-      result +=
-        this.modifier > 0 ? ` + ${this.modifier}` : ` - ${-this.modifier}`;
+      result += this.modifier > 0 ? `+${this.modifier}` : `-${-this.modifier}`;
     }
     return result;
   }

@@ -438,6 +438,9 @@
   padding: 4px 9px;
   font: 600 12px var(--csv2-font-mono);
   cursor: pointer;
+  /* The effective formula chips (spec 009 US1) are wider — never wrap a formula
+     mid-way; the Test columns/containers grow (or scroll) to fit instead. */
+  white-space: nowrap;
 }
 
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .rollable:hover {

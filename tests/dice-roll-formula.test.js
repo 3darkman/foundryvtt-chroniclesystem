@@ -54,30 +54,30 @@ describe("DiceRollFormula — ToFormattedStr", () => {
     expect(f.ToFormattedStr().startsWith("1d6")).toBe(true);
   });
 
-  it('1.6 appends " + {n}B" when bonusDice > 0', () => {
+  it('1.6 appends "+{n}B" when bonusDice > 0 (compact — the chip format)', () => {
     const f = new DiceRollFormula();
     f.pool = 4;
     f.bonusDice = 2;
-    expect(f.ToFormattedStr()).toContain(" + 2B");
+    expect(f.ToFormattedStr()).toContain("+2B");
   });
 
-  it('1.7 shows a positive modifier as " + 3"', () => {
+  it('1.7 shows a positive modifier as "+3" (compact)', () => {
     const f = new DiceRollFormula();
     f.modifier = 3;
-    expect(f.ToFormattedStr()).toContain(" + 3");
+    expect(f.ToFormattedStr()).toContain("+3");
   });
 
-  it('1.8 shows a negative modifier as " - 3"', () => {
+  it('1.8 shows a negative modifier as "-3" (compact)', () => {
     const f = new DiceRollFormula();
     f.modifier = -3;
-    expect(f.ToFormattedStr()).toContain(" - 3");
+    expect(f.ToFormattedStr()).toContain("-3");
   });
 
   it("1.9 hides a zero modifier", () => {
     const f = new DiceRollFormula();
     f.modifier = 0;
     const out = f.ToFormattedStr();
-    expect(out).not.toContain(" + 0");
-    expect(out).not.toContain(" - 0");
+    expect(out).not.toContain("+0");
+    expect(out).not.toContain("-0");
   });
 });
