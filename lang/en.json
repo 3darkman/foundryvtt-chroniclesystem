@@ -207,6 +207,44 @@
       },
       "customTarget": "Custom (type a slug)…"
     },
+    "intrigue": {
+      "techniques": {
+        "bargain": "Bargain",
+        "charm": "Charm",
+        "convince": "Convince",
+        "incite": "Incite",
+        "intimidate": "Intimidate",
+        "seduce": "Seduce",
+        "taunt": "Taunt"
+      }
+    },
+    "difficulty": {
+      "automatic": "Automatic",
+      "easy": "Easy",
+      "routine": "Routine",
+      "challenging": "Challenging",
+      "formidable": "Formidable",
+      "hard": "Hard",
+      "veryHard": "Very Hard",
+      "heroic": "Heroic",
+      "none": "No difficulty (free roll)",
+      "degree": {
+        "criticalFailure": "Critical Failure",
+        "marginalFailure": "Marginal Failure",
+        "marginalSuccess": "Marginal Success",
+        "greatSuccess": "Great Success",
+        "incredibleSuccess": "Incredible Success",
+        "astoundingSuccess": "Astounding Success"
+      },
+      "result": {
+        "success": "Success",
+        "failure": "Failure",
+        "target": "Target",
+        "total": "Total",
+        "margin": "Margin",
+        "degree": "Degree"
+      }
+    },
     "sheets": {
       "characterSheet": "Character Sheet",
       "houseSheet": "House Sheet",
