@@ -87,7 +87,10 @@
       },
       "status": {
         "active": "Active",
-        "suppressed": "Suppressed"
+        "suppressed": "Suppressed",
+        "suspended": "Suspended",
+        "disabled": "Disabled",
+        "suspendedHint": "Suspended — the source item is not equipped."
       },
       "locked": "Locked — only the GM can modify this effect.",
       "permission": {

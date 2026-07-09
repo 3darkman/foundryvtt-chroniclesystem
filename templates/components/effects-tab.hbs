@@ -22,12 +22,26 @@
             </div>
             <span class="effect-origin-name">{{localize (concat "CS.effects.origin." effect.originKind)}}{{#if effect.sourceName}}: {{effect.sourceName}}{{/if}}</span>
             <span class="effect-status">
-                <span class="effect-status-badge {{#if effect.active}}is-active{{else}}is-suppressed{{/if}}">
-                    {{#if effect.active}}{{localize "CS.effects.status.active"}}{{else}}{{localize "CS.effects.status.suppressed"}}{{/if}}
+                <span class="effect-status-badge is-{{effect.displayState}}">
+                    {{localize (concat "CS.effects.status." effect.displayState)}}
                 </span>
             </span>
             <div class="effect-controls flexrow">
+                {{#if effect.isSuppressed}}
+                {{!-- Suspended is derived from the unequipped source item: no reactivate
+                      toggle — a non-interactive icon carries the cause (FR-024/FR-025). --}}
+                <i class="effect-suspended-icon fas fa-link-slash" title="{{localize 'CS.effects.status.suspendedHint'}}"></i>
                 {{#if effect.editable}}
+                <a class="effect-control" data-action="effectEdit" data-effect-id="{{effect.id}}" title="{{localize 'CS.effects.edit'}}">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a class="effect-control effect-delete" data-action="effectDelete" data-effect-id="{{effect.id}}" title="{{localize 'CS.effects.delete'}}">
+                    <i class="fas fa-times"></i>
+                </a>
+                {{else}}
+                <i class="effect-lock fas fa-lock" title="{{localize 'CS.effects.locked'}}"></i>
+                {{/if}}
+                {{else if effect.editable}}
                 <a class="effect-control effect-toggle {{#unless effect.disabled}}is-on{{/unless}}" data-action="effectToggle" data-effect-id="{{effect.id}}" title="{{localize 'CS.effects.toggle'}}">
                     <i class="fas {{#if effect.disabled}}fa-toggle-off{{else}}fa-toggle-on{{/if}}"></i>
                 </a>

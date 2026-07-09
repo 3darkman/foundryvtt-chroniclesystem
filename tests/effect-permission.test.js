@@ -20,6 +20,7 @@ const fakeEffect = ({
   name = "Effect",
   img = "i.svg",
   disabled = false,
+  isSuppressed = false,
   origin,
   authorId,
   item = null,
@@ -29,6 +30,7 @@ const fakeEffect = ({
   name,
   img,
   disabled,
+  isSuppressed,
   item,
   originItem,
   getFlag: (scope, key) => {
@@ -112,9 +114,9 @@ describe("effectOriginKind — the tab badge classification", () => {
   });
 
   it("is 'item' for a non-player effect that has a distinct source item", () => {
-    expect(effectOriginKind(fakeEffect({ origin: "item" }), "Plate Armor")).toBe(
-      "item"
-    );
+    expect(
+      effectOriginKind(fakeEffect({ origin: "item" }), "Plate Armor")
+    ).toBe("item");
   });
 
   it("is 'intrinsic' for the actor's own non-player effect (no source item)", () => {
@@ -181,6 +183,27 @@ describe("buildEffectContext", () => {
     expect(ctx.editable).toBe(true);
     expect(ctx.locked).toBe(false);
   });
+});
+
+describe("buildEffectContext — displayState 3-state matrix (US5)", () => {
+  // disabled × isSuppressed → the single badge state. Suppression PREVAILS over a
+  // manual disable (FR-023): both true collapses to "suspended".
+  const cases = [
+    [false, false, "active"],
+    [true, false, "disabled"],
+    [false, true, "suspended"],
+    [true, true, "suspended"], // collapse: suppression wins
+  ];
+  for (const [disabled, isSuppressed, expected] of cases) {
+    it(`disabled=${disabled}, isSuppressed=${isSuppressed} → ${expected}`, () => {
+      const ctx = buildEffectContext(
+        fakeEffect({ disabled, isSuppressed }),
+        gm,
+        { id: "actor1" }
+      );
+      expect(ctx.displayState).toBe(expected);
+    });
+  }
 });
 
 describe("effectBlockMessageKey — the right denial reason per origin", () => {
