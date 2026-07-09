@@ -90,6 +90,13 @@
   background: var(--csv2-bg);
 }
 
+/* The AppV2 scroll container wraps every part — keep it white (kills the legacy
+   bluish tint from global.css) and let each part own its padding. */
+.cs-effect-config.cs-v2 .window-content {
+  background: var(--csv2-bg);
+  padding: 0;
+}
+
 /* The AppV2 window already provides the title bar; tint it near-black. */
 .cs-effect-config.cs-v2 .window-header {
   background: var(--csv2-title-bg);
@@ -139,6 +146,10 @@
   color: var(--csv2-dark);
 }
 .cs-effect-config.cs-v2 .cs-effect-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
   font-family: var(--csv2-font-sans);
   font-weight: 500;
   font-size: 12px;
@@ -250,6 +261,11 @@
   height: 18px;
   accent-color: var(--csv2-primary);
 }
+/* Hide the browser's datalist arrow on the slug free-text fields (renders
+   misaligned); the datalist still autocompletes as the user types. */
+.cs-effect-config.cs-v2 input[list]::-webkit-calendar-picker-indicator {
+  display: none;
+}
 .cs-effect-config.cs-v2 .hint,
 .cs-effect-config.cs-v2 .csv2-help {
   font-family: var(--csv2-font-sans);
@@ -306,41 +322,193 @@
   box-shadow: none;
 }
 
-/* Changes tab — reskin the cascade "clause" cards to the clean look while
-   keeping the channel-colored left rail as a subtle accent. */
+/* =========================================================================
+   Changes tab (US6) — the cascade authored as clean "change cards" that match
+   the Active Effect design handoff. This is now the SINGLE source for the
+   Changes-tab look: the legacy heraldic rules (effects.css / global.css
+   `.cs-effect-config …`) were removed so nothing competes.
+   ======================================================================== */
 .cs-effect-config.cs-v2 .cs-effect-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   color: var(--csv2-text);
 }
 .cs-effect-config.cs-v2 .cs-effect-changes > .hint {
+  margin: 0;
   font-family: var(--csv2-font-sans);
   font-style: italic;
   font-size: 12.5px;
+  line-height: 1.5;
   color: var(--csv2-muted-2);
 }
+
+/* Optional / condition callout — the tinted card from the handoff. */
 .cs-effect-config.cs-v2 .cs-effect-flags {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 12px 14px;
   border: 1px solid var(--csv2-callout-border);
-  border-left: 4px solid var(--csv2-primary);
   border-radius: 7px;
   background: var(--csv2-area);
 }
+.cs-effect-config.cs-v2 .cs-effect-optional {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--csv2-dark);
+}
+.cs-effect-config.cs-v2 .cs-effect-flags > .hint {
+  margin: 0;
+  font-family: var(--csv2-font-sans);
+  font-style: normal;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--csv2-muted-2);
+}
+.cs-effect-config.cs-v2 .cs-effect-condition {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--csv2-primary);
+}
+.cs-effect-config.cs-v2 .cs-effect-condition input {
+  flex: 1 1 auto;
+  font-family: var(--csv2-font-mono);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Change list + cards. */
+.cs-effect-config.cs-v2 .cs-changes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: min(28rem, 55vh);
+  overflow-y: auto;
+}
 .cs-effect-config.cs-v2 .cs-change {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  margin: 0;
+  padding: 14px;
   border: 1px solid var(--csv2-border);
   border-left: 4px solid var(--csv2-primary);
   border-radius: 7px;
   background: var(--csv2-bg);
   box-shadow: none;
+  text-align: left;
 }
-.cs-effect-config.cs-v2 .cs-change > .cs-field > label {
+/* Reserve the card's top-right corner for the delete button. */
+.cs-effect-config.cs-v2 .cs-change > .cs-field:first-child {
+  padding-right: 32px;
+}
+/* Verbatim/raw rows read as "advanced" — neutral dashed rail. */
+.cs-effect-config.cs-v2 .cs-change-raw {
+  border-left-style: dashed;
+  border-left-color: var(--csv2-muted);
+  background: var(--csv2-border-soft);
+}
+
+/* Each field: an eyebrow label over a full-width control. */
+.cs-effect-config.cs-v2 .cs-change .cs-field {
+  display: block;
+  margin: 0;
+}
+.cs-effect-config.cs-v2 .cs-change .cs-field > label {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--csv2-muted);
 }
+/* TYPE names the clause — a touch darker. */
+.cs-effect-config.cs-v2 .cs-change .cs-channel-field > label {
+  color: var(--csv2-muted-2);
+}
+/* Multi-control value rows (derived = form + slug; quality = kind + param)
+   stack their controls full-width. */
+.cs-effect-config.cs-v2 .cs-value-derived,
+.cs-effect-config.cs-v2 .cs-value-quality {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cs-effect-config.cs-v2 .cs-quality-param {
+  max-width: 8rem;
+}
+.cs-effect-config.cs-v2 .cs-static-target {
+  display: inline-block;
+  font-family: var(--csv2-font-sans);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--csv2-muted-2);
+}
+
+/* Delete: a quiet outline button in the card's top-right (handoff). */
+.cs-effect-config.cs-v2 .cs-change-delete {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--csv2-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  color: var(--csv2-danger);
+  cursor: pointer;
+  box-shadow: none;
+}
+.cs-effect-config.cs-v2 .cs-change-delete:hover {
+  border-color: var(--csv2-danger);
+  background: #fbeeee;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+/* Add change — an outline call-to-action (handoff). */
 .cs-effect-config.cs-v2 .cs-change-add {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
   border: 1px solid var(--csv2-primary);
+  border-radius: 6px;
+  background: var(--csv2-bg);
   color: var(--csv2-primary);
-  border-radius: 7px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 12.5px;
+  cursor: pointer;
 }
 .cs-effect-config.cs-v2 .cs-change-add:hover {
   background: var(--csv2-primary);
   color: var(--csv2-on-primary);
+  box-shadow: none;
 }
 
 /* =========================================================================
