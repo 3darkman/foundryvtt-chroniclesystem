@@ -1,0 +1,24 @@
+{{!-- Redesigned Active Effect header (US6). NOT a tab — no `class="tab"`. Keeps
+      the core `data-action="editImage" data-edit="img"` on the icon and the
+      `name="name"` input so the image picker + name persistence still work. The
+      meta line mirrors the Optional/Condition flags authored in the Changes tab,
+      updated live by _updateHeaderMeta. --}}
+<header class="sheet-header img-name cs-effect-header">
+    <img class="cs-effect-icon" src="{{source.img}}" data-action="editImage" data-edit="img"
+        alt="{{localize 'EFFECT.FIELDS.img.label'}}" />
+    <div class="cs-effect-headings">
+        <input class="cs-effect-name-input" name="name" type="text" value="{{source.name}}"
+            placeholder="{{localize 'EFFECT.FIELDS.name.label'}}"
+            aria-label="{{localize 'EFFECT.FIELDS.name.label'}}" />
+        <div class="cs-effect-meta">
+            <span class="cs-meta-label">{{localize "CS.effects.redesign.optionalMeta"}}</span>
+            <span class="cs-effect-optional-meta">
+                {{#if effectOptional}}{{localize "CS.effects.redesign.yes"}}{{else}}{{localize "CS.effects.redesign.no"}}{{/if}}
+            </span>
+            <span class="cs-effect-condition-wrap" {{#unless effectOptional}}style="display:none"{{/unless}}>
+                <span class="cs-meta-label">{{localize "CS.effects.redesign.conditionMeta"}}</span>
+                <span class="cs-effect-condition-meta">{{#if effectCondition}}{{effectCondition}}{{else}}—{{/if}}</span>
+            </span>
+        </div>
+    </div>
+</header>

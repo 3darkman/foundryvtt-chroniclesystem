@@ -366,3 +366,149 @@
   font-size: 0.7rem;
   color: var(--cs-stone-dark);
 }
+
+/* --------------------------------- roll dialog (US2/US3) ------------------- */
+
+.cs-roll-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--cs-ink);
+}
+.cs-roll-dialog fieldset {
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--cs-stone);
+  border-radius: 4px;
+}
+.cs-roll-dialog legend {
+  padding: 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cs-azure);
+}
+.cs-roll-difficulty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cs-roll-difficulty label {
+  font-weight: 600;
+  color: var(--cs-azure);
+}
+.cs-roll-difficulty select {
+  flex: 1 1 auto;
+}
+.cs-roll-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+}
+.cs-roll-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cs-stone-dark);
+}
+.cs-roll-base input[readonly] {
+  background: var(--cs-parchment);
+  color: var(--cs-ink);
+  font-weight: 700;
+}
+.cs-roll-extras-hint {
+  margin: 0 0 0.35rem;
+  font-family: var(--cs-serif);
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--cs-stone-dark);
+}
+.cs-itemized-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.15rem 0.2rem;
+  border-left: 3px solid var(--cs-stone);
+  padding-left: 0.5rem;
+}
+.cs-itemized-row.cs-origin-condition {
+  border-left-color: var(--cs-crimson);
+}
+.cs-itemized-row.cs-origin-equipment {
+  border-left-color: var(--cs-bronze);
+}
+.cs-itemized-row.cs-origin-effect {
+  border-left-color: var(--cs-azure);
+}
+.cs-itemized-origin {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cs-stone-dark);
+}
+.cs-itemized-source {
+  font-family: var(--cs-serif);
+}
+.cs-itemized-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--cs-azure);
+}
+.cs-itemized-condition {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--cs-stone-dark);
+}
+
+/* ----------------------------- difficulty verdict card (US3) --------------- */
+
+.cs-difficulty-card {
+  border: 1px solid var(--cs-stone);
+  border-radius: 5px;
+  padding: 0.4rem 0.6rem;
+  margin-top: 0.3rem;
+  background: var(--cs-parchment-hi);
+}
+.cs-difficulty-card.is-success {
+  border-left: 4px solid #3c7a4a;
+}
+.cs-difficulty-card.is-failure {
+  border-left: 4px solid var(--cs-crimson);
+}
+.cs-difficulty-verdict {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+.cs-difficulty-card.is-success .cs-difficulty-outcome {
+  color: #3c7a4a;
+}
+.cs-difficulty-card.is-failure .cs-difficulty-outcome {
+  color: var(--cs-crimson);
+}
+.cs-difficulty-degree {
+  margin-left: auto;
+  font-family: var(--cs-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--cs-stone-dark);
+}
+.cs-difficulty-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.cs-difficulty-name {
+  font-weight: 700;
+  color: var(--cs-azure);
+}

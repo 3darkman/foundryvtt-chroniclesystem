@@ -1,0 +1,407 @@
+/* =============================================================================
+   cs-components.css — the SHARED style layer (spec 009 US6, FR-028/SC-008).
+   The SINGLE source of the `--csv2-*` design tokens + the IBM Plex fonts + the
+   reusable v2 components, so the character sheet (.cs-sheet-v2) and the Active
+   Effect config window (.cs-effect-config.cs-v2) "feel like one product" — no
+   parallel palette. Referenced in system.json BEFORE character-sheet-v2.css and
+   effects.css. Tokens live on a shared class applied to BOTH window roots.
+   ========================================================================== */
+
+/* Self-hosted per the design handoff — the v2 typographic identity reads wrong
+   with a system-font fallback, so these are not optional. Declared here (not in
+   character-sheet-v2.css) so the effect window has the fonts even when the sheet
+   is closed. */
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("fonts/IBMPlexSans-Variable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/IBMPlexMono-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/IBMPlexMono-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/IBMPlexMono-Bold.woff2") format("woff2");
+}
+
+/* --- Token SSOT: consumed by the character sheet AND the effect window. ----- */
+.cs-v2,
+.cs-sheet-v2 {
+  --csv2-primary: #015ea6;
+  --csv2-primary-dark: #013f70;
+  --csv2-dark: #0a0405;
+  --csv2-secondary: #e6e6e8;
+  --csv2-text: #242021;
+  --csv2-bg: #ffffff;
+  --csv2-area: #dfe5f3;
+  --csv2-border: #d3d7e0;
+  --csv2-border-soft: #eef0f4;
+  --csv2-muted: #8a8688;
+  --csv2-muted-2: #5a5658;
+  --csv2-danger: #b04a4a;
+  --csv2-on-primary: #fff;
+  --csv2-input-border: #b9c2d6;
+  --csv2-callout-border: #c7d0e8;
+  --csv2-track-border: #c9ccd4;
+  --csv2-op-muted: #9aa2b4;
+  --csv2-grid-head-text: #cbd3e0;
+  --csv2-font-sans:
+    "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --csv2-font-mono:
+    "IBM Plex Mono", ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas,
+    monospace;
+  /* Custom select chevron (SVG data-URI, stroke #7a828e) reused by every v2 select. */
+  --csv2-chevron: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="%237a828e" stroke-width="1.6"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>');
+}
+
+/* =========================================================================
+   Active Effect config window redesign (.cs-effect-config.cs-v2). Scoped with
+   both classes so these clean-look rules win over the legacy effects.css rules
+   regardless of load order (higher specificity), and never touch other sheets.
+   ======================================================================== */
+
+.cs-effect-config.cs-v2 {
+  --csv2-title-bg: var(--csv2-dark);
+  color: var(--csv2-text);
+  font-family: var(--csv2-font-sans);
+  background: var(--csv2-bg);
+}
+
+/* The AppV2 window already provides the title bar; tint it near-black. */
+.cs-effect-config.cs-v2 .window-header {
+  background: var(--csv2-title-bg);
+  color: var(--csv2-grid-head-text);
+  border-bottom: none;
+}
+.cs-effect-config.cs-v2 .window-header .window-title {
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+}
+
+/* ① Effect header (custom part). */
+.cs-effect-config.cs-v2 .cs-effect-header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--csv2-secondary);
+  background: var(--csv2-bg);
+}
+.cs-effect-config.cs-v2 .cs-effect-icon {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  background: var(--csv2-primary);
+  object-fit: cover;
+  border: none;
+  cursor: pointer;
+}
+.cs-effect-config.cs-v2 .cs-effect-headings {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.cs-effect-config.cs-v2 .cs-effect-name-input {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: var(--csv2-font-sans);
+  font-weight: 700;
+  font-size: 23px;
+  color: var(--csv2-dark);
+}
+.cs-effect-config.cs-v2 .cs-effect-meta {
+  font-family: var(--csv2-font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--csv2-muted-2);
+}
+.cs-effect-config.cs-v2 .cs-effect-meta .cs-meta-label {
+  color: var(--csv2-muted);
+}
+.cs-effect-config.cs-v2 .cs-effect-meta .cs-effect-condition-meta {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  color: var(--csv2-primary);
+}
+
+/* ③ Tab bar — flat segmented, matching the character sheet. */
+.cs-effect-config.cs-v2 .sheet-tabs,
+.cs-effect-config.cs-v2 nav.tabs {
+  display: flex;
+  gap: 0;
+  background: var(--csv2-secondary);
+  border-bottom: 1px solid var(--csv2-border);
+  border-top: none;
+  margin: 0;
+  padding: 0;
+}
+.cs-effect-config.cs-v2 .sheet-tabs > [data-tab],
+.cs-effect-config.cs-v2 nav.tabs > [data-tab] {
+  padding: 10px 15px;
+  border: none;
+  background: transparent;
+  color: var(--csv2-muted-2);
+  font-family: var(--csv2-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+.cs-effect-config.cs-v2 .sheet-tabs > [data-tab].active,
+.cs-effect-config.cs-v2 nav.tabs > [data-tab].active {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  font-weight: 600;
+}
+
+/* ④ Tab body + section-card idiom (shared with the character sheet). */
+.cs-effect-config.cs-v2 .tab {
+  padding: 16px 20px;
+}
+.cs-effect-config.cs-v2 .csv2-card {
+  border: 1px solid var(--csv2-border);
+  border-radius: 7px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  background: var(--csv2-bg);
+}
+.cs-effect-config.cs-v2 .csv2-card-header {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+}
+.cs-effect-config.cs-v2 .csv2-card-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Field label + controls. */
+.cs-effect-config.cs-v2 .cs-field > label,
+.cs-effect-config.cs-v2 .csv2-label {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+.cs-effect-config.cs-v2 input[type="text"],
+.cs-effect-config.cs-v2 input[type="number"],
+.cs-effect-config.cs-v2 select {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--csv2-input-border);
+  background: var(--csv2-bg);
+  border-radius: 5px;
+  padding: 8px 11px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--csv2-text);
+}
+.cs-effect-config.cs-v2 select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
+  background-image: var(--csv2-chevron);
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.cs-effect-config.cs-v2 input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--csv2-primary);
+}
+.cs-effect-config.cs-v2 .hint,
+.cs-effect-config.cs-v2 .csv2-help {
+  font-family: var(--csv2-font-sans);
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--csv2-muted);
+  margin: 0;
+}
+
+/* Two-column grid used by the Details/Duration rows. */
+.cs-effect-config.cs-v2 .csv2-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.cs-effect-config.cs-v2 .csv2-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+}
+.cs-effect-config.cs-v2 .csv2-row + .csv2-row {
+  border-top: 1px solid var(--csv2-border-soft);
+}
+.cs-effect-config.cs-v2 .csv2-row-label {
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--csv2-dark);
+}
+
+/* ⑤ Footer — full-width primary Submit button (core form-footer.hbs). */
+.cs-effect-config.cs-v2 .form-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--csv2-secondary);
+  background: var(--csv2-bg);
+}
+.cs-effect-config.cs-v2 .form-footer button {
+  width: 100%;
+  border: none;
+  border-radius: 7px;
+  padding: 12px;
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+.cs-effect-config.cs-v2 .form-footer button:hover {
+  background: var(--csv2-primary-dark);
+  box-shadow: none;
+}
+
+/* Changes tab — reskin the cascade "clause" cards to the clean look while
+   keeping the channel-colored left rail as a subtle accent. */
+.cs-effect-config.cs-v2 .cs-effect-changes {
+  color: var(--csv2-text);
+}
+.cs-effect-config.cs-v2 .cs-effect-changes > .hint {
+  font-family: var(--csv2-font-sans);
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--csv2-muted-2);
+}
+.cs-effect-config.cs-v2 .cs-effect-flags {
+  border: 1px solid var(--csv2-callout-border);
+  border-left: 4px solid var(--csv2-primary);
+  border-radius: 7px;
+  background: var(--csv2-area);
+}
+.cs-effect-config.cs-v2 .cs-change {
+  border: 1px solid var(--csv2-border);
+  border-left: 4px solid var(--csv2-primary);
+  border-radius: 7px;
+  background: var(--csv2-bg);
+  box-shadow: none;
+}
+.cs-effect-config.cs-v2 .cs-change > .cs-field > label {
+  color: var(--csv2-muted);
+}
+.cs-effect-config.cs-v2 .cs-change-add {
+  border: 1px solid var(--csv2-primary);
+  color: var(--csv2-primary);
+  border-radius: 7px;
+}
+.cs-effect-config.cs-v2 .cs-change-add:hover {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+
+/* =========================================================================
+   Difficulty table editor (settings menu, US3) — shares the v2 tokens.
+   ======================================================================== */
+.cs-difficulty-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: var(--csv2-font-sans);
+  color: var(--csv2-text);
+}
+.cs-difficulty-editor .cs-difficulty-head,
+.cs-difficulty-editor .cs-difficulty-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 5rem 2rem;
+  align-items: center;
+  gap: 8px;
+}
+.cs-difficulty-editor .cs-difficulty-head {
+  font-family: var(--csv2-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+.cs-difficulty-editor .cs-difficulty-none {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--csv2-muted-2);
+}
+.cs-difficulty-editor input[type="text"],
+.cs-difficulty-editor input[type="number"] {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 5px;
+  padding: 6px 9px;
+  font-family: var(--csv2-font-sans);
+  font-size: 13px;
+}
+.cs-difficulty-editor .cs-difficulty-delete,
+.cs-difficulty-editor .cs-difficulty-add {
+  border: 1px solid var(--csv2-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  color: var(--csv2-muted-2);
+  cursor: pointer;
+  padding: 6px;
+}
+.cs-difficulty-editor .cs-difficulty-add {
+  align-self: flex-start;
+  padding: 8px 14px;
+  color: var(--csv2-primary);
+  border-color: var(--csv2-primary);
+  font-weight: 600;
+}
+.cs-difficulty-editor .cs-difficulty-add:hover {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}

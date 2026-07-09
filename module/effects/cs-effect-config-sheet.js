@@ -176,13 +176,26 @@ const ActiveEffectConfigBase =
   foundry.applications?.sheets?.ActiveEffectConfig ?? class {};
 
 export class CSActiveEffectConfig extends ActiveEffectConfigBase {
-  /** @override — only override the `changes` part; inherit header/details/duration/footer + addChange/deleteChange. */
+  /** @override — override header/details/duration/changes with the redesigned
+   *  templates (US6); `...super.PARTS` preserves the `tabs` nav + the core footer.
+   *  Order stays header → tabs → details → duration → changes → footer. */
   static PARTS = {
     ...super.PARTS,
+    header: {
+      template: "systems/chroniclesystem/templates/effects/effect-header.hbs",
+    },
+    details: {
+      template: "systems/chroniclesystem/templates/effects/effect-details.hbs",
+      scrollable: [""],
+    },
+    duration: {
+      template: "systems/chroniclesystem/templates/effects/effect-duration.hbs",
+    },
     changes: {
       template: "systems/chroniclesystem/templates/effects/effect-changes.hbs",
       scrollable: ["ol[data-changes]"],
     },
+    footer: { template: "templates/generic/form-footer.hbs" },
   };
 
   /** @override */
@@ -193,8 +206,9 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     // (overlapping header, vertical nav, unstyled fields, and the
     // `[data-application-part]{display:flex}` rule that stacked the tabs). With
     // only our own scope the core's clean effect layout shows through and our
-    // cascade styling (.cs-effect-*) still applies.
-    classes: ["cs-effect-config"],
+    // cascade styling (.cs-effect-*) still applies. `cs-v2` pulls in the shared
+    // design tokens/components (US6) so this window matches the character sheet.
+    classes: ["cs-effect-config", "cs-v2"],
   };
 
   /** @override — fold the system permission rule into the core OWNER gate. */
@@ -202,9 +216,22 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     return super.isEditable && canUserModifyEffect(game.user, this.document);
   }
 
-  /** @override — inject the cascade data only for the changes part. */
+  /** @override — inject the cascade data (changes) and the live meta (header).
+   *  super._preparePartContext runs for EVERY part, so it populates
+   *  `partContext.tab` for the tab parts (the idiomatic no-stacking fix, US6). */
   async _preparePartContext(partId, context) {
     const partContext = await super._preparePartContext(partId, context);
+    if (partId === "header") {
+      // The header MIRRORS the Optional/Condition flags authored in the Changes
+      // tab, updated live by _onChangeForm (FR-030).
+      partContext.effectOptional = !!this.document.getFlag(
+        "chroniclesystem",
+        "optional"
+      );
+      partContext.effectCondition =
+        this.document.getFlag("chroniclesystem", "condition") ?? "";
+      return partContext;
+    }
     if (partId !== "changes") return partContext;
 
     // Homebrew slugs present in the world (not already in the canonical dropdown),
@@ -263,6 +290,37 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
       const row = target.closest("li.cs-change");
       if (row) this._syncRowVisibility(row);
     }
+    // Live header meta (US6/FR-030): the Optional/Condition flags authored in the
+    // Changes tab are mirrored in the header without a re-render.
+    if (
+      target?.name === "flags.chroniclesystem.optional" ||
+      target?.name === "flags.chroniclesystem.condition"
+    ) {
+      this._updateHeaderMeta();
+    }
+  }
+
+  /** Mirror the current Optional/Condition flags into the header meta line. */
+  _updateHeaderMeta() {
+    const form = this.element;
+    if (!form) return;
+    const optional = !!form.querySelector(
+      'input[name="flags.chroniclesystem.optional"]'
+    )?.checked;
+    const condition =
+      form
+        .querySelector('input[name="flags.chroniclesystem.condition"]')
+        ?.value?.trim() ?? "";
+    const optSpan = form.querySelector(".cs-effect-optional-meta");
+    if (optSpan) {
+      optSpan.textContent = game.i18n.localize(
+        optional ? "CS.effects.redesign.yes" : "CS.effects.redesign.no"
+      );
+    }
+    const condWrap = form.querySelector(".cs-effect-condition-wrap");
+    if (condWrap) condWrap.style.display = optional ? "" : "none";
+    const condSpan = form.querySelector(".cs-effect-condition-meta");
+    if (condSpan) condSpan.textContent = condition || "—";
   }
 
   /** @override */

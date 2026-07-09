@@ -8,6 +8,7 @@
         "styles/item-sheet.css",
         "styles/actor-sheet.css",
         "styles/less/global.css",
+        "styles/cs-components.css",
         "styles/effects.css",
         "styles/character-sheet-v2.css"
     ],

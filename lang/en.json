@@ -239,7 +239,15 @@
         "custom": "Custom",
         "world": "In this world"
       },
-      "customTarget": "Custom (type a slug)…"
+      "customTarget": "Custom (type a slug)…",
+      "redesign": {
+        "description": "Effect Description",
+        "optionalMeta": "Optional",
+        "conditionMeta": "Condition",
+        "yes": "Yes",
+        "no": "No",
+        "durationHint": "Leave the duration blank for a permanent effect. Combat-based durations require an active encounter to track rounds and turns."
+      }
     },
     "intrigue": {
       "techniques": {
