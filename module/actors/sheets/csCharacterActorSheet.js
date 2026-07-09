@@ -8,6 +8,8 @@ import { CSActorSheet } from "./csActorSheet.js";
 import LOGGER from "../../utils/logger.js";
 import SystemUtils from "../../utils/systemUtils.js";
 import { CSConstants } from "../../system/csConstants.js";
+import { INTRIGUE_TECHNIQUES } from "../../vocabulary/cs-intrigue-techniques.js";
+import { influenceFor } from "../../effects/cs-effect-modifiers.js";
 
 export class CSCharacterActorSheet extends CSActorSheet {
   itemTypesPermitted = [
@@ -274,129 +276,78 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   _calculateIntrigueTechniques(data, actor) {
-    // Resolve intrigue inputs by STABLE SLUG (spec 008) so the panel survives a
-    // rename to any language. keyConstants stays only as the display LABEL below.
-    let cunningValue = actor.getAbilityValueBySlug("cunning");
-    let willValue = actor.getAbilityValueBySlug("will");
-    let persuasionValue = actor.getAbilityValueBySlug("persuasion");
-    let awarenessValue = actor.getAbilityValueBySlug("awareness");
+    // US4: the disposition delta + per-technique influence buffers written by the
+    // collector — applied WITHOUT changing the selected disposition level
+    // (FR-017/FR-018). Names + influence bases come from the canonical technique
+    // source (SSOT), so the sheet and the effect authoring share ONE set of names.
+    const dispositionDelta = actor.dispositionDelta ?? {
+      persuasion: 0,
+      deception: 0,
+    };
+    const influence = actor.influence ?? {};
 
-    let bluffFormula = ChronicleSystem.getActorAbilityFormula(
+    // Deception side (bluff/act) — shared by several techniques.
+    const bluffFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
       "deception",
       "deception_bluff"
     );
-    let actFormula = ChronicleSystem.getActorAbilityFormula(
+    const actFormula = ChronicleSystem.getActorAbilityFormula(
       actor,
       "deception",
       "deception_act"
     );
-    let bargainFormula = ChronicleSystem.getActorAbilityFormula(
-      actor,
-      "persuasion",
-      "persuasion_bargain"
-    );
-    let charmFormula = ChronicleSystem.getActorAbilityFormula(
-      actor,
-      "persuasion",
-      "persuasion_charm"
-    );
-    let convinceFormula = ChronicleSystem.getActorAbilityFormula(
-      actor,
-      "persuasion",
-      "persuasion_convince"
-    );
-    let inciteFormula = ChronicleSystem.getActorAbilityFormula(
-      actor,
-      "persuasion",
-      "persuasion_incite"
-    );
-    let intimidateFormula = ChronicleSystem.getActorAbilityFormula(
-      actor,
-      "persuasion",
-      "persuasion_intimidate"
-    );
-    let seduceFormula = ChronicleSystem.getActorAbilityFormula(
-      actor,
-      "persuasion",
-      "persuasion_seduce"
-    );
-    let tauntFormula = ChronicleSystem.getActorAbilityFormula(
-      actor,
-      "persuasion",
-      "persuasion_taunt"
-    );
-
-    let intimidateDeceptionFormula =
+    const intimidateDeceptionFormula =
       actFormula.bonusDice + actFormula.modifier >
       bluffFormula.bonusDice + bluffFormula.modifier
         ? actFormula
         : bluffFormula;
 
-    // Apply current disposition modifiers to technique formulas
+    // The deception formula each technique pairs with (a Chronicle System rule
+    // mapping, not part of the canonical technique source — kept local).
+    const deceptionByTechnique = {
+      bargain: bluffFormula,
+      charm: actFormula,
+      convince: actFormula,
+      incite: bluffFormula,
+      intimidate: intimidateDeceptionFormula,
+      seduce: bluffFormula,
+      taunt: bluffFormula,
+    };
+
+    // Disposition modifiers (from the selected level) PLUS the authored delta.
     const currentDisposition = ChronicleSystem.dispositions.find(
       (d) => d.rating === actor.getCSData().currentDisposition
     );
-    if (currentDisposition) {
-      for (const f of [
-        bargainFormula,
-        charmFormula,
-        convinceFormula,
-        inciteFormula,
-        intimidateFormula,
-        seduceFormula,
-        tauntFormula,
-      ]) {
-        f.modifier += currentDisposition.persuasionModifier;
-      }
-      bluffFormula.modifier += currentDisposition.deceptionModifier;
-      actFormula.modifier += currentDisposition.deceptionModifier;
-    }
+    const persuasionMod =
+      (currentDisposition?.persuasionModifier ?? 0) +
+      dispositionDelta.persuasion;
+    const deceptionMod =
+      (currentDisposition?.deceptionModifier ?? 0) + dispositionDelta.deception;
+    bluffFormula.modifier += deceptionMod;
+    actFormula.modifier += deceptionMod;
 
-    data.techniques = {
-      bargain: new Technique(
-        SystemUtils.localize(ChronicleSystem.keyConstants.BARGAIN),
-        cunningValue,
-        bargainFormula,
-        bluffFormula
-      ),
-      charm: new Technique(
-        SystemUtils.localize(ChronicleSystem.keyConstants.CHARM),
-        persuasionValue,
-        charmFormula,
-        actFormula
-      ),
-      convince: new Technique(
-        SystemUtils.localize(ChronicleSystem.keyConstants.CONVINCE),
-        willValue,
-        convinceFormula,
-        actFormula
-      ),
-      incite: new Technique(
-        SystemUtils.localize(ChronicleSystem.keyConstants.INCITE),
-        cunningValue,
-        inciteFormula,
-        bluffFormula
-      ),
-      intimidate: new Technique(
-        SystemUtils.localize(ChronicleSystem.keyConstants.INTIMIDATE),
-        willValue,
-        intimidateFormula,
-        intimidateDeceptionFormula
-      ),
-      seduce: new Technique(
-        SystemUtils.localize(ChronicleSystem.keyConstants.SEDUCE),
-        persuasionValue,
-        seduceFormula,
-        bluffFormula
-      ),
-      taunt: new Technique(
-        SystemUtils.localize(ChronicleSystem.keyConstants.TAUNT),
-        awarenessValue,
-        tauntFormula,
-        bluffFormula
-      ),
-    };
+    // One row per canonical technique: localized name + effective influence
+    // (base ability rating + technique/ALL influence delta) + the persuasion
+    // formula with the disposition modifier folded in.
+    data.techniques = {};
+    for (const entry of INTRIGUE_TECHNIQUES) {
+      const persuasionFormula = ChronicleSystem.getActorAbilityFormula(
+        actor,
+        "persuasion",
+        entry.specialtySlug
+      );
+      persuasionFormula.modifier += persuasionMod;
+      const influenceValue =
+        actor.getAbilityValueBySlug(entry.influenceAbilitySlug) +
+        influenceFor(influence, entry.slug);
+      data.techniques[entry.slug] = new Technique(
+        SystemUtils.localize(entry.nameKey),
+        influenceValue,
+        persuasionFormula,
+        deceptionByTechnique[entry.slug]
+      );
+    }
   }
 
   /* -------------------------------------------- */

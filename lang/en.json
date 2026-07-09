@@ -140,7 +140,9 @@
         "armorrating": "Armor rating",
         "damage": "Weapon damage",
         "quality": "Grant weapon quality",
-        "bulk": "Bulk (movement)"
+        "bulk": "Bulk (movement)",
+        "disposition": "Disposition delta",
+        "influence": "Intrigue influence"
       },
       "targetKinds": {
         "all": "All / global",
@@ -175,6 +177,12 @@
         "slugPlaceholder": "e.g. fighting",
         "weaponType": "Weapon type",
         "weaponTypePlaceholder": "e.g. axes",
+        "technique": "Technique",
+        "dispositionPersuasion": "Persuasion",
+        "dispositionDeception": "Deception",
+        "dispositionBoth": "Both",
+        "influenceAll": "All techniques",
+        "influenceOne": "A single technique",
         "value": "Value",
         "qualityName": "Quality",
         "qualityNamePlaceholder": "e.g. Shattering, Piercing 1",

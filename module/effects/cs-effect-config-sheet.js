@@ -36,6 +36,10 @@ import {
   DERIVED_STAT_CHOICES,
   VALUE_MODE_CHOICES,
   DERIVED_FORM_CHOICES,
+  DISPOSITION_CHANNEL,
+  DISPOSITION_FACET_CHOICES,
+  INFLUENCE_SCOPE_CHOICES,
+  TECHNIQUE_CHOICES,
   QUALITY_OTHER,
   ROLL_SLUG_CUSTOM,
   parseChangeRow,
@@ -234,6 +238,9 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     partContext.derivedStatChoices = DERIVED_STAT_CHOICES;
     partContext.valueModeChoices = VALUE_MODE_CHOICES;
     partContext.derivedFormChoices = DERIVED_FORM_CHOICES;
+    partContext.dispositionFacetChoices = DISPOSITION_FACET_CHOICES;
+    partContext.influenceScopeChoices = INFLUENCE_SCOPE_CHOICES;
+    partContext.techniqueChoices = TECHNIQUE_CHOICES;
     Object.assign(partContext, suggestions);
     partContext.effectOptional = !!this.document.getFlag(
       "chroniclesystem",
@@ -250,7 +257,7 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     const target = event?.target;
     if (
       target?.matches?.(
-        "select.cs-channel, select.cs-roll-targetkind, select.cs-roll-slug-select, select.cs-weapon-targetkind, select.cs-value-mode, select.cs-quality-kind"
+        "select.cs-channel, select.cs-roll-targetkind, select.cs-roll-slug-select, select.cs-weapon-targetkind, select.cs-value-mode, select.cs-quality-kind, select.cs-influence-scope"
       )
     ) {
       const row = target.closest("li.cs-change");
@@ -320,6 +327,15 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
       ".cs-weapon-slug",
       isWeapon && weaponKind === TARGET_KINDS.WEAPON_TYPE
     );
+
+    // US4: disposition facet + influence scope/technique subselects.
+    const isDisposition = channel === DISPOSITION_CHANNEL;
+    const isInfluence = channel === EFFECT_CHANNELS.INFLUENCE;
+    show(".cs-disposition-target", isDisposition);
+    show(".cs-influence-target", isInfluence);
+    const influenceScope = valueOf("select.cs-influence-scope");
+    show(".cs-influence-technique", isInfluence && influenceScope === "one");
+
     show(".cs-value-mode-field", !isQuality);
     show(".cs-value-fixed", !isQuality && valueMode === "fixed");
     show(".cs-value-derived", !isQuality && valueMode === "derived");

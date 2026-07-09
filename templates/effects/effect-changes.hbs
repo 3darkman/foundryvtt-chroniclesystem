@@ -118,6 +118,28 @@
           list="cs-weapontype-slugs" placeholder="{{localize 'CS.effects.authoring.weaponTypePlaceholder'}}" />
       </div>
 
+      {{!-- TARGET: disposition facet (US4) --}}
+      <div class="cs-field cs-disposition-target" style="{{#unless change.isDisposition}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.target"}}</label>
+        <select name="changes.{{change.index}}.dispositionFacet" class="cs-disposition-facet">
+          {{selectOptions ../dispositionFacetChoices selected=change.dispositionFacet localize=true}}
+        </select>
+      </div>
+
+      {{!-- TARGET: influence scope + technique (US4) --}}
+      <div class="cs-field cs-influence-target" style="{{#unless change.isInfluence}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.target"}}</label>
+        <select name="changes.{{change.index}}.influenceScope" class="cs-influence-scope">
+          {{selectOptions ../influenceScopeChoices selected=change.influenceScope localize=true}}
+        </select>
+      </div>
+      <div class="cs-field cs-influence-technique" style="{{#unless change.showInfluenceTechnique}}display:none{{/unless}}">
+        <label>{{localize "CS.effects.authoring.technique"}}</label>
+        <select name="changes.{{change.index}}.influenceTechnique" class="cs-influence-technique-select">
+          {{selectOptions ../techniqueChoices selected=change.influenceTechnique localize=true}}
+        </select>
+      </div>
+
       {{!-- VALUE: fixed | derived (hidden for quality) --}}
       <div class="cs-field cs-value-mode-field" style="{{#if change.isQuality}}display:none{{/if}}">
         <label>{{localize "CS.effects.authoring.value"}}</label>

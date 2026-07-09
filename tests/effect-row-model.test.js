@@ -28,12 +28,44 @@ describe("round-trip — every representable cs.* channel + value mode", () => {
     { key: "cs.damage.weapontype.axes", value: "2" },
     { key: "cs.result.ability.fighting", value: "@rank:fighting" },
     { key: "cs.testdice.specialty.axes", value: "@half:persuasion" },
+    // US4 — disposition + influence author through their own cascade branches.
+    { key: "cs.result.disposition.persuasion", value: "2" },
+    { key: "cs.result.disposition.deception", value: "1" },
+    { key: "cs.result.disposition.both", value: "2" },
+    { key: "cs.influence", value: "1" },
+    { key: "cs.influence.charm", value: "2" },
   ];
   it.each(cases)("preserves %o", (change) => {
     const out = roundTrip(change);
     expect(out.key).toBe(change.key);
     expect(out.value).toBe(change.value);
     expect(out.type).toBe("add");
+  });
+});
+
+describe("US4 authoring rows — disposition + influence cascade fields", () => {
+  it("maps a disposition key to the disposition pseudo-channel + facet", () => {
+    const row = parseChangeRow(
+      { key: "cs.result.disposition.both", value: "2" },
+      0
+    );
+    expect(row.channel).toBe("disposition");
+    expect(row.dispositionFacet).toBe("both");
+    expect(row.isDisposition).toBe(true);
+  });
+
+  it("maps an all-techniques influence key to scope 'all'", () => {
+    const row = parseChangeRow({ key: "cs.influence", value: "1" }, 0);
+    expect(row.channel).toBe("influence");
+    expect(row.influenceScope).toBe("all");
+    expect(row.showInfluenceTechnique).toBe(false);
+  });
+
+  it("maps a single-technique influence key to scope 'one' + the technique", () => {
+    const row = parseChangeRow({ key: "cs.influence.charm", value: "2" }, 0);
+    expect(row.influenceScope).toBe("one");
+    expect(row.influenceTechnique).toBe("charm");
+    expect(row.showInfluenceTechnique).toBe(true);
   });
 });
 
