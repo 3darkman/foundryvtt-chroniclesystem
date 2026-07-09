@@ -1,0 +1,36 @@
+{{!-- Difficulty table editor body (US3). Root is a <section> — the ApplicationV2
+      frame (tag:"form") IS the form; a nested <form> would steal input association
+      and submit nothing. --}}
+<section class="cs-difficulty-editor">
+    <p class="hint">{{localize "CS.settings.difficulty.menuHint"}}</p>
+
+    <div class="cs-difficulty-head">
+        <span class="col-default">{{localize "CS.settings.difficulty.columnDefault"}}</span>
+        <span class="col-name">{{localize "CS.settings.difficulty.columnName"}}</span>
+        <span class="col-target">{{localize "CS.settings.difficulty.columnTarget"}}</span>
+        <span class="col-actions"></span>
+    </div>
+
+    <div class="cs-difficulty-rows">
+        <label class="cs-difficulty-none">
+            <input type="radio" name="defaultIndex" value="-1" {{#if noneDefault}}checked{{/if}} />
+            {{localize "CS.difficulty.none"}}
+        </label>
+
+        {{#each entries as |entry|}}
+        <div class="cs-difficulty-row" data-row="{{entry.index}}">
+            <input type="radio" name="defaultIndex" value="{{entry.index}}" {{#if entry.isDefault}}checked{{/if}} title="{{localize 'CS.settings.difficulty.defaultLabel'}}" />
+            <input type="hidden" name="entries.{{entry.index}}.labelKey" value="{{entry.labelKey}}" />
+            <input type="text" class="col-name" name="entries.{{entry.index}}.label" value="{{entry.label}}" placeholder="{{entry.placeholder}}" />
+            <input type="number" class="col-target" name="entries.{{entry.index}}.target" value="{{entry.target}}" />
+            <button type="button" class="cs-difficulty-delete" data-action="deleteRow" data-index="{{entry.index}}" title="{{localize 'CS.settings.difficulty.deleteRow'}}">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+        {{/each}}
+    </div>
+
+    <button type="button" class="cs-difficulty-add" data-action="addRow">
+        <i class="fa-solid fa-plus"></i> {{localize "CS.settings.difficulty.addRow"}}
+    </button>
+</section>

@@ -1,0 +1,40 @@
+{{!-- Redesigned Duration tab (US6). Rows (label left, control right) via .csv2-row
+      so the labels follow the handoff instead of core's form-group layout. Every
+      control keeps its schema `name` through {{formInput}} (persistence intact). --}}
+<section class="tab{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+    {{#if start}}
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize "EFFECT.START.Header"}}</div>
+        <div class="csv2-row">
+            <span class="csv2-row-label">{{localize "EFFECT.FIELDS.start.time.label"}}</span>
+            <span class="cs-start-value">{{start.time}}</span>
+        </div>
+        {{#if start.combat}}
+        <div class="csv2-row">
+            <span class="csv2-row-label">{{localize "DOCUMENT.Combat"}}</span>
+            <span class="cs-start-value">{{localize "EFFECT.START.Combat" round=start.round turn=start.turn}}</span>
+        </div>
+        {{/if}}
+    </div>
+    {{/if}}
+
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize "EFFECT.DURATION.Header"}}</div>
+        <div class="csv2-row" data-duration>
+            <span class="csv2-row-label">{{localize "EFFECT.DURATION.Label"}}</span>
+            <div class="cs-duration-fields">
+                {{formInput fields.duration.fields.value value=source.duration.value}}
+                {{formInput fields.duration.fields.units value=source.duration.units options=durationUnits}}
+            </div>
+        </div>
+        <div class="csv2-row">
+            <span class="csv2-row-label">{{localize "EFFECT.FIELDS.duration.expiry.label"}}</span>
+            <div class="cs-duration-expiry">
+                {{formInput fields.duration.fields.expiry choices=expiryEvents value=source.duration.expiry}}
+            </div>
+        </div>
+    </div>
+
+    <p class="csv2-help cs-duration-hint">{{localize "CS.effects.redesign.durationHint"}}</p>
+</section>

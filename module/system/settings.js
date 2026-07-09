@@ -1,5 +1,7 @@
 import LOGGER from "../utils/logger.js";
 import { CSConstants } from "./csConstants.js";
+import { CSDifficultyConfig } from "../settings/cs-difficulty-config.js";
+import { CANONICAL_DIFFICULTY_SETTING } from "../difficulty/cs-difficulty.js";
 
 /**
  * This file defines user settings for the system module.
@@ -99,6 +101,33 @@ const registerSystemSettings = () => {
           `Changed ${CSConstants.Settings.MODIFIER_DIALOG_AS_DEFAULT} to ${value}`
         );
       },
+    }
+  );
+
+  // Difficulty table (US3): a world Object setting edited via the ApplicationV2
+  // menu below. The factory default lives in the pure cs-difficulty.js (SSOT).
+  game.settings.register(
+    CSConstants.Settings.SYSTEM_NAME,
+    CSConstants.Settings.DIFFICULTY_TABLE,
+    {
+      name: "CS.settings.difficulty.name",
+      scope: "world",
+      config: false,
+      type: Object,
+      default: CANONICAL_DIFFICULTY_SETTING,
+    }
+  );
+
+  game.settings.registerMenu(
+    CSConstants.Settings.SYSTEM_NAME,
+    CSConstants.Settings.DIFFICULTY_TABLE,
+    {
+      name: "CS.settings.difficulty.menuName",
+      label: "CS.settings.difficulty.menuLabel",
+      hint: "CS.settings.difficulty.menuHint",
+      icon: "fa-solid fa-table-list",
+      type: CSDifficultyConfig,
+      restricted: true,
     }
   );
 };

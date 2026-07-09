@@ -33,9 +33,23 @@ import {
   isCanonicalAbilitySlug,
   isCanonicalSpecialtySlug,
 } from "../vocabulary/cs-canonical-abilities.js";
+import {
+  INTRIGUE_TECHNIQUES,
+  techniqueChoices,
+} from "../vocabulary/cs-intrigue-techniques.js";
 
 /** Sentinel `rollSlug` for the free-text "Custom…" option (homebrew slugs). */
 export const ROLL_SLUG_CUSTOM = "__custom__";
+
+/**
+ * Authoring-only pseudo-channel for the disposition delta (US4). The real key
+ * rides the `result` channel (`cs.result.disposition.<facet>`), but the cascade
+ * presents "Disposition" as its own Type so the facet subselect is discoverable.
+ */
+export const DISPOSITION_CHANNEL = "disposition";
+
+/** Default technique preselected on a fresh "one technique" influence row. */
+const DEFAULT_TECHNIQUE = INTRIGUE_TECHNIQUES[0]?.slug ?? "";
 
 /** True when a slug is offered by the canonical roll-target dropdown. */
 function isCanonicalRollSlug(slug) {
@@ -55,7 +69,27 @@ export const CHANNEL_CHOICES = {
   [EFFECT_CHANNELS.DAMAGE]: "CS.effects.channels.damage",
   [EFFECT_CHANNELS.QUALITY]: "CS.effects.channels.quality",
   [EFFECT_CHANNELS.BULK]: "CS.effects.channels.bulk",
+  [DISPOSITION_CHANNEL]: "CS.effects.channels.disposition",
+  [EFFECT_CHANNELS.INFLUENCE]: "CS.effects.channels.influence",
 };
+
+/** Disposition facet subselect (US4): which side of disposition the delta hits. */
+export const DISPOSITION_FACET_CHOICES = {
+  persuasion: "CS.effects.authoring.dispositionPersuasion",
+  deception: "CS.effects.authoring.dispositionDeception",
+  both: "CS.effects.authoring.dispositionBoth",
+};
+
+/** Influence scope subselect (US4): all techniques vs a single one. */
+export const INFLUENCE_SCOPE_CHOICES = {
+  all: "CS.effects.authoring.influenceAll",
+  one: "CS.effects.authoring.influenceOne",
+};
+
+/** Technique subselect (US4): the canonical techniques, one localized name each. */
+export const TECHNIQUE_CHOICES = Object.fromEntries(
+  techniqueChoices().map((choice) => [choice.value, choice.labelKey])
+);
 
 export const ROLL_TARGETKIND_CHOICES = {
   [TARGET_KINDS.ALL]: "CS.effects.targetKinds.all",
@@ -104,6 +138,8 @@ function withRowFlags(row) {
   const isRoll = isRollChannel(row.channel);
   const isWeapon = isWeaponChannel(row.channel);
   const isQuality = row.channel === EFFECT_CHANNELS.QUALITY;
+  const isDisposition = row.channel === DISPOSITION_CHANNEL;
+  const isInfluence = row.channel === EFFECT_CHANNELS.INFLUENCE;
   return {
     ...row,
     isRoll,
@@ -112,6 +148,9 @@ function withRowFlags(row) {
     isBulk: row.channel === EFFECT_CHANNELS.BULK,
     isWeapon,
     isQuality,
+    isDisposition,
+    isInfluence,
+    showInfluenceTechnique: isInfluence && row.influenceScope === "one",
     showRollSlug:
       isRoll &&
       (row.rollTargetKind === TARGET_KINDS.ABILITY ||
@@ -166,7 +205,12 @@ export function parseChangeRow(change, index) {
   }
 
   const parsed = parseEffectKey(change?.key);
-  const channel = parsed?.channel ?? EFFECT_CHANNELS.RESULT;
+  // Disposition rides the `result` channel but is authored as its OWN pseudo-
+  // channel (US4), so the facet subselect surfaces instead of the roll target.
+  const isDisposition = parsed?.targetKind === TARGET_KINDS.DISPOSITION;
+  const channel = isDisposition
+    ? DISPOSITION_CHANNEL
+    : parsed?.channel ?? EFFECT_CHANNELS.RESULT;
   const row = {
     index,
     channel,
@@ -176,6 +220,9 @@ export function parseChangeRow(change, index) {
     statTarget: DERIVED_STATS.COMBAT_DEFENSE,
     weaponTargetKind: TARGET_KINDS.WEAPON_ALL,
     weaponSlug: "",
+    dispositionFacet: "persuasion",
+    influenceScope: "all",
+    influenceTechnique: DEFAULT_TECHNIQUE,
     valueMode: "fixed",
     fixedValue: 0,
     derivedForm: VALUE_FORMS.RANK,
@@ -185,7 +232,12 @@ export function parseChangeRow(change, index) {
     qualityCustom: "",
   };
 
-  if (isRollChannel(channel)) {
+  if (isDisposition) {
+    row.dispositionFacet = parsed?.target ?? "persuasion";
+  } else if (channel === EFFECT_CHANNELS.INFLUENCE) {
+    row.influenceScope = parsed?.target ? "one" : "all";
+    row.influenceTechnique = parsed?.target ?? DEFAULT_TECHNIQUE;
+  } else if (isRollChannel(channel)) {
     row.rollTargetKind = parsed?.targetKind ?? TARGET_KINDS.ALL;
     const target = parsed?.target ?? "";
     // A canonical slug preselects the dropdown; anything else falls to "Custom…"
@@ -243,7 +295,20 @@ export function buildChangeFromRow(row) {
 
   const channel = row?.channel ?? EFFECT_CHANNELS.RESULT;
   let key = "";
-  if (isRollChannel(channel)) {
+  if (channel === DISPOSITION_CHANNEL) {
+    key = buildEffectKey({
+      channel: EFFECT_CHANNELS.RESULT,
+      targetKind: TARGET_KINDS.DISPOSITION,
+      target: row.dispositionFacet,
+    });
+  } else if (channel === EFFECT_CHANNELS.INFLUENCE) {
+    const target = row.influenceScope === "one" ? row.influenceTechnique : null;
+    key = buildEffectKey({
+      channel: EFFECT_CHANNELS.INFLUENCE,
+      targetKind: TARGET_KINDS.INFLUENCE,
+      target,
+    });
+  } else if (isRollChannel(channel)) {
     const targetKind = row.rollTargetKind || TARGET_KINDS.ALL;
     // The dropdown value is a canonical slug; "Custom…" defers to the free text.
     const rawSlug =

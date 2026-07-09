@@ -1,10 +1,13 @@
 /* =============================================================================
-   Active Effects — authoring cascade, effects tab & roll-dialog modifiers.
-   Heraldic direction (spec 007 Wave 5 redesign): each change is a "clause" card
-   with a channel-colored rail; the flags row reads as a wax-seal banner; the
-   whole thing sits on cold parchment with a serif accent — deliberately not a
-   raw form. Scoped to .cs-effect-config / .effects-tab / the dialog sections so
-   nothing leaks into the actor/item sheets or the core AppV2 config chrome.
+   Active Effects — the actor-sheet effects tab, the roll-dialog modifiers and
+   the difficulty verdict card. These surfaces keep the heraldic `--cs-*` accent
+   (parchment/azure/gold), scoped to .effects-tab / the dialog sections so
+   nothing leaks into the actor/item sheets.
+
+   NOTE: the Active-Effect CONFIG window (`.cs-effect-config.cs-v2`) is styled
+   ENTIRELY by cs-components.css (spec 009 US6). The legacy heraldic cascade that
+   used to live here was removed so the redesign is the single source and no
+   "previous styles" pollute the window.
    ========================================================================== */
 
 :root {
@@ -19,240 +22,6 @@
   --cs-stone: #c9c2b2;
   --cs-stone-dark: #9a927f;
   --cs-serif: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
-}
-
-/* ---------------------------------------------------------------- cascade -- */
-
-.cs-effect-config .cs-effect-changes {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  color: var(--cs-ink);
-}
-
-.cs-effect-config .cs-effect-changes > .hint {
-  margin: 0;
-  font-family: var(--cs-serif);
-  font-style: italic;
-  font-size: 0.9rem;
-  color: var(--cs-azure);
-}
-
-/* Flags banner — reads like a sealed decree header. */
-.cs-effect-config .cs-effect-flags {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 0.35rem 0.75rem;
-  margin: 0;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--cs-stone);
-  border-left: 4px solid var(--cs-gold);
-  border-radius: 4px;
-  background: linear-gradient(180deg, var(--cs-parchment-hi), var(--cs-parchment));
-}
-
-.cs-effect-config .cs-effect-optional {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.cs-effect-config .cs-effect-flags > .hint {
-  grid-column: 2;
-  margin: 0;
-  font-family: var(--cs-serif);
-  font-style: italic;
-  font-size: 0.82rem;
-  color: var(--cs-stone-dark);
-}
-
-.cs-effect-config .cs-effect-condition {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--cs-azure);
-}
-
-.cs-effect-config .cs-effect-condition input {
-  flex: 1 1 auto;
-}
-
-/* Clause list + cards. */
-.cs-effect-config .cs-changes-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  /* Cap the list and scroll internally (AppV2 tracks scroll via the
-     `scrollable: ["ol[data-changes]"]` part option) so many clauses never push
-     the Submit footer off-screen. */
-  max-height: min(24rem, 50vh);
-  overflow-y: auto;
-  padding-right: 0.3rem;
-}
-
-.cs-effect-config .cs-change {
-  position: relative;
-  display: block;
-  padding: 0.65rem 2.2rem 0.7rem 0.85rem;
-  border: 1px solid var(--cs-stone);
-  border-left: 5px solid var(--cs-gold);
-  border-radius: 4px;
-  background: var(--cs-parchment-hi);
-  box-shadow: 0 1px 2px rgba(27, 35, 48, 0.08);
-  text-align: left;
-}
-
-/* Channel-colored rail (data-channel kept in sync live by _syncRowVisibility). */
-.cs-effect-config .cs-change[data-channel="result"],
-.cs-effect-config .cs-change[data-channel="testdice"],
-.cs-effect-config .cs-change[data-channel="bonusdice"],
-.cs-effect-config .cs-change[data-channel="reroll"] {
-  border-left-color: var(--cs-azure);
-}
-.cs-effect-config .cs-change[data-channel="penalty"] {
-  border-left-color: var(--cs-crimson);
-}
-.cs-effect-config .cs-change[data-channel="derivedstat"],
-.cs-effect-config .cs-change[data-channel="armorrating"] {
-  border-left-color: var(--cs-gold);
-}
-.cs-effect-config .cs-change[data-channel="damage"],
-.cs-effect-config .cs-change[data-channel="quality"] {
-  border-left-color: var(--cs-bronze);
-}
-.cs-effect-config .cs-change[data-channel="bulk"] {
-  border-left-color: var(--cs-stone-dark);
-}
-
-/* Each field: an eyebrow label stacked over a full-width control. Deliberately
-   BLOCK layout (not flex) with an explicit width — a flex/inline label fights the
-   core ActiveEffectConfig's own field CSS and collapses the controls. */
-.cs-effect-config .cs-field {
-  display: block;
-  margin: 0 0 0.45rem;
-}
-.cs-effect-config .cs-field:last-child {
-  margin-bottom: 0;
-}
-
-.cs-effect-config .cs-field > label {
-  display: block;
-  margin: 0 0 0.15rem;
-  font-size: 0.66rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--cs-azure);
-  text-align: left;
-}
-
-.cs-effect-config .cs-field select,
-.cs-effect-config .cs-field input[type="text"],
-.cs-effect-config .cs-field input[type="number"] {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  height: 1.7rem;
-  margin: 0;
-  background: #fff;
-  border: 1px solid var(--cs-stone);
-  border-radius: 3px;
-}
-
-/* Hide the browser's datalist dropdown indicator (a small arrow that renders
-   misaligned against our 1.7rem inputs). The datalist still autocompletes as the
-   user types; the visible arrow just added clutter. */
-.cs-effect-config .cs-field input[list]::-webkit-calendar-picker-indicator {
-  display: none;
-}
-
-/* TYPE names the clause — a touch louder. */
-.cs-effect-config .cs-channel-field > label {
-  color: var(--cs-ink);
-}
-.cs-effect-config .cs-channel-field select {
-  font-weight: 600;
-}
-
-/* Multi-control value rows (derived = form + slug; quality = kind + rating +
-   custom) stack their controls full-width — same block treatment as every other
-   field, so they never collapse the way an inline flex row did against the core. */
-.cs-effect-config .cs-value-derived,
-.cs-effect-config .cs-value-quality {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.35rem;
-}
-.cs-effect-config .cs-value-quality .cs-quality-param {
-  max-width: 6rem;
-}
-
-.cs-effect-config .cs-static-target {
-  display: inline-block;
-  font-family: var(--cs-serif);
-  font-style: italic;
-  color: var(--cs-stone-dark);
-}
-
-/* Delete: a quiet corner control that warms to crimson on hover. */
-.cs-effect-config .cs-change-delete {
-  position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
-  width: 1.6rem;
-  height: 1.6rem;
-  padding: 0;
-  border: none;
-  border-radius: 3px;
-  background: transparent;
-  color: var(--cs-stone-dark);
-  cursor: pointer;
-  line-height: 1;
-}
-.cs-effect-config .cs-change-delete:hover {
-  background: rgba(122, 46, 46, 0.1);
-  color: var(--cs-crimson);
-  box-shadow: none;
-  text-shadow: none;
-}
-
-/* Verbatim/raw rows read as "advanced" — hatched neutral rail. */
-.cs-effect-config .cs-change-raw {
-  border-left-color: var(--cs-stone-dark);
-  border-left-style: dashed;
-  background: var(--cs-parchment);
-}
-
-/* Add clause — a gold-ruled call to action. */
-.cs-effect-config .cs-change-add {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.9rem;
-  border: 1px solid var(--cs-gold);
-  border-radius: 3px;
-  background: transparent;
-  color: var(--cs-gold);
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-}
-.cs-effect-config .cs-change-add:hover {
-  background: var(--cs-gold);
-  color: #fff;
-  box-shadow: none;
 }
 
 /* ------------------------------------------------------------ effects tab -- */
@@ -365,4 +134,150 @@
 .cs-active-effect-lock {
   font-size: 0.7rem;
   color: var(--cs-stone-dark);
+}
+
+/* --------------------------------- roll dialog (US2/US3) ------------------- */
+
+.cs-roll-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--cs-ink);
+}
+.cs-roll-dialog fieldset {
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--cs-stone);
+  border-radius: 4px;
+}
+.cs-roll-dialog legend {
+  padding: 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cs-azure);
+}
+.cs-roll-difficulty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cs-roll-difficulty label {
+  font-weight: 600;
+  color: var(--cs-azure);
+}
+.cs-roll-difficulty select {
+  flex: 1 1 auto;
+}
+.cs-roll-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+}
+.cs-roll-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cs-stone-dark);
+}
+.cs-roll-base input[readonly] {
+  background: var(--cs-parchment);
+  color: var(--cs-ink);
+  font-weight: 700;
+}
+.cs-roll-extras-hint {
+  margin: 0 0 0.35rem;
+  font-family: var(--cs-serif);
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--cs-stone-dark);
+}
+.cs-itemized-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.15rem 0.2rem;
+  border-left: 3px solid var(--cs-stone);
+  padding-left: 0.5rem;
+}
+.cs-itemized-row.cs-origin-condition {
+  border-left-color: var(--cs-crimson);
+}
+.cs-itemized-row.cs-origin-equipment {
+  border-left-color: var(--cs-bronze);
+}
+.cs-itemized-row.cs-origin-effect {
+  border-left-color: var(--cs-azure);
+}
+.cs-itemized-origin {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cs-stone-dark);
+}
+.cs-itemized-source {
+  font-family: var(--cs-serif);
+}
+.cs-itemized-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--cs-azure);
+}
+.cs-itemized-condition {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--cs-stone-dark);
+}
+
+/* ----------------------------- difficulty verdict card (US3) --------------- */
+
+.cs-difficulty-card {
+  border: 1px solid var(--cs-stone);
+  border-radius: 5px;
+  padding: 0.4rem 0.6rem;
+  margin-top: 0.3rem;
+  background: var(--cs-parchment-hi);
+}
+.cs-difficulty-card.is-success {
+  border-left: 4px solid #3c7a4a;
+}
+.cs-difficulty-card.is-failure {
+  border-left: 4px solid var(--cs-crimson);
+}
+.cs-difficulty-verdict {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+.cs-difficulty-card.is-success .cs-difficulty-outcome {
+  color: #3c7a4a;
+}
+.cs-difficulty-card.is-failure .cs-difficulty-outcome {
+  color: var(--cs-crimson);
+}
+.cs-difficulty-degree {
+  margin-left: auto;
+  font-family: var(--cs-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--cs-stone-dark);
+}
+.cs-difficulty-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.cs-difficulty-name {
+  font-weight: 700;
+  color: var(--cs-azure);
 }

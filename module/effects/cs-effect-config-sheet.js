@@ -36,6 +36,10 @@ import {
   DERIVED_STAT_CHOICES,
   VALUE_MODE_CHOICES,
   DERIVED_FORM_CHOICES,
+  DISPOSITION_CHANNEL,
+  DISPOSITION_FACET_CHOICES,
+  INFLUENCE_SCOPE_CHOICES,
+  TECHNIQUE_CHOICES,
   QUALITY_OTHER,
   ROLL_SLUG_CUSTOM,
   parseChangeRow,
@@ -172,13 +176,28 @@ const ActiveEffectConfigBase =
   foundry.applications?.sheets?.ActiveEffectConfig ?? class {};
 
 export class CSActiveEffectConfig extends ActiveEffectConfigBase {
-  /** @override — only override the `changes` part; inherit header/details/duration/footer + addChange/deleteChange. */
+  /** @override — override header/details/duration/changes with the redesigned
+   *  templates (US6); `...super.PARTS` preserves the `tabs` nav + the core footer.
+   *  Order stays header → tabs → details → duration → changes → footer. */
   static PARTS = {
     ...super.PARTS,
+    header: {
+      template: "systems/chroniclesystem/templates/effects/effect-header.hbs",
+    },
+    details: {
+      template: "systems/chroniclesystem/templates/effects/effect-details.hbs",
+      scrollable: [""],
+    },
+    duration: {
+      template: "systems/chroniclesystem/templates/effects/effect-duration.hbs",
+    },
     changes: {
       template: "systems/chroniclesystem/templates/effects/effect-changes.hbs",
-      scrollable: ["ol[data-changes]"],
+      // The fixed-height `.cs-changes-scroll` region scrolls internally (window stays
+      // auto-sized); track its scroll position across re-renders.
+      scrollable: [".cs-changes-scroll"],
     },
+    footer: { template: "templates/generic/form-footer.hbs" },
   };
 
   /** @override */
@@ -189,8 +208,12 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     // (overlapping header, vertical nav, unstyled fields, and the
     // `[data-application-part]{display:flex}` rule that stacked the tabs). With
     // only our own scope the core's clean effect layout shows through and our
-    // cascade styling (.cs-effect-*) still applies.
-    classes: ["cs-effect-config"],
+    // cascade styling (.cs-effect-*) still applies. `cs-v2` pulls in the shared
+    // design tokens/components (US6) so this window matches the character sheet.
+    classes: ["cs-effect-config", "cs-v2"],
+    // The handoff sizes the window at 660px; height stays auto (the Changes list
+    // scrolls internally so many changes never push the footer off-screen).
+    position: { width: 660, height: "auto" },
   };
 
   /** @override — fold the system permission rule into the core OWNER gate. */
@@ -198,9 +221,22 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     return super.isEditable && canUserModifyEffect(game.user, this.document);
   }
 
-  /** @override — inject the cascade data only for the changes part. */
+  /** @override — inject the cascade data (changes) and the live meta (header).
+   *  super._preparePartContext runs for EVERY part, so it populates
+   *  `partContext.tab` for the tab parts (the idiomatic no-stacking fix, US6). */
   async _preparePartContext(partId, context) {
     const partContext = await super._preparePartContext(partId, context);
+    if (partId === "header") {
+      // The header MIRRORS the Optional/Condition flags authored in the Changes
+      // tab, updated live by _onChangeForm (FR-030).
+      partContext.effectOptional = !!this.document.getFlag(
+        "chroniclesystem",
+        "optional"
+      );
+      partContext.effectCondition =
+        this.document.getFlag("chroniclesystem", "condition") ?? "";
+      return partContext;
+    }
     if (partId !== "changes") return partContext;
 
     // Homebrew slugs present in the world (not already in the canonical dropdown),
@@ -234,6 +270,9 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     partContext.derivedStatChoices = DERIVED_STAT_CHOICES;
     partContext.valueModeChoices = VALUE_MODE_CHOICES;
     partContext.derivedFormChoices = DERIVED_FORM_CHOICES;
+    partContext.dispositionFacetChoices = DISPOSITION_FACET_CHOICES;
+    partContext.influenceScopeChoices = INFLUENCE_SCOPE_CHOICES;
+    partContext.techniqueChoices = TECHNIQUE_CHOICES;
     Object.assign(partContext, suggestions);
     partContext.effectOptional = !!this.document.getFlag(
       "chroniclesystem",
@@ -250,12 +289,43 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
     const target = event?.target;
     if (
       target?.matches?.(
-        "select.cs-channel, select.cs-roll-targetkind, select.cs-roll-slug-select, select.cs-weapon-targetkind, select.cs-value-mode, select.cs-quality-kind"
+        "select.cs-channel, select.cs-roll-targetkind, select.cs-roll-slug-select, select.cs-weapon-targetkind, select.cs-value-mode, select.cs-quality-kind, select.cs-influence-scope"
       )
     ) {
       const row = target.closest("li.cs-change");
       if (row) this._syncRowVisibility(row);
     }
+    // Live header meta (US6/FR-030): the Optional/Condition flags authored in the
+    // Changes tab are mirrored in the header without a re-render.
+    if (
+      target?.name === "flags.chroniclesystem.optional" ||
+      target?.name === "flags.chroniclesystem.condition"
+    ) {
+      this._updateHeaderMeta();
+    }
+  }
+
+  /** Mirror the current Optional/Condition flags into the header meta line. */
+  _updateHeaderMeta() {
+    const form = this.element;
+    if (!form) return;
+    const optional = !!form.querySelector(
+      'input[name="flags.chroniclesystem.optional"]'
+    )?.checked;
+    const condition =
+      form
+        .querySelector('input[name="flags.chroniclesystem.condition"]')
+        ?.value?.trim() ?? "";
+    const optSpan = form.querySelector(".cs-effect-optional-meta");
+    if (optSpan) {
+      optSpan.textContent = game.i18n.localize(
+        optional ? "CS.effects.redesign.yes" : "CS.effects.redesign.no"
+      );
+    }
+    const condWrap = form.querySelector(".cs-effect-condition-wrap");
+    if (condWrap) condWrap.style.display = optional ? "" : "none";
+    const condSpan = form.querySelector(".cs-effect-condition-meta");
+    if (condSpan) condSpan.textContent = condition || "—";
   }
 
   /** @override */
@@ -320,6 +390,15 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
       ".cs-weapon-slug",
       isWeapon && weaponKind === TARGET_KINDS.WEAPON_TYPE
     );
+
+    // US4: disposition facet + influence scope/technique subselects.
+    const isDisposition = channel === DISPOSITION_CHANNEL;
+    const isInfluence = channel === EFFECT_CHANNELS.INFLUENCE;
+    show(".cs-disposition-target", isDisposition);
+    show(".cs-influence-target", isInfluence);
+    const influenceScope = valueOf("select.cs-influence-scope");
+    show(".cs-influence-technique", isInfluence && influenceScope === "one");
+
     show(".cs-value-mode-field", !isQuality);
     show(".cs-value-fixed", !isQuality && valueMode === "fixed");
     show(".cs-value-derived", !isQuality && valueMode === "derived");
@@ -335,6 +414,17 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
         weaponQualityTakesParam(qualityKind)
     );
     show(".cs-quality-custom", isQuality && qualityKind === QUALITY_OTHER);
+  }
+
+  /** @override — the handoff always shows the "Effect Start" section; core returns
+   *  null for a not-yet-started effect, so fall back to a localized "Now" so the
+   *  section (Start Time: Now) is always present, matching the proposed layout. */
+  async _prepareStartContext() {
+    return (
+      (await super._prepareStartContext()) ?? {
+        time: game.i18n.localize("CS.effects.redesign.startNow"),
+      }
+    );
   }
 
   /** @override — rebuild the real `system.changes` from the synthetic rows. */

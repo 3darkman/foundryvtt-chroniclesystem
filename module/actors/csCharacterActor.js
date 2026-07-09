@@ -60,6 +60,10 @@ export class CSCharacterActor extends CSActor {
   derivedStats;
   weaponDamage;
   weaponQuality;
+  // US4 intrigue buffers: disposition delta (persuasion/deception) and per-
+  // technique influence, read by the sheet's _calculateIntrigueTechniques.
+  dispositionDelta;
+  influence;
 
   prepareData() {
     super.prepareData();
@@ -104,6 +108,8 @@ export class CSCharacterActor extends CSActor {
       this.derivedStats = collected.derivedStats;
       this.weaponDamage = collected.weaponDamage;
       this.weaponQuality = collected.weaponQuality;
+      this.dispositionDelta = collected.dispositionDelta;
+      this.influence = collected.influence;
     }
   }
 

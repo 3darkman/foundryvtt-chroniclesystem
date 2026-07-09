@@ -70,6 +70,7 @@ export function buildEffectContext(effect, user, viewingDoc = null) {
   const editable = canUserModifyEffect(user, effect);
   const sourceName = effectSourceName(effect, viewingDoc);
   const isSuppressed = !!effect.isSuppressed;
+  const disabled = !!effect.disabled;
   return {
     id: effect.id,
     name: effect.name,
@@ -79,6 +80,9 @@ export function buildEffectContext(effect, user, viewingDoc = null) {
     // "Active" only when it is neither toggled off nor suppressed — drives the
     // Status badge (design §7).
     active: !effect.disabled && !isSuppressed,
+    // Single derived 3-state for the tab badge (US5): suppression (an unequipped
+    // source item, derived) PREVAILS over a manual disable — FR-023.
+    displayState: isSuppressed ? "suspended" : disabled ? "disabled" : "active",
     sourceName,
     originKind: effectOriginKind(effect, sourceName),
     editable,

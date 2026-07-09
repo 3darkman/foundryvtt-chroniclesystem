@@ -32,6 +32,7 @@ export const EFFECT_CHANNELS = {
   BULK: "bulk", // movement bulk
   DAMAGE: "damage", // weapon damage
   QUALITY: "quality", // grant a quality to an item
+  INFLUENCE: "influence", // intrigue-technique influence (US4)
 };
 
 /** Channels that target a roll (all / ability / specialty). */
@@ -83,7 +84,16 @@ export const TARGET_KINDS = {
   WEAPON_TYPE: "weapontype", // weapons of a type (slug, e.g. shortblade)
   WEAPON_ALL: "weapon", // all weapons
   SELF: "self", // the bearing item itself (armorrating)
+  DISPOSITION: "disposition", // intrigue disposition delta (US4; facet slug)
+  INFLUENCE: "influence", // intrigue influence: a technique slug, or null = ALL (US4)
 };
+
+/**
+ * The disposition facets addressable by `cs.result.disposition.<facet>` (US4).
+ * `both` adds to persuasion AND deception. A CLOSED set — an out-of-set facet is
+ * a rejected key (silent typo protection, like the derived-stat gating).
+ */
+export const DISPOSITION_FACETS = new Set(["persuasion", "deception", "both"]);
 
 /**
  * Derived-stat slugs addressable by the `derivedstat` channel. Reuses the
@@ -235,8 +245,28 @@ export function parseEffectKey(key) {
 
   // Strict: reject any key carrying extra/unexpected segments (slugs never
   // contain dots, so segment counts are exact) — a malformed key parses to null.
+  // Disposition rides the `result` channel but routes to its OWN buffer, so it is
+  // matched before the generic roll-target parse (US4).
+  if (
+    channel === EFFECT_CHANNELS.RESULT &&
+    rest[0] === TARGET_KINDS.DISPOSITION
+  ) {
+    return rest.length === 2 && DISPOSITION_FACETS.has(rest[1])
+      ? { channel, targetKind: TARGET_KINDS.DISPOSITION, target: rest[1] }
+      : null;
+  }
   if (ROLL_CHANNELS.has(channel)) return parseRollTarget(channel, rest);
   if (WEAPON_CHANNELS.has(channel)) return parseWeaponTarget(channel, rest);
+  if (channel === EFFECT_CHANNELS.INFLUENCE) {
+    // `cs.influence` (no slug) = the ALL bucket; `cs.influence.<slug>` = one
+    // technique. The slug is NOT validated here — an unknown technique parses
+    // fine and simply no-ops in the sheet (silent parity, contract §Validação).
+    if (rest.length === 0)
+      return { channel, targetKind: TARGET_KINDS.INFLUENCE, target: null };
+    if (rest.length === 1 && rest[0])
+      return { channel, targetKind: TARGET_KINDS.INFLUENCE, target: rest[0] };
+    return null;
+  }
   if (channel === EFFECT_CHANNELS.DERIVED_STAT) {
     return rest.length === 1 && VALID_DERIVED_STATS.has(rest[0])
       ? { channel, targetKind: TARGET_KINDS.STAT, target: rest[0] }
@@ -287,6 +317,21 @@ function parseWeaponTarget(channel, rest) {
  */
 export function buildEffectKey({ channel, targetKind, target = null } = {}) {
   if (!VALID_CHANNELS.has(channel)) return "";
+
+  // Disposition round-trips to `cs.result.disposition.<facet>` (US4).
+  if (
+    channel === EFFECT_CHANNELS.RESULT &&
+    targetKind === TARGET_KINDS.DISPOSITION
+  ) {
+    return target && DISPOSITION_FACETS.has(target)
+      ? `${EFFECT_KEY_PREFIX}result.disposition.${target}`
+      : "";
+  }
+  if (channel === EFFECT_CHANNELS.INFLUENCE) {
+    return target
+      ? `${EFFECT_KEY_PREFIX}influence.${target}`
+      : `${EFFECT_KEY_PREFIX}influence`;
+  }
 
   if (ROLL_CHANNELS.has(channel)) {
     if (targetKind === TARGET_KINDS.ALL)

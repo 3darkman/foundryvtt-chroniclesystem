@@ -1,0 +1,57 @@
+{{!-- Redesigned Details tab (US6). Uses {{formInput}} / {{formGroup}} so every
+      schema `name` is preserved (persistence intact), but lays the fields out to
+      match the design handoff: eyebrow labels, a titled description card, toggle
+      rows (title + hint + checkbox), and a two-column statuses/show-icon block.
+      Tab binding on the root section is the idiomatic no-stacking fix. --}}
+<section class="tab scrollable{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+    {{!-- Icon tint (color-picker: text input + swatch) --}}
+    <div class="cs-field">
+        <label class="csv2-label">{{localize "CS.effects.redesign.iconTint"}}</label>
+        {{formInput fields.tint value=source.tint placeholder="#ffffff"}}
+    </div>
+
+    {{!-- Description — the card header IS the title, so the formGroup's own label
+          is hidden (cs-desc-body) to avoid the repeated heading. --}}
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.effects.redesign.description"}}</div>
+        <div class="csv2-card-body cs-desc-body">
+            {{formGroup fields.description value=source.description rootId=rootId}}
+        </div>
+    </div>
+
+    {{!-- Toggle rows: title + hint on the left, checkbox on the right. --}}
+    <div class="csv2-card">
+        <div class="csv2-row">
+            <div class="csv2-row-text">
+                <div class="csv2-row-label">{{localize "CS.effects.redesign.suspendedTitle"}}</div>
+                <p class="csv2-help">{{localize "CS.effects.redesign.suspendedHint"}}</p>
+            </div>
+            {{formInput fields.disabled value=source.disabled}}
+        </div>
+        {{#if isItemEffect}}
+        <div class="csv2-row">
+            <div class="csv2-row-text">
+                <div class="csv2-row-label">{{localize "CS.effects.redesign.applyTitle"}}</div>
+                <p class="csv2-help">{{localize "CS.effects.redesign.applyHint"}}</p>
+            </div>
+            {{formInput fields.transfer value=source.transfer}}
+        </div>
+        {{/if}}
+    </div>
+
+    {{#if isActorEffect}}
+    <div class="cs-field">
+        <label class="csv2-label">{{localize "EFFECT.FIELDS.origin.label"}}</label>
+        {{formInput fields.origin value=source.origin disabled=true}}
+    </div>
+    {{/if}}
+
+    {{!-- Status conditions + show icon (formGroup so core renders the multi-select
+          widget; the labels are restyled as eyebrows by the generic .form-group rule). --}}
+    <div class="csv2-two-col">
+        {{formGroup fields.statuses value=source.statuses options=statuses sort=true rootId=rootId classes="statuses"}}
+        {{formGroup fields.showIcon value=source.showIcon options=showIconOptions rootId=rootId}}
+    </div>
+    <p class="csv2-help cs-details-hint">{{localize "CS.effects.redesign.showIconHint"}}</p>
+</section>

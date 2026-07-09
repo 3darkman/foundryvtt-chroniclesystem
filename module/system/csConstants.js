@@ -32,6 +32,7 @@ CSConstants.Settings = {
   CURRENT_VERSION: "version",
   MODIFIER_DIALOG_AS_DEFAULT: "isModifierDialogDefault",
   SLUG_REVIEW: "slugReview",
+  DIFFICULTY_TABLE: "difficultyTable",
 };
 
 CSConstants.HouseResources = {

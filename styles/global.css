@@ -488,16 +488,9 @@
   flex-direction: column;
 }
 
-/* System colour theme for the effect config. The sheet drops the
-   `chroniclesystem` class to keep the core's clean V2 layout, so re-apply ONLY
-   the palette here — backgrounds/colours (and minimal chip padding) — never
-   structural layout, or the breakage returns (overlapping header, vertical nav).
-   Values mirror the system's actor/item theme (less/global.css). */
-.cs-effect-config .window-content {
-  background: #dce2ef;
-}
-
-/* form controls: white fields, dark text (kills the core v13 dark form theme) */
+/* form controls: white fields, dark text (kills the core v13 dark form theme).
+   The v2 redesign (cs-components.css) restyles the visible text inputs / selects
+   with higher specificity; this keeps the description editor / textarea readable. */
 .cs-effect-config input,
 .cs-effect-config textarea,
 .cs-effect-config select,
@@ -524,75 +517,10 @@
   color: #4b4a44;
 }
 
-/* tab chips: system grey / active blue */
-.cs-effect-config nav.sheet-tabs {
-  gap: 4px;
-}
-.cs-effect-config nav [data-tab] {
-  background: #bbbbbb;
-  color: black;
-  text-shadow: none;
-  padding: 3px 8px;
-  border-radius: 3px;
-}
-.cs-effect-config nav [data-tab].active {
-  background: #005390;
-  color: white;
-}
-
-/* primary action button: system blue */
-.cs-effect-config .sheet-footer button,
-.cs-effect-config button[type="submit"] {
-  background: #005390;
-  color: white;
-  border: none;
-}
-.cs-effect-config .sheet-footer button:hover,
-.cs-effect-config button[type="submit"]:hover {
-  background: #0067b3;
-}
-
-.cs-effect-changes .cs-effect-flags {
-  border: 1px solid var(--color-border-light-tertiary, #999);
-  border-radius: 4px;
-  margin-bottom: 6px;
-  padding: 4px 8px;
-}
-.cs-effect-changes .cs-effect-flags .cs-effect-condition {
-  align-items: center;
-  display: flex;
-  gap: 6px;
-  margin-top: 4px;
-}
-.cs-effect-changes .cs-changes-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.cs-effect-changes .cs-change {
-  align-items: flex-end;
-  border-bottom: 1px solid var(--color-border-light-tertiary, #ccc);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 6px 0;
-}
-.cs-effect-changes .cs-field {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.cs-effect-changes .cs-field label {
-  font-size: 0.8em;
-  opacity: 0.7;
-}
-.cs-effect-changes .cs-change-delete {
-  flex: 0 0 auto;
-  margin-left: auto;
-}
-.cs-effect-changes .cs-change-add {
-  margin-top: 6px;
-}
+/* NOTE: the effect-config tab chips, footer button and the whole `.cs-effect-changes`
+   cascade layout used to be re-themed here. They now live in cs-components.css
+   (`.cs-effect-config.cs-v2 …`, spec 009 US6) as the single source — the legacy
+   copies were removed so they no longer pollute the redesigned window. */
 
 /* =============================================================================
    Tabs — unified flat chips that fill the nav width. GLOBAL: every actor/item
