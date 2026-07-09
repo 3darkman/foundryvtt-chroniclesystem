@@ -277,7 +277,30 @@ function pushQuality(buffer, key, id, grant) {
  * @param {object} buffers
  */
 function routeNonRollChange(parsed, change, effectId, accessors, buffers) {
+  // Disposition delta (US4): rides the `result` channel but feeds its OWN buffer,
+  // summed into the technique modifiers on the sheet (never touching the selected
+  // disposition level). `both` adds to persuasion AND deception.
+  if (parsed.targetKind === TARGET_KINDS.DISPOSITION) {
+    const value = resolveEffectValue(change.value, accessors);
+    if (!value) return;
+    if (parsed.target === "persuasion" || parsed.target === "both") {
+      buffers.dispositionDelta.persuasion += value;
+    }
+    if (parsed.target === "deception" || parsed.target === "both") {
+      buffers.dispositionDelta.deception += value;
+    }
+    return;
+  }
   switch (parsed.channel) {
+    case EFFECT_CHANNELS.INFLUENCE: {
+      // Per-technique influence (US4): `cs.influence.<slug>` → that technique;
+      // `cs.influence` (target null) → the ALL bucket added to every technique.
+      const value = resolveEffectValue(change.value, accessors);
+      if (!value) break;
+      const key = parsed.target ?? ChronicleSystem.modifiersConstants.ALL;
+      buffers.influence[key] = (buffers.influence[key] || 0) + value;
+      break;
+    }
     case EFFECT_CHANNELS.DERIVED_STAT: {
       const value = resolveEffectValue(change.value, accessors);
       pushEntry(buffers.derivedStats, parsed.target, effectId, value, false);
@@ -341,7 +364,12 @@ function collectAuthoredEffects(actor, buffers) {
       const parsed = parseEffectKey(change.key);
       if (!parsed) continue;
 
-      const bufferName = ROLL_CHANNEL_TO_BUFFER[parsed.channel];
+      // Disposition rides the `result` channel but is NOT a plain roll modifier —
+      // let routeNonRollChange divert it to the dispositionDelta buffer.
+      const bufferName =
+        parsed.targetKind === TARGET_KINDS.DISPOSITION
+          ? null
+          : ROLL_CHANNEL_TO_BUFFER[parsed.channel];
       if (bufferName) {
         const value = resolveEffectValue(change.value, accessors);
         if (!value) continue;
@@ -454,11 +482,26 @@ export function collectEffectModifiers(actor) {
     derivedStats: {},
     weaponDamage: {},
     weaponQuality: {},
+    dispositionDelta: { persuasion: 0, deception: 0 },
+    influence: {},
   };
   collectAuthoredEffects(actor, buffers);
   collectItemModifiers(actor, buffers.modifiers);
   collectConditionModifiers(actor, buffers.modifiers, buffers.penalties);
   return buffers;
+}
+
+/**
+ * Read the influence delta for one technique: its own bucket + the ALL bucket
+ * (both written by {@link collectEffectModifiers}). Absent buckets read 0, so an
+ * unaddressed technique is a silent no-op (US4 parity).
+ * @param {object} influenceBuffer the `influence` buffer
+ * @param {string} techniqueSlug
+ * @returns {number}
+ */
+export function influenceFor(influenceBuffer, techniqueSlug) {
+  const all = influenceBuffer?.[ChronicleSystem.modifiersConstants.ALL] || 0;
+  return (influenceBuffer?.[techniqueSlug] || 0) + all;
 }
 
 /** Sum a single item's OWN effects on one channel (self-targeted, e.g. armour
