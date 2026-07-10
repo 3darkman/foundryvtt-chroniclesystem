@@ -30,11 +30,14 @@
         "optionalEffects": "Optional Modifiers",
         "activeEffects": "Active Effects",
         "activeEffectHint": "Always on — already applied to this roll.",
-        "baseTitle": "Base (raw capacity)",
+        "baseTitle": "Base · Raw Capacity",
         "itemizedTitle": "Always-on modifiers",
         "extrasTitle": "Your extra modifiers",
         "extrasHint": "Added on top of the base — flagged as your change.",
         "difficulty": "Difficulty",
+        "difficultyLevel": "Difficulty Level",
+        "passiveDifficulty": "Passive difficulty from target",
+        "confirmRoll": "Confirm Roll",
         "targetDifficulty": "Difficulty vs {name}",
         "origin": {
           "condition": "Condition",
@@ -311,10 +314,15 @@
       "disposition": "Disposition ({level})",
       "damage": "Damage",
       "influence": "Influence",
+      "modifiers": "Modifiers",
+      "reduction": {
+        "armor": "armor",
+        "disposition": "disposition"
+      },
       "dice": {
         "kept": "Kept",
         "discarded": "Discarded",
-        "rerolled": "Re-rolled",
+        "rerolled": "Re-rolled 1",
         "legend": "Dice"
       },
       "apply": {

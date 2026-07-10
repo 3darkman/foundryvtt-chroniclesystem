@@ -1,93 +1,98 @@
-{{!-- Unified roll RESULT card (spec 011, US2) — the single surface for EVERY
-      roll (FR-011). One structure: a plain roll shows verdict + numbers (Target 0)
-      + base + itemization + dice; a conflict ADDS the target line and, on a hit,
-      the resolution panel. Root carries `.cs-roll-card.cs-v2` to resolve the
-      tokens and beat the core `.chat-message` defaults (D11). The Roll stays
-      attached to the message; its native breakdown is hidden for this card. --}}
+{{!-- Unified roll RESULT card (spec 011, US2). Rebuilt to the design handoff
+      (docs/design_handoff_roll_result_card). ONE structure for EVERY roll
+      (FR-011): a plain roll shows title/verdict/numbers/base/mods/dice; a conflict
+      ADDS the target line (3) and, on a hit, the resolution panel (8). Root carries
+      `.cs-roll-card.cs-v2` to resolve the tokens and beat the core `.chat-message`
+      defaults (D11). The Roll stays attached; its native breakdown is hidden. --}}
 <div class="cs-roll-card cs-v2 {{#if success}}is-success{{else}}is-failure{{/if}}">
-    <header class="cs-verdict">
-        <i class="fas {{#if success}}fa-circle-check{{else}}fa-circle-xmark{{/if}}"></i>
-        <span class="cs-verdict-word">
-            {{#if success}}{{localize "CS.difficulty.result.success"}}{{else}}{{localize "CS.difficulty.result.failure"}}{{/if}}
-        </span>
-        <span class="cs-verdict-degree">{{degree}}{{#if degrees}} ({{degrees}}){{/if}}</span>
-    </header>
+    {{!-- 1 · Title — dark strip at the top (optional). --}}
+    {{#if title}}
+    <div class="cs-rc-title">{{title}}</div>
+    {{/if}}
 
-    <div class="cs-roll-card-body">
-        {{#if title}}
-        <div class="cs-roll-card-title">{{title}}</div>
-        {{/if}}
+    {{!-- 2 · Verdict header — tinted; word over grade text. --}}
+    <div class="cs-rc-verdict">
+        <span class="cs-rc-verdict-icon"><i class="fas {{#if success}}fa-circle-check{{else}}fa-circle-xmark{{/if}}"></i></span>
+        <div class="cs-rc-verdict-text">
+            <div class="cs-rc-verdict-word">
+                {{#if success}}{{localize "CS.difficulty.result.success"}}{{else}}{{localize "CS.difficulty.result.failure"}}{{/if}}
+            </div>
+            <div class="cs-rc-verdict-grade">{{degree}}{{#if degrees}} <span class="cs-rc-degrees">({{degrees}})</span>{{/if}}</div>
+        </div>
+    </div>
 
-        {{!-- Target line — CONFLICT only, so the target name is not mistaken for
-              the roller. --}}
+    <div class="cs-rc-body">
+        {{!-- 3 · Target line — CONFLICT only. --}}
         {{#if targetName}}
-        <div class="cs-target-chip">
-            <i class="fas fa-crosshairs"></i>
-            <span class="csv2-label">{{localize "CS.conflict.targetName"}}</span>
-            <span class="cs-target-name">{{targetName}}</span>
+        <div class="cs-rc-target">
+            <span class="cs-rc-target-icon"><i class="fas fa-bullseye"></i></span>
+            <span class="cs-rc-target-label">{{localize "CS.conflict.targetName"}}</span>
+            <span class="cs-rc-target-name">{{targetName}}</span>
         </div>
         {{/if}}
 
-        {{!-- Total / Target / Margin. Target is ALWAYS present (0 with no
-              difficulty); the difficulty name sits above only when set; the
-              margin is tinted by direction. --}}
-        <div class="cs-roll-numbers">
-            {{#if difficultyName}}
-            <span class="cs-difficulty-name">{{difficultyName}}</span>
-            {{/if}}
-            <span class="cs-num-cell"><span class="csv2-label">{{localize "CS.difficulty.result.total"}}</span><b>{{total}}</b></span>
-            <span class="cs-num-cell"><span class="csv2-label">{{localize "CS.difficulty.result.target"}}</span><b>{{target}}</b></span>
-            <span class="cs-num-cell"><span class="csv2-label">{{localize "CS.difficulty.result.margin"}}</span><b class="cs-value-{{marginTone}}">{{marginText}}</b></span>
+        {{!-- 4 · Numbers — optional difficulty name, then Total / Target / Margin. --}}
+        <div class="cs-rc-numbers">
+            {{#if difficultyName}}<div class="cs-rc-diffname">{{difficultyName}}</div>{{/if}}
+            <div class="cs-rc-num-grid">
+                <div class="cs-rc-num-cell"><div class="cs-rc-num-label">{{localize "CS.difficulty.result.total"}}</div><div class="cs-rc-num-value">{{total}}</div></div>
+                <div class="cs-rc-num-cell"><div class="cs-rc-num-label">{{localize "CS.difficulty.result.target"}}</div><div class="cs-rc-num-value">{{target}}</div></div>
+                <div class="cs-rc-num-cell cs-margin-{{marginTone}}"><div class="cs-rc-num-label">{{localize "CS.difficulty.result.margin"}}</div><div class="cs-rc-num-value">{{marginText}}</div></div>
+            </div>
         </div>
 
-        {{!-- Base (raw capacity) so the total reconstructs by hand even with no
-              modifiers: base + Σ itemized + dice = total (SC-001). --}}
+        {{!-- 5 · Base line (optional) so the total reconstructs by hand (SC-001). --}}
         {{#if baseLabel}}
-        <div class="cs-roll-base">
-            <span class="csv2-label">{{localize "CS.conflict.base"}}</span>
-            <span class="cs-roll-base-value">{{baseLabel}}</span>
+        <div class="cs-rc-base">
+            <span class="cs-rc-base-label">{{localize "CS.conflict.base"}}</span>
+            <span class="cs-rc-base-value">{{baseLabel}}</span>
         </div>
         {{/if}}
 
-        {{!-- Modifier decomposition — origin pill + source + signed, tinted value.
-              Shared row component with the dialog (FR-020). --}}
+        {{!-- 6 · Modifier breakdown — bordered box + sub-header; shared row (FR-020). --}}
         {{#if itemized.length}}
-        <div class="cs-roll-itemized">
+        <div class="cs-rc-mods">
+            <div class="cs-rc-mods-header">{{localize "CS.conflict.modifiers"}}</div>
             {{#each itemized}}
-            <div class="cs-itemized-row cs-origin-{{this.origin}}">
-                <span class="cs-itemized-origin">{{this.originLabel}}</span>
-                <span class="cs-itemized-source">{{this.sourceLabel}}</span>
-                <span class="cs-itemized-value cs-value-{{this.tone}}">{{this.displayValue}}</span>
-                {{#if this.condition}}<span class="cs-itemized-condition">{{this.condition}}</span>{{/if}}
+            <div class="cs-mod-row cs-origin-{{this.origin}}">
+                <div class="cs-mod-main">
+                    <span class="cs-mod-pill">{{this.originLabel}}</span>
+                    <span class="cs-mod-source">{{this.sourceLabel}}</span>
+                    <span class="cs-mod-value cs-value-{{this.tone}}">{{this.displayValue}}</span>
+                </div>
+                {{#if this.condition}}<div class="cs-mod-condition">{{this.condition}}</div>{{/if}}
             </div>
             {{/each}}
         </div>
         {{/if}}
 
-        {{!-- Die faces — one pip face per physical die, three states (from the
-              collapsed DieView, T014). Each face's title/data-tooltip IS the
-              single-source DieView.tooltip (F2) — the hook does not recompute. --}}
-        <div class="cs-roll-dice">
-            {{#each dice}}
-            <span class="cs-die is-{{this.state}}" title="{{this.tooltip}}" data-tooltip="{{this.tooltip}}">
-                <span class="cs-die-face" data-value="{{this.value}}">{{#for 1 this.value 1}}<i class="cs-die-pip"></i>{{/for}}</span>
-            </span>
-            {{/each}}
-        </div>
-        <div class="cs-dice-legend">
-            <span class="csv2-label">{{localize "CS.conflict.dice.legend"}}</span>
-            <span class="cs-legend-item"><span class="cs-die-swatch is-kept"></span>{{localize "CS.conflict.dice.kept"}}</span>
-            <span class="cs-legend-item"><span class="cs-die-swatch is-discarded"></span>{{localize "CS.conflict.dice.discarded"}}</span>
-            <span class="cs-legend-item"><span class="cs-die-swatch is-rerolled"></span>{{localize "CS.conflict.dice.rerolled"}}</span>
+        {{!-- 7 · Die faces — one pip face per physical die, three states (T014). The
+              face's title/data-tooltip IS the single-source DieView.tooltip (F2). --}}
+        <div class="cs-rc-dice-block">
+            <div class="cs-rc-dice-label">{{localize "CS.conflict.dice.legend"}}</div>
+            <div class="cs-rc-dice">
+                {{#each dice}}
+                <span class="cs-die is-{{this.state}}" title="{{this.tooltip}}" data-tooltip="{{this.tooltip}}">
+                    <span class="cs-die-face" data-value="{{this.value}}">{{#for 1 this.value 1}}<i class="cs-die-pip"></i>{{/for}}</span>
+                </span>
+                {{/each}}
+            </div>
+            <div class="cs-rc-legend">
+                <span class="cs-legend-item"><span class="cs-die-swatch is-kept"></span>{{localize "CS.conflict.dice.kept"}}</span>
+                <span class="cs-legend-item"><span class="cs-die-swatch is-discarded"></span>{{localize "CS.conflict.dice.discarded"}}</span>
+                <span class="cs-legend-item"><span class="cs-die-swatch is-rerolled"></span>{{localize "CS.conflict.dice.rerolled"}}</span>
+            </div>
         </div>
 
-        {{!-- Resolution — only on a HIT of a real conflict (blue panel + apply). --}}
+        {{!-- 8 · Resolution — successful conflict only (blue panel + apply). --}}
         {{#if resolution}}
-        <div class="csv2-panel cs-resolution">
-            <span class="csv2-label">{{localize (concat "CS.conflict." resolution.kind)}}</span>
-            <div class="cs-resolution-value">
-                <b>{{resolution.value}}</b>
-                {{#if resolution.reduction}}<span class="cs-resolution-reduction">&minus;{{resolution.reduction}}</span>{{/if}}
+        <div class="cs-rc-resolution">
+            <div class="cs-rc-res-head">
+                <span class="cs-rc-res-label"><i class="fas fa-star"></i>{{localize (concat "CS.conflict." resolution.kind)}}</span>
+                <div class="cs-rc-res-figure">
+                    <span class="cs-rc-res-value">{{resolution.value}}</span>
+                    {{#if resolution.reduction}}<span class="cs-rc-res-reduction">&minus;{{resolution.reduction}} {{resolution.reductionUnit}}</span>{{/if}}
+                </div>
             </div>
             <button type="button" class="cs-apply-btn" data-action="cs-apply-resource">
                 {{localize (concat "CS.conflict.apply." resolution.kind)}} {{resolution.value}}

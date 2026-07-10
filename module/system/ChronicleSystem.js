@@ -326,22 +326,28 @@ async function _showModifierDialog(context) {
   );
 
   return foundry.applications.api.DialogV2.wait({
+    // Scope the frame to the v2 look (root is a <dialog>); fixed 700px per handoff.
+    classes: ["cs-roll-dialog-window", "cs-v2"],
+    position: { width: 700 },
     window: {
       title: SystemUtils.localize("CS.dialogs.rollModifier.title"),
     },
     content: html,
+    // Cancel (outline, left) then Confirm Roll (primary, right, dice icon). The
+    // `class` lands on the rendered <button> so only Confirm styles as primary.
     buttons: [
-      {
-        action: "confirm",
-        label: SystemUtils.localize("CS.dialogs.actions.confirm"),
-        icon: "fas fa-check",
-        default: true,
-        callback: (event, button) => button.form,
-      },
       {
         action: "cancel",
         label: SystemUtils.localize("CS.dialogs.actions.cancel"),
         icon: "fas fa-times",
+      },
+      {
+        action: "confirm",
+        label: SystemUtils.localize("CS.dialogs.rollModifier.confirmRoll"),
+        icon: "fas fa-dice-d6",
+        default: true,
+        class: "cs-primary",
+        callback: (event, button) => button.form,
       },
     ],
     rejectClose: false,
@@ -616,6 +622,7 @@ async function handleRollAsync(
     ).map((effect) => ({
       ...effect,
       displayValue: _withUnit(effect.value, effect.formulaField),
+      tone: _valueTone(effect.value, effect.formulaField),
     }));
     const difficultyOptions = difficultyTable.entries.map((entry, index) => ({
       index,

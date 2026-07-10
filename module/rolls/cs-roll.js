@@ -117,15 +117,23 @@ export class CSRoll {
     // never recomputes it.
     const term = roll.terms?.[0];
     const dice = collapseDiceResults(term?.results ?? [], term?.number).map(
-      (d) => ({
-        ...d,
-        tooltip: `${SystemUtils.localize(`CS.conflict.dice.${d.state}`)} · ${
-          d.value
-        }`,
-      })
+      (d) => {
+        const label = SystemUtils.localize(`CS.conflict.dice.${d.state}`);
+        // Handoff tooltips: "Kept · N" / "Discarded · N" / "Re-rolled 1 → N".
+        const sep = d.state === "rerolled" ? "→" : "·";
+        return { ...d, tooltip: `${label} ${sep} ${d.value}` };
+      }
     );
 
     const resolution = this._resolveConflict(verdict);
+    // The reduction unit shown beside the resolution value ("−2 armor" / "… disposition").
+    if (resolution) {
+      resolution.reductionUnit = SystemUtils.localize(
+        resolution.kind === "damage"
+          ? "CS.conflict.reduction.armor"
+          : "CS.conflict.reduction.disposition"
+      );
+    }
     // spec 011 (FR-011/T017): ONE structure for every roll. difficulty-result.hbs
     // is gone; the unified card handles the plain case (target 0, no target line,
     // no resolution) through its own conditional blocks.
