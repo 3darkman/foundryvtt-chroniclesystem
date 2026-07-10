@@ -1,78 +1,103 @@
-{{!-- Roll dialog (spec 009 US2/US3). Root is a <div> (NEVER a nested <form> — the
-      DialogV2 frame owns the form). The BASE inputs are read-only and carry NO
-      name (v13 submits readonly inputs that HAVE a name), so only the difficulty
-      selector, the optional-effect checkboxes and the user-extra inputs submit. --}}
-<div class="cs-roll-dialog">
-    {{!-- spec 010 (FR-004): with a target, its Combat/Intrigue Defense IS the
-          difficulty — shown READ-ONLY in place of the selector (not editable).
-          Without a target, the standard difficulty selector. --}}
+{{!-- Roll parameter dialog (spec 011, US1). v2 language: dark-strip section
+      cards + one blue "your extras" panel, IBM Plex. Root is a <div> (NEVER a
+      nested <form> — the DialogV2 frame owns the form; a nested one steals the
+      input association). Confirm/Cancel come from the DialogV2 footer.
+
+      FORM CONTRACT (contracts/dialog-form-contract.md — breaking any of these
+      breaks the roll math silently):
+        · BASE = display-only, NO `name` (v13 submits readonly inputs with a name).
+        · optional effects = <input type=checkbox class="cs-optional-effect"
+          data-field/data-value/data-effect-id>, default UNCHECKED.
+        · extras = name=extra{Pool,BonusDice,Modifier,DicePenalty,ReRoll}, default 0.
+        · difficulty selector = <select name="difficultyIndex"> (state B only).
+      No "total of modifiers" line (FR-007): total = base + Σ active, by hand. --}}
+<div class="cs-roll-dialog cs-v2">
+    {{!-- Difficulty — 3 mutually-exclusive states (FR-003). A: the target's
+          defense, read-only (spec 010). B: the system difficulty selector. C:
+          neither → the whole block is omitted. --}}
     {{#if targetDifficulty}}
-    <div class="cs-roll-difficulty cs-roll-difficulty-target">
-        <label>{{localize "CS.dialogs.rollModifier.difficulty"}}</label>
-        <span class="cs-difficulty-target-value"><b>{{targetDifficulty.value}}</b><em>{{targetDifficulty.name}}</em></span>
-    </div>
-    {{else}}
-    {{#if difficultyOptions.length}}
-    <div class="cs-roll-difficulty">
-        <label for="difficultyIndex">{{localize "CS.dialogs.rollModifier.difficulty"}}</label>
-        <select id="difficultyIndex" name="difficultyIndex">
-            <option value="-1" {{#if noneSelected}}selected{{/if}}>{{localize "CS.difficulty.none"}}</option>
-            {{#each difficultyOptions}}
-            <option value="{{this.index}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-        </select>
-    </div>
-    {{/if}}
-    {{/if}}
-
-    <fieldset class="cs-roll-base">
-        <legend>{{localize "CS.dialogs.rollModifier.baseTitle"}}</legend>
-        <div class="cs-roll-grid">
-            <label>{{localize "CS.dialogs.rollModifier.pool"}}<input type="number" value="{{base.pool}}" readonly tabindex="-1" /></label>
-            <label>{{localize "CS.dialogs.rollModifier.bonusDice"}}<input type="number" value="{{base.bonusDice}}" readonly tabindex="-1" /></label>
-            <label>{{localize "CS.dialogs.rollModifier.modifier"}}<input type="number" value="{{base.modifier}}" readonly tabindex="-1" /></label>
-            <label>{{localize "CS.dialogs.rollModifier.dicePenalty"}}<input type="number" value="{{base.dicePenalty}}" readonly tabindex="-1" /></label>
-            <label>{{localize "CS.dialogs.rollModifier.reRoll"}}<input type="number" value="{{base.reRoll}}" readonly tabindex="-1" /></label>
+    <section class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.dialogs.rollModifier.difficulty"}}</div>
+        <div class="csv2-card-body">
+            <div class="cs-difficulty-target">
+                <span class="cs-difficulty-target-value">{{targetDifficulty.value}}</span>
+                <span class="cs-difficulty-target-name">{{targetDifficulty.name}}</span>
+            </div>
         </div>
-    </fieldset>
+    </section>
+    {{else if difficultyOptions.length}}
+    <section class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.dialogs.rollModifier.difficulty"}}</div>
+        <div class="csv2-card-body">
+            <select name="difficultyIndex">
+                <option value="-1" {{#if noneSelected}}selected{{/if}}>{{localize "CS.difficulty.none"}}</option>
+                {{#each difficultyOptions}}
+                <option value="{{this.index}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </section>
+    {{/if}}
 
+    {{!-- Base (raw capacity) — 5 read-only quantities, display-only (no inputs,
+          so nothing here is ever submitted). --}}
+    <section class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.dialogs.rollModifier.baseTitle"}}</div>
+        <div class="csv2-card-body">
+            <div class="cs-roll-grid">
+                <div class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.pool"}}</span><span class="cs-roll-num">{{base.pool}}</span></div>
+                <div class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.bonusDice"}}</span><span class="cs-roll-num">{{base.bonusDice}}</span></div>
+                <div class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.modifier"}}</span><span class="cs-roll-num">{{base.modifier}}</span></div>
+                <div class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.dicePenalty"}}</span><span class="cs-roll-num">{{base.dicePenalty}}</span></div>
+                <div class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.reRoll"}}</span><span class="cs-roll-num">{{base.reRoll}}</span></div>
+            </div>
+        </div>
+    </section>
+
+    {{!-- Always-on modifiers (display-only, itemized). Hidden when empty. --}}
     {{#if itemizedAlwaysOn.length}}
-    <fieldset class="cs-roll-itemized">
-        <legend>{{localize "CS.dialogs.rollModifier.itemizedTitle"}}</legend>
-        {{#each itemizedAlwaysOn}}
-        <div class="cs-itemized-row cs-origin-{{this.origin}}">
-            <span class="cs-itemized-origin">{{this.originLabel}}</span>
-            <span class="cs-itemized-source">{{this.sourceLabel}}</span>
-            <span class="cs-itemized-value">{{this.displayValue}}</span>
-            {{#if this.condition}}<span class="cs-itemized-condition">{{this.condition}}</span>{{/if}}
+    <section class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.dialogs.rollModifier.itemizedTitle"}}</div>
+        <div class="csv2-card-body cs-itemized-scroll">
+            {{#each itemizedAlwaysOn}}
+            <div class="cs-itemized-row cs-origin-{{this.origin}}">
+                <span class="cs-itemized-origin">{{this.originLabel}}</span>
+                <span class="cs-itemized-source">{{this.sourceLabel}}</span>
+                <span class="cs-itemized-value cs-value-{{this.tone}}">{{this.displayValue}}</span>
+                {{#if this.condition}}<span class="cs-itemized-condition">{{this.condition}}</span>{{/if}}
+            </div>
+            {{/each}}
         </div>
-        {{/each}}
-    </fieldset>
+    </section>
     {{/if}}
 
+    {{!-- Optional modifiers — checkboxes, default OFF. Hidden when empty. --}}
     {{#if optionalEffects.length}}
-    <fieldset class="cs-optional-effects">
-        <legend>{{localize "CS.dialogs.rollModifier.optionalEffects"}}</legend>
-        {{#each optionalEffects}}
-        <label class="cs-optional-effect">
-            <input type="checkbox" data-field="{{this.formulaField}}" data-value="{{this.value}}" data-effect-id="{{this.effectId}}" />
-            <span class="cs-optional-effect-name">{{this.name}}</span>
-            <span class="cs-optional-effect-value">{{this.displayValue}}</span>
-            {{#if this.condition}}<span class="cs-optional-effect-condition">{{this.condition}}</span>{{/if}}
-        </label>
-        {{/each}}
-    </fieldset>
+    <section class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.dialogs.rollModifier.optionalEffects"}}</div>
+        <div class="csv2-card-body">
+            {{#each optionalEffects}}
+            <label class="cs-optional-effect">
+                <input type="checkbox" data-field="{{this.formulaField}}" data-value="{{this.value}}" data-effect-id="{{this.effectId}}" />
+                <span class="cs-optional-effect-name">{{this.name}}</span>
+                <span class="cs-optional-effect-value">{{this.displayValue}}</span>
+                {{#if this.condition}}<span class="cs-optional-effect-condition">{{this.condition}}</span>{{/if}}
+            </label>
+            {{/each}}
+        </div>
+    </section>
     {{/if}}
 
-    <fieldset class="cs-roll-extras">
-        <legend>{{localize "CS.dialogs.rollModifier.extrasTitle"}}</legend>
+    {{!-- Your extra modifiers — the blue panel of 5 editable inputs (default 0). --}}
+    <section class="csv2-panel cs-roll-extras">
+        <span class="csv2-label">{{localize "CS.dialogs.rollModifier.extrasTitle"}}</span>
         <p class="cs-roll-extras-hint">{{localize "CS.dialogs.rollModifier.extrasHint"}}</p>
         <div class="cs-roll-grid">
-            <label>{{localize "CS.dialogs.rollModifier.pool"}}<input type="number" name="extraPool" value="0" /></label>
-            <label>{{localize "CS.dialogs.rollModifier.bonusDice"}}<input type="number" name="extraBonusDice" value="0" /></label>
-            <label>{{localize "CS.dialogs.rollModifier.modifier"}}<input type="number" name="extraModifier" value="0" /></label>
-            <label>{{localize "CS.dialogs.rollModifier.dicePenalty"}}<input type="number" name="extraDicePenalty" value="0" /></label>
-            <label>{{localize "CS.dialogs.rollModifier.reRoll"}}<input type="number" name="extraReRoll" value="0" /></label>
+            <label class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.pool"}}</span><input type="number" name="extraPool" value="0" /></label>
+            <label class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.bonusDice"}}</span><input type="number" name="extraBonusDice" value="0" /></label>
+            <label class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.modifier"}}</span><input type="number" name="extraModifier" value="0" /></label>
+            <label class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.dicePenalty"}}</span><input type="number" name="extraDicePenalty" value="0" /></label>
+            <label class="cs-roll-cell"><span class="csv2-label">{{localize "CS.dialogs.rollModifier.reRoll"}}</span><input type="number" name="extraReRoll" value="0" /></label>
         </div>
-    </fieldset>
+    </section>
 </div>

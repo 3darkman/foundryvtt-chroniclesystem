@@ -311,6 +311,12 @@
       "disposition": "Disposition ({level})",
       "damage": "Damage",
       "influence": "Influence",
+      "dice": {
+        "kept": "Kept",
+        "discarded": "Discarded",
+        "rerolled": "Re-rolled",
+        "legend": "Dice"
+      },
       "apply": {
         "damage": "Apply damage",
         "influence": "Apply influence"

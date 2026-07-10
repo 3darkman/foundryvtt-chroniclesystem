@@ -438,41 +438,6 @@
   padding: 0 4px;
 }
 
-/* Optional (dialog-toggled) roll effects — rendered inside the roll-modifier
-   DialogV2, which carries no .chroniclesystem class, so this is self-scoped. */
-.cs-optional-effects {
-  border: 1px solid var(--color-border-light-tertiary, #999);
-  border-radius: 4px;
-  margin-top: 6px;
-  padding: 4px 8px 6px;
-}
-.cs-optional-effects legend {
-  font-weight: bold;
-  padding: 0 4px;
-}
-.cs-optional-effect {
-  align-items: center;
-  display: flex;
-  gap: 6px;
-  padding: 2px 0;
-}
-.cs-optional-effect input[type="checkbox"] {
-  flex: 0 0 auto;
-}
-.cs-optional-effect .cs-optional-effect-name {
-  flex: 1;
-}
-.cs-optional-effect .cs-optional-effect-value {
-  flex: 0 0 auto;
-  font-variant-numeric: tabular-nums;
-}
-.cs-optional-effect .cs-optional-effect-condition {
-  flex: 0 0 auto;
-  font-size: 0.85em;
-  font-style: italic;
-  opacity: 0.7;
-}
-
 /* CSActiveEffectConfig cascade (Wave 5) — the changes tab of the effect config. */
 
 /* Tab isolation for the subclassed V2 ActiveEffectConfig. The config drops the

@@ -178,12 +178,27 @@ function _withUnit(value, field) {
   return `${_signed(value)}${DICE_FORMULA_FIELDS.has(field) ? "d" : ""}`;
 }
 
+/** Value TONE (spec 011, data-model §3): direction is mapped by FIELD, not by
+ *  sign — a `dicePenalty` stores a positive value but always hinders, so it reads
+ *  red; pool/bonusDice/re-roll always help (green); a flat modifier / size follows
+ *  its own sign; zero is muted. Drives the `.cs-value-{gain,loss,zero}` utility. */
+function _valueTone(value, field) {
+  if (value === 0) return "zero";
+  if (field === "dicePenalty") return "loss";
+  // `reReoll` keeps the codebase-wide typo (F7) — it is a beneficial re-roll count.
+  if (field === "pool" || field === "bonusDice" || field === "reReoll")
+    return "gain";
+  return value >= 0 ? "gain" : "loss";
+}
+
 /** Decorate an itemized entry (spec 009 shape + spec 010 origins) with the
- *  localized origin label and display value the dialog and the card both show. */
+ *  localized origin label, display value and value tone the dialog and the card
+ *  both show (spec 011). */
 function _decorateItem(item) {
   return {
     ...item,
     displayValue: _withUnit(item.value, item.field),
+    tone: _valueTone(item.value, item.field),
     originLabel: SystemUtils.localize(
       `CS.dialogs.rollModifier.origin.${item.origin}`
     ),
@@ -648,6 +663,15 @@ async function handleRollAsync(
       ..._checkedOptionalItemized(formData, optionalEffects).map(_decorateItem),
       ..._extrasItemized(formData).map(_decorateItem),
     ];
+  }
+
+  // spec 011 (FR-011/FR-013): there is no "free roll". An unresolved difficulty
+  // (None selected in the dialog, or a -1 default) resolves against TARGET 0 so
+  // EVERY roll through this path renders the unified card below — never the plain
+  // Foundry message. Initiative rolls take the sync handleRoll() path (no
+  // difficulty) and keep their own message (D6).
+  if (!difficulty || difficulty.target == null) {
+    difficulty = { target: 0, label: null, labelKey: null };
   }
 
   // spec 010 (FR-025): whenever a difficulty resolves, post the transparent card
