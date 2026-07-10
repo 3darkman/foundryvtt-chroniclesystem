@@ -137,10 +137,23 @@ export class CSActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       showModifierDialog = true;
     }
     const rollType = target.id;
+    // spec 010: thread the weapon/technique context (data-* on the chip) so the
+    // roll can derive the target's difficulty/modifiers. Absent → an ordinary
+    // roll (kind null), retrocompatible with every non-conflict chip.
+    const rollContext = {
+      kind: target.dataset.rollKind ?? null,
+      itemId: target.dataset.itemId ?? null,
+      techniqueSlug: target.dataset.technique ?? null,
+      influenceValue:
+        target.dataset.influence != null
+          ? Number(target.dataset.influence)
+          : null,
+    };
     await ChronicleSystem.handleRollAsync(
       rollType,
       this.actor,
-      showModifierDialog
+      showModifierDialog,
+      rollContext
     );
   }
 

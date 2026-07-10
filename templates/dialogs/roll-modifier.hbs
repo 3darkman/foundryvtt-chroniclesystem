@@ -3,6 +3,15 @@
       name (v13 submits readonly inputs that HAVE a name), so only the difficulty
       selector, the optional-effect checkboxes and the user-extra inputs submit. --}}
 <div class="cs-roll-dialog">
+    {{!-- spec 010 (FR-004): with a target, its Combat/Intrigue Defense IS the
+          difficulty — shown READ-ONLY in place of the selector (not editable).
+          Without a target, the standard difficulty selector. --}}
+    {{#if targetDifficulty}}
+    <div class="cs-roll-difficulty cs-roll-difficulty-target">
+        <label>{{localize "CS.dialogs.rollModifier.difficulty"}}</label>
+        <span class="cs-difficulty-target-value"><b>{{targetDifficulty.value}}</b><em>{{targetDifficulty.name}}</em></span>
+    </div>
+    {{else}}
     {{#if difficultyOptions.length}}
     <div class="cs-roll-difficulty">
         <label for="difficultyIndex">{{localize "CS.dialogs.rollModifier.difficulty"}}</label>
@@ -13,6 +22,7 @@
             {{/each}}
         </select>
     </div>
+    {{/if}}
     {{/if}}
 
     <fieldset class="cs-roll-base">

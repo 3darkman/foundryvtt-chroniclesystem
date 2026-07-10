@@ -163,6 +163,98 @@ function _applyUserExtras(form, formula) {
   return changed;
 }
 
+/** Signed string for an itemized value (+2 / −1). */
+const _signed = (v) => (v >= 0 ? `+${v}` : `${v}`);
+
+/** Display string for an itemized value: bonus dice always read as "B" (+2B, the
+ *  same notation the sheet chips / ToFormattedStr use); a dice penalty is always
+ *  subtractive, so it reads as a negative die count (−2d, never +); test dice get
+ *  a "d" suffix (+2d); the target's `difficulty` adjustment (size) and flat
+ *  modifiers stay unit-less. */
+function _withUnit(value, field) {
+  if (field === "difficulty") return _signed(value);
+  if (field === "bonusDice") return `${_signed(value)}B`;
+  if (field === "dicePenalty") return `-${Math.abs(value)}d`;
+  return `${_signed(value)}${DICE_FORMULA_FIELDS.has(field) ? "d" : ""}`;
+}
+
+/** Decorate an itemized entry (spec 009 shape + spec 010 origins) with the
+ *  localized origin label and display value the dialog and the card both show. */
+function _decorateItem(item) {
+  return {
+    ...item,
+    displayValue: _withUnit(item.value, item.field),
+    originLabel: SystemUtils.localize(
+      `CS.dialogs.rollModifier.origin.${item.origin}`
+    ),
+  };
+}
+
+/**
+ * Itemize the dialog's CHECKED optional effects for the transparent card (FR-025):
+ * the same effects `_applyCheckedOptionalEffects` folds into the rolled formula,
+ * surfaced as `origin:"effect"` entries so the card lists 100% of the modifiers.
+ * @param {HTMLFormElement} form
+ * @param {Array<{effectId: string, name: string, condition: string}>} optionalEffects
+ * @returns {Array<object>}
+ */
+function _checkedOptionalItemized(form, optionalEffects) {
+  if (!form?.querySelectorAll) return [];
+  const byId = new Map((optionalEffects ?? []).map((e) => [e.effectId, e]));
+  const out = [];
+  form
+    .querySelectorAll(
+      ".cs-optional-effect input[type=checkbox]:checked:not([disabled])"
+    )
+    .forEach((cb) => {
+      const field = cb.dataset.field;
+      const value = parseInt(cb.dataset.value);
+      if (!field || Number.isNaN(value)) return;
+      const eff = byId.get(cb.dataset.effectId);
+      out.push({
+        sourceLabel: eff?.name ?? "",
+        origin: "effect",
+        field,
+        value,
+        condition: eff?.condition ?? "",
+      });
+    });
+  return out;
+}
+
+/** Formula fields the user-extras inputs feed, in dialog order. */
+const _EXTRA_FIELDS = [
+  ["extraPool", "pool"],
+  ["extraBonusDice", "bonusDice"],
+  ["extraModifier", "modifier"],
+  ["extraDicePenalty", "dicePenalty"],
+  ["extraReRoll", "reRoll"],
+];
+
+/**
+ * Itemize the dialog's non-zero user EXTRAS for the transparent card (FR-025) —
+ * the manual adjustments `_applyUserExtras` folds in, as `origin:"user"` entries.
+ * @param {HTMLFormElement} form
+ * @returns {Array<object>}
+ */
+function _extrasItemized(form) {
+  const out = [];
+  for (const [name, field] of _EXTRA_FIELDS) {
+    const value = parseInt(form?.[name]?.value);
+    if (!Number.isNaN(value) && value !== 0) {
+      out.push({
+        // The field label (Pool/Modifier/…) reads better than repeating "You".
+        sourceLabel: SystemUtils.localize(`CS.dialogs.rollModifier.${field}`),
+        origin: "user",
+        field,
+        value,
+        condition: "",
+      });
+    }
+  }
+  return out;
+}
+
 /**
  * The dialog's read-only BASE formula (US2): the raw trait capacity for
  * ability/specialty rolls; for formula-string rolls, derived by subtracting the
@@ -241,7 +333,186 @@ async function _showModifierDialog(context) {
   });
 }
 
-async function handleRollAsync(rollType, actor, showModifierDialog = false) {
+/**
+ * Derive the target-driven difficulty + itemized modifiers of a conflict roll
+ * (spec 010, US1/US3). Mutates the effective `formula` in place: range/prone go
+ * to the roll fields, size goes to the difficulty target (not the formula), the
+ * attacker's disposition (intrigue) goes to the result modifier. Returns the
+ * decorated itemized rows (origin "character"/"target"), the target difficulty
+ * descriptor (or null with no valid target), and the resolution inputs (US4).
+ * The pure math lives in `cs-conflict.js`; the canvas reads in `cs-targeting.js`.
+ * @returns {Promise<{itemized: Array, difficulty: object|null, resolution: object|null}>}
+ */
+async function _deriveTargetConflict(
+  actor,
+  roll_definition,
+  rollContext,
+  formula
+) {
+  const kind = rollContext.kind;
+  const { getUserTarget, getAttackerToken, measureDistanceYards } =
+    await import("../combat/cs-targeting.js");
+  const {
+    rangeCategoryFromQualities,
+    rangePenalty,
+    combatDefenseSizeModifier,
+  } = await import("../combat/cs-conflict.js");
+
+  const itemized = [];
+  const weapon = kind === "weapon" ? actor.items.get(rollContext.itemId) : null;
+
+  // Resolve the ability/specialty this conflict roll actually exercises, so the
+  // card/dialog itemize its ability/specialty-specific always-on modifiers
+  // (FR-025). A weapon-test/technique roll is a formula-string roll that carries
+  // NO ability context via `_resolveRollTarget`, so without this only the global
+  // ALL-bucket rows would surface — a Fighting-boosting effect (or the trait
+  // itself) would be invisible on the card. Weapon: "Ability:Specialty"; intrigue:
+  // the persuasion/deception ability.
+  let itemizeAbility = null;
+  let itemizeSpecialty = null;
+  if (kind === "weapon" && weapon) {
+    const parts = String(weapon.system?.specialty ?? "").split(":");
+    itemizeAbility = parts[0] || null;
+    itemizeSpecialty = parts[1] || null;
+  } else if (kind === "intrigue") {
+    itemizeAbility = roll_definition[0] || null; // "persuasion" | "deception"
+  }
+
+  // Attacker disposition (intrigue) — an itemized "character" always-on (FR-013),
+  // applied to the effective formula whether or not there is a target. Extracted
+  // from the technique's base formula (T034) so it is never double-counted.
+  if (kind === "intrigue") {
+    const disposition = ChronicleSystem.dispositions.find(
+      (d) => d.rating === actor.getCSData().currentDisposition
+    );
+    const dispMod =
+      roll_definition[0] === "deception"
+        ? disposition?.deceptionModifier ?? 0
+        : disposition?.persuasionModifier ?? 0;
+    if (dispMod !== 0) {
+      formula.modifier += dispMod;
+      itemized.push(
+        _decorateItem({
+          sourceLabel: SystemUtils.format("CS.conflict.disposition", {
+            level: SystemUtils.localize(disposition?.name ?? ""),
+          }),
+          origin: "character",
+          field: "modifier",
+          value: dispMod,
+          condition: "",
+        })
+      );
+    }
+  }
+
+  const target = getUserTarget(actor, kind);
+  if (target.status !== "ok") {
+    return {
+      itemized,
+      difficulty: null,
+      resolution: null,
+      itemizeAbility,
+      itemizeSpecialty,
+    };
+  }
+
+  const defense =
+    kind === "weapon" ? target.combatDefense : target.intrigueDefense;
+  let difficultyTargetValue = defense;
+
+  if (kind === "weapon" && weapon) {
+    // Range penalty — ranged weapon (by slug) with a measurable attacker token.
+    const category = rangeCategoryFromQualities(weapon.system?.qualities);
+    if (category) {
+      const attackerToken = getAttackerToken(actor);
+      const yd = attackerToken
+        ? measureDistanceYards(attackerToken, target.token)
+        : null;
+      if (yd != null) {
+        const pen = rangePenalty(yd, category);
+        if (pen > 0) {
+          formula.dicePenalty += pen;
+          itemized.push(
+            _decorateItem({
+              sourceLabel: SystemUtils.format("CS.conflict.range", {
+                distance: Math.round(yd),
+                units: "yd",
+              }),
+              origin: "target",
+              field: "dicePenalty",
+              value: pen,
+              condition: "",
+            })
+          );
+        }
+      }
+    }
+    // Prone target — +1 Test Die, Fighting only (the weapon's ability half).
+    const abilityHalf = (weapon.system?.specialty ?? "").split(":")[0];
+    if (slugify(abilityHalf) === "fighting" && target.conditions?.prone) {
+      formula.pool += 1;
+      itemized.push(
+        _decorateItem({
+          sourceLabel: SystemUtils.localize("CS.conflict.prone"),
+          origin: "target",
+          field: "pool",
+          value: 1,
+          condition: "",
+        })
+      );
+    }
+    // Size → difficulty (adjusts the Combat Defense target, not the formula).
+    const sizeMod = combatDefenseSizeModifier(target.size);
+    if (sizeMod !== 0) {
+      difficultyTargetValue += sizeMod;
+      itemized.push(
+        _decorateItem({
+          sourceLabel: SystemUtils.format("CS.conflict.size", {
+            size: SystemUtils.localize(`CS.sizes.${target.size}`),
+          }),
+          origin: "target",
+          field: "difficulty",
+          value: sizeMod,
+          condition: "",
+        })
+      );
+    }
+  }
+
+  // Resolution inputs (US4): the base value + the target's reductions.
+  let baseValue = 0;
+  if (kind === "weapon" && weapon) {
+    weapon.updateDamageValue(actor);
+    baseValue = Number(weapon.damageValue) || 0;
+  } else if (kind === "intrigue") {
+    baseValue = Number(rollContext.influenceValue) || 0;
+  }
+
+  return {
+    itemized,
+    difficulty: {
+      target: difficultyTargetValue,
+      label: target.token.name,
+      labelKey: null,
+    },
+    resolution: {
+      kind,
+      targetActor: target.actor,
+      baseValue,
+      armorRating: target.armorRating,
+      dispositionRating: target.dispositionRating,
+    },
+    itemizeAbility,
+    itemizeSpecialty,
+  };
+}
+
+async function handleRollAsync(
+  rollType,
+  actor,
+  showModifierDialog = false,
+  rollContext = {}
+) {
   const roll_definition = rollType.split(":");
   if (roll_definition.length < 2) return;
   let formula = _getFormula(roll_definition, actor); // effective = base + always-on
@@ -254,10 +525,50 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
   const difficultyTable = readDifficultyTable();
   let difficulty = _difficultyAt(difficultyTable, difficultyTable.defaultIndex);
 
+  const { abilityName, specialtyName } = _resolveRollTarget(roll_definition);
+
+  // spec 010: for a weapon/intrigue roll, derive the target's difficulty + the
+  // itemized target/disposition modifiers, applied to the effective formula for
+  // BOTH the quick roll and the dialog (parity, SC-005).
+  const kind = rollContext.kind ?? null;
+  const isConflict = kind === "weapon" || kind === "intrigue";
+  const conflictItemized = []; // decorated rows: origin "character"/"target"
+  let targetDifficulty = null; // {value, name} pre-fill for the dialog
+  let resolutionCtx = null; // US4 damage/influence inputs
+  // The ability/specialty to ITEMIZE against. For weapon/intrigue rolls the
+  // formula-string target is null, so `_deriveTargetConflict` resolves the roll's
+  // real ability/specialty; ability/specialty rolls keep their own (FR-025).
+  let itemAbility = abilityName;
+  let itemSpecialty = specialtyName;
+
+  if (isConflict) {
+    const conflict = await _deriveTargetConflict(
+      actor,
+      roll_definition,
+      rollContext,
+      formula
+    );
+    conflictItemized.push(...conflict.itemized);
+    itemAbility = conflict.itemizeAbility ?? abilityName;
+    itemSpecialty = conflict.itemizeSpecialty ?? specialtyName;
+    if (conflict.difficulty) {
+      difficulty = conflict.difficulty;
+      // Read-only in the dialog (spec 010): the target's defense replaces the
+      // difficulty selector; it is NOT editable, so only value + name are needed.
+      targetDifficulty = {
+        value: conflict.difficulty.target,
+        name: conflict.difficulty.label,
+      };
+    }
+    resolutionCtx = conflict.resolution;
+  }
+
   const revertModifierDialog = game.settings.get(
     CSConstants.Settings.SYSTEM_NAME,
     CSConstants.Settings.MODIFIER_DIALOG_AS_DEFAULT
   );
+
+  let dialogItemized = null; // the card decomposition when the dialog ran
 
   if (showModifierDialog ? !revertModifierDialog : revertModifierDialog) {
     // Lazy import: a static one would close the eval-time cycle
@@ -265,42 +576,32 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
     // ChronicleSystem (vocabulary reads modifiersConstants at module-eval time).
     const { collectOptionalRollEffects, collectItemizedAlwaysOn } =
       await import("../effects/cs-effect-modifiers.js");
-    const { abilityName, specialtyName } = _resolveRollTarget(roll_definition);
 
-    const signed = (v) => (v >= 0 ? `+${v}` : `${v}`);
-    const withUnit = (v, field) =>
-      `${signed(v)}${DICE_FORMULA_FIELDS.has(field) ? "d" : ""}`;
-    const withDisplayValue = (effect) => ({
-      ...effect,
-      displayValue: withUnit(effect.value, effect.formulaField),
-    });
-    const withItemDisplay = (item) => ({
-      ...item,
-      displayValue: withUnit(item.value, item.field),
-      originLabel: SystemUtils.localize(
-        `CS.dialogs.rollModifier.origin.${item.origin}`
-      ),
-    });
-
-    // US2: itemize every always-on source (labeled by origin); show the RAW base
-    // read-only. `base + Σ itemized` equals the effective formula we roll from.
+    // US2: itemize every always-on source (labeled by origin); the target rows
+    // (spec 010) are shown in the SAME list. The RAW base is shown read-only —
+    // `base + Σ itemized` (roll-field rows) equals the effective formula.
     const itemizedAlwaysOn = collectItemizedAlwaysOn(
       actor,
-      abilityName,
-      specialtyName
-    ).map(withItemDisplay);
+      itemAbility,
+      itemSpecialty
+    ).map(_decorateItem);
+    const displayedItemized = [...itemizedAlwaysOn, ...conflictItemized];
     const base = _rawFormulaForDialog(
       actor,
       formula,
       abilityName,
       specialtyName,
-      itemizedAlwaysOn
+      // The size row (field "difficulty") never touches the formula — exclude it.
+      displayedItemized.filter((i) => i.field !== "difficulty")
     );
     const optionalEffects = collectOptionalRollEffects(
       actor,
-      abilityName,
-      specialtyName
-    ).map(withDisplayValue);
+      itemAbility,
+      itemSpecialty
+    ).map((effect) => ({
+      ...effect,
+      displayValue: _withUnit(effect.value, effect.formulaField),
+    }));
     const difficultyOptions = difficultyTable.entries.map((entry, index) => ({
       index,
       label: entryLabel(entry, SystemUtils.localize),
@@ -309,10 +610,11 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
 
     const formData = await _showModifierDialog({
       base,
-      itemizedAlwaysOn,
+      itemizedAlwaysOn: displayedItemized,
       optionalEffects,
       difficultyOptions,
       noneSelected: difficultyTable.defaultIndex < 0,
+      targetDifficulty,
     });
     if (!formData) return null;
 
@@ -329,13 +631,73 @@ async function handleRollAsync(rollType, actor, showModifierDialog = false) {
     rolled.isUserChanged = optionalApplied || extrasApplied;
     formula = rolled;
 
-    difficulty = _difficultyAt(
-      difficultyTable,
-      formData.difficultyIndex?.value ?? difficultyTable.defaultIndex
-    );
+    // spec 010: with a target, its defense IS the difficulty (read-only, already
+    // set before the dialog). Only the table selector — shown when there is no
+    // target — can change it here.
+    if (!targetDifficulty) {
+      difficulty = _difficultyAt(
+        difficultyTable,
+        formData.difficultyIndex?.value ?? difficultyTable.defaultIndex
+      );
+    }
+
+    // The card decomposition (FR-025): the displayed always-on/target rows plus
+    // the optionals + extras actually applied (parity with the quick roll).
+    dialogItemized = [
+      ...displayedItemized,
+      ..._checkedOptionalItemized(formData, optionalEffects).map(_decorateItem),
+      ..._extrasItemized(formData).map(_decorateItem),
+    ];
   }
 
-  let csRoll = new CSRoll(roll_definition[1], formula, difficulty);
+  // spec 010 (FR-025): whenever a difficulty resolves, post the transparent card
+  // (itemized decomposition + dice faces) with the conflict resolution inputs.
+  let conflictContext = null;
+  if (difficulty && difficulty.target != null) {
+    let itemized = dialogItemized;
+    if (itemized === null) {
+      const { collectItemizedAlwaysOn } = await import(
+        "../effects/cs-effect-modifiers.js"
+      );
+      itemized = [
+        ...collectItemizedAlwaysOn(actor, itemAbility, itemSpecialty).map(
+          _decorateItem
+        ),
+        ...conflictItemized,
+      ];
+    }
+    // Base (raw capacity) shown on the card so the total is reconstructable even
+    // with no modifiers (SC-008): base + Σ itemized (roll-fields) = rolled formula.
+    // The size row (field "difficulty") never touches the formula, so exclude it.
+    const base = _rawFormulaForDialog(
+      actor,
+      formula,
+      abilityName,
+      specialtyName,
+      itemized.filter((i) => i.field !== "difficulty")
+    );
+    conflictContext = {
+      itemized,
+      // Compact base label (e.g. "4d6+2B+1"), the same format the sheet chips use
+      // — clean even when the weapon-training shift makes a raw component negative.
+      baseLabel: base.ToFormattedStr(),
+      // The target's token name (spec 010 polish): shown as an explicit "Target"
+      // line on the card so it is not mistaken for the roller.
+      targetName: targetDifficulty ? targetDifficulty.name : null,
+      kind: resolutionCtx ? resolutionCtx.kind : null,
+      targetActor: resolutionCtx ? resolutionCtx.targetActor : null,
+      baseValue: resolutionCtx ? resolutionCtx.baseValue : 0,
+      armorRating: resolutionCtx ? resolutionCtx.armorRating : 0,
+      dispositionRating: resolutionCtx ? resolutionCtx.dispositionRating : 0,
+    };
+  }
+
+  let csRoll = new CSRoll(
+    roll_definition[1],
+    formula,
+    difficulty,
+    conflictContext
+  );
   return await csRoll.doRoll(actor, true);
 }
 

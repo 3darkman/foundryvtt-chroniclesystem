@@ -22,6 +22,10 @@ CSConstants.Templates = {
     ROLL_MODIFIER:
       "systems/chroniclesystem/templates/dialogs/roll-modifier.hbs",
   },
+  Chat: {
+    CONFLICT_RESULT:
+      "systems/chroniclesystem/templates/chat/cs-conflict-result.hbs",
+  },
 };
 
 CSConstants.Settings = {

@@ -64,12 +64,14 @@
                     <div class="cs2-grid-cell center">
                         {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
                             id=(concat "persuasion:" this.name ":" (formulaToStr this.persuasion))
-                            label=(format-formula this.persuasion) }}
+                            label=(format-formula this.persuasion)
+                            rollKind="intrigue" techniqueSlug=@key influence=this.influence }}
                     </div>
                     <div class="cs2-grid-cell center">
                         {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
                             id=(concat "deception:" this.name ":" (formulaToStr this.deception))
-                            label=(format-formula this.deception) }}
+                            label=(format-formula this.deception)
+                            rollKind="intrigue" techniqueSlug=@key influence=this.influence }}
                     </div>
                 </div>
                 {{/each}}
@@ -161,7 +163,8 @@
                             <div class="cs2-grid-cell center">
                                 {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
                                     id=(concat "weapon-test:" weapon.name ":" (formulaToStr weapon.formula))
-                                    label=(format-formula weapon.formula) }}
+                                    label=(format-formula weapon.formula)
+                                    rollKind="weapon" itemId=weapon.id }}
                             </div>
                             <div class="cs2-grid-cell center mono">{{weapon.damageValue}}</div>
                         </div>

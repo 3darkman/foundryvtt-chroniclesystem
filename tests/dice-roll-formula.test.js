@@ -21,17 +21,26 @@ describe("DiceRollFormula — serialization", () => {
     expect(round.toStr()).toBe("5|2|1|0|1");
   });
 
-  it("1.3 fromStr() with 3 components → defaults (reRoll stays undefined)", () => {
-    // ⚠️ Characterized, not corrected: the constructor's `this.reroll = 0`
-    // (lowercase typo, diceRollFormula.js:16) never hits the reRoll setter,
-    // so the private #reRoll is undefined on a default formula. FR-014 forbids
-    // touching module/**, so we assert the REAL behavior.
+  it("1.3 fromStr() with 3 components → defaults (reRoll defaults to 0)", () => {
+    // The constructor now initializes reRoll through its setter, so a default
+    // formula has #reRoll === 0 (spec 010 fix: the old `this.reroll = 0` typo
+    // left it undefined, which broke `formula.reRoll += value` accumulation).
     const f = DiceRollFormula.fromStr("5|2|1");
     expect(f.pool).toBe(2);
     expect(f.bonusDice).toBe(0);
     expect(f.modifier).toBe(0);
     expect(f.dicePenalty).toBe(0);
-    expect(f.reRoll).toBeUndefined();
+    expect(f.reRoll).toBe(0);
+  });
+
+  it("1.3b reRoll accumulates from the default without becoming NaN", () => {
+    // Root of the reroll bug: the old constructor typo left #reRoll undefined,
+    // so `formula.reRoll += value` (the dialog's extra-reroll path) produced NaN
+    // and the `r=1` reroll modifier was never appended to the roll formula.
+    const f = new DiceRollFormula();
+    f.reRoll += 1;
+    expect(f.reRoll).toBe(1);
+    expect(Number.isNaN(f.reRoll)).toBe(false);
   });
 
   it("1.4 fromStr() with length !== 5 → default pool 2", () => {

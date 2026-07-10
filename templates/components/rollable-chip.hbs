@@ -1,4 +1,12 @@
 {{!-- Shared "rollable" dice chip (spec: character sheet redesign). Single source
       of markup so every roll button across the sheet renders identically —
-      id carries the roll formula string parsed by CSActorSheet._onRollDice. --}}
-<div class="rollable" id="{{id}}" data-action="rollDice"><a>{{label}}</a></div>
+      id carries the roll formula string parsed by CSActorSheet._onRollDice.
+      The data-* attributes are OPTIONAL (spec 010): when a caller passes
+      rollKind/itemId/techniqueSlug/influence, they thread the weapon/technique
+      context to the roll so it can derive the target's difficulty/modifiers.
+      Absent → an unchanged, ordinary chip. --}}
+<div class="rollable" id="{{id}}" data-action="rollDice"
+    {{~#if rollKind}} data-roll-kind="{{rollKind}}"{{/if~}}
+    {{~#if itemId}} data-item-id="{{itemId}}"{{/if~}}
+    {{~#if techniqueSlug}} data-technique="{{techniqueSlug}}"{{/if~}}
+    {{~#if influence}} data-influence="{{influence}}"{{/if~}}><a>{{label}}</a></div>

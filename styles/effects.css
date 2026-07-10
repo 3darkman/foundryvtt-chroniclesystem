@@ -170,6 +170,23 @@
 .cs-roll-difficulty select {
   flex: 1 1 auto;
 }
+/* spec 010: the target's defense shown READ-ONLY in place of the selector. */
+.cs-difficulty-target-value {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
+.cs-difficulty-target-value b {
+  font-size: 1.05rem;
+  color: var(--cs-azure);
+}
+.cs-difficulty-target-value em {
+  font-style: italic;
+  color: var(--cs-stone-dark);
+  font-size: 0.85rem;
+}
 .cs-roll-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -214,6 +231,16 @@
 .cs-itemized-row.cs-origin-effect {
   border-left-color: var(--cs-azure);
 }
+/* spec 010 origins: target-derived, attacker disposition, player extras. */
+.cs-itemized-row.cs-origin-target {
+  border-left-color: var(--cs-gold);
+}
+.cs-itemized-row.cs-origin-character {
+  border-left-color: var(--cs-ink);
+}
+.cs-itemized-row.cs-origin-user {
+  border-left-color: var(--cs-stone-dark);
+}
 .cs-itemized-origin {
   font-size: 0.62rem;
   font-weight: 700;
@@ -230,6 +257,10 @@
   color: var(--cs-azure);
 }
 .cs-itemized-condition {
+  /* Span the whole row: as the grid's 4th child it would otherwise land in the
+     auto column 1 and stretch it to the condition's width, crushing the 1fr
+     source column to a vertical sliver. */
+  grid-column: 1 / -1;
   font-size: 0.72rem;
   font-style: italic;
   color: var(--cs-stone-dark);
@@ -280,4 +311,174 @@
 .cs-difficulty-name {
   font-weight: 700;
   color: var(--cs-azure);
+}
+
+/* Test name headline inside the card (spec 010 polish) — replaces the flavor. */
+.cs-conflict-title {
+  font-family: var(--cs-serif);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  color: var(--cs-ink);
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.1rem;
+  border-bottom: 1px solid var(--cs-stone);
+}
+
+/* Explicit target line so the target name is not mistaken for the roller. */
+.cs-conflict-target {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+}
+.cs-conflict-target > i {
+  color: var(--cs-crimson);
+}
+.cs-conflict-target-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--cs-stone-dark);
+}
+.cs-conflict-target-name {
+  font-weight: 700;
+  color: var(--cs-crimson);
+}
+
+/* ---------------------- transparent conflict card (spec 010, FR-025) ------- */
+
+/* Base (raw capacity) line — the trait pool before any modifier, so the total is
+   reconstructable by hand even when no modifiers apply (SC-008). */
+.cs-conflict-base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
+  margin-top: 0.35rem;
+  padding-top: 0.3rem;
+  border-top: 1px dashed var(--cs-stone);
+  font-size: 0.76rem;
+}
+.cs-conflict-base-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.62rem;
+  color: var(--cs-stone-dark);
+}
+.cs-conflict-base-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--cs-azure);
+}
+
+/* Modifier decomposition: reuses the .cs-itemized-row grid from the roll dialog
+   (origins already coloured above), stacked compactly inside the chat card. */
+.cs-conflict-itemized {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.4rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed var(--cs-stone);
+}
+.cs-conflict-itemized .cs-itemized-row {
+  font-size: 0.78rem;
+}
+
+/* Every die face — kept highlighted, discarded struck through. */
+.cs-conflict-dice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+}
+.cs-conflict-die {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.2rem;
+  border: 1px solid var(--cs-stone);
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  background: var(--cs-parchment);
+}
+.cs-conflict-die.is-kept {
+  border-color: var(--cs-azure);
+  color: var(--cs-azure);
+  background: var(--cs-parchment-hi);
+}
+.cs-conflict-die.is-discarded {
+  color: var(--cs-stone-dark);
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+/* Re-rolled die (a rerolled 1): struck through + a ↻ marker so it is clearly
+   distinct from a keep-highest discard. */
+.cs-conflict-die.is-rerolled {
+  position: relative;
+  border-color: var(--cs-bronze);
+  color: var(--cs-bronze);
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+.cs-conflict-die.is-rerolled::after {
+  content: "\21bb";
+  position: absolute;
+  top: -0.4rem;
+  right: -0.2rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--cs-bronze);
+}
+
+/* Resolution — damage/influence + the permission-aware apply button. */
+.cs-conflict-resolution {
+  margin-top: 0.5rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--cs-stone);
+}
+.cs-conflict-resolution-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.cs-conflict-resolution-title {
+  font-family: var(--cs-serif);
+  font-weight: 700;
+  color: var(--cs-crimson);
+}
+.cs-conflict-resolution-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+}
+.cs-conflict-resolution-reduction {
+  font-size: 0.72rem;
+  color: var(--cs-stone-dark);
+}
+.cs-conflict-apply {
+  margin-top: 0.35rem;
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--cs-crimson);
+  border-radius: 4px;
+  background: var(--cs-parchment-hi);
+  color: var(--cs-crimson);
+  font-weight: 700;
+  cursor: pointer;
+}
+.cs-conflict-apply:hover {
+  background: var(--cs-crimson);
+  color: var(--cs-parchment-hi);
 }

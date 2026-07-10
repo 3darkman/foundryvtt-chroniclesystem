@@ -31,6 +31,10 @@ import {
 import { registerEffectConfigEnhancements } from "../effects/cs-active-effect-config.js";
 import { registerEffectConfigSheet } from "../effects/cs-effect-config-sheet.js";
 import { registerSlugLifecycleHooks } from "../data/slug-lifecycle.js";
+import {
+  registerApplyQuery,
+  applyResourceDelta,
+} from "../combat/cs-conflict-apply.js";
 
 // TypeDataModel classes
 import CharacterData from "../data/actor/character-data.js";
@@ -188,7 +192,29 @@ Hooks.once("init", async function () {
   registerEffectConfigEnhancements();
   // Derive the stable slug from the name on item create/rename (spec 008, US2).
   registerSlugLifecycleHooks();
+  // spec 010 (FR-019): the resource-apply query handler, so a non-owner's card
+  // click can delegate the Health/Composure update to the active GM's client.
+  registerApplyQuery();
   await preloadHandlebarsTemplates();
+});
+
+/* -------------------------------------------- */
+/*  Conflict card — apply damage/influence      */
+/*  (spec 010, FR-019). renderChatMessageHTML    */
+/*  passes an HTMLElement (renderChatMessage is  */
+/*  deprecated v13→removed v15).                 */
+/* -------------------------------------------- */
+
+Hooks.on("renderChatMessageHTML", (message, html) => {
+  const btn = html.querySelector("[data-action='cs-apply-resource']");
+  if (!btn) return;
+  const apply = message.getFlag("chroniclesystem", "apply");
+  if (!apply) return;
+  btn.addEventListener("click", async (ev) => {
+    ev.preventDefault();
+    const actor = await fromUuid(apply.targetUuid);
+    await applyResourceDelta(actor, apply.path, apply.delta);
+  });
 });
 
 /* -------------------------------------------- */

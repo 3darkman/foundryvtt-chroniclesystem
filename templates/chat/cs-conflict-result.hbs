@@ -1,0 +1,83 @@
+{{!-- Transparent conflict result card (spec 010, FR-025). Extends the difficulty
+      verdict with (a) the full modifier decomposition, (b) every die face (kept
+      vs. discarded), and (c) the damage/influence resolution + apply button so
+      the total can be reconstructed by hand. Rendered as the ChatMessage content;
+      the dice mechanic tooltip is also appended by the message's `rolls`. --}}
+<div class="cs-difficulty-card cs-conflict-card {{#if success}}is-success{{else}}is-failure{{/if}}">
+    {{!-- Test name inside the card (spec 010 polish) — replaces the flavor line. --}}
+    {{#if title}}
+    <div class="cs-conflict-title">{{title}}</div>
+    {{/if}}
+    <header class="cs-difficulty-verdict">
+        <i class="fas {{#if success}}fa-circle-check{{else}}fa-circle-xmark{{/if}}"></i>
+        <span class="cs-difficulty-outcome">
+            {{#if success}}{{localize "CS.difficulty.result.success"}}{{else}}{{localize "CS.difficulty.result.failure"}}{{/if}}
+        </span>
+        {{!-- Degree text + numeric degrees of success, shown on every hit. --}}
+        <span class="cs-difficulty-degree">{{degree}}{{#if degrees}} ({{degrees}}){{/if}}</span>
+    </header>
+    {{!-- Explicit target line so the target name is not mistaken for the roller. --}}
+    {{#if targetName}}
+    <div class="cs-conflict-target">
+        <i class="fas fa-crosshairs"></i>
+        <span class="cs-conflict-target-label">{{localize "CS.conflict.targetName"}}</span>
+        <span class="cs-conflict-target-name">{{targetName}}</span>
+    </div>
+    {{/if}}
+    <div class="cs-difficulty-numbers">
+        {{#if difficultyName}}
+        <span class="cs-difficulty-name">{{difficultyName}}</span>
+        {{/if}}
+        <span class="cs-difficulty-cell">{{localize "CS.difficulty.result.total"}}: <b>{{total}}</b></span>
+        <span class="cs-difficulty-cell">{{localize "CS.difficulty.result.target"}}: <b>{{target}}</b></span>
+        <span class="cs-difficulty-cell">{{localize "CS.difficulty.result.margin"}}: <b>{{marginText}}</b></span>
+    </div>
+
+    {{!-- (a0) Base (raw capacity) so the total reconstructs even with no
+          modifiers: base + Σ modifiers (below) + dice = total (SC-008). --}}
+    {{#if baseLabel}}
+    <div class="cs-conflict-base">
+        <span class="cs-conflict-base-label">{{localize "CS.conflict.base"}}</span>
+        <span class="cs-conflict-base-value">{{baseLabel}}</span>
+    </div>
+    {{/if}}
+
+    {{!-- (a) Modifier decomposition — origin + source + signed value (FR-025). --}}
+    {{#if itemized.length}}
+    <div class="cs-conflict-itemized">
+        {{#each itemized}}
+        <div class="cs-itemized-row cs-origin-{{this.origin}}">
+            <span class="cs-itemized-origin">{{this.originLabel}}</span>
+            <span class="cs-itemized-source">{{this.sourceLabel}}</span>
+            <span class="cs-itemized-value">{{this.displayValue}}</span>
+            {{#if this.condition}}<span class="cs-itemized-condition">{{this.condition}}</span>{{/if}}
+        </div>
+        {{/each}}
+    </div>
+    {{/if}}
+
+    {{!-- (b) Every die face — kept highlighted, re-rolled (rerolled 1s) marked,
+          keep-highest discards struck. The three states are mutually exclusive:
+          rerolled → active:false+rerolled; discarded → active:false+discarded. --}}
+    <div class="cs-conflict-dice">
+        {{#each roll.terms.[0].results}}
+        <span class="cs-conflict-die {{#if this.rerolled}}is-rerolled{{else if this.active}}is-kept{{else}}is-discarded{{/if}}">{{this.result}}</span>
+        {{/each}}
+    </div>
+
+    {{!-- (c) Resolution — only on a hit of a real conflict (FR-016/017/018/020). --}}
+    {{#if resolution}}
+    <div class="cs-conflict-resolution">
+        <div class="cs-conflict-resolution-head">
+            <span class="cs-conflict-resolution-title">{{localize (concat "CS.conflict." resolution.kind)}}</span>
+        </div>
+        <div class="cs-conflict-resolution-value">
+            <b>{{resolution.value}}</b>
+            {{#if resolution.reduction}}<span class="cs-conflict-resolution-reduction">&minus;{{resolution.reduction}}</span>{{/if}}
+        </div>
+        <button type="button" class="cs-conflict-apply" data-action="cs-apply-resource">
+            {{localize (concat "CS.conflict.apply." resolution.kind)}} {{resolution.value}}
+        </button>
+    </div>
+    {{/if}}
+</div>

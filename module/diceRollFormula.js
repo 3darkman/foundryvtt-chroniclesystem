@@ -10,7 +10,7 @@ export class DiceRollFormula {
   constructor() {
     this.pool = 2;
     this.bonusDice = 0;
-    this.reroll = 0;
+    this.reRoll = 0;
     this.modifier = 0;
     this.dicePenalty = 0;
     this.difficult = 0;

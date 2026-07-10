@@ -58,6 +58,15 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
         }
       }
     }
+    // spec 010: `size` is a new StringField (small/medium/large). Coerce any
+    // present-but-invalid legacy value to the default so `choices` validation
+    // never rejects a legacy actor (absent → the schema `initial` covers it).
+    if (
+      source.size !== undefined &&
+      !["small", "medium", "large"].includes(source.size)
+    ) {
+      source.size = "medium";
+    }
     return super.migrateData(source);
   }
 
@@ -209,6 +218,15 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
         required: true,
         initial: 4,
         integer: true,
+      }),
+      // spec 010 (FR-014): the character's size feeds the target's Combat Defense
+      // difficulty modifier at roll-time (stable slug; the stored Combat Defense
+      // stays size-agnostic). No destructive migration — the default + migrateData
+      // cover legacy actors.
+      size: new fields.StringField({
+        required: true,
+        initial: "medium",
+        choices: ["small", "medium", "large"],
       }),
       modifiers: new fields.ObjectField({ initial: {} }),
       penalties: new fields.ObjectField({ initial: {} }),
