@@ -1,5 +1,20 @@
 #Change Log
 
+## 0.10.0
+
+### Added
+- Targeting a token now drives the roll automatically (spec 010): a weapon attack uses the target's Combat Defense as the difficulty and an intrigue technique uses its Intrigue Defense — shown read-only (replacing the difficulty selector) in the shift-click dialog.
+- Target-derived modifiers, itemized by origin: ranged **range penalty** (distance measured on the canvas), **+1 test die vs. a prone target** (Fighting), and the target's **size** adjusting the difficulty (small +2 / large −2). New `size` field on characters (default `medium`).
+- The attacker's **disposition** modifier is now itemized as its own line on intrigue rolls (extracted from the technique base so the total is preserved).
+- A transparent **conflict result card**: headlines the **test name**, shows the roll's **base capacity** plus every applied **modifier** (origin + value) — including the roll's ability/specialty-specific always-on effects — and each die face (kept dice highlighted, re-rolled 1s marked with ↻, keep-highest discards struck through), so the total reconstructs by hand. The **degrees of success** are shown on every successful roll, and a marked target is called out on its own **"Target"** line. On a hit it computes **damage** `(base × degrees) − Armor Rating` / **influence** `(value × degrees) − Disposition Rating` (floored at 0) with a permission-aware **apply** button.
+
+### Fixed
+- Re-roll now re-rolls **1s**, up to the configured count: a re-roll value of N builds `rN=1` (re-roll up to N dice showing 1). The previous `r=N` re-rolled every die *equal to* N (with N=2 it re-rolled the 2s).
+- Dice penalties are now shown with a negative sign (e.g. `-2d`) in the roll breakdown — a penalty total is never positive.
+- Bonus dice modifiers now read as `+NB` (matching the sheet chips), never `+Nd`.
+- `DiceRollFormula` now initializes its re-roll count through the proper setter (was a `this.reroll` typo that left it undefined and broke re-roll accumulation).
+- Plain rolls (no target, no selected difficulty) label the chat message with just the test name instead of the "&lt;name&gt; make a &lt;test&gt; roll" sentence.
+
 ## 0.6.0
 
 ### Added

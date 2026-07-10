@@ -25,7 +25,7 @@ export const EFFECT_CHANNELS = {
   RESULT: "result", // flat ±N on the test result → formula.modifier
   TEST_DICE: "testdice", // +#D kept dice → formula.pool
   BONUS_DICE: "bonusdice", // +#B rolled extra → formula.bonusDice
-  REROLL: "reroll", // reroll ≤N → formula.reRoll
+  REROLL: "reroll", // reroll up to N dice showing 1 → formula.reRoll (rN=1)
   PENALTY: "penalty", // −#D (negative value = reduction) → formula.dicePenalty
   DERIVED_STAT: "derivedstat", // a system.derivedStats.* field
   ARMOR_RATING: "armorrating", // armour AR
@@ -72,7 +72,7 @@ export const ROLL_CHANNEL_TO_FORMULA_FIELD = {
   [EFFECT_CHANNELS.PENALTY]: "dicePenalty", // −#D → formula.dicePenalty
   [EFFECT_CHANNELS.TEST_DICE]: "pool", // +#D → formula.pool
   [EFFECT_CHANNELS.BONUS_DICE]: "bonusDice", // +#B → formula.bonusDice
-  [EFFECT_CHANNELS.REROLL]: "reRoll", // reroll ≤N → formula.reRoll
+  [EFFECT_CHANNELS.REROLL]: "reRoll", // reroll up to N ones → formula.reRoll
 };
 
 /** Target kinds — WHAT the channel applies to. */

@@ -315,17 +315,14 @@ export class CSCharacterActorSheet extends CSActorSheet {
       taunt: bluffFormula,
     };
 
-    // Disposition modifiers (from the selected level) PLUS the authored delta.
-    const currentDisposition = ChronicleSystem.dispositions.find(
-      (d) => d.rating === actor.getCSData().currentDisposition
-    );
-    const persuasionMod =
-      (currentDisposition?.persuasionModifier ?? 0) +
-      dispositionDelta.persuasion;
-    const deceptionMod =
-      (currentDisposition?.deceptionModifier ?? 0) + dispositionDelta.deception;
-    bluffFormula.modifier += deceptionMod;
-    actFormula.modifier += deceptionMod;
+    // Disposition (spec 010, FR-013): only the authored delta (spec 009 pseudo-
+    // channel) is folded into the technique's base formula here. The LEVEL
+    // modifier (from the selected disposition) is NO LONGER folded — it is
+    // itemized at roll-time by handleRollAsync as an "character"-origin modifier,
+    // so the sheet's base stays disposition-level-agnostic while the roll total
+    // is preserved (base + itemized level = the previous total).
+    bluffFormula.modifier += dispositionDelta.deception;
+    actFormula.modifier += dispositionDelta.deception;
 
     // One row per canonical technique: localized name + effective influence
     // (base ability rating + technique/ALL influence delta) + the persuasion
@@ -337,7 +334,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
         "persuasion",
         entry.specialtySlug
       );
-      persuasionFormula.modifier += persuasionMod;
+      persuasionFormula.modifier += dispositionDelta.persuasion;
       const influenceValue =
         actor.getAbilityValueBySlug(entry.influenceAbilitySlug) +
         influenceFor(influence, entry.slug);
