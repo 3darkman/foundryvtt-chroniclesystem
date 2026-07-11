@@ -298,33 +298,8 @@
   display: block;
   margin-bottom: 6px;
 }
-.cs-effect-config.cs-v2 input[type="text"],
-.cs-effect-config.cs-v2 input[type="number"],
-.cs-effect-config.cs-v2 select {
-  box-sizing: border-box;
-  width: 100%;
-  /* height:auto + line-height defeat core's `height/line-height: var(--input-height)`
-     (32px) which, with our padding, pushed the text down and clipped it (issue #6). */
-  height: auto;
-  min-height: 0;
-  border: 1px solid var(--csv2-input-border);
-  background: var(--csv2-bg);
-  border-radius: 5px;
-  padding: 8px 11px;
-  font-family: var(--csv2-font-sans);
-  font-weight: 500;
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--csv2-text);
-}
-.cs-effect-config.cs-v2 select {
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 28px;
-  background-image: var(--csv2-chevron);
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-}
+/* Text/number inputs + selects now come from the SHARED `.cs-v2 input/select`
+   primitive (SSOT — see "Shared v2 form controls" below); no per-window copy. */
 /* Generalized checkbox (US6 item 2): core renders checkboxes as FontAwesome
    glyphs (appearance:none + ::before/::after, themed cool/warm). Draw a clean
    square instead — white with a light border when UNCHECKED, solid blue with a
@@ -1057,6 +1032,158 @@
   color: var(--csv2-muted);
 }
 
+/* ===========================================================================
+   Shared v2 form controls + buttons — the SINGLE source for these primitives
+   across EVERY `.cs-v2` window (SSOT, Principle II). Any new window that carries
+   `.cs-v2` inherits them; do NOT re-declare input/select/button looks per window.
+   ========================================================================== */
+
+/* Text/number/search inputs, selects, textareas — one canonical control.
+   `:is(...)` pins specificity at (0,2,1) — matching the per-window rules this
+   replaced — so it reliably beats core's control styling. */
+.cs-v2
+  :is(
+    input[type="text"],
+    input[type="number"],
+    input[type="search"],
+    select,
+    textarea
+  ) {
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  border: 1px solid var(--csv2-input-border);
+  /* background-COLOR (not the shorthand) so the select chevron background-image
+     below is not reset by this higher-specificity rule. */
+  background-color: var(--csv2-bg);
+  border-radius: 5px;
+  padding: 8px 11px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--csv2-text);
+  box-shadow: none;
+}
+.cs-v2 select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
+  background-image: var(--csv2-chevron);
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+}
+.cs-v2 textarea {
+  resize: vertical;
+}
+
+/* Buttons — base + primary/secondary variants + a compact size. */
+.cs-v2 .csv2-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 0;
+  height: auto;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 10px 18px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 12.5px;
+  line-height: 1.1;
+  cursor: pointer;
+  box-shadow: none;
+}
+.cs-v2 .csv2-btn--primary {
+  background: var(--csv2-primary);
+  border-color: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+.cs-v2 .csv2-btn--primary:hover {
+  background: var(--csv2-primary-dark);
+  border-color: var(--csv2-primary-dark);
+  box-shadow: none;
+}
+.cs-v2 .csv2-btn--primary:disabled {
+  background: var(--csv2-op-muted);
+  border-color: var(--csv2-op-muted);
+  cursor: not-allowed;
+}
+.cs-v2 .csv2-btn--secondary {
+  background: var(--csv2-bg);
+  border-color: var(--csv2-input-border);
+  color: var(--csv2-muted-2);
+}
+.cs-v2 .csv2-btn--secondary:hover {
+  border-color: var(--csv2-muted);
+  color: var(--csv2-text);
+  box-shadow: none;
+}
+.cs-v2 .csv2-btn--sm {
+  padding: 7px 14px;
+  font-size: 11.5px;
+  border-radius: 6px;
+}
+
+/* Segmented toggle (e.g. SVG|PNG, Tintura|Padrão|Semy). */
+.cs-v2 .csv2-segmented {
+  display: flex;
+  border: 1px solid var(--csv2-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.cs-v2 .csv2-segmented button {
+  flex: 1;
+  min-height: 0;
+  padding: 7px 10px;
+  border: none;
+  border-right: 1px solid var(--csv2-border);
+  background: var(--csv2-bg);
+  color: var(--csv2-muted-2);
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.cs-v2 .csv2-segmented button:last-child {
+  border-right: none;
+}
+.cs-v2 .csv2-segmented button.is-active {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+
+/* Status chip / pill (mono, rounded). */
+.cs-v2 .csv2-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--csv2-secondary);
+  color: var(--csv2-muted-2);
+}
+
+/* Colour swatch button (tincture / palette pickers). */
+.cs-v2 .csv2-swatch {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  min-height: 0;
+}
+.cs-v2 .csv2-swatch.is-selected {
+  border-color: var(--csv2-dark);
+}
+
 /* ---------- Shared: origin pill (filled per type) + value tones (T005/T006) ---------- */
 .cs-v2 .cs-mod-pill {
   flex: none;
@@ -1356,32 +1483,8 @@
 .cs-roll-dialog.cs-v2 .cs-rd-col {
   align-self: stretch;
 }
-/* Inputs / selects (difficulty selector + extras). */
-.cs-roll-dialog.cs-v2 select,
-.cs-roll-dialog.cs-v2 input[type="number"] {
-  box-sizing: border-box;
-  width: 100%;
-  height: auto;
-  min-height: 0;
-  border: 1px solid var(--csv2-input-border);
-  background: var(--csv2-bg);
-  border-radius: 5px;
-  padding: 8px 11px;
-  font-family: var(--csv2-font-sans);
-  font-weight: 500;
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--csv2-text);
-}
-.cs-roll-dialog.cs-v2 select {
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 28px;
-  background-image: var(--csv2-chevron);
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  cursor: pointer;
-}
+/* Inputs / selects now come from the SHARED `.cs-v2 input/select` primitive
+   (SSOT — see "Shared v2 form controls"); no per-window copy. */
 
 /* 1 · Difficulty state A (target). */
 .cs-roll-dialog.cs-v2 .cs-rd-target-pill {

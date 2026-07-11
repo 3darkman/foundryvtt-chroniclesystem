@@ -1,0 +1,65 @@
+{{!-- Charge inspector — symbol picker + position grid + colours + toggles + advanced. --}}
+<div class="coa-field">
+  <div class="csv2-label">{{localize "CS.coa.fields.symbol"}}</div>
+  <button type="button" class="coa-symbol-btn" data-action="openCatalog">
+    <span class="coa-symbol-thumb">
+      {{#if thumb}}<img src="{{thumb}}" alt="" />{{else}}<svg width="24" height="24"><use href="#gl-charge"></use></svg>{{/if}}
+    </span>
+    <div class="coa-symbol-text">
+      <div class="coa-symbol-name">{{chargeLabel}}</div>
+      <div class="coa-symbol-hint">{{localize "CS.coa.fields.swapCharge"}}</div>
+    </div>
+    <svg class="coa-symbol-search" width="14" height="14"><use href="#coa-ico-search"></use></svg>
+  </button>
+</div>
+
+<div class="coa-charge-grid">
+  <div class="coa-field">
+    <div class="csv2-label">{{localize "CS.coa.fields.position"}} (p)</div>
+    <div class="coa-pos-grid">
+      {{#each positions}}
+        <button type="button" class="coa-pos-cell {{#if this.selected}}is-selected{{/if}}"
+                data-action="setPosition" data-index="{{../index}}" data-code="{{this.code}}"
+                {{#unless this.enabled}}disabled{{/unless}}><span class="coa-pos-dot"></span></button>
+      {{/each}}
+    </div>
+  </div>
+  <div class="coa-charge-side">
+    <label class="coa-field">
+      <span class="csv2-label">{{localize "CS.coa.fields.size"}}</span>
+      <input type="range" min="0.3" max="2" step="0.1" data-coa="charges.{{index}}.size"
+             data-dtype="Number" data-optional data-live value="{{ch.size}}" />
+    </label>
+    <div class="coa-toggle-row">
+      {{#if allowSinister}}
+      <label class="coa-toggle"><input type="checkbox" data-coa="charges.{{index}}.sinister" data-optional {{#if ch.sinister}}checked{{/if}} /> <span>sinister</span></label>
+      {{/if}}
+      {{#if allowReversed}}
+      <label class="coa-toggle"><input type="checkbox" data-coa="charges.{{index}}.reversed" data-optional {{#if ch.reversed}}checked{{/if}} /> <span>reversed</span></label>
+      {{/if}}
+    </div>
+  </div>
+</div>
+
+{{> "systems/chroniclesystem/templates/apps/partials/coa-tincture.hbs" tincture}}
+
+<div class="coa-advanced">
+  <button type="button" class="coa-advanced-toggle {{#if advanced}}is-open{{/if}}" data-action="toggleAdvanced">
+    <svg width="12" height="12"><use href="#coa-ico-down"></use></svg> {{localize "CS.coa.actions.advanced"}}
+  </button>
+  {{#if advanced}}
+  <div class="coa-advanced-body">
+    {{#if tincture2}}{{> "systems/chroniclesystem/templates/apps/partials/coa-tincture.hbs" tincture2}}{{/if}}
+    {{#if tincture3}}{{> "systems/chroniclesystem/templates/apps/partials/coa-tincture.hbs" tincture3}}{{/if}}
+    {{#if allowLayered}}
+    <label class="coa-check"><input type="checkbox" data-coa="charges.{{index}}.layered" data-optional {{#if ch.layered}}checked{{/if}} /> <span>{{localize "CS.coa.fields.layered"}}</span></label>
+    {{/if}}
+    <div class="coa-four-col">
+      <label class="coa-field"><span class="coa-sub-label">stroke</span><input type="number" step="0.1" data-coa="charges.{{index}}.stroke" data-dtype="Number" data-optional data-live value="{{ch.stroke}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">stretch</span><input type="number" step="0.1" data-coa="charges.{{index}}.stretch" data-dtype="Number" data-optional data-live value="{{ch.stretch}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">angle</span><input type="number" step="1" data-coa="charges.{{index}}.angle" data-dtype="Number" data-optional data-live value="{{ch.angle}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">x</span><input type="number" step="1" data-coa="charges.{{index}}.x" data-dtype="Number" data-optional data-live value="{{ch.x}}" /></label>
+    </div>
+  </div>
+  {{/if}}
+</div>

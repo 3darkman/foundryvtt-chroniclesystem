@@ -1,0 +1,4 @@
+# Generated heraldic-vocabulary data — emitted by scripts/extract-armoria-catalog.mjs
+# (marked "DO NOT EDIT BY HAND"). Linting/formatting these would diverge from the
+# generator output on the next regeneration.
+module/coat-of-arms/data/

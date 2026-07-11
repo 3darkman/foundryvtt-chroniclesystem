@@ -33,6 +33,21 @@ export const preloadHandlebarsTemplates = async function () {
     "systems/chroniclesystem/templates/components/house-resource-item.hbs",
     "systems/chroniclesystem/templates/components/member-list-item.hbs",
     "systems/chroniclesystem/templates/components/resource-holdings.hbs",
+
+    // Coat of Arms editor (spec 013) — window + partials.
+    "systems/chroniclesystem/templates/apps/coat-of-arms-editor.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-preview.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-layers.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-import.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-inspector.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-tincture.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-inspector-shield.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-inspector-field.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-inspector-division.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-inspector-ordinary.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-inspector-charge.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-charge-catalog.hbs",
+    "systems/chroniclesystem/templates/apps/partials/coa-footer.hbs",
   ];
   await foundry.applications.handlebars.loadTemplates(templatePaths);
 

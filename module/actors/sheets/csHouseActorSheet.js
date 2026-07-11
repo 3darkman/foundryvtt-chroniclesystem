@@ -3,6 +3,7 @@ import { CSConstants } from "../../system/csConstants.js";
 import SystemUtils from "../../utils/systemUtils.js";
 import LOGGER from "../../utils/logger.js";
 import { ChronicleSystem } from "../../system/ChronicleSystem.js";
+import { CoatOfArmsEditor } from "../../coat-of-arms/cs-coa-editor.js";
 
 export class CSHouseActorSheet extends CSActorSheet {
   itemTypesPermitted = ["event", "holding"];
@@ -16,6 +17,8 @@ export class CSHouseActorSheet extends CSActorSheet {
       openActorSheet: CSHouseActorSheet._onOpenActorSheet,
       editResource: CSHouseActorSheet._onEditResource,
       regenerateResources: CSHouseActorSheet._onRegenerateResources,
+      openCoaEditor: CSHouseActorSheet._onOpenCoaEditor,
+      reRenderCoa: CSHouseActorSheet._onReRenderCoa,
     },
   };
 
@@ -90,6 +93,10 @@ export class CSHouseActorSheet extends CSActorSheet {
 
     // Effects tab (shared across all actor types)
     this._prepareEffectsContext(context);
+
+    // Coat of arms (spec 013): show the manual "Re-render" affordance only when a
+    // definition exists but has no saved image (FR-020).
+    context.coaNeedsRender = actor.hasCoaDefinition() && !actor.system.coaImg;
 
     // Prepare tab state
     context.tabs = this._getTabs();
@@ -263,6 +270,35 @@ export class CSHouseActorSheet extends CSActorSheet {
   static async _onRegenerateResources(event, target) {
     event.preventDefault();
     await this.document.regenerateAllStartingResources();
+  }
+
+  /**
+   * Static action handler for opening the Coat of Arms editor (OWNER only, GM
+   * included — FR-015). A unique id per house allows several editors at once.
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  // eslint-disable-next-line no-unused-vars
+  static _onOpenCoaEditor(event, target) {
+    event.preventDefault();
+    if (!this.document.isOwner) return;
+    new CoatOfArmsEditor({
+      document: this.document,
+      id: `cs-coa-editor-${this.document.id}`,
+    }).render(true);
+  }
+
+  /**
+   * Static action handler for the manual re-render of a saved definition
+   * (FR-020) — only meaningful when a definition exists but has no image.
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  // eslint-disable-next-line no-unused-vars
+  static async _onReRenderCoa(event, target) {
+    event.preventDefault();
+    if (!this.document.isOwner) return;
+    await this.document.reRenderCoa();
   }
 
   /* -------------------------------------------- */

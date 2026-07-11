@@ -1,0 +1,23 @@
+{{!-- Division inspector — partition + line (linear only) + 2nd-half tincture. --}}
+<div class="coa-two-col">
+  <label class="coa-field">
+    <span class="csv2-label">{{localize "CS.coa.fields.division"}} · 16</span>
+    <select data-coa="division.division" data-division-type>
+      {{#each divisions}}
+        <option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+      {{/each}}
+    </select>
+  </label>
+  <label class="coa-field">
+    <span class="csv2-label">{{localize "CS.coa.fields.line"}} · 33</span>
+    <select data-coa="division.line" data-optional {{#unless hasDivision}}disabled{{/unless}}>
+      {{#each lines}}
+        <option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+      {{/each}}
+    </select>
+  </label>
+</div>
+
+{{#if hasDivision}}
+  {{> "systems/chroniclesystem/templates/apps/partials/coa-tincture.hbs" tincture}}
+{{/if}}

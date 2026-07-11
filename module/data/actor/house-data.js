@@ -19,6 +19,13 @@ export default class HouseData extends foundry.abstract.TypeDataModel {
         }
       }
     }
+    // Coat of arms (spec 013): initialise the pair non-destructively so legacy
+    // houses validate under v13 (ObjectField `coa`, StringField `coaImg`). The
+    // COA is a plain object — never a string — because ObjectField._cast silently
+    // swallows non-objects to `{}`.
+    if (source.coa != null && typeof source.coa !== "object") source.coa = {};
+    if (source.coa === undefined || source.coa === null) source.coa = {};
+    if (typeof source.coaImg !== "string") source.coaImg = "";
     return super.migrateData(source);
   }
 
@@ -51,6 +58,11 @@ export default class HouseData extends foundry.abstract.TypeDataModel {
       wealth: resourceField(),
       historicalEvents: new fields.ArrayField(new fields.ObjectField()),
       motto: new fields.StringField({ required: true, initial: "" }),
+      // Coat of arms (spec 013). `coa` = re-editable COA definition (opaque JSON,
+      // replaced whole on update); `coaImg` = canonical saved image path ("" when
+      // the definition has no rendered image yet — FR-020).
+      coa: new fields.ObjectField(),
+      coaImg: new fields.StringField({ required: true, initial: "" }),
       members: new fields.SchemaField({
         head: new fields.SchemaField({
           id: new fields.StringField({ required: true, initial: "" }),

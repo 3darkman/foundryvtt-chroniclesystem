@@ -1,0 +1,47 @@
+{{!-- Ordinary inspector — core (type/tincture/line/size) + advanced (FR-017). --}}
+<div class="coa-two-col">
+  <label class="coa-field">
+    <span class="csv2-label">{{localize "CS.coa.fields.ordinary"}} · 35</span>
+    <select data-coa="ordinaries.{{index}}.ordinary" data-rerender>
+      {{#each ordinaries}}
+        <option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+      {{/each}}
+    </select>
+  </label>
+  <label class="coa-field">
+    <span class="csv2-label">{{localize "CS.coa.fields.size"}}</span>
+    <input type="number" step="0.1" min="0.1" data-coa="ordinaries.{{index}}.size"
+           data-dtype="Number" data-optional data-live value="{{o.size}}" placeholder="1.0" />
+  </label>
+</div>
+
+{{> "systems/chroniclesystem/templates/apps/partials/coa-tincture.hbs" tincture}}
+
+{{#if lined}}
+<label class="coa-field">
+  <span class="csv2-label">{{localize "CS.coa.fields.line"}}</span>
+  <select data-coa="ordinaries.{{index}}.line" data-optional>
+    {{#each lines}}
+      <option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+    {{/each}}
+  </select>
+</label>
+{{/if}}
+
+<div class="coa-advanced">
+  <button type="button" class="coa-advanced-toggle {{#if advanced}}is-open{{/if}}" data-action="toggleAdvanced">
+    <svg width="12" height="12"><use href="#coa-ico-down"></use></svg> {{localize "CS.coa.actions.advanced"}}
+  </button>
+  {{#if advanced}}
+  <div class="coa-advanced-body">
+    <label class="coa-check"><input type="checkbox" data-coa="ordinaries.{{index}}.above" data-optional {{#if o.above}}checked{{/if}} /> <span>{{localize "CS.coa.fields.above"}}</span></label>
+    {{> "systems/chroniclesystem/templates/apps/partials/coa-tincture.hbs" tincture2}}
+    <div class="coa-four-col">
+      <label class="coa-field"><span class="coa-sub-label">stretch</span><input type="number" step="0.1" data-coa="ordinaries.{{index}}.stretch" data-dtype="Number" data-optional data-live value="{{o.stretch}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">angle</span><input type="number" step="1" data-coa="ordinaries.{{index}}.angle" data-dtype="Number" data-optional data-live value="{{o.angle}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">x</span><input type="number" step="1" data-coa="ordinaries.{{index}}.x" data-dtype="Number" data-optional data-live value="{{o.x}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">y</span><input type="number" step="1" data-coa="ordinaries.{{index}}.y" data-dtype="Number" data-optional data-live value="{{o.y}}" /></label>
+    </div>
+  </div>
+  {{/if}}
+</div>

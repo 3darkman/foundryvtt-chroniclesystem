@@ -1,0 +1,8 @@
+{{!-- Inspector dispatcher — renders the partial for the selected layer type.
+      Context = the `inspector` object (carries is<Type> flags). --}}
+{{#if isShield}}{{> "systems/chroniclesystem/templates/apps/partials/coa-inspector-shield.hbs"}}{{/if}}
+{{#if isField}}{{> "systems/chroniclesystem/templates/apps/partials/coa-inspector-field.hbs"}}{{/if}}
+{{#if isDivision}}{{> "systems/chroniclesystem/templates/apps/partials/coa-inspector-division.hbs"}}{{/if}}
+{{#if isOrdinary}}{{> "systems/chroniclesystem/templates/apps/partials/coa-inspector-ordinary.hbs"}}{{/if}}
+{{#if isCharge}}{{> "systems/chroniclesystem/templates/apps/partials/coa-inspector-charge.hbs"}}{{/if}}
+{{#if isEmpty}}<div class="coa-inspector-empty">{{localize "CS.coa.layers.empty"}}</div>{{/if}}

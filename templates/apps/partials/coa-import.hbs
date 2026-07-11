@@ -1,0 +1,16 @@
+{{!-- Import a COA string / Armoria link (US2), as a collapsible blue strip. --}}
+<div class="coa-import">
+  <button type="button" class="coa-import-toggle" data-action="toggleImport">
+    <span class="coa-section-title">{{localize "CS.coa.sections.import"}}</span>
+    <svg class="coa-import-chevron {{#if ui.importOpen}}is-open{{/if}}" width="13" height="13"><use href="#coa-ico-down"></use></svg>
+  </button>
+  {{#if ui.importOpen}}
+  <div class="coa-import-body">
+    <textarea class="coa-import-text" rows="3"
+      placeholder="{{localize 'CS.coa.import.placeholder'}}"></textarea>
+    <div class="coa-import-actions">
+      <button type="button" class="csv2-btn csv2-btn--primary csv2-btn--sm" data-action="loadImport">{{localize "CS.coa.actions.load"}}</button>
+    </div>
+  </div>
+  {{/if}}
+</div>
