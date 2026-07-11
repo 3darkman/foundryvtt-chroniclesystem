@@ -7,25 +7,25 @@ import {
   computeInfluence,
 } from "../combat/cs-conflict.js";
 import { buildDieFormula } from "./cs-die-formula.js";
+import { collapseDiceResults } from "./cs-die-view.js";
 
 export class CSRoll {
   /**
    * @param {string} title the rolled test's name
    * @param {DiceRollFormula} formula
    * @param {{target: number, labelKey: string|null, label: string|null}|null} difficulty
-   *   the selected difficulty (US3), or null for a free roll (FR-015).
-   * @param {object|null} conflictContext spec 010: the transparent-card decomposition
-   *   ({ itemized, kind, targetActor, baseValue, armorRating, dispositionRating }),
-   *   or null to keep the plain difficulty card.
+   *   the resolved difficulty. Player test rolls always carry one (handleRollAsync
+   *   coerces an unselected one to target 0, spec 011); a null only reaches the
+   *   sync initiative path, which keeps the default Foundry message.
+   * @param {object|null} conflictContext spec 010: the card decomposition
+   *   ({ itemized, baseLabel, kind, targetActor, baseValue, armorRating,
+   *   dispositionRating }), or null for a plain roll with no decomposition.
    */
   constructor(title, formula, difficulty = null, conflictContext = null) {
     this.formula = formula;
     this.title = title;
     this.difficulty = difficulty;
     this.conflictContext = conflictContext;
-    this.entityData = undefined;
-    this.rollCard =
-      "systems/chroniclesystem/templates/chat/cs-stat-rollcard.html";
     this.results = [];
   }
 
@@ -42,8 +42,11 @@ export class CSRoll {
     await resultRoll.evaluate();
     this.results = resultRoll.terms[0].results;
 
-    // With a selected difficulty (US3), resolve the verdict + degree and post a
-    // custom card; otherwise keep the default roll message (FR-015 free roll).
+    // spec 011 (FR-011/FR-013): every player TEST roll now carries a resolved
+    // difficulty (handleRollAsync coerces an unselected one to target 0), so it
+    // always renders the unified card. The else branch is now exclusively the
+    // no-difficulty SYNC path — initiative (handleRoll → CsCombatant), which
+    // posts its own message and stays as-is (D6).
     if (this.difficulty && this.difficulty.target != null) {
       await this._toVerdictMessage(resultRoll, actor);
     } else {
@@ -84,31 +87,56 @@ export class CSRoll {
   }
 
   /**
-   * Post the difficulty verdict card (US3). With a conflict context (spec 010),
-   * post the TRANSPARENT card instead: the itemized decomposition + every die
-   * face (kept vs. discarded) + the damage/influence resolution and apply button.
+   * Post the unified result card (spec 011) — the single surface for every roll:
+   * verdict + numbers (target 0 with no difficulty) + base + itemized
+   * decomposition + one pip face per physical die (kept/discarded/re-rolled) and,
+   * on a hit of a real conflict, the damage/influence resolution + apply button.
    */
   async _toVerdictMessage(roll, actor) {
     const { target, label, labelKey } = this.difficulty;
     const verdict = resolveVerdict(roll.total, target);
     const cc = this.conflictContext;
-    // With a target, its token name is the difficulty label — surface it as an
-    // explicit "Target" line instead of the ambiguous difficulty name, so it is
-    // not mistaken for the character making the roll (spec 010 polish).
+    // The target's own token name is the explicit "Target" line (below); the
+    // difficulty NAME is the defense type / table level and is shown above the
+    // numbers on BOTH plain and conflict rolls (spec 011, handoff).
     const targetName = cc?.targetName ?? null;
-    const difficultyName = targetName
-      ? ""
-      : label || (labelKey ? SystemUtils.localize(labelKey) : "");
+    const difficultyName =
+      label || (labelKey ? SystemUtils.localize(labelKey) : "");
     const marginText =
       verdict.margin >= 0 ? `+${verdict.margin}` : `${verdict.margin}`;
+    // Margin tone: a hit (margin ≥ 0) reads green, a miss red (spec 011).
+    const marginTone = verdict.margin >= 0 ? "gain" : "loss";
     const degree = SystemUtils.localize(verdict.degreeKey);
     // Degrees of success shown on EVERY successful roll, not just conflicts.
     const degrees = verdict.success ? degreesOfSuccess(verdict.margin) : null;
 
+    // spec 011 (T014): collapse the raw die results into one pip-view per physical
+    // die (final face + kept/discarded/rerolled) and attach the i18n tooltip HERE
+    // — the single source the template renders as title/data-tooltip (F2). The hook
+    // never recomputes it.
+    const term = roll.terms?.[0];
+    const dice = collapseDiceResults(term?.results ?? [], term?.number).map(
+      (d) => {
+        const label = SystemUtils.localize(`CS.conflict.dice.${d.state}`);
+        // Handoff tooltips: "Kept · N" / "Discarded · N" / "Re-rolled 1 → N".
+        const sep = d.state === "rerolled" ? "→" : "·";
+        return { ...d, tooltip: `${label} ${sep} ${d.value}` };
+      }
+    );
+
     const resolution = this._resolveConflict(verdict);
-    const template = cc
-      ? CSConstants.Templates.Chat.CONFLICT_RESULT
-      : "systems/chroniclesystem/templates/chat/difficulty-result.hbs";
+    // The reduction unit shown beside the resolution value ("−2 armor" / "… disposition").
+    if (resolution) {
+      resolution.reductionUnit = SystemUtils.localize(
+        resolution.kind === "damage"
+          ? "CS.conflict.reduction.armor"
+          : "CS.conflict.reduction.disposition"
+      );
+    }
+    // spec 011 (FR-011/T017): ONE structure for every roll. difficulty-result.hbs
+    // is gone; the unified card handles the plain case (target 0, no target line,
+    // no resolution) through its own conditional blocks.
+    const template = CSConstants.Templates.Chat.CONFLICT_RESULT;
 
     const content = await foundry.applications.handlebars.renderTemplate(
       template,
@@ -120,11 +148,13 @@ export class CSRoll {
         total: roll.total,
         margin: verdict.margin,
         marginText,
+        marginTone,
         success: verdict.success,
         degree,
         degrees,
         baseLabel: cc?.baseLabel ?? null,
         itemized: cc?.itemized ?? [],
+        dice,
         roll,
         resolution,
       }

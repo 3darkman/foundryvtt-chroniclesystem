@@ -78,6 +78,40 @@
     monospace;
   /* Custom select chevron (SVG data-URI, stroke #7a828e) reused by every v2 select. */
   --csv2-chevron: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="%237a828e" stroke-width="1.6"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>');
+
+  /* --- Roll surfaces (spec 011): the tokens the roll dialog + result card need
+         so NO raw hex lives on those surfaces (FR-021/D10). Reuse existing tokens
+         where they already match the handoff (danger, area, callout-border). --- */
+  /* Value tones (direction, not sign — data-model §3). */
+  --csv2-gain: #2f7d55;
+  --csv2-loss: var(--csv2-danger); /* #b04a4a */
+  /* Verdict header tints (success / failure). */
+  --csv2-verdict-success-fg: #2f7d55;
+  --csv2-verdict-success-bg: #f1f7f3;
+  --csv2-verdict-success-border: #cfe3d7;
+  --csv2-verdict-failure-fg: #b04a4a;
+  --csv2-verdict-failure-bg: #fbf1f1;
+  --csv2-verdict-failure-border: #f0d5d5;
+  /* Origin pills — FILLED bg/fg per origin (D3), shared by dialog + card. */
+  --csv2-origin-condition-bg: #fbeeee;
+  --csv2-origin-condition-fg: #b04a4a;
+  --csv2-origin-equipment-bg: #e7eef7;
+  --csv2-origin-equipment-fg: #015ea6;
+  --csv2-origin-effect-bg: #dfe5f3;
+  --csv2-origin-effect-fg: #3a4a8a;
+  --csv2-origin-target-bg: #0a0405;
+  --csv2-origin-target-fg: #cbd3e0;
+  --csv2-origin-character-bg: #e6efe9;
+  --csv2-origin-character-fg: #2f7d55;
+  --csv2-origin-user-bg: #f0ecdf;
+  --csv2-origin-user-fg: #8a6d1f;
+  /* Target chip (card target line). */
+  --csv2-chip-bg: #f4f6fb;
+  --csv2-chip-border: #e2e8f4;
+  /* Die faces (pips + 3 states). */
+  --csv2-die-kept-bg: #e7eef7;
+  --csv2-die-discarded-pip: #b6bcc6;
+  --csv2-reroll-accent: #8a6d1f;
 }
 
 /* =========================================================================
@@ -238,33 +272,19 @@
      own margin so the trailing hints don't read as over-spaced (items 8 / 9.a). */
   gap: 12px;
 }
-.cs-effect-config.cs-v2 .csv2-card {
-  border: 1px solid var(--csv2-border);
-  border-radius: 7px;
-  overflow: hidden;
-  margin: 0;
-  background: var(--csv2-bg);
-}
-.cs-effect-config.cs-v2 .csv2-card-header {
-  background: var(--csv2-primary);
-  color: var(--csv2-on-primary);
-  font-family: var(--csv2-font-mono);
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 8px 12px;
-}
-.cs-effect-config.cs-v2 .csv2-card-body {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+/* The effect window's section card + header + body converge onto the SINGLE
+   shared `.cs-v2 .csv2-card{,-header,-body}` definition below (spec 011 T023 /
+   SC-005): this window carries `.cs-v2`, and the shared declarations are
+   identical to the ones that used to live here, so this is a zero-regression
+   de-duplication. (The character sheet's `.cs2-card` — a different class with a
+   flex header for its count badge — is a separate, side-by-side-verified step.) */
 
-/* Field label + controls. */
-.cs-effect-config.cs-v2 .cs-field > label,
-.cs-effect-config.cs-v2 .csv2-label {
+/* Field label + controls. `.csv2-label` typography converges onto the SINGLE
+   shared `.cs-v2 .csv2-label` rule below (spec 011 T004 / SC-005) — this window
+   carries `.cs-v2`, so only the block layout (display/margin) is added here. The
+   core formGroup `.cs-field > label` (NOT a `.csv2-label`) keeps the full eyebrow
+   look, as the shared rule does not match it. */
+.cs-effect-config.cs-v2 .cs-field > label {
   display: block;
   margin-bottom: 6px;
   font-family: var(--csv2-font-mono);
@@ -273,6 +293,10 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--csv2-muted);
+}
+.cs-effect-config.cs-v2 .csv2-label {
+  display: block;
+  margin-bottom: 6px;
 }
 .cs-effect-config.cs-v2 input[type="text"],
 .cs-effect-config.cs-v2 input[type="number"],
@@ -956,4 +980,1013 @@
 }
 :is(.chroniclesystem, .cs-v2) prose-mirror .ProseMirror:focus {
   outline: none;
+}
+
+/* =========================================================================
+   Roll surfaces (spec 011) — REBUILT to the design handoffs
+   (docs/design_handoff_roll_parameters + docs/design_handoff_roll_result_card).
+   The roll PARAMETER dialog (window .cs-roll-dialog-window, body
+   .cs-roll-dialog.cs-v2) and the result CARD (.cs-roll-card.cs-v2). Shared
+   patterns (section card, origin pills, value tones, die faces) are defined once
+   under `.cs-v2`; per-surface density differs by design (the card is denser than
+   the dialog). Scoped so tokens resolve and core defaults are beaten by
+   specificity/load-order — no broad `!important` (D11).
+   ======================================================================== */
+
+/* ---------- Shared: section card + header strip (T003) ---------- */
+.cs-v2 .csv2-card {
+  border: 1px solid var(--csv2-border);
+  border-radius: 7px;
+  overflow: hidden;
+  margin: 0;
+  background: var(--csv2-bg);
+}
+.cs-v2 .csv2-card-header {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+}
+.cs-v2 .csv2-card-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* Header variant that holds a right-aligned pill (difficulty state A). */
+.cs-v2 .cs-rd-header-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ---------- Shared: field label eyebrow (T004) ---------- */
+.cs-v2 .csv2-label {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+
+/* ---------- Shared: origin pill (filled per type) + value tones (T005/T006) ---------- */
+.cs-v2 .cs-mod-pill {
+  flex: none;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: 20px;
+  background: var(--csv2-secondary);
+  color: var(--csv2-muted-2);
+}
+.cs-v2 .cs-origin-condition .cs-mod-pill {
+  background: var(--csv2-origin-condition-bg);
+  color: var(--csv2-origin-condition-fg);
+}
+.cs-v2 .cs-origin-equipment .cs-mod-pill {
+  background: var(--csv2-origin-equipment-bg);
+  color: var(--csv2-origin-equipment-fg);
+}
+.cs-v2 .cs-origin-effect .cs-mod-pill {
+  background: var(--csv2-origin-effect-bg);
+  color: var(--csv2-origin-effect-fg);
+}
+.cs-v2 .cs-origin-target .cs-mod-pill {
+  background: var(--csv2-origin-target-bg);
+  color: var(--csv2-origin-target-fg);
+}
+.cs-v2 .cs-origin-character .cs-mod-pill {
+  background: var(--csv2-origin-character-bg);
+  color: var(--csv2-origin-character-fg);
+}
+.cs-v2 .cs-origin-user .cs-mod-pill {
+  background: var(--csv2-origin-user-bg);
+  color: var(--csv2-origin-user-fg);
+}
+.cs-v2 .cs-value-gain {
+  color: var(--csv2-gain);
+}
+.cs-v2 .cs-value-loss {
+  color: var(--csv2-loss);
+}
+.cs-v2 .cs-value-zero {
+  color: var(--csv2-muted);
+}
+
+/* ---------- Shared: modifier row structure (dialog + card, FR-020) ---------- */
+.cs-v2 .cs-mod-main {
+  display: flex;
+  align-items: center;
+}
+.cs-v2 .cs-mod-source {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--csv2-font-sans);
+  font-weight: 500;
+  color: var(--csv2-text);
+}
+.cs-v2 .cs-mod-value {
+  flex: none;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.cs-v2 .cs-mod-condition {
+  font-family: var(--csv2-font-sans);
+  font-style: italic;
+  color: var(--csv2-muted);
+}
+
+/* ---------- Shared: die faces + pips + 3 states (T011) ---------- */
+.cs-v2 .cs-die {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1.5px solid var(--csv2-border);
+  background: var(--csv2-bg);
+}
+.cs-v2 .cs-die.is-kept {
+  border-color: var(--csv2-primary);
+  background: var(--csv2-die-kept-bg);
+  color: var(--csv2-primary);
+}
+.cs-v2 .cs-die.is-discarded {
+  border-color: var(--csv2-border);
+  background: var(--csv2-bg);
+  color: var(--csv2-die-discarded-pip);
+  opacity: 0.55;
+}
+.cs-v2 .cs-die.is-rerolled {
+  border-color: var(--csv2-reroll-accent);
+  background: var(--csv2-bg);
+  color: var(--csv2-reroll-accent);
+}
+.cs-v2 .cs-die.is-discarded::after,
+.cs-v2 .cs-die.is-rerolled::after {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 13px;
+  height: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--csv2-on-primary);
+  line-height: 1;
+}
+.cs-v2 .cs-die.is-discarded::after {
+  content: "\00d7"; /* × */
+  background: var(--csv2-die-discarded-pip);
+  font-family: var(--csv2-font-sans);
+  font-weight: 700;
+  font-size: 9px;
+}
+.cs-v2 .cs-die.is-rerolled::after {
+  content: "\21bb"; /* ↻ */
+  background: var(--csv2-reroll-accent);
+  font-family: var(--csv2-font-mono);
+  font-weight: 700;
+  font-size: 8px;
+}
+.cs-v2 .cs-die-face {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  box-sizing: border-box;
+}
+.cs-v2 .cs-die-pip {
+  align-self: center;
+  justify-self: center;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.cs-v2 .cs-die-face[data-value="1"] .cs-die-pip:nth-child(1) {
+  grid-area: 2 / 2;
+}
+.cs-v2 .cs-die-face[data-value="2"] .cs-die-pip:nth-child(1) {
+  grid-area: 1 / 1;
+}
+.cs-v2 .cs-die-face[data-value="2"] .cs-die-pip:nth-child(2) {
+  grid-area: 3 / 3;
+}
+.cs-v2 .cs-die-face[data-value="3"] .cs-die-pip:nth-child(1) {
+  grid-area: 1 / 1;
+}
+.cs-v2 .cs-die-face[data-value="3"] .cs-die-pip:nth-child(2) {
+  grid-area: 2 / 2;
+}
+.cs-v2 .cs-die-face[data-value="3"] .cs-die-pip:nth-child(3) {
+  grid-area: 3 / 3;
+}
+.cs-v2 .cs-die-face[data-value="4"] .cs-die-pip:nth-child(1),
+.cs-v2 .cs-die-face[data-value="5"] .cs-die-pip:nth-child(1),
+.cs-v2 .cs-die-face[data-value="6"] .cs-die-pip:nth-child(1) {
+  grid-area: 1 / 1;
+}
+.cs-v2 .cs-die-face[data-value="4"] .cs-die-pip:nth-child(2),
+.cs-v2 .cs-die-face[data-value="5"] .cs-die-pip:nth-child(2),
+.cs-v2 .cs-die-face[data-value="6"] .cs-die-pip:nth-child(2) {
+  grid-area: 1 / 3;
+}
+.cs-v2 .cs-die-face[data-value="4"] .cs-die-pip:nth-child(3),
+.cs-v2 .cs-die-face[data-value="6"] .cs-die-pip:nth-child(5) {
+  grid-area: 3 / 1;
+}
+.cs-v2 .cs-die-face[data-value="4"] .cs-die-pip:nth-child(4),
+.cs-v2 .cs-die-face[data-value="5"] .cs-die-pip:nth-child(5),
+.cs-v2 .cs-die-face[data-value="6"] .cs-die-pip:nth-child(6) {
+  grid-area: 3 / 3;
+}
+.cs-v2 .cs-die-face[data-value="5"] .cs-die-pip:nth-child(3) {
+  grid-area: 2 / 2;
+}
+.cs-v2 .cs-die-face[data-value="5"] .cs-die-pip:nth-child(4) {
+  grid-area: 3 / 1;
+}
+.cs-v2 .cs-die-face[data-value="6"] .cs-die-pip:nth-child(3) {
+  grid-area: 2 / 1;
+}
+.cs-v2 .cs-die-face[data-value="6"] .cs-die-pip:nth-child(4) {
+  grid-area: 2 / 3;
+}
+/* Legend — swatch per state (re-rolled is a filled circle, per handoff). */
+.cs-v2 .cs-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 500;
+  font-size: 8.5px;
+  color: var(--csv2-muted);
+}
+.cs-v2 .cs-die-swatch {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  border: 1.5px solid var(--csv2-border);
+  background: var(--csv2-bg);
+}
+.cs-v2 .cs-die-swatch.is-kept {
+  border-color: var(--csv2-primary);
+  background: var(--csv2-die-kept-bg);
+}
+.cs-v2 .cs-die-swatch.is-discarded {
+  border-color: var(--csv2-border);
+  background: var(--csv2-bg);
+}
+.cs-v2 .cs-die-swatch.is-rerolled {
+  border: none;
+  border-radius: 50%;
+  background: var(--csv2-reroll-accent);
+}
+
+/* =========================================================================
+   DIALOG (Roll Parameters) — window frame + 2-column grid body + footer.
+   Window root is a <dialog class="application dialog cs-roll-dialog-window cs-v2">.
+   ======================================================================== */
+.cs-roll-dialog-window.cs-v2 {
+  border: 1px solid var(--csv2-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 14px 44px rgba(10, 4, 5, 0.18);
+  padding: 0;
+  background: var(--csv2-bg);
+  color: var(--csv2-text);
+}
+/* Dark title bar with a blue dot before the title (handoff). */
+.cs-roll-dialog-window .window-header {
+  background: var(--csv2-dark);
+  color: var(--csv2-grid-head-text);
+  border-bottom: none;
+  padding: 9px 14px;
+}
+.cs-roll-dialog-window .window-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--csv2-grid-head-text);
+}
+.cs-roll-dialog-window .window-title::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--csv2-primary);
+}
+.cs-roll-dialog-window .window-header button {
+  color: #7f8794;
+}
+.cs-roll-dialog-window .window-header button:hover {
+  color: var(--csv2-on-primary);
+}
+/* White content + neutralize the core standard-form spacing on the wrappers. */
+.cs-roll-dialog-window .window-content {
+  padding: 0;
+  background: var(--csv2-bg);
+}
+.cs-roll-dialog-window .dialog-form {
+  gap: 0;
+  background: transparent;
+  padding: 0;
+}
+.cs-roll-dialog-window .dialog-content {
+  padding: 0;
+}
+/* The body: a 2-column grid that scrolls internally (handoff max-height 660). */
+.cs-roll-dialog.cs-v2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 16px;
+  max-height: 660px;
+  overflow-y: auto;
+  color: var(--csv2-text);
+  font-family: var(--csv2-font-sans);
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
+}
+.cs-roll-dialog.cs-v2 .cs-rd-full {
+  grid-column: 1 / -1;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-col {
+  align-self: stretch;
+}
+/* Inputs / selects (difficulty selector + extras). */
+.cs-roll-dialog.cs-v2 select,
+.cs-roll-dialog.cs-v2 input[type="number"] {
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  border: 1px solid var(--csv2-input-border);
+  background: var(--csv2-bg);
+  border-radius: 5px;
+  padding: 8px 11px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--csv2-text);
+}
+.cs-roll-dialog.cs-v2 select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
+  background-image: var(--csv2-chevron);
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+}
+
+/* 1 · Difficulty state A (target). */
+.cs-roll-dialog.cs-v2 .cs-rd-target-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 55%;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: rgba(255, 255, 255, 0.16);
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-target-pill > i {
+  flex: none;
+  font-size: 9px;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-diff-a {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-diff-value {
+  font-family: var(--csv2-font-mono);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--csv2-dark);
+  font-variant-numeric: tabular-nums;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-diff-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--csv2-secondary);
+}
+.cs-roll-dialog.cs-v2 .cs-rd-diff-name {
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--csv2-text);
+}
+.cs-roll-dialog.cs-v2 .cs-rd-diff-hint {
+  font-family: var(--csv2-font-sans);
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--csv2-muted);
+  margin-top: 2px;
+}
+
+/* 1 · Difficulty state B (selector) — single inline row, no header strip. */
+.cs-roll-dialog.cs-v2 .cs-rd-diff-b {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-diff-level-label {
+  flex: none;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+.cs-roll-dialog.cs-v2 .cs-rd-diff-b select {
+  flex: 1;
+}
+
+/* 2 · Base — 5 read-only cells, value over label, right dividers. */
+.cs-roll-dialog.cs-v2 .cs-rd-base-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+.cs-roll-dialog.cs-v2 .cs-rd-base-cell {
+  padding: 11px 10px;
+  text-align: center;
+  border-right: 1px solid var(--csv2-border-soft);
+}
+.cs-roll-dialog.cs-v2 .cs-rd-base-cell:last-child {
+  border-right: none;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-base-value {
+  font-family: var(--csv2-font-mono);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--csv2-dark);
+  font-variant-numeric: tabular-nums;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-base-label {
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--csv2-text);
+  margin-top: 7px;
+}
+
+/* 3/4 · Always-on + optional lists — internal scroll, per-row divider. */
+.cs-roll-dialog.cs-v2 .cs-rd-mod-scroll {
+  max-height: 230px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
+}
+/* Muted placeholder when one modifier list is empty but the other is shown. */
+.cs-roll-dialog.cs-v2 .cs-rd-mod-empty {
+  padding: 12px 14px;
+  font-family: var(--csv2-font-sans);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--csv2-muted);
+}
+.cs-roll-dialog.cs-v2 .cs-mod-row {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--csv2-border-soft);
+}
+.cs-roll-dialog.cs-v2 .cs-mod-row:last-child {
+  border-bottom: none;
+}
+.cs-roll-dialog.cs-v2 .cs-mod-main {
+  gap: 9px;
+}
+.cs-roll-dialog.cs-v2 .cs-mod-pill {
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+}
+.cs-roll-dialog.cs-v2 .cs-mod-source {
+  font-size: 12.5px;
+}
+.cs-roll-dialog.cs-v2 .cs-mod-value {
+  font-size: 14px;
+}
+.cs-roll-dialog.cs-v2 .cs-mod-condition {
+  font-size: 10.5px;
+  margin-top: 4px;
+  padding-left: 2px;
+}
+/* Optional rows — a clickable label with a checkbox. */
+.cs-roll-dialog.cs-v2 .cs-opt-row {
+  display: block;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--csv2-border-soft);
+  cursor: pointer;
+}
+.cs-roll-dialog.cs-v2 .cs-opt-row:last-child {
+  border-bottom: none;
+}
+.cs-roll-dialog.cs-v2 .cs-opt-row:hover {
+  background: var(--csv2-chip-bg);
+}
+.cs-roll-dialog.cs-v2 .cs-opt-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cs-roll-dialog.cs-v2 .cs-opt-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--csv2-font-sans);
+  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--csv2-text);
+}
+.cs-roll-dialog.cs-v2 .cs-opt-value {
+  flex: none;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.cs-roll-dialog.cs-v2 .cs-opt-condition {
+  font-family: var(--csv2-font-sans);
+  font-style: italic;
+  font-size: 10.5px;
+  color: var(--csv2-muted);
+  margin-top: 4px;
+  padding-left: 27px;
+}
+
+/* 5 · Your extra modifiers — light-blue panel, blue header strip, 5 inputs. */
+.cs-roll-dialog.cs-v2 .cs-rd-extras {
+  border: 1px solid var(--csv2-callout-border);
+  background: var(--csv2-area);
+  border-radius: 7px;
+  overflow: hidden;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-extras-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  padding: 8px 12px;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-extras-title {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-extras-hint {
+  font-family: var(--csv2-font-sans);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: right;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-extras-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  padding: 12px 16px;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-extra-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-extra-label {
+  font-family: var(--csv2-font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--csv2-text);
+  text-align: center;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-extra-cell input[type="number"] {
+  text-align: center;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 7px 8px;
+}
+
+/* Footer — Cancel (outline, left) + Confirm Roll (primary, flex:1, right). */
+.cs-roll-dialog-window .form-footer {
+  border-top: 1px solid var(--csv2-secondary);
+  background: var(--csv2-bg);
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  margin: 0;
+}
+.cs-roll-dialog-window .form-footer button {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 11px 18px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 7px;
+  background: var(--csv2-bg);
+  color: var(--csv2-muted-2);
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: none;
+}
+.cs-roll-dialog-window .form-footer button:hover {
+  border-color: var(--csv2-muted);
+  color: var(--csv2-text);
+  background: var(--csv2-bg);
+  box-shadow: none;
+}
+.cs-roll-dialog-window .form-footer button.cs-primary {
+  flex: 1;
+  border: none;
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  font-size: 13.5px;
+  padding: 11px;
+}
+.cs-roll-dialog-window .form-footer button.cs-primary:hover {
+  background: var(--csv2-primary-dark);
+  color: var(--csv2-on-primary);
+}
+
+/* =========================================================================
+   RESULT CARD (chat) — .cs-roll-card.cs-v2, ~270px, dense.
+   ======================================================================== */
+.cs-roll-card.cs-v2 {
+  border: 1px solid var(--csv2-border);
+  border-radius: 9px;
+  overflow: hidden;
+  box-shadow: 0 8px 26px rgba(10, 4, 5, 0.16);
+  background: var(--csv2-bg);
+  color: var(--csv2-text);
+  font-family: var(--csv2-font-sans);
+}
+/* 1 · Title — dark strip. */
+.cs-roll-card.cs-v2 .cs-rc-title {
+  background: var(--csv2-dark);
+  color: var(--csv2-on-primary);
+  padding: 7px 11px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 11.5px;
+  letter-spacing: 0.01em;
+}
+/* 2 · Verdict — tinted; icon + (word over grade). */
+.cs-roll-card.cs-v2 .cs-rc-verdict {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 11px;
+  border-bottom: 1px solid var(--csv2-secondary);
+}
+.cs-roll-card.cs-v2.is-success .cs-rc-verdict {
+  background: var(--csv2-verdict-success-bg);
+}
+.cs-roll-card.cs-v2.is-failure .cs-rc-verdict {
+  background: var(--csv2-verdict-failure-bg);
+}
+.cs-roll-card.cs-v2 .cs-rc-verdict-icon {
+  flex: none;
+  display: flex;
+}
+.cs-roll-card.cs-v2 .cs-rc-verdict-icon > i {
+  font-size: 20px;
+}
+.cs-roll-card.cs-v2.is-success .cs-rc-verdict-icon {
+  color: var(--csv2-verdict-success-fg);
+}
+.cs-roll-card.cs-v2.is-failure .cs-rc-verdict-icon {
+  color: var(--csv2-verdict-failure-fg);
+}
+.cs-roll-card.cs-v2 .cs-rc-verdict-text {
+  min-width: 0;
+}
+.cs-roll-card.cs-v2 .cs-rc-verdict-word {
+  font-family: var(--csv2-font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.1;
+}
+.cs-roll-card.cs-v2.is-success .cs-rc-verdict-word {
+  color: var(--csv2-verdict-success-fg);
+}
+.cs-roll-card.cs-v2.is-failure .cs-rc-verdict-word {
+  color: var(--csv2-verdict-failure-fg);
+}
+.cs-roll-card.cs-v2 .cs-rc-verdict-grade {
+  font-family: var(--csv2-font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--csv2-muted-2);
+  margin-top: 1px;
+}
+.cs-roll-card.cs-v2 .cs-rc-degrees {
+  font-family: var(--csv2-font-mono);
+  color: var(--csv2-muted);
+}
+/* body */
+.cs-roll-card.cs-v2 .cs-rc-body {
+  padding: 10px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+/* 3 · Target line (conflict only). */
+.cs-roll-card.cs-v2 .cs-rc-target {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: var(--csv2-chip-bg);
+  border: 1px solid var(--csv2-chip-border);
+  border-radius: 5px;
+}
+.cs-roll-card.cs-v2 .cs-rc-target-icon {
+  flex: none;
+  display: flex;
+  color: var(--csv2-primary);
+}
+.cs-roll-card.cs-v2 .cs-rc-target-icon > i {
+  font-size: 11px;
+}
+.cs-roll-card.cs-v2 .cs-rc-target-label {
+  flex: none;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+.cs-roll-card.cs-v2 .cs-rc-target-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--csv2-text);
+}
+/* 4 · Numbers. */
+.cs-roll-card.cs-v2 .cs-rc-diffname {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 8.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+  margin-bottom: 5px;
+}
+.cs-roll-card.cs-v2 .cs-rc-num-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+.cs-roll-card.cs-v2 .cs-rc-num-cell {
+  text-align: center;
+  padding: 6px 3px;
+  border: 1px solid var(--csv2-border);
+  border-radius: 5px;
+}
+.cs-roll-card.cs-v2 .cs-rc-num-label {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 7.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+.cs-roll-card.cs-v2 .cs-rc-num-value {
+  font-family: var(--csv2-font-mono);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.1;
+  color: var(--csv2-dark);
+  font-variant-numeric: tabular-nums;
+}
+.cs-roll-card.cs-v2 .cs-margin-gain {
+  background: var(--csv2-verdict-success-bg);
+  border-color: var(--csv2-verdict-success-border);
+}
+.cs-roll-card.cs-v2 .cs-margin-gain .cs-rc-num-value {
+  color: var(--csv2-gain);
+}
+.cs-roll-card.cs-v2 .cs-margin-loss {
+  background: var(--csv2-verdict-failure-bg);
+  border-color: var(--csv2-verdict-failure-border);
+}
+.cs-roll-card.cs-v2 .cs-margin-loss .cs-rc-num-value {
+  color: var(--csv2-loss);
+}
+/* 5 · Base line. */
+.cs-roll-card.cs-v2 .cs-rc-base {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.cs-roll-card.cs-v2 .cs-rc-base-label {
+  flex: none;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 8.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+.cs-roll-card.cs-v2 .cs-rc-base-value {
+  flex: 1;
+  text-align: right;
+  font-family: var(--csv2-font-mono);
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--csv2-muted-2);
+}
+/* 6 · Modifier breakdown — bordered box + sub-header. */
+.cs-roll-card.cs-v2 .cs-rc-mods {
+  border: 1px solid var(--csv2-border-soft);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.cs-roll-card.cs-v2 .cs-rc-mods-header {
+  background: var(--csv2-chip-bg);
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 8px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--csv2-border-soft);
+}
+.cs-roll-card.cs-v2 .cs-mod-row {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--csv2-chip-bg);
+}
+.cs-roll-card.cs-v2 .cs-mod-row:last-child {
+  border-bottom: none;
+}
+.cs-roll-card.cs-v2 .cs-mod-main {
+  gap: 6px;
+}
+.cs-roll-card.cs-v2 .cs-mod-pill {
+  font-size: 7.5px;
+  letter-spacing: 0.05em;
+  padding: 2px 5px;
+}
+.cs-roll-card.cs-v2 .cs-mod-source {
+  font-size: 11px;
+}
+.cs-roll-card.cs-v2 .cs-mod-value {
+  font-size: 12px;
+}
+.cs-roll-card.cs-v2 .cs-mod-condition {
+  font-size: 9.5px;
+  margin-top: 2px;
+}
+/* 7 · Dice. */
+.cs-roll-card.cs-v2 .cs-rc-dice-label {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 8px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+  margin-bottom: 5px;
+}
+.cs-roll-card.cs-v2 .cs-rc-dice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.cs-roll-card.cs-v2 .cs-rc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 7px;
+}
+/* 8 · Resolution (successful conflict). */
+.cs-roll-card.cs-v2 .cs-rc-resolution {
+  border: 1px solid var(--csv2-callout-border);
+  background: var(--csv2-area);
+  border-radius: 6px;
+  padding: 9px 10px;
+}
+.cs-roll-card.cs-v2 .cs-rc-res-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.cs-roll-card.cs-v2 .cs-rc-res-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--csv2-origin-effect-fg);
+}
+.cs-roll-card.cs-v2 .cs-rc-res-label > i {
+  font-size: 10px;
+}
+.cs-roll-card.cs-v2 .cs-rc-res-figure {
+  text-align: right;
+}
+.cs-roll-card.cs-v2 .cs-rc-res-value {
+  font-family: var(--csv2-font-mono);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--csv2-dark);
+  font-variant-numeric: tabular-nums;
+}
+.cs-roll-card.cs-v2 .cs-rc-res-reduction {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--csv2-loss);
+  margin-left: 5px;
+}
+.cs-roll-card.cs-v2 .cs-apply-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.cs-roll-card.cs-v2 .cs-apply-btn:hover {
+  background: var(--csv2-primary-dark);
+  box-shadow: none;
+}
+
+/* =========================================================================
+   Core override neutralization (T022, D11/FR-022) — the card lives inside the
+   core `.chat-message`; hide the redundant native dice-roll breakdown for OUR
+   card only (the Roll stays attached for Dice-So-Nice / message.rolls).
+   ======================================================================== */
+.chat-message .message-content:has(.cs-roll-card.cs-v2) {
+  color: var(--csv2-text);
+}
+.chat-message .message-content:has(.cs-roll-card.cs-v2) .dice-roll {
+  display: none;
 }

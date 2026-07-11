@@ -178,12 +178,27 @@ function _withUnit(value, field) {
   return `${_signed(value)}${DICE_FORMULA_FIELDS.has(field) ? "d" : ""}`;
 }
 
+/** Value TONE (spec 011, data-model §3): direction is mapped by FIELD, not by
+ *  sign — a `dicePenalty` stores a positive value but always hinders, so it reads
+ *  red; pool/bonusDice/re-roll always help (green); a flat modifier / size follows
+ *  its own sign; zero is muted. Drives the `.cs-value-{gain,loss,zero}` utility. */
+function _valueTone(value, field) {
+  if (value === 0) return "zero";
+  if (field === "dicePenalty") return "loss";
+  // `reReoll` keeps the codebase-wide typo (F7) — it is a beneficial re-roll count.
+  if (field === "pool" || field === "bonusDice" || field === "reReoll")
+    return "gain";
+  return value >= 0 ? "gain" : "loss";
+}
+
 /** Decorate an itemized entry (spec 009 shape + spec 010 origins) with the
- *  localized origin label and display value the dialog and the card both show. */
+ *  localized origin label, display value and value tone the dialog and the card
+ *  both show (spec 011). */
 function _decorateItem(item) {
   return {
     ...item,
     displayValue: _withUnit(item.value, item.field),
+    tone: _valueTone(item.value, item.field),
     originLabel: SystemUtils.localize(
       `CS.dialogs.rollModifier.origin.${item.origin}`
     ),
@@ -311,22 +326,28 @@ async function _showModifierDialog(context) {
   );
 
   return foundry.applications.api.DialogV2.wait({
+    // Scope the frame to the v2 look (root is a <dialog>); fixed 700px per handoff.
+    classes: ["cs-roll-dialog-window", "cs-v2"],
+    position: { width: 700 },
     window: {
       title: SystemUtils.localize("CS.dialogs.rollModifier.title"),
     },
     content: html,
+    // Cancel (outline, left) then Confirm Roll (primary, right, dice icon). The
+    // `class` lands on the rendered <button> so only Confirm styles as primary.
     buttons: [
-      {
-        action: "confirm",
-        label: SystemUtils.localize("CS.dialogs.actions.confirm"),
-        icon: "fas fa-check",
-        default: true,
-        callback: (event, button) => button.form,
-      },
       {
         action: "cancel",
         label: SystemUtils.localize("CS.dialogs.actions.cancel"),
         icon: "fas fa-times",
+      },
+      {
+        action: "confirm",
+        label: SystemUtils.localize("CS.dialogs.rollModifier.confirmRoll"),
+        icon: "fas fa-dice-d6",
+        default: true,
+        class: "cs-primary",
+        callback: (event, button) => button.form,
       },
     ],
     rejectClose: false,
@@ -492,9 +513,16 @@ async function _deriveTargetConflict(
     itemized,
     difficulty: {
       target: difficultyTargetValue,
-      label: target.token.name,
+      // The difficulty NAME is the defense TYPE that drives it (Combat / Intrigue
+      // Defense); the target's own token name is surfaced separately (targetName).
+      label: SystemUtils.localize(
+        kind === "weapon"
+          ? "CS.effects.derivedStats.combat_defense"
+          : "CS.effects.derivedStats.intrigue_defense"
+      ),
       labelKey: null,
     },
+    targetName: target.token.name,
     resolution: {
       kind,
       targetActor: target.actor,
@@ -554,10 +582,12 @@ async function handleRollAsync(
     if (conflict.difficulty) {
       difficulty = conflict.difficulty;
       // Read-only in the dialog (spec 010): the target's defense replaces the
-      // difficulty selector; it is NOT editable, so only value + name are needed.
+      // difficulty selector. `name` is the defense TYPE (Combat / Intrigue
+      // Defense); `targetName` is the target token's own name (header pill).
       targetDifficulty = {
         value: conflict.difficulty.target,
         name: conflict.difficulty.label,
+        targetName: conflict.targetName,
       };
     }
     resolutionCtx = conflict.resolution;
@@ -601,6 +631,7 @@ async function handleRollAsync(
     ).map((effect) => ({
       ...effect,
       displayValue: _withUnit(effect.value, effect.formulaField),
+      tone: _valueTone(effect.value, effect.formulaField),
     }));
     const difficultyOptions = difficultyTable.entries.map((entry, index) => ({
       index,
@@ -615,6 +646,9 @@ async function handleRollAsync(
       difficultyOptions,
       noneSelected: difficultyTable.defaultIndex < 0,
       targetDifficulty,
+      // Show BOTH modifier lists together whenever either has content, so the
+      // two-column pairing is preserved even when one side is empty.
+      showModifiers: displayedItemized.length > 0 || optionalEffects.length > 0,
     });
     if (!formData) return null;
 
@@ -650,6 +684,15 @@ async function handleRollAsync(
     ];
   }
 
+  // spec 011 (FR-011/FR-013): there is no "free roll". An unresolved difficulty
+  // (None selected in the dialog, or a -1 default) resolves against TARGET 0 so
+  // EVERY roll through this path renders the unified card below — never the plain
+  // Foundry message. Initiative rolls take the sync handleRoll() path (no
+  // difficulty) and keep their own message (D6).
+  if (!difficulty || difficulty.target == null) {
+    difficulty = { target: 0, label: null, labelKey: null };
+  }
+
   // spec 010 (FR-025): whenever a difficulty resolves, post the transparent card
   // (itemized decomposition + dice faces) with the conflict resolution inputs.
   let conflictContext = null;
@@ -683,7 +726,7 @@ async function handleRollAsync(
       baseLabel: base.ToFormattedStr(),
       // The target's token name (spec 010 polish): shown as an explicit "Target"
       // line on the card so it is not mistaken for the roller.
-      targetName: targetDifficulty ? targetDifficulty.name : null,
+      targetName: targetDifficulty ? targetDifficulty.targetName : null,
       kind: resolutionCtx ? resolutionCtx.kind : null,
       targetActor: resolutionCtx ? resolutionCtx.targetActor : null,
       baseValue: resolutionCtx ? resolutionCtx.baseValue : 0,
