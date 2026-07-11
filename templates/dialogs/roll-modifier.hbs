@@ -18,7 +18,7 @@
     <section class="csv2-card cs-rd-full">
         <div class="csv2-card-header cs-rd-header-split">
             <span>{{localize "CS.dialogs.rollModifier.difficulty"}}</span>
-            <span class="cs-rd-target-pill"><i class="fas fa-bullseye"></i>{{localize "CS.conflict.targetName"}}</span>
+            <span class="cs-rd-target-pill"><i class="fas fa-bullseye"></i>{{targetDifficulty.targetName}}</span>
         </div>
         <div class="cs-rd-diff-a">
             <div class="cs-rd-diff-value">{{targetDifficulty.value}}</div>
@@ -54,8 +54,11 @@
         </div>
     </section>
 
-    {{!-- 3 · Always-on modifiers (one column). Hidden when empty. --}}
-    {{#if itemizedAlwaysOn.length}}
+    {{!-- 3 + 4 · Always-on + Optional modifiers — shown TOGETHER (side by side)
+          whenever EITHER has content; the empty side shows a muted placeholder so
+          the two-column pairing is preserved. Both hidden only when neither has
+          any modifier. --}}
+    {{#if showModifiers}}
     <section class="csv2-card cs-rd-col">
         <div class="csv2-card-header">{{localize "CS.dialogs.rollModifier.itemizedTitle"}}</div>
         <div class="cs-rd-mod-scroll">
@@ -69,12 +72,9 @@
                 {{#if this.condition}}<div class="cs-mod-condition">{{this.condition}}</div>{{/if}}
             </div>
             {{/each}}
+            {{#unless itemizedAlwaysOn.length}}<div class="cs-rd-mod-empty">{{localize "CS.dialogs.rollModifier.emptyList"}}</div>{{/unless}}
         </div>
     </section>
-    {{/if}}
-
-    {{!-- 4 · Optional modifiers (one column, beside block 3). Hidden when empty. --}}
-    {{#if optionalEffects.length}}
     <section class="csv2-card cs-rd-col">
         <div class="csv2-card-header">{{localize "CS.dialogs.rollModifier.optionalEffects"}}</div>
         <div class="cs-rd-mod-scroll">
@@ -88,6 +88,7 @@
                 {{#if this.condition}}<div class="cs-opt-condition">{{this.condition}}</div>{{/if}}
             </label>
             {{/each}}
+            {{#unless optionalEffects.length}}<div class="cs-rd-mod-empty">{{localize "CS.dialogs.rollModifier.emptyList"}}</div>{{/unless}}
         </div>
     </section>
     {{/if}}

@@ -513,9 +513,16 @@ async function _deriveTargetConflict(
     itemized,
     difficulty: {
       target: difficultyTargetValue,
-      label: target.token.name,
+      // The difficulty NAME is the defense TYPE that drives it (Combat / Intrigue
+      // Defense); the target's own token name is surfaced separately (targetName).
+      label: SystemUtils.localize(
+        kind === "weapon"
+          ? "CS.effects.derivedStats.combat_defense"
+          : "CS.effects.derivedStats.intrigue_defense"
+      ),
       labelKey: null,
     },
+    targetName: target.token.name,
     resolution: {
       kind,
       targetActor: target.actor,
@@ -575,10 +582,12 @@ async function handleRollAsync(
     if (conflict.difficulty) {
       difficulty = conflict.difficulty;
       // Read-only in the dialog (spec 010): the target's defense replaces the
-      // difficulty selector; it is NOT editable, so only value + name are needed.
+      // difficulty selector. `name` is the defense TYPE (Combat / Intrigue
+      // Defense); `targetName` is the target token's own name (header pill).
       targetDifficulty = {
         value: conflict.difficulty.target,
         name: conflict.difficulty.label,
+        targetName: conflict.targetName,
       };
     }
     resolutionCtx = conflict.resolution;
@@ -637,6 +646,9 @@ async function handleRollAsync(
       difficultyOptions,
       noneSelected: difficultyTable.defaultIndex < 0,
       targetDifficulty,
+      // Show BOTH modifier lists together whenever either has content, so the
+      // two-column pairing is preserved even when one side is empty.
+      showModifiers: displayedItemized.length > 0 || optionalEffects.length > 0,
     });
     if (!formData) return null;
 
@@ -714,7 +726,7 @@ async function handleRollAsync(
       baseLabel: base.ToFormattedStr(),
       // The target's token name (spec 010 polish): shown as an explicit "Target"
       // line on the card so it is not mistaken for the roller.
-      targetName: targetDifficulty ? targetDifficulty.name : null,
+      targetName: targetDifficulty ? targetDifficulty.targetName : null,
       kind: resolutionCtx ? resolutionCtx.kind : null,
       targetActor: resolutionCtx ? resolutionCtx.targetActor : null,
       baseValue: resolutionCtx ? resolutionCtx.baseValue : 0,

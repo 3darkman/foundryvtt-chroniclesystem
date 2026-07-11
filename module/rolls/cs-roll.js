@@ -96,13 +96,12 @@ export class CSRoll {
     const { target, label, labelKey } = this.difficulty;
     const verdict = resolveVerdict(roll.total, target);
     const cc = this.conflictContext;
-    // With a target, its token name is the difficulty label — surface it as an
-    // explicit "Target" line instead of the ambiguous difficulty name, so it is
-    // not mistaken for the character making the roll (spec 010 polish).
+    // The target's own token name is the explicit "Target" line (below); the
+    // difficulty NAME is the defense type / table level and is shown above the
+    // numbers on BOTH plain and conflict rolls (spec 011, handoff).
     const targetName = cc?.targetName ?? null;
-    const difficultyName = targetName
-      ? ""
-      : label || (labelKey ? SystemUtils.localize(labelKey) : "");
+    const difficultyName =
+      label || (labelKey ? SystemUtils.localize(labelKey) : "");
     const marginText =
       verdict.margin >= 0 ? `+${verdict.margin}` : `${verdict.margin}`;
     // Margin tone: a hit (margin ≥ 0) reads green, a miss red (spec 011).

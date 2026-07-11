@@ -38,6 +38,7 @@
         "difficultyLevel": "Difficulty Level",
         "passiveDifficulty": "Passive difficulty from target",
         "confirmRoll": "Confirm Roll",
+        "emptyList": "None",
         "targetDifficulty": "Difficulty vs {name}",
         "origin": {
           "condition": "Condition",
