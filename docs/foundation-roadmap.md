@@ -5,6 +5,14 @@
 > sequenciado, backlog de features e referências de API do Foundry já verificadas.
 >
 > **Data-base:** 2026-06-10 · **Versão do system:** 0.7.0 · **Foundry:** v14 (verified) / min 12.
+>
+> **📋 Auditoria de implementação — 2026-07-11 · system `0.10.0`.** Marcações de status
+> **✅ concluído / 🟡 parcial / ⬜ pendente** foram adicionadas por seção abaixo, **verificadas
+> contra o código atual** (não apenas contra a existência das specs). Resumo executivo:
+> **Passo 1–3 ✅**, **Passo 4 🟡** (só identidade por slug), **Passo 5 ⬜**, **Passo 6 ⬜**.
+> Backlog: **dificuldade-alvo + grau de sucesso ✅** (specs 009/010/011), **consumo de
+> `armorRating`/`DAMAGE_TAKEN` ✅**, **Intriga alvo→Composure ✅**, **dano/ferimentos 🟡**
+> (calculado + botão de 1 clique, sem auto-aplicar), **Sorcery/Warfare/Casas ⬜**.
 
 ---
 
@@ -21,6 +29,14 @@
 ---
 
 ## 1. Estado atual (verificado)
+
+> ⚠️ **Snapshot de 2026-06-10 — parcialmente superado (ver auditoria 2026-07-11).**
+> Atualizações confirmadas no código: versão **`0.10.0`** (min **13** / verified 14, `system.json`);
+> **Modificadores migrados p/ Active Effects** — coletor único (`module/effects/cs-effect-modifiers.js`)
+> é o único escritor de `modifiers`/`penalties` (spec 007) → a linha "**0 `ActiveEffect`**" está **obsoleta**;
+> **Testes existem** (Vitest, 23 arquivos / 364 testes, spec 005); **Linter funcional** (spec 004);
+> **Especialidades com slug estável** (spec 008), porém ainda subdata/texto (não item);
+> `template.json` e o **Proxy factory continuam presentes** (Passo 5 não iniciado).
 
 | Aspecto | Situação |
 |---------|----------|
@@ -65,6 +81,14 @@ Os 5 pontos levantados pelo autor têm uma **raiz comum** (exceto o async):
 | 5 | **fórmulas como texto aberto** (specialty + dano), sem sugerir opções | `damage @Ability+N` via `eval()` (`csWeaponItem.js:12`) | M | Passo 4 |
 | 4 | **i18n complicada** | **Sintoma de 2/3/5**, não causa | — | Passo 6 |
 
+> **Status (2026-07-11):** **#2 (modifiers→AE) ✅ RESOLVIDA** — go/no-go decidido em 2026-06-11
+> (HÍBRIDO, `specs/006-spike-active-effects/decision-report.md`); épico entregue (specs 006/007/009).
+> **#3 (especialidade como texto) 🟡 PARCIAL** — identidade por slug estável entregue (spec 008),
+> mas a especialidade da arma ainda é texto cru `Ability:Specialty` (`handlebarsHelpers.js:65`) e não
+> virou item arrastável. **#5 (fórmulas como texto) 🟡 PARCIAL** — `@Ability` resolve por slug, mas o
+> **`eval()` do dano permanece** (`csWeaponItem.js:22`); sem parser explícito nem autocomplete.
+> **#1 (async) ✅** — auditoria absorvida nos Passos 1–2 (sem anti-padrões).
+
 ### O insight de ordem (crítico)
 
 A armadilha de i18n — `CS.constants.*` (habilidades) são **chaves de lookup**: o código localiza
@@ -87,7 +111,10 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 
 > Cada passo é candidato a uma spec speckit. Ordem reflete dependências reais.
 
-### Passo 1 — Linter funcional (CRLF)
+### Passo 1 — Linter funcional (CRLF)  ✅ CONCLUÍDO (spec 004)
+> **Verificado:** `.gitattributes` (`* text=auto eol=lf`), `.prettierrc` (`endOfLine: lf`), `.editorconfig`;
+> husky **v8** (`.husky/pre-commit` → `npx lint-staged`); `package.json` com `"lint": "eslint module/"`,
+> `"prepare": "husky install"` e `lint-staged` sobre `module/**/*.js`.
 - **Objetivo:** tornar o ESLint utilizável (hoje 99% do output é ruído de CRLF).
 - **Escopo:** `.gitattributes` (`* text=auto eol=lf`), `.prettierrc` (`{ "endOfLine": "lf" }`),
   `.editorconfig`; `git add --renormalize .` (commit isolado — toca 54 arquivos).
@@ -96,7 +123,11 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 - **Esforço:** S · **Risco:** baixo (mas commit de renormalização grande — fazer isolado).
 - **Pronto quando:** `eslint module/` mostra só erros reais (~45); pre-commit bloqueia erro novo.
 
-### Passo 2 — Testes da lógica pura (Vitest)
+### Passo 2 — Testes da lógica pura (Vitest)  ✅ CONCLUÍDO (spec 005)
+> **Verificado:** `vitest.config.mjs` + `"test": "vitest run"`; **23 arquivos / 364 testes verdes**.
+> Cobre os 4 grupos: `DiceRollFormula` (`tests/dice-roll-formula.test.js`), parsing specialty/dano
+> (`tests/weapon-formula.test.js`), `migrateData` com null/NaN/legado (`tests/migrations.test.js`),
+> deriváveis puros — Saúde=Endurance×3, defesas (`tests/derived-stats.test.js`).
 - **Objetivo:** rede de segurança que torna todos os refactors seguros.
 - **Escopo (lógica testável sem Foundry):** `DiceRollFormula` (pool/bonusDice/modifier),
   parsing de specialty/dano de arma, os `migrateData` dos DataModels (fixtures com null/NaN/legado),
@@ -105,7 +136,12 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 - **Não testar:** sheets/UI de início — ROI está na lógica de regras.
 - **Esforço:** M · **Risco:** baixo · **Pronto quando:** suíte verde cobrindo os 4 grupos acima.
 
-### Passo 3 — Spike Active Effects → decisão go/no-go (dívida #2)
+### Passo 3 — Spike Active Effects → decisão go/no-go (dívida #2)  ✅ CONCLUÍDO (specs 006/007/009)
+> **Verificado:** go/no-go decidido em 2026-06-11 (HÍBRIDO — `specs/006-spike-active-effects/decision-report.md`)
+> e o **épico entregue**: `module/effects/` (10 arquivos) com coletor único (`cs-effect-modifiers.js`) que
+> reescreve `modifiers`/`penalties` a cada `prepareData`, lendo AE autorados (`actor.appliedEffects`) +
+> itens vivos + condições. `csArmorItem.js` é classe vazia (penalidade lida ao vivo — spike). UI de autoria
+> em cascata (`cs-effect-config-sheet.js`) registrada. Migração 0.8.0 (`task080-ae-unification.js`).
 - **Objetivo:** medir esforço×ganho de migrar `modifiers`/`penalties` p/ Active Effects.
 - **Escopo do spike:** migrar **1** modificador (sugestão: penalidade de armadura, `csArmorItem.js:12`)
   para AE com mode adequado; comparar com o caminho caseiro; mapear quais casos são declarativos
@@ -115,7 +151,12 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 - **Esforço:** M (spike) / XL (épico, se go) · **Risco:** alto (é a maior decisão arquitetural).
 - **Pronto quando:** existe um AE funcional + relatório de decisão.
 
-### Passo 4 — Modelagem de dados: especialidades + fórmulas (dívidas #3 e #5)
+### Passo 4 — Modelagem de dados: especialidades + fórmulas (dívidas #3 e #5)  🟡 PARCIAL
+> **Feito (spec 008):** identidade por **slug estável** — `cs-slugify.js`, `getAbilityValueBySlug`,
+> especialidades de ability como subdata com slug escopado; migração 0.9.0 (`task090-slug-identity.js`).
+> **Pendente:** especialidade **não** virou item arrastável (segue subdata; a arma usa texto
+> `Ability:Specialty` em `handlebarsHelpers.js:65`); o **`eval()` do dano permanece** (`csWeaponItem.js:22`),
+> sem parser explícito nem autocomplete/validação.
 - **Objetivo:** trocar texto bruto por **referências estruturadas com IDs estáveis**.
 - **Escopo:**
   - Especialidade como **item** (ou subdado com id) arrastável p/ habilidades, em vez de `Ability:Specialty`.
@@ -125,7 +166,12 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 - **Impacto colateral positivo:** destrava a i18n (Passo 6) ao eliminar comparação por nome localizado.
 - **Esforço:** M (cada) · **Risco:** médio (migração de dados de mundos existentes → `migrateData`).
 
-### Passo 5 — SSOT: `template.json` → DataModels-only + eliminar Proxy
+### Passo 5 — SSOT: `template.json` → DataModels-only + eliminar Proxy  ⬜ NÃO INICIADO
+> **Verificado:** `template.json` **ainda existe** na raiz; `system.json` **sem** bloco `documentTypes`;
+> `lang/en.json` **sem** chaves `TYPES.Actor.*`/`TYPES.Item.*`; **Proxy factory intacto**
+> (`module/utils/factory.js`, trap `getPrototypeOf`; usado em `config.js:74-75`). DataModels **estão**
+> registrados p/ todos os tipos (`config.js:86-103`), mas **`unit-data.js` segue sem `nullable`/`migrateData`**
+> (único DataModel sem `migrateData` — pré-req do 5a ainda aberto).
 - **5a — Remover `template.json`** (deprecado `@deprecated until v16`):
   1. Declarar tipos em `system.json` → bloco `documentTypes` (ver §7).
   2. **Auditar** que cada DataModel cobre 100% dos campos/defaults do `template.json`
@@ -140,14 +186,18 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 - **Esforço:** M (5a) + L (5b) · **Risco:** médio — persistência não muda SE feito na ordem.
 - **Pronto quando:** sem `template.json`; tipos via `documentTypes`; instanceof e tokens não-linkados OK.
 
-### Passo 6 — Localização pt-BR (dívida #4 — só agora é segura)
+### Passo 6 — Localização pt-BR (dívida #4 — só agora é segura)  ⬜ NÃO INICIADO
+> **Verificado:** **não** existe `lang/pt-BR.json`; `system.json` registra só `en`; strings ainda hardcoded
+> em templates de item (weapon/armor/ability) e abas de personagem. **Pré-requisito já destravado:** o
+> acoplamento `CS.constants.*` por nome localizado foi resolvido via slugs estáveis (spec 008) — a i18n
+> agora é segura; falta só o trabalho de extração/tradução.
 - **Pré-condição:** Passos 4/5 (IDs estáveis) — senão cai na armadilha `CS.constants`.
 - **Escopo:** extrair ~150 strings hardcoded (templates de item + abas de character) p/ chaves;
   manter `CS.constants.*` **idênticas ao inglês** OU desacoplar lookup de rótulo (slug estável);
   criar `lang/pt-BR.json` (UTF-8) e registrar em `system.json` (bloco `languages`, modelo: street-fighter).
 - **Esforço:** L · **Risco:** alto se feito antes da modelagem; baixo depois.
 
-### Auditoria de async (dívida #1) — encaixa nos Passos 1–2
+### Auditoria de async (dívida #1) — encaixa nos Passos 1–2  ✅ (sem anti-padrões)
 - Sem padrões grosseiros. Procurar: `async` desnecessário, `update()`/`create()` não-aguardados pontuais,
   `await` sequenciais que poderiam ser `Promise.all`. Esforço S–M.
 
@@ -165,6 +215,19 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 | **Qualidades de arma** (só adaptable/two-handed/bulk funcionam; `onEquippedChanged` vazio) | `csWeaponItem.js:6` | alto | L |
 | **Grau de sucesso no CSRoll** (sem dificuldade-alvo) + remover `dieroll.js` morto | `cs-roll.js:12` | médio | L |
 
+> **Status Combate (2026-07-11):**
+> - ✅ **Grau de sucesso + dificuldade-alvo** — escada de dificuldade + faixas de grau (`cs-difficulty.js`),
+>   `degreesOfSuccess` (`cs-conflict.js`), alvo→dificuldade (specs 009/010); **`dieroll.js` removido**;
+>   card de roll redesenhado (spec 011 — `cs-base-rollcard.hbs`/`difficulty-result.hbs` removidos).
+> - ✅ **Consumir `armorRating`/`DAMAGE_TAKEN`** — lido via coletor (`cs-effect-modifiers.js:397`) e
+>   subtraído no dano (`cs-conflict.js:108`, `cs-targeting.js`).
+> - 🟡 **Aplicação automática de dano + ferimentos** — dano/influência são **calculados** no acerto e há
+>   **botão "Aplicar" de 1 clique** (permission-gated, `cs-conflict-apply.js`), mas **não auto-aplica**
+>   (FR-019, por design) e **ferimentos/wounds seguem manuais**.
+> - 🟡 **Qualidades de arma** — alcance (close/long) e concessão de qualidades via AE funcionam; `bulk`/
+>   `adaptable` lidos ao vivo; mas `onEquippedChanged` segue stub vazio (`csItem.js:12`) e a maioria das
+>   qualidades ainda não tem efeito mecânico dedicado.
+
 ### Casas / Intriga / Sorcery / Warfare
 | Feature | Imp. | Esf. |
 |---------|:----:|:----:|
@@ -175,6 +238,18 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 | Eventos: regenerar/editar modifiers pós-drop | baixo | M |
 | Holdings: automação de `features` sobre recursos da casa | baixo | L |
 
+> **Status Casas/Intriga/Sorcery/Warfare (2026-07-11):**
+> - ✅ **Intriga** — disputa alvo vs **Intrigue Defense** (`cs-targeting.js:46`) e dano à **Composure**
+>   (`cs-roll.js:83`, `computeInfluence` em `cs-conflict.js`), aplicado pelo card (mesma ressalva do
+>   dano: 1 clique, não auto) — antes era "calculado, nunca usado".
+> - ⬜ **Sorcery** — só schema (`sorceryPoints`) + aba de exibição; `technique-data.js` **sem campo de custo**;
+>   **nenhum consumo** de pontos/custo.
+> - ⬜ **Warfare** — ator `unit` reusa `CSCharacterActor` como placeholder (`actorConstructor.js:8`), sem
+>   sheet dedicada; item `unitType` tem DataModel mas **não** é registrado como sheet (`config.js`). Segue *stub*.
+> - 🟡 **Fortune de casa** — a **rolagem** existe (pré-roadmap; `csHouseActorSheet.js`), mas **sem
+>   consequência de recurso** automatizada. ⬜ **Eventos: regenerar modifiers pós-drop** (só no drop) ·
+>   ⬜ **Holdings: automação de `features`** — não implementados.
+
 > **Warfare** = épico que reúne: ator `unit` + item `unitType` (re-registrar sheet, `config.js:97`)
 > + `unit-data` hardening + sheet dedicada. `unit`/`unitType` são *stubs* deixados para o futuro.
 
@@ -182,7 +257,11 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 
 ## 6. Achados verificados do levantamento
 
-### Lote 0 — JÁ APLICADO (working tree, sem commit) ✅
+### Lote 0 — JÁ APLICADO E COMMITADO ✅ (confirmado 2026-07-11)
+> Verificado no HEAD atual: `splice(index, 1)` (`csHouseActor.js:180`), `unitType` fora do registro de
+> sheet (`config.js`), `data-action="editImage"` nos dois headers, `dataType` nos 16 inputs de `event.hbs`,
+> `console.log`/`{{csTrace}}` removidos. **Exceção:** o item `task030` ficou **obsoleto** — a migração
+> `task030.js` foi **aposentada/removida** por completo (`migration.js:39`), então aquele `import` não existe mais.
 - `csHouseActor.js:190` `splice(index)` → `splice(index, 1)` (não apaga membros seguintes)
 - `config.js:97` — `unitType` removido do registro de sheet (volta com Warfare)
 - `header.hbs` + `header-delete.hbs` — add `data-action="editImage"`
@@ -198,6 +277,11 @@ provavelmente tem desses casos → por isso o **spike** (migrar 1 modificador) a
 - 🟡 "`task030` sem import" — era inócuo (resolvia via `window`), mas corrigido por robustez.
 
 ### UX/Qualidade reais ainda abertos (fora da fundação — fazer durante features)
+> **Status parcial (2026-07-11):** ✅ **drop de itens na ficha já funciona** — `_onDropItem` override
+> (`csActorSheet.js:184`) cria o item embutido + `onObtained` (o V2 despacha nativamente). Ainda abertos:
+> ⬜ **`deleteItem` genérico na ficha de personagem** (só há delete de wound/injury); ⬜ `unit-data` sem
+> `nullable`/`migrateData` (pré-req do Passo 5a); ⬜ `CLAUDE.md` ainda cita classes inexistentes
+> (`CsAbstractCombatActor`/`CsHouseUnitActor`). Demais (CSS, acessibilidade, `csFormGroup`) seguem abertos.
 - **UX actor:** sem `deleteItem` na ficha de personagem (M/alto); `dragDrop` não configurado (M/alto);
   fallback CSS `.tab{display:none}` (S/médio); acessibilidade (M/médio); feedback drag-over + confirmação
   destrutiva (M/médio); `resizable`/`data-base-size` órfão (S/baixo).
@@ -259,6 +343,11 @@ Passo 1 (linter)  →  Passo 2 (testes)  →  Passo 3 (spike AE → go/no-go)
    →  Passo 4 (especialidades/fórmulas)  →  Passo 5 (SSOT: template.json + Proxy)
    →  Passo 6 (i18n pt-BR)  →  Backlog de Features (§5, com NotebookLM)
 ```
+
+> **Progresso (2026-07-11):** ✅ Passo 1 · ✅ Passo 2 · ✅ Passo 3 · 🟡 Passo 4 (só slug) ·
+> ⬜ Passo 5 · ⬜ Passo 6. **Próximo pela ordem:** concluir Passo 4 (parser de dano + especialidade
+> estruturada) e então Passo 5 (SSOT/Proxy). Já entregues fora da ordem original via specs 009/010/011:
+> dificuldade-alvo, grau de sucesso, consumo de armadura e Intriga alvo→Composure.
 
 Auditoria de async corre junto de 1–2. UX/qualidade da §6 entram oportunisticamente (boy-scout)
 ao tocar cada área durante as features.
