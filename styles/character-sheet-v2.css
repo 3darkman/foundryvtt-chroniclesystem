@@ -1507,3 +1507,148 @@
   color: var(--csv2-muted);
   font-style: italic;
 }
+
+/* ============================================================ spec 012 ======
+   Configure-public-sheet controls (US2) + passive hidden indicators (US3).
+   Tokens only (R7). Blue-header controls sit on `.cs2-card-header`; the
+   House/Position light variant sits on the header meta line.
+   ========================================================================== */
+
+/* Config bar (Description tab top): "Description" title + master toggle. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-title {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font: 600 18px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+}
+
+/* Master toggle button — outline blue (off) / filled blue (on). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: auto;
+  flex: none;
+  padding: 6px 13px;
+  border: 1px solid var(--csv2-primary);
+  border-radius: 6px;
+  background: var(--csv2-bg);
+  color: var(--csv2-primary);
+  font: 600 11px var(--csv2-font-sans);
+  box-shadow: none;
+  cursor: pointer;
+}
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-toggle:hover {
+  background: var(--csv2-area);
+}
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-toggle.on {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+}
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-toggle.on:hover {
+  background: var(--csv2-primary-dark);
+}
+
+/* Instruction banner (config mode only). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  margin-bottom: 12px;
+  border: 1px solid var(--csv2-callout-border);
+  border-radius: 7px;
+  background: var(--csv2-area);
+  color: var(--csv2-primary);
+  font: 500 12px var(--csv2-font-sans);
+}
+
+/* Per-field eye button on the BLUE card headers (config mode) — translucent so
+   it reads on the blue strip. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-eye {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: auto;
+  flex: none;
+  padding: 3px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--csv2-on-primary);
+  font: 600 8.5px var(--csv2-font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: none;
+  cursor: pointer;
+}
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-eye:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* Static HIDDEN pill on the BLUE card headers (US3 — config off + hidden). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--csv2-on-primary);
+  font: 700 8px var(--csv2-font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* House/Position light-variant button (header meta line) — icon-only, blue when
+   public / red when hidden. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-eye-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  flex: none;
+  padding: 2px 4px;
+  border: 1px solid var(--csv2-border);
+  border-radius: 4px;
+  background: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-eye-inline.is-on {
+  color: var(--csv2-primary);
+}
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-eye-inline.is-off {
+  color: var(--csv2-danger);
+}
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-eye-inline:hover {
+  border-color: var(--csv2-primary);
+}
+
+/* Static House/Position hidden indicator (US3) — red eye-off icon only. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-ind-inline {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--csv2-danger);
+}
+
+/* Keep every control's inline SVG crisp and non-stretching. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-toggle svg,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-banner svg,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-eye svg,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-pill svg,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-eye-inline svg,
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-ind-inline svg {
+  display: block;
+  flex: none;
+}

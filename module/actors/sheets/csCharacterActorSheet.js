@@ -10,6 +10,10 @@ import SystemUtils from "../../utils/systemUtils.js";
 import { CSConstants } from "../../system/csConstants.js";
 import { INTRIGUE_TECHNIQUES } from "../../vocabulary/cs-intrigue-techniques.js";
 import { influenceFor } from "../../effects/cs-effect-modifiers.js";
+import {
+  PUBLIC_VISIBILITY_FIELDS,
+  PUBLIC_VISIBILITY_KEYS,
+} from "../../system/public-visibility.js";
 
 export class CSCharacterActorSheet extends CSActorSheet {
   itemTypesPermitted = [
@@ -22,6 +26,10 @@ export class CSCharacterActorSheet extends CSActorSheet {
     "technique",
     "unitType",
   ];
+
+  // spec 012 (US2): transient "configure public sheet" mode — UI-only, never
+  // persisted, off on each open (FR-018). Flipped by the togglePubMode action.
+  _pubMode = false;
 
   static DEFAULT_OPTIONS = {
     classes: ["chroniclesystem", "character", "sheet", "actor"],
@@ -36,6 +44,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
       deleteWound: CSCharacterActorSheet._onClickWoundDelete,
       clickSquare: CSCharacterActorSheet._onClickSquare,
       openHouse: CSCharacterActorSheet._onOpenHouse,
+      togglePubMode: CSCharacterActorSheet._onTogglePubMode,
+      toggleFieldVisibility: CSCharacterActorSheet._onToggleFieldVisibility,
       // NOTE: `editImage` (portrait) and `configurePrototypeToken` (header
       // avatar) are inherited from DocumentSheetV2/ActorSheetV2 and merged in
       // additively — no need to redeclare them here.
@@ -199,6 +209,38 @@ export class CSCharacterActorSheet extends CSActorSheet {
     context.maxWounds = this.actor.getMaxWounds();
     context.houseRole = this.actor.getHouseRole();
     context.character = character;
+
+    // spec 012 (US2/US3): owner-gated configure-public-sheet controls. `_pubMode`
+    // is transient UI state (never persisted, off on each open — FR-018). The
+    // per-field map drives the clickable eye (config mode) and the passive HIDDEN
+    // indicator (outside it). Non-owners receive none of this (FR-015), keyed by
+    // the shared eleven-field list (FR-011, module/system/public-visibility.js).
+    if (actor.isOwner) {
+      const pubMode = this._pubMode === true;
+      const pv = character.publicVisibility ?? {};
+      const pub = {};
+      for (const field of PUBLIC_VISIBILITY_FIELDS) {
+        const on = pv[field.key] === true;
+        pub[field.key] = {
+          on,
+          hidden: !on,
+          showBtn: pubMode,
+          showPill: !pubMode && !on,
+          word: SystemUtils.localize(
+            on
+              ? "CS.sheets.character.visibility.public"
+              : "CS.sheets.character.visibility.hidden"
+          ),
+        };
+      }
+      context.pub = pub;
+      context.pubMode = pubMode;
+      context.pubLabel = SystemUtils.localize(
+        pubMode
+          ? "CS.sheets.character.visibility.done"
+          : "CS.sheets.character.visibility.configure"
+      );
+    }
 
     // Pre-enrich HTML descriptions for benefit and drawback items
     const rollData = this.actor.getRollData();
@@ -638,6 +680,35 @@ export class CSCharacterActorSheet extends CSActorSheet {
     event.preventDefault();
     const house = game.actors.get(target.dataset.actorId);
     if (house) house.sheet.render({ force: true });
+  }
+
+  /**
+   * spec 012 (US2): toggle the transient configure-public-sheet mode and re-render
+   * so the per-field eye controls appear/disappear (FR-018, transient UI state).
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  // eslint-disable-next-line no-unused-vars
+  static async _onTogglePubMode(event, target) {
+    event.preventDefault();
+    this._pubMode = !this._pubMode;
+    this.render();
+  }
+
+  /**
+   * spec 012 (US2): flip one field's public/hidden flag, persisted immediately
+   * and in isolation — only this key changes, the field's content is untouched
+   * (FR-017/FR-019). The document update re-renders every open app, so a watching
+   * Limited player's public sheet updates within a cycle (FR-004).
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  static async _onToggleFieldVisibility(event, target) {
+    event.preventDefault();
+    const key = target.dataset.key;
+    if (!PUBLIC_VISIBILITY_KEYS.includes(key)) return;
+    const current = this.actor.system.publicVisibility?.[key] === true;
+    await this.actor.update({ ["system.publicVisibility." + key]: !current });
   }
 
   /* -------------------------------------------- */

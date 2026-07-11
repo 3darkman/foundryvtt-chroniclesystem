@@ -1,0 +1,237 @@
+/* =========================================================================
+   Public Character Sheet (spec 012) — layout scoped under `.cs-public-sheet`.
+   Loaded AFTER cs-components.css so it consumes the shared `--csv2-*` tokens and
+   the generic `.cs-v2 .csv2-card` component layer (R7, FR-022). Holds ONLY the
+   public sheet's own layout (portrait+appearance grid, identity/concept grids,
+   collapsible rows). No new hex or @font-face — tokens only.
+   ======================================================================== */
+
+/* Fill the window; the sheet owns its own padding/scroll. */
+.cs-public-sheet .window-content {
+  padding: 0;
+  overflow-y: auto;
+  background: var(--csv2-bg);
+}
+.cs-public-sheet [data-application-part="form"] {
+  height: 100%;
+}
+.cs-public-sheet .cs-ps {
+  display: flex;
+  flex-direction: column;
+  background: var(--csv2-bg);
+  color: var(--csv2-text);
+  font-family: var(--csv2-font-sans);
+}
+
+/* ---------- A. PUBLIC badge strip ---------- */
+.cs-public-sheet .cs-ps-topbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--csv2-dark);
+}
+.cs-public-sheet .cs-ps-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--csv2-op-muted);
+}
+
+/* ---------- B. Character header ---------- */
+.cs-public-sheet .cs-ps-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--csv2-secondary);
+}
+.cs-public-sheet .cs-ps-headtext {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.cs-public-sheet .cs-ps-name {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-family: var(--csv2-font-sans);
+  font-weight: 700;
+  font-size: 23px;
+  line-height: 1.1;
+  color: var(--csv2-dark);
+}
+.cs-public-sheet .cs-ps-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  font: 500 12px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+}
+/* Both House and Position hidden → the meta line adds no space (FR row-collapse
+   parity at the header). */
+.cs-public-sheet .cs-ps-meta:empty {
+  display: none;
+}
+.cs-public-sheet .cs-ps-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.cs-public-sheet .cs-ps-meta-label {
+  color: var(--csv2-op-muted);
+}
+.cs-public-sheet .cs-ps-meta-value {
+  color: var(--csv2-text);
+}
+
+/* ---------- Body (C–H) ---------- */
+.cs-public-sheet .cs-ps-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+}
+
+/* C. "Description" section title */
+.cs-public-sheet .cs-ps-section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.cs-public-sheet .cs-ps-tick {
+  flex: none;
+  width: 3px;
+  height: 20px;
+  border-radius: 2px;
+  background: var(--csv2-primary);
+}
+.cs-public-sheet .cs-ps-section-title h2 {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font: 600 18px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+}
+
+/* D. Portrait + Appearance/Identity */
+.cs-public-sheet .cs-ps-portrait-grid {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.cs-public-sheet .cs-ps-portrait {
+  width: 190px;
+  height: 190px;
+  border-radius: 7px;
+  overflow: hidden;
+  border: 1px solid var(--csv2-border);
+  background: var(--csv2-secondary);
+}
+.cs-public-sheet .cs-ps-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cs-public-sheet .cs-ps-portrait-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--csv2-op-muted);
+}
+.cs-public-sheet .cs-ps-portrait-placeholder span {
+  font: 500 11px var(--csv2-font-sans);
+}
+.cs-public-sheet .cs-ps-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Label/value cell grids (Appearance, Identity, Concept) */
+.cs-public-sheet .cs-ps-cell-grid {
+  display: grid;
+}
+.cs-public-sheet .cs-ps-cell-grid.cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+.cs-public-sheet .cs-ps-cell-grid.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.cs-public-sheet .cs-ps-cell {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+  border-right: 1px solid var(--csv2-border-soft);
+  min-width: 0;
+}
+.cs-public-sheet .cs-ps-cell-grid.cols-2 .cs-ps-cell:nth-child(2n),
+.cs-public-sheet .cs-ps-cell-grid.cols-3 .cs-ps-cell:nth-child(3n) {
+  border-right: none;
+}
+.cs-public-sheet .cs-ps-cell-label {
+  font: 500 11px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  white-space: nowrap;
+}
+.cs-public-sheet .cs-ps-cell-value {
+  font: 600 12px var(--csv2-font-sans);
+  color: var(--csv2-text);
+  text-align: right;
+  word-break: break-word;
+}
+
+/* Free-text / rich-text card bodies (Mannerisms, Features, History, bonds) */
+.cs-public-sheet .cs-ps-text {
+  padding: 11px 13px;
+  font: 400 12.5px/1.6 var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+}
+.cs-public-sheet .cs-ps-text p:first-child {
+  margin-top: 0;
+}
+.cs-public-sheet .cs-ps-text p:last-child {
+  margin-bottom: 0;
+}
+.cs-public-sheet .cs-ps-motto .cs-ps-text {
+  color: var(--csv2-primary);
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* F/H. Multi-card rows — flex so a lone visible card fills the row and the
+   whole row is simply absent when every member is hidden (FR-013 collapse). */
+.cs-public-sheet .cs-ps-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.cs-public-sheet .cs-ps-row > .csv2-card {
+  flex: 1 1 calc(50% - 5px);
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .cs-public-sheet .cs-ps-portrait-grid {
+    grid-template-columns: 1fr;
+  }
+  .cs-public-sheet .cs-ps-row > .csv2-card {
+    flex-basis: 100%;
+  }
+}

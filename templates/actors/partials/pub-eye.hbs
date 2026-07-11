@@ -1,0 +1,17 @@
+{{!-- spec 012 — per-field visibility control for a BLUE card header (the nine
+      in-tab fields). Requires `state` (= pub[key]) and `key`. Owner-only: for a
+      non-owner `state` is undefined and nothing renders.
+        • config mode (state.showBtn)  → clickable PUBLIC/HIDDEN button (US2)
+        • outside it & hidden (state.showPill) → static HIDDEN pill (US3)
+        • outside it & public          → nothing (uncluttered, FR-021) --}}
+{{#if state.showBtn}}
+<button type="button" class="cs2-pub-eye" data-action="toggleFieldVisibility" data-key="{{key}}" title="{{localize "CS.sheets.character.visibility.tooltip"}}">
+    {{#if state.on}}<svg width="12" height="12" aria-hidden="true"><use href="#ico-eye"></use></svg>{{else}}<svg width="12" height="12" aria-hidden="true"><use href="#ico-eye-off"></use></svg>{{/if}}
+    <span>{{state.word}}</span>
+</button>
+{{else}}{{#if state.showPill}}
+<span class="cs2-pub-pill">
+    <svg width="11" height="11" aria-hidden="true"><use href="#ico-eye-off"></use></svg>
+    <span>{{localize "CS.sheets.character.visibility.hidden"}}</span>
+</span>
+{{/if}}{{/if}}

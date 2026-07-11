@@ -1,0 +1,150 @@
+{{!-- spec 012 — read-only Public Character Sheet (FR-012 layout order).
+      Root is a <section> (NOT a <form> — the AppV2 frame IS the form). Contains
+      NO <input>/<prose-mirror>/rollable/mutating action — description content
+      only, each toggled block gated by `vis.*` and whole rows collapsed via
+      showTraitRow/showBondRow (FR-003/FR-013). Context: public-sheet-context.md. --}}
+<section class="cs-ps">
+    {{> "systems/chroniclesystem/templates/components/cs-eye-icons.hbs"}}
+    {{!-- A. PUBLIC badge strip --}}
+    <div class="cs-ps-topbar">
+        <span class="cs-ps-badge">
+            <svg width="12" height="12" aria-hidden="true"><use href="#ico-eye"></use></svg>
+            {{localize "CS.sheets.character.publicSheet.public"}}
+        </span>
+    </div>
+
+    {{!-- B. Character header — always visible; house/position meta gated by vis --}}
+    <header class="cs-ps-header">
+        <div class="csv2-avatar-initials">{{initials}}</div>
+        <div class="cs-ps-headtext">
+            <h1 class="cs-ps-name">{{name}}</h1>
+            {{#if showHeaderMeta}}
+            <div class="cs-ps-meta">
+                {{#if vis.house}}{{#if house}}
+                <span class="cs-ps-meta-item">
+                    <span class="cs-ps-meta-label">{{localize "CS.sheets.character.publicSheet.house"}}</span>
+                    <span class="cs-ps-meta-value">{{house}}</span>
+                </span>
+                {{/if}}{{/if}}
+                {{#if vis.position}}{{#if position}}
+                <span class="cs-ps-meta-item">
+                    <span class="cs-ps-meta-label">{{localize "CS.sheets.character.publicSheet.position"}}</span>
+                    <span class="cs-ps-meta-value">{{position.role}}{{#if position.description}}/{{position.description}}{{/if}}</span>
+                </span>
+                {{/if}}{{/if}}
+            </div>
+            {{/if}}
+        </div>
+    </header>
+
+    {{!-- Body (C–H) --}}
+    <div class="cs-ps-body">
+        {{!-- C. "Description" section title --}}
+        <div class="cs-ps-section-title">
+            <span class="cs-ps-tick"></span>
+            <h2>{{localize "CS.sheets.generalLabels.description"}}</h2>
+        </div>
+
+        {{!-- D. Portrait + Appearance (always); Identity beneath when vis.identity --}}
+        <div class="cs-ps-portrait-grid">
+            <div class="cs-ps-portrait">
+                {{#if hasPortrait}}
+                <img src="{{img}}" alt="{{name}}"/>
+                {{else}}
+                <div class="cs-ps-portrait-placeholder">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path></svg>
+                    <span>{{localize "CS.sheets.character.publicSheet.portrait"}}</span>
+                </div>
+                {{/if}}
+            </div>
+            <div class="cs-ps-right">
+                <div class="csv2-card">
+                    <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.appearance"}}</div>
+                    <div class="cs-ps-cell-grid cols-2">
+                        {{#each appearance}}
+                        <div class="cs-ps-cell"><span class="cs-ps-cell-label">{{this.label}}</span><span class="cs-ps-cell-value">{{this.value}}</span></div>
+                        {{/each}}
+                    </div>
+                </div>
+                {{#if vis.identity}}
+                <div class="csv2-card">
+                    <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.identity"}}</div>
+                    <div class="cs-ps-cell-grid cols-3">
+                        {{#each identity}}
+                        <div class="cs-ps-cell"><span class="cs-ps-cell-label">{{this.label}}</span><span class="cs-ps-cell-value">{{this.value}}</span></div>
+                        {{/each}}
+                    </div>
+                </div>
+                {{/if}}
+            </div>
+        </div>
+
+        {{!-- E. Concept --}}
+        {{#if vis.concept}}
+        <div class="csv2-card">
+            <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.concept"}}</div>
+            <div class="cs-ps-cell-grid cols-2">
+                {{#each concept}}
+                <div class="cs-ps-cell"><span class="cs-ps-cell-label">{{this.label}}</span><span class="cs-ps-cell-value">{{this.value}}</span></div>
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+
+        {{!-- F. Mannerisms / Distinguishing Features row (collapses when both hidden) --}}
+        {{#if showTraitRow}}
+        <div class="cs-ps-row cols-2">
+            {{#if vis.mannerisms}}
+            <div class="csv2-card">
+                <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.mannerisms"}}</div>
+                <div class="cs-ps-text">{{mannerisms}}</div>
+            </div>
+            {{/if}}
+            {{#if vis.features}}
+            <div class="csv2-card">
+                <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.features"}}</div>
+                <div class="cs-ps-text">{{features}}</div>
+            </div>
+            {{/if}}
+        </div>
+        {{/if}}
+
+        {{!-- G. Personal History --}}
+        {{#if vis.history}}
+        <div class="csv2-card">
+            <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.personalHistory"}}</div>
+            <div class="cs-ps-text editor-content">{{{enrichedHistory}}}</div>
+        </div>
+        {{/if}}
+
+        {{!-- H. Allies / Enemies / Oaths / Motto row (collapses when all hidden) --}}
+        {{#if showBondRow}}
+        <div class="cs-ps-row cols-2">
+            {{#if vis.allies}}
+            <div class="csv2-card">
+                <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.allies"}}</div>
+                <div class="cs-ps-text editor-content">{{{enrichedAllies}}}</div>
+            </div>
+            {{/if}}
+            {{#if vis.enemies}}
+            <div class="csv2-card">
+                <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.enemies"}}</div>
+                <div class="cs-ps-text editor-content">{{{enrichedEnemies}}}</div>
+            </div>
+            {{/if}}
+            {{#if vis.oaths}}
+            <div class="csv2-card">
+                <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.oaths"}}</div>
+                <div class="cs-ps-text editor-content">{{{enrichedOaths}}}</div>
+            </div>
+            {{/if}}
+            {{#if vis.motto}}
+            <div class="csv2-card cs-ps-motto">
+                <div class="csv2-card-header">{{localize "CS.sheets.character.publicSheet.motto"}}</div>
+                <div class="cs-ps-text editor-content">{{{enrichedMotto}}}</div>
+            </div>
+            {{/if}}
+        </div>
+        {{/if}}
+    </div>
+</section>

@@ -1,4 +1,7 @@
 <div class="{{cssClass}} cs-sheet-v2" autocomplete="off">
+    {{!-- spec 012: shared eye-icon sprite, included ONCE per sheet; the header
+         (House/Position) and the Description tab reference its symbols by id. --}}
+    {{> "systems/chroniclesystem/templates/components/cs-eye-icons.hbs"}}
     {{!-- Sheet Header --}}
     <header class="sheet-header">
         <div class="header-fields">
@@ -9,9 +12,10 @@
                     <span class="cs2-header-meta-item">
                         <span class="cs2-header-meta-label">House</span>
                         {{#if houseRole}}<a class="cs2-header-meta-value cs2-house-link" data-action="openHouse" data-actor-id="{{houseRole.houseId}}">{{houseRole.houseName}}</a>{{else}}<span class="cs2-header-meta-value">{{character.house}}</span>{{/if}}
+                        {{> "systems/chroniclesystem/templates/actors/partials/pub-eye-inline.hbs" state=pub.house key="house"}}
                     </span>
                     {{#if houseRole}}
-                    <span class="cs2-header-meta-item"><span class="cs2-header-meta-label">Position</span> <span class="cs2-header-meta-value">{{houseRole.role}}{{#if houseRole.description}}/{{houseRole.description}}{{/if}}</span></span>
+                    <span class="cs2-header-meta-item"><span class="cs2-header-meta-label">Position</span> <span class="cs2-header-meta-value">{{houseRole.role}}{{#if houseRole.description}}/{{houseRole.description}}{{/if}}</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye-inline.hbs" state=pub.position key="position"}}</span>
                     {{/if}}
                     <span class="cs2-header-meta-item"><span class="cs2-header-meta-label">Glory</span> <span class="cs2-header-meta-value cs2-header-meta-glory">{{character.glory}}</span></span>
                 </div>

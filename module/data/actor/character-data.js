@@ -67,6 +67,18 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     ) {
       source.size = "medium";
     }
+    // spec 012: `publicVisibility` is a new SchemaField (11 booleans, default
+    // hidden). Defensive parity with the clauses above — if a legacy value is
+    // present but not a plain object, drop it so the schema `initial` (all
+    // false) applies (absent → the `initial` covers it, no migration needed).
+    if (
+      source.publicVisibility !== undefined &&
+      (typeof source.publicVisibility !== "object" ||
+        source.publicVisibility === null ||
+        Array.isArray(source.publicVisibility))
+    ) {
+      delete source.publicVisibility;
+    }
     return super.migrateData(source);
   }
 
@@ -340,6 +352,28 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
           initial: 0,
           integer: true,
         }),
+      }),
+
+      // === spec 012: public-sheet visibility map ===
+      // Eleven per-field flags (FR-007) gating what appears on the read-only
+      // public sheet. Default `false` = hidden (FR-010, privacy-by-default;
+      // overrides the design handoff's default-public). Single source of truth
+      // shared by the public sheet (reader) and the standard sheet's configure
+      // UI (writer), keyed by the exact identifiers in module/system/
+      // public-visibility.js (FR-011). Owner/GM writes one key at a time via
+      // `system.publicVisibility.<key>`.
+      publicVisibility: new fields.SchemaField({
+        house: new fields.BooleanField({ required: true, initial: false }),
+        position: new fields.BooleanField({ required: true, initial: false }),
+        identity: new fields.BooleanField({ required: true, initial: false }),
+        concept: new fields.BooleanField({ required: true, initial: false }),
+        mannerisms: new fields.BooleanField({ required: true, initial: false }),
+        features: new fields.BooleanField({ required: true, initial: false }),
+        history: new fields.BooleanField({ required: true, initial: false }),
+        allies: new fields.BooleanField({ required: true, initial: false }),
+        enemies: new fields.BooleanField({ required: true, initial: false }),
+        oaths: new fields.BooleanField({ required: true, initial: false }),
+        motto: new fields.BooleanField({ required: true, initial: false }),
       }),
     };
   }

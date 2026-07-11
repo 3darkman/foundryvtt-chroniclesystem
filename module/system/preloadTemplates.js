@@ -10,17 +10,22 @@ export const preloadHandlebarsTemplates = async function () {
     "systems/chroniclesystem/templates/items/tabs/technique-details-tab.hbs",
     "systems/chroniclesystem/templates/items/tabs/technique-works-tab.hbs",
 
+    "systems/chroniclesystem/templates/actors/characters/public-character-sheet.hbs",
+
     "systems/chroniclesystem/templates/actors/partials/tabs/abilities-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/combat-and-intrigue-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/qualities-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/description-tab.hbs",
+    "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs",
+    "systems/chroniclesystem/templates/actors/partials/pub-eye-inline.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/resources-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/events-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/members-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/holdings-tab.hbs",
 
+    "systems/chroniclesystem/templates/components/cs-eye-icons.hbs",
     "systems/chroniclesystem/templates/components/effects-tab.hbs",
     "systems/chroniclesystem/templates/components/rating-checkbox.hbs",
     "systems/chroniclesystem/templates/components/rollable-chip.hbs",

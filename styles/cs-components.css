@@ -1017,6 +1017,29 @@
   flex-direction: column;
   gap: 10px;
 }
+
+/* ---------- Shared: initials avatar (spec 012) ---------- */
+/* 52×52 blue square showing a name monogram; the read-only public sheet's
+   header avatar (the editable sheet uses a token image instead). Shareable
+   `.cs-v2` component — mirrors the 52px blue square of `.cs-effect-icon`. */
+.cs-v2 .csv2-avatar-initials {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  font-family: var(--csv2-font-sans);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  user-select: none;
+}
 /* Header variant that holds a right-aligned pill (difficulty state A). */
 .cs-v2 .cs-rd-header-split {
   display: flex;
