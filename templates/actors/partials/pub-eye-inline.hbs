@@ -1,0 +1,13 @@
+{{!-- spec 012 — House/Position visibility control (LIGHT header variant, on the
+      character header meta line). Requires `state` (= pub[key]) and `key`.
+      Owner-only: for a non-owner `state` is undefined and nothing renders.
+        • config mode (state.showBtn)  → icon-only button, blue=public / red=hidden (US2)
+        • outside it & hidden (state.showPill) → static red eye-off icon (US3)
+        • outside it & public          → nothing (FR-021) --}}
+{{#if state.showBtn}}
+<button type="button" class="cs2-pub-eye-inline {{#if state.on}}is-on{{else}}is-off{{/if}}" data-action="toggleFieldVisibility" data-key="{{key}}" title="{{localize "CS.sheets.character.visibility.tooltip"}}">
+    {{#if state.on}}<svg width="12" height="12" aria-hidden="true"><use href="#ico-eye"></use></svg>{{else}}<svg width="12" height="12" aria-hidden="true"><use href="#ico-eye-off"></use></svg>{{/if}}
+</button>
+{{else}}{{#if state.showPill}}
+<span class="cs2-pub-ind-inline" title="{{localize "CS.sheets.character.visibility.hidden"}}"><svg width="12" height="12" aria-hidden="true"><use href="#ico-eye-off"></use></svg></span>
+{{/if}}{{/if}}

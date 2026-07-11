@@ -1,0 +1,19 @@
+{{!-- spec 012 (R8): shared inline SVG sprite of two STATIC symbols. Every eye
+      control references these by id (<use href="#ico-eye"> / "#ico-eye-off");
+      the visible state is chosen with a Handlebars conditional at each call
+      site — never by rebinding a <use href> at runtime (that errors on the SVG
+      resource). Include this partial ONCE per sheet render (near the top of the
+      public sheet and the standard sheet); all other sites only <use> the ids.
+      16×16, stroke=currentColor so the icon inherits the surrounding color. --}}
+<svg width="0" height="0" aria-hidden="true" focusable="false"
+     style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="ico-eye" viewBox="0 0 16 16">
+        <path d="M1.5 8s2.5-4.5 6.5-4.5S14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path>
+        <circle cx="8" cy="8" r="1.8" fill="currentColor"></circle>
+    </symbol>
+    <symbol id="ico-eye-off" viewBox="0 0 16 16">
+        <path d="M2.4 5.5C1.9 6.4 1.5 8 1.5 8s2.5 4.5 6.5 4.5c1.1 0 2-.2 2.9-.6M5.6 3.9C6.3 3.6 7.1 3.5 8 3.5c4 0 6.5 4.5 6.5 4.5s-.6 1.1-1.7 2.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M6.6 6.6a2 2 0 0 0 2.8 2.8" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path>
+        <path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path>
+    </symbol>
+</svg>

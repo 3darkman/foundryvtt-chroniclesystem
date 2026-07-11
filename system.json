@@ -1,7 +1,7 @@
 {
     "title": "Chronicle System (Unofficial)",
     "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "esmodules": ["module/system/config.js"],
     "styles": [
         "styles/global.css",
@@ -9,6 +9,7 @@
         "styles/actor-sheet.css",
         "styles/less/global.css",
         "styles/cs-components.css",
+        "styles/public-character-sheet.css",
         "styles/effects.css",
         "styles/character-sheet-v2.css"
     ],

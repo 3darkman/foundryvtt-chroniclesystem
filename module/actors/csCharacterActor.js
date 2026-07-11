@@ -1,5 +1,6 @@
 import { ChronicleSystem } from "../system/ChronicleSystem.js";
 import { CSActor } from "./csActor.js";
+import { CSPublicCharacterSheet } from "./sheets/csPublicCharacterSheet.js";
 import SystemUtils from "../utils/systemUtils.js";
 import { CSConstants } from "../system/csConstants.js";
 import {
@@ -86,6 +87,22 @@ export class CSCharacterActor extends CSActor {
   /** @override */
   getRollData() {
     return super.getRollData();
+  }
+
+  /**
+   * spec 012 — route a user whose ownership is exactly Limited to the read-only
+   * public sheet (FR-001, contracts/sheet-routing.md). `this.limited` is core's
+   * exact-LIMITED test, so Observer/Owner/GM all fall through to the standard
+   * sheet. The `type === "character"` guard protects `unit` actors, which also
+   * resolve to CSCharacterActor (actorConstructor.js) and must keep their normal
+   * sheet. Intercepting at `_getSheetClass` covers every open path (directory,
+   * token, chat portrait, `actor.sheet.render`).
+   * @override
+   */
+  _getSheetClass() {
+    if (this.type === "character" && this.limited)
+      return CSPublicCharacterSheet;
+    return super._getSheetClass();
   }
 
   /**

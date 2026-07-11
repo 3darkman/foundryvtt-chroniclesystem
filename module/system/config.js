@@ -11,6 +11,7 @@ import { registerCustomHelpers } from "./handlebarsHelpers.js";
 import actorConstructor from "../actors/actorConstructor.js";
 import registerSystemSettings from "./settings.js";
 import { CSCharacterActorSheet } from "../actors/sheets/csCharacterActorSheet.js";
+import { CSPublicCharacterSheet } from "../actors/sheets/csPublicCharacterSheet.js";
 import { CSHouseActorSheet } from "../actors/sheets/csHouseActorSheet.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
@@ -114,6 +115,21 @@ Hooks.once("init", async function () {
       label: SystemUtils.localize("CS.sheets.characterSheet"),
       types: ["character"],
       makeDefault: true,
+    }
+  );
+  // spec 012: the read-only public sheet. Registered so the framework knows it,
+  // but never user-selectable or default — routing is done directly by
+  // CSCharacterActor#_getSheetClass (canBeDefault/canConfigure false keeps the
+  // standard sheet the sole configurable default). Per contracts/sheet-routing.md.
+  foundry.documents.collections.Actors.registerSheet(
+    "chroniclesystem",
+    CSPublicCharacterSheet,
+    {
+      label: SystemUtils.localize("CS.sheets.publicCharacterSheet"),
+      types: ["character"],
+      makeDefault: false,
+      canBeDefault: false,
+      canConfigure: false,
     }
   );
   foundry.documents.collections.Actors.registerSheet(

@@ -1,4 +1,20 @@
 <div class="tab description" data-group="primary" data-tab="actor-description">
+    {{!-- spec 012 (US2): owner-only configure-public-sheet bar + instruction banner. --}}
+    {{#if pub}}
+    <div class="cs2-pub-bar">
+        <h2 class="cs2-pub-title">{{localize "CS.sheets.character.tabs.description"}}</h2>
+        <button type="button" class="cs2-pub-toggle{{#if pubMode}} on{{/if}}" data-action="togglePubMode">
+            <svg width="13" height="13" aria-hidden="true"><use href="#ico-eye"></use></svg>
+            <span>{{pubLabel}}</span>
+        </button>
+    </div>
+    {{#if pubMode}}
+    <div class="cs2-pub-banner">
+        <svg width="14" height="14" aria-hidden="true"><use href="#ico-eye"></use></svg>
+        <span>{{localize "CS.sheets.character.visibility.banner"}}</span>
+    </div>
+    {{/if}}
+    {{/if}}
     <div class="cs2-columns" style="grid-template-columns: 140px 1fr">
         <section class="profile-picture">
             <div class="profile-img-container flex">
@@ -58,7 +74,7 @@
     </div>
 
     <div class="cs2-card">
-        <div class="cs2-card-header">Identity</div>
+        <div class="cs2-card-header"><span>Identity</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs" state=pub.identity key="identity"}}</div>
         <div class="cs2-field-stack cs2-identity-grid">
             <div class="form-group">
                 <label for="system.ancestries">Ancestry</label>
@@ -82,7 +98,7 @@
     </div>
 
     <div class="cs2-card">
-        <div class="cs2-card-header">Concept</div>
+        <div class="cs2-card-header"><span>Concept</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs" state=pub.concept key="concept"}}</div>
         <div class="cs2-field-stack cs2-concept-grid">
             <div class="form-group">
                 <label for="system.vice">Vice</label>
@@ -113,7 +129,7 @@
 
     <div class="cs2-columns">
         <div class="cs2-card cs2-note-card">
-            <div class="cs2-card-header">Mannerisms</div>
+            <div class="cs2-card-header"><span>Mannerisms</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs" state=pub.mannerisms key="mannerisms"}}</div>
             <div class="form-group">
                 <span class="form-fields">
                     <input id="system.mannerisms" class="big-field" name="system.mannerisms" type="text" value="{{character.mannerisms}}" placeholder="Mannerisms" data-dtype="String"/>
@@ -121,7 +137,7 @@
             </div>
         </div>
         <div class="cs2-card cs2-note-card">
-            <div class="cs2-card-header">Distinguishing Features</div>
+            <div class="cs2-card-header"><span>Distinguishing Features</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs" state=pub.features key="features"}}</div>
             <div class="form-group">
                 <span class="form-fields">
                     <input id="system.distinguishingFeatures" class="big-field" name="system.distinguishingFeatures" type="text" value="{{character.distinguishingFeatures}}" placeholder="Distinguishing Features" data-dtype="String"/>
@@ -131,7 +147,7 @@
     </div>
 
     <div class="cs2-card">
-        <div class="cs2-card-header">Personal History</div>
+        <div class="cs2-card-header"><span>Personal History</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs" state=pub.history key="history"}}</div>
         <div class="cs2-rich-text form-group">
             {{#if editable}}
             <prose-mirror name="system.personalHistory" button="true" toggled="true" value="{{character.personalHistory}}">
@@ -145,7 +161,7 @@
 
     <div class="cs2-columns">
         <div class="cs2-card">
-            <div class="cs2-card-header">Allies</div>
+            <div class="cs2-card-header"><span>Allies</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs" state=pub.allies key="allies"}}</div>
             <div class="cs2-rich-text form-group">
                 {{#if editable}}
                 <prose-mirror name="system.allies" button="true" toggled="true" value="{{character.allies}}">
@@ -157,7 +173,7 @@
             </div>
         </div>
         <div class="cs2-card">
-            <div class="cs2-card-header">Enemies</div>
+            <div class="cs2-card-header"><span>Enemies</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs" state=pub.enemies key="enemies"}}</div>
             <div class="cs2-rich-text form-group">
                 {{#if editable}}
                 <prose-mirror name="system.enemies" button="true" toggled="true" value="{{character.enemies}}">
@@ -169,7 +185,7 @@
             </div>
         </div>
         <div class="cs2-card">
-            <div class="cs2-card-header">Oaths</div>
+            <div class="cs2-card-header"><span>Oaths</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs" state=pub.oaths key="oaths"}}</div>
             <div class="cs2-rich-text form-group">
                 {{#if editable}}
                 <prose-mirror name="system.oaths" button="true" toggled="true" value="{{character.oaths}}">
@@ -181,7 +197,7 @@
             </div>
         </div>
         <div class="cs2-card">
-            <div class="cs2-card-header">Motto</div>
+            <div class="cs2-card-header"><span>Motto</span>{{> "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs" state=pub.motto key="motto"}}</div>
             <div class="cs2-rich-text form-group">
                 {{#if editable}}
                 <prose-mirror name="system.motto" button="true" toggled="true" value="{{character.motto}}">

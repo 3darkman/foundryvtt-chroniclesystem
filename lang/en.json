@@ -338,6 +338,7 @@
     },
     "sheets": {
       "characterSheet": "Character Sheet",
+      "publicCharacterSheet": "Public Character Sheet",
       "houseSheet": "House Sheet",
       "itemSheet": "Item Sheet",
       "abilityItemSheet": "Ability Sheet",
@@ -420,6 +421,41 @@
           "sorcery": "Sorcery",
           "equipments": "Equipments",
           "description": "Description"
+        },
+        "publicSheet": {
+          "public": "PUBLIC",
+          "portrait": "Portrait",
+          "appearance": "Appearance",
+          "identity": "Identity",
+          "concept": "Concept",
+          "mannerisms": "Mannerisms",
+          "features": "Distinguishing Features",
+          "personalHistory": "Personal History",
+          "allies": "Allies",
+          "enemies": "Enemies",
+          "oaths": "Oaths",
+          "motto": "Motto",
+          "house": "House",
+          "position": "Position",
+          "height": "Height",
+          "weight": "Weight",
+          "eyeColor": "Eye Color",
+          "hairColor": "Hair Color",
+          "ancestry": "Ancestry",
+          "gender": "Gender",
+          "age": "Age",
+          "vice": "Vice",
+          "virtue": "Virtue",
+          "goal": "Goal",
+          "motivation": "Motivation"
+        },
+        "visibility": {
+          "configure": "Configure public sheet",
+          "done": "Done",
+          "banner": "Tap each field's eye to choose what appears on the shared public sheet.",
+          "public": "PUBLIC",
+          "hidden": "HIDDEN",
+          "tooltip": "Toggle public visibility"
         }
       },
       "eventItem": {
