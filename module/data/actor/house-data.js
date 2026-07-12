@@ -26,6 +26,8 @@ export default class HouseData extends foundry.abstract.TypeDataModel {
     if (source.coa != null && typeof source.coa !== "object") source.coa = {};
     if (source.coa === undefined || source.coa === null) source.coa = {};
     if (typeof source.coaImg !== "string") source.coaImg = "";
+    // Coat of arms (spec 014): coaSvg = sharp vector shown on the sheet.
+    if (typeof source.coaSvg !== "string") source.coaSvg = "";
     return super.migrateData(source);
   }
 
@@ -59,10 +61,12 @@ export default class HouseData extends foundry.abstract.TypeDataModel {
       historicalEvents: new fields.ArrayField(new fields.ObjectField()),
       motto: new fields.StringField({ required: true, initial: "" }),
       // Coat of arms (spec 013). `coa` = re-editable COA definition (opaque JSON,
-      // replaced whole on update); `coaImg` = canonical saved image path ("" when
-      // the definition has no rendered image yet — FR-020).
+      // replaced whole on update); `coaImg` = canonical saved PNG path (token —
+      // "" when no rendered image yet). `coaSvg` (spec 014) = canonical saved SVG
+      // path (sharp sheet display); "" when not yet rendered/no upload permission.
       coa: new fields.ObjectField(),
       coaImg: new fields.StringField({ required: true, initial: "" }),
+      coaSvg: new fields.StringField({ required: true, initial: "" }),
       members: new fields.SchemaField({
         head: new fields.SchemaField({
           id: new fields.StringField({ required: true, initial: "" }),

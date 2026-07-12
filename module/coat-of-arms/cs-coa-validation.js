@@ -1,18 +1,38 @@
-// Pure COA validation (D8, FR-008/FR-009, SC-003/SC-006). Every enum is checked
-// against the SSOT catalog allowlist BEFORE a URL is built, so an invalid value
-// never reaches the API (which would answer with an opaque HTTP 500). The URL
-// length is classified against the complexity budget. Domain layer — no DOM, no
-// Foundry. Errors are returned as localisable descriptors ({ key, data }).
-// See contracts/vocabulary-catalog.md §Validação.
-
-import { URL_BUDGET } from "./cs-armoria-url.js";
+// Pure COA validation (FR-012/FR-009). Every enum is checked against the SSOT
+// catalog allowlist before a COA is rendered/saved, so an invalid value never
+// reaches the renderer. Domain layer — no DOM, no Foundry. Errors are returned as
+// localisable descriptors ({ key, data }). The legacy URL-length budget() is gone
+// (FR-014): there is no GET-URL ceiling for the embedded renderer.
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 const SEMY_PREFIX = "semy_of_";
 
-/** Solid tincture: a canonical key OR a `#rrggbb` hex. */
+/** Solid tincture: a known tincture key OR a `#rrggbb` hex. The renderer's full
+ *  vocabulary is `tinctureColors` (13 keys) — `CATALOG.tinctures` is only the
+ *  10-swatch subset, so classifying against it wrongly rejected carnation /
+ *  celeste / cendree. Accept anything the renderer can actually paint. */
 function isSolidTincture(value, CATALOG) {
-  return CATALOG.tinctures.includes(value) || HEX_RE.test(value);
+  if (HEX_RE.test(value)) return true;
+  if (CATALOG.tinctureColors && value in CATALOG.tinctureColors) return true;
+  return CATALOG.tinctures.includes(value);
+}
+
+/** All valid single-char position codes (union across shields). `positionCoords`
+ *  is the SSOT the renderer reads; `CATALOG.positions` is a malformed legacy list. */
+function positionCodes(CATALOG) {
+  const set = new Set();
+  const pc = CATALOG.positionCoords ?? {};
+  for (const shield of Object.keys(pc))
+    for (const code of Object.keys(pc[shield])) set.add(code);
+  return set;
+}
+
+/** A charge position: a non-empty string of valid position codes (e.g. "e", "abc").
+ *  Armoria places one charge at several spots by concatenating codes. */
+function isPositionString(p, codes) {
+  if (typeof p !== "string" || !p) return false;
+  for (const ch of p) if (!codes.has(ch)) return false;
+  return true;
 }
 
 /**
@@ -114,12 +134,13 @@ export function validate(coa, CATALOG) {
 
   // charges[].
   if (Array.isArray(c.charges)) {
+    const posCodes = positionCodes(CATALOG);
     c.charges.forEach((ch, i) => {
       if (!ch || !CATALOG.charges.includes(ch.charge)) {
         err("CS.coa.errors.invalidCharge", { index: i, value: ch?.charge });
         return;
       }
-      if (!CATALOG.positions.includes(ch.p)) {
+      if (!isPositionString(ch.p, posCodes)) {
         err("CS.coa.errors.invalidValue", {
           field: `charge[${i}].p`,
           value: ch.p,
@@ -137,15 +158,4 @@ export function validate(coa, CATALOG) {
   }
 
   return { ok: errors.length === 0, errors };
-}
-
-/**
- * Classify an encoded-URL length against the complexity budget (FR-009).
- * @param {number} length
- * @returns {"OK"|"WARN"|"BLOCK"}
- */
-export function budget(length) {
-  if (length > URL_BUDGET.BLOCK) return "BLOCK";
-  if (length >= URL_BUDGET.WARN) return "WARN";
-  return "OK";
 }

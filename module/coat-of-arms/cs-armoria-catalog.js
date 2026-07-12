@@ -18,7 +18,19 @@ import {
   patterns,
   sizes,
   chargeThumbs,
+  // Geometry (spec 014, SSOT — FR-017). The embedded renderer consumes these.
+  positionCoords,
+  shieldGeom,
+  lineData,
+  divisionGeom,
+  ordinaryGeom,
+  patternGeom,
+  patternSizes,
+  tinctureColors,
+  linedDivisions,
 } from "./data/armoria-catalog.js";
+// Generated inline charge artwork (spec 014). ~3 MB, loaded once (D15).
+import { chargeArt } from "./data/armoria-charge-art.js";
 
 /** Frozen vocabulary: array axes (options + allowlist) + per-item metadata. */
 export const CATALOG = Object.freeze({
@@ -36,6 +48,18 @@ export const CATALOG = Object.freeze({
   patterns,
   sizes,
   chargeThumbs,
+  // Geometry as data (FR-017) — `linedDivisions` is derived geometry, NOT a
+  // vocabulary axis, so it is intentionally kept out of ALLOWLIST_AXES below.
+  positionCoords,
+  shieldGeom,
+  lineData,
+  divisionGeom,
+  ordinaryGeom,
+  patternGeom,
+  patternSizes,
+  tinctureColors,
+  linedDivisions,
+  chargeArt,
 });
 
 /** Axes that are simple key allowlists (arrays of canonical EN keys). */

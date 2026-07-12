@@ -1,21 +1,28 @@
 // DEV TOOL — NOT loaded by Foundry. Regenerates the heraldic vocabulary SSOT.
 //
 // Reads the Armoria sources (default C:/tmp/armoria) and emits:
-//   module/coat-of-arms/data/armoria-catalog.js        — frozen CATALOG (options + allowlist)
-//   module/coat-of-arms/data/armoria-labels-ptBR.js    — Armoria pt-BR locale (display labels)
+//   module/coat-of-arms/data/armoria-catalog.js        — frozen CATALOG (options + allowlist + geometry)
+//   module/coat-of-arms/data/armoria-charge-art.js      — inline charge <g> + bbox + license (spec 014)
+//   lang/armoria.<locale>.json                          — heraldic-vocabulary display labels (CS.coa.vocab.*)
 //   assets/armoria/charges/<id>.svg                     — charge thumbnails (with --thumbs)
 //
 // The Armoria object literals are valid JS/TS expressions, so we slice the
-// balanced literal for a named declaration and evaluate it. Two sources hold
-// generator FUNCTIONS (dataModel `divisions`, `patterns`) — for those we slice
-// only the pure-numeric sub-block (`variants`) instead of the whole object.
+// balanced literal for a named declaration and evaluate it. `dataModel`'s
+// `divisions`/`lines`/`patterns` are FULL literals we evaluate whole (`divisions`
+// CONTAINS `templateLined` generator functions; the `patterns` VALUES are
+// generator functions) — the `new Function` in evalLit resolves everything,
+// including `.repeat()` inside line-path template literals. Geometry generators
+// are captured as template STRINGS with `{{line}}`/`{{c1}}`/`{{c2}}`/`{{chargeId}}`
+// placeholders (contracts/catalog-geometry.md) so ALL geometry lives in the single
+// generated catalog (FR-017) and the renderer only substitutes placeholders.
 //
 // Usage:  node scripts/extract-armoria-catalog.mjs [--src C:/tmp/armoria] [--thumbs] [--host https://armoria.herokuapp.com]
-// See contracts/vocabulary-catalog.md §Regeneração.
+// See contracts/catalog-geometry.md §Regeneração.
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { computeChargeArt } from "./lib/charge-bbox.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -93,15 +100,37 @@ function constLit(text, name) {
   );
 }
 
-/** Balanced literal of a `subkey: ...` inside an already-sliced block. */
-function subLit(block, subkey) {
-  return litAfter(block, new RegExp(`\\b${subkey}\\s*:\\s*`));
-}
-
 /** Evaluate a pure-data literal (object/array) to a JS value. */
 function evalLit(lit) {
   // eslint-disable-next-line no-new-func
   return new Function(`return (${lit})`)();
+}
+
+/** Parse a generated `<pattern …>…</pattern>` (size=1) into geometry data. The
+ *  pattern element's OWN attributes (patternUnits/stroke/stroke-width/fill) are
+ *  preserved as `attrs` — several patterns (vair, semy) rely on inherited stroke. */
+function parsePattern(html) {
+  const openEnd = html.indexOf(">");
+  const opening = html.slice(0, openEnd);
+  const close = html.lastIndexOf("</pattern>");
+  const w = /width="([\d.]+)"/.exec(opening);
+  const h = /height="([\d.]+)"/.exec(opening);
+  const vb = /viewBox="([^"]*)"/.exec(opening);
+  const attrs = opening
+    .replace(/^<pattern\s*/, "")
+    .replace(/\bid="[^"]*"/, "")
+    .replace(/\bwidth="[\d.]+"/, "")
+    .replace(/\bheight="[\d.]+"/, "")
+    .replace(/\bviewBox="[^"]*"/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return {
+    wMul: w ? Number(w[1]) : 25,
+    hMul: h ? Number(h[1]) : 25,
+    viewBox: vb ? vb[1] : "0 0 200 200",
+    attrs, // leftover pattern-element attributes (e.g. patternUnits, stroke)
+    body: html.slice(openEnd + 1, close), // children (with {{c1}}/{{c2}}/{{chargeId}})
+  };
 }
 
 const read = (file) => readFileSync(join(SRC, file), "utf8");
@@ -130,6 +159,9 @@ function extract() {
   }
   const shieldMeta = {};
   const shieldPaths = {};
+  // Geometry as DATA (SSOT, FR-017): the renderer consumes these, never re-derives.
+  const positionCoords = {}; // { shield: { code: [x, y] } } — relative to centre
+  const shieldGeom = {}; // { shield: { size, segments } } — charge scale + compony
   for (const k of shieldKeys) {
     const d = shields.data?.[k];
     shieldMeta[k] = {
@@ -139,6 +171,8 @@ function extract() {
     // SVG shape (path + viewBox) so the picker can draw each shield form.
     if (d?.path)
       shieldPaths[k] = { path: d.path, box: d.box ?? DEFAULT_SHIELD_BOX };
+    if (d?.positions) positionCoords[k] = d.positions;
+    shieldGeom[k] = { size: d?.size ?? 1, segments: d?.segments ?? null };
   }
 
   // Charges — the full selectable set is the union of the weighted category maps
@@ -186,15 +220,61 @@ function extract() {
   const linedOrdinaries = Object.keys(ordinaries.lined);
   const straightOrdinaries = Object.keys(ordinaries.straight);
   const ordinaryKeys = [...linedOrdinaries, ...straightOrdinaries];
+  // ordinaryGeom (SSOT): `template` static fragment; `templateLined` = the
+  // generator invoked with the `{{line}}` sentinel (bordure/orle: both null →
+  // drawn in code from the shield path). D6/catalog-geometry §ordinaryGeom.
+  const ordinaryGeom = {};
+  for (const [k, v] of Object.entries(ordinaries.data)) {
+    ordinaryGeom[k] = {
+      template: v.template ?? null,
+      templateLined:
+        typeof v.templateLined === "function"
+          ? v.templateLined("{{line}}")
+          : null,
+    };
+  }
 
-  // Divisions / lines — `divisions` holds generator functions, so slice the
-  // pure-numeric `variants` sub-block only.
-  const divisions = Object.keys(
-    evalLit(subLit(constLit(dmTxt, "divisions"), "variants"))
+  // Divisions / lines / patterns — evaluate the FULL literals (they carry
+  // generator functions / `.repeat()` template literals — evalLit resolves all).
+  const divisionsFull = evalLit(constLit(dmTxt, "divisions"));
+  const divisions = Object.keys(divisionsFull.variants);
+  const divisionGeom = {};
+  for (const [k, v] of Object.entries(divisionsFull.data)) {
+    divisionGeom[k] = {
+      template: v.template ?? null,
+      templateLined:
+        typeof v.templateLined === "function"
+          ? v.templateLined("{{line}}")
+          : null,
+    };
+  }
+  const linedDivisions = Object.keys(divisionGeom).filter(
+    (k) => divisionGeom[k].templateLined
   );
-  const lines = Object.keys(
-    evalLit(subLit(constLit(dmTxt, "lines"), "variants"))
-  );
+
+  const linesFull = evalLit(constLit(dmTxt, "lines"));
+  const lines = Object.keys(linesFull.variants);
+  const lineData = linesFull.data; // { style: "<path-d>" } (`.repeat` resolved)
+
+  // patternGeom: invoke each generator with string sentinels + size=1 so the
+  // multipliers fall out as `size*N → N`; capture wMul/hMul/viewBox/body with the
+  // `{{c1}}/{{c2}}/{{chargeId}}` placeholders. catalog-geometry §patternGeom.
+  const patternsFull = evalLit(constLit(dmTxt, "patterns"));
+  const patternGeom = {};
+  for (const [k, fn] of Object.entries(patternsFull)) {
+    patternGeom[k] = parsePattern(
+      fn("{{id}}", "{{c1}}", "{{c2}}", 1, "{{chargeId}}")
+    );
+  }
+  const patternSizes = evalLit(constLit(dmTxt, "patternSize"));
+
+  // tinctureColors: Armoria's DEFAULT_COLORS render hues (D2), keys accent-
+  // normalised (tenné→tenne, cendrée→cendree) to match the catalog axes.
+  const rawColors = evalLit(constLit(defTxt, "DEFAULT_COLORS"));
+  const tinctureColors = {};
+  for (const [k, v] of Object.entries(rawColors)) {
+    tinctureColors[k.normalize("NFD").replace(/\p{Diacritic}/gu, "")] = v;
+  }
 
   // Position presets (charge.p picker).
   const positions = evalLit(constLit(dmTxt, "positionsSelect"));
@@ -238,6 +318,16 @@ function extract() {
     tinctures,
     patterns,
     sizes,
+    // Geometry (spec 014, SSOT — FR-017).
+    positionCoords,
+    shieldGeom,
+    lineData,
+    divisionGeom,
+    ordinaryGeom,
+    patternGeom,
+    patternSizes,
+    tinctureColors,
+    linedDivisions,
   };
 }
 
@@ -277,27 +367,216 @@ export const tinctures = ${j(cat.tinctures)};
 export const patterns = ${j(cat.patterns)};
 export const sizes = ${j(cat.sizes)};
 export const chargeThumbs = ${j(chargeThumbs)};
+
+// ---- Geometry (spec 014, SSOT — FR-017). Consumed by module/coat-of-arms/render.
+export const positionCoords = ${j(cat.positionCoords)};
+export const shieldGeom = ${j(cat.shieldGeom)};
+export const lineData = ${j(cat.lineData)};
+export const divisionGeom = ${j(cat.divisionGeom)};
+export const ordinaryGeom = ${j(cat.ordinaryGeom)};
+export const patternGeom = ${j(cat.patternGeom)};
+export const patternSizes = ${j(cat.patternSizes)};
+export const tinctureColors = ${j(cat.tinctureColors)};
+export const linedDivisions = ${j(cat.linedDivisions)};
 `;
   const path = join(ROOT, "module/coat-of-arms/data/armoria-catalog.js");
   writeFileSync(path, out, "utf8");
   return path;
 }
 
-function emitLabels() {
-  const raw = read("lang.pt-BR.json");
-  // Emit as an ES module (not raw .json) so the browser imports it statically
-  // without JSON import-attributes, and cs-coa-labels can stay sync — consistent
-  // with the generated armoria-catalog.js. Round-trip validates the JSON.
-  const data = JSON.parse(raw);
-  const out = `// GENERATED by scripts/extract-armoria-catalog.mjs — DO NOT EDIT BY HAND.
-// Armoria official pt-BR locale, bundled as heraldic-vocabulary display labels
-// (SSOT of the vocabulary; EN keys stay canonical). See contracts/vocabulary-catalog.md.
+const isInescutcheon = (name) => name.slice(0, 12) === "inescutcheon";
 
-export default ${JSON.stringify(data)};
+/** Square viewBox framing a bbox centre (8% margin) — uniform catalog thumbnails. */
+function thumbViewBox(bbox) {
+  const side = Math.max(bbox.w, bbox.h) * 1.16;
+  const cx = bbox.x + bbox.w / 2;
+  const cy = bbox.y + bbox.h / 2;
+  const r = (n) => Math.round(n * 100) / 100;
+  return `${r(cx - side / 2)} ${r(cy - side / 2)} ${r(side)} ${r(side)}`;
+}
+
+/** Rewrite a charge SVG's root viewBox to tightly frame its drawn bbox. The art
+ *  (the `<g>`) is untouched, so the extracted innerG/bbox are unaffected; only the
+ *  <img> catalog thumbnail becomes aligned + uniformly sized. */
+function normalizeThumb(svgText, bbox) {
+  const vb = thumbViewBox(bbox);
+  return /<svg[^>]*\bviewBox="/.test(svgText)
+    ? svgText.replace(/(<svg[^>]*\bviewBox=")[^"]*(")/, `$1${vb}$2`)
+    : svgText.replace(/<svg\b/, `<svg viewBox="${vb}"`);
+}
+
+/**
+ * Emit the generated charge-art module (spec 014): for every bundled charge SVG,
+ * the inline `<g>` (with license attrs), the pre-computed drawn bbox, and the
+ * license metadata. Also normalises each thumbnail file's viewBox for aligned
+ * catalog display. inescutcheon* are DERIVED by the renderer (not real art) → they
+ * are skipped here and get separate generated thumbnails. Runs the drift assertion.
+ * @returns {{ path: string, count: number, missing: string[] }}
+ */
+function emitChargeArt(chargeKeys) {
+  const dir = join(ROOT, "assets/armoria/charges");
+  const art = {};
+  const missing = [];
+  for (const name of chargeKeys) {
+    if (isInescutcheon(name)) continue; // derived from shield paths — not art
+    let svgText;
+    try {
+      svgText = readFileSync(join(dir, `${name}.svg`), "utf8");
+    } catch {
+      missing.push(name); // no bundled SVG (~17 real charges without art) — D14
+      continue;
+    }
+    const computed = computeChargeArt(svgText, name);
+    if (!computed) {
+      missing.push(name);
+      continue;
+    }
+    // Drift assertion (catalog-geometry §5): every art has a real bbox.
+    if (!(computed.bbox.w > 0) || !(computed.bbox.h > 0)) {
+      throw new Error(
+        `charge ${name}: empty bbox ${JSON.stringify(computed.bbox)}`
+      );
+    }
+    art[name] = computed;
+    // Normalise the thumbnail file's viewBox so the catalog <img> is aligned.
+    writeFileSync(
+      join(dir, `${name}.svg`),
+      normalizeThumb(svgText, computed.bbox),
+      "utf8"
+    );
+  }
+  const out = `// GENERATED by scripts/extract-armoria-catalog.mjs — DO NOT EDIT BY HAND.
+// Inline charge artwork (spec 014): { name: { innerG, bbox:{x,y,w,h}, license } }.
+// The renderer inlines innerG into <defs> and centres by bbox (FR-006a). Licenses
+// preserved (FR-013). See contracts/catalog-geometry.md + assets/armoria/NOTICE.md.
+
+export const chargeArt = ${JSON.stringify(art)};
 `;
-  const path = join(ROOT, "module/coat-of-arms/data/armoria-labels-ptBR.js");
+  const path = join(ROOT, "module/coat-of-arms/data/armoria-charge-art.js");
   writeFileSync(path, out, "utf8");
-  return path;
+  return { path, count: Object.keys(art).length, missing };
+}
+
+/**
+ * Generate catalog thumbnail SVGs for the inescutcheon* charges (no bundled art):
+ * the homonymous shield path scaled/placed exactly like the renderer's
+ * inescutcheonDef, with a tight viewBox. Lets them show as real <img> thumbnails
+ * instead of a placeholder. Returns the count written.
+ */
+function emitInescutcheonThumbs(chargeKeys, shieldPaths) {
+  const dir = join(ROOT, "assets/armoria/charges");
+  let written = 0;
+  for (const name of chargeKeys) {
+    if (!isInescutcheon(name) || name.length <= 12) continue;
+    const shieldName = name.slice(12, 13).toLowerCase() + name.slice(13);
+    const path = shieldPaths[shieldName]?.path;
+    if (!path) continue;
+    const inner = `<path transform="translate(67 67) scale(.33)" d="${path}"/>`;
+    // Real bbox of the scaled path → tight, uniform thumbnail framing.
+    const computed = computeChargeArt(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><g id="${name}">${inner}</g></svg>`,
+      name
+    );
+    const vb = thumbViewBox(computed?.bbox ?? { x: 67, y: 67, w: 66, h: 66 });
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" fill="#d7374a" stroke="#000">${inner}</svg>`;
+    writeFileSync(join(dir, `${name}.svg`), svg, "utf8");
+    written++;
+  }
+  return written;
+}
+
+/** Drift assertions on the generated geometry (catalog-geometry §5). Throws. */
+function assertGeometry(cat) {
+  for (const [k, v] of Object.entries(cat.patternGeom)) {
+    if (!v.body.includes("{{c1}}"))
+      throw new Error(`patternGeom.${k}.body missing {{c1}} sentinel`);
+  }
+  const checkLined = (obj, label) => {
+    for (const [k, v] of Object.entries(obj)) {
+      if (v.templateLined && !v.templateLined.includes("{{line}}"))
+        throw new Error(
+          `${label}.${k}.templateLined missing {{line}} sentinel`
+        );
+    }
+  };
+  checkLined(cat.divisionGeom, "divisionGeom");
+  checkLined(cat.ordinaryGeom, "ordinaryGeom");
+}
+
+// Armoria locales emitted as Foundry language files. EN is the native fallback; the
+// editor resolves each label via game.i18n against the ACTIVE language (game.i18n.lang).
+const LABEL_LOCALES = ["en", "pt-BR"];
+
+/** Read a locale's lang.json — the repo layout is public/locales/<loc>/lang.json;
+ *  fall back to a root-level lang.<loc>.json copy. */
+function readLocale(loc) {
+  try {
+    return read(`public/locales/${loc}/lang.json`);
+  } catch {
+    return read(`lang.${loc}.json`);
+  }
+}
+
+/** shield.<category>.* → one flat key→label map (skip the `types` category-name map). */
+function flattenLocaleShields(L) {
+  const out = {};
+  const shield = L.shield ?? {};
+  for (const cat of Object.keys(shield)) {
+    if (cat === "types") continue;
+    const map = shield[cat];
+    if (map && typeof map === "object") Object.assign(out, map);
+  }
+  return out;
+}
+
+/** Strip diacritics from a map's KEYS — Armoria uses `tenné`/`cendrée`; the catalog
+ *  tincture axis is accent-normalised (tenne/cendree). */
+function normalizeKeys(map) {
+  const out = {};
+  for (const [k, v] of Object.entries(map ?? {}))
+    out[k.normalize("NFD").replace(/\p{Diacritic}/gu, "")] = v;
+  return out;
+}
+
+/**
+ * Emit the heraldic vocabulary as Foundry language files (one per locale) under
+ * `CS.coa.vocab.<axis>.<key>` — so the vocabulary follows the active Foundry language
+ * with the native EN fallback (a new language is added exactly like en.json: a lang
+ * file declaring CS.coa.vocab.* for that locale). Only the catalog's own keys are
+ * emitted (SSOT); a key absent from a locale falls back to EN, then to the raw EN key.
+ * `tinctures` spans the full 13-hue render vocabulary (tinctureColors), Armoria's
+ * accented keys normalised to match. `sizes` are the size keywords under editor.*.
+ */
+function emitLabels(cat) {
+  const AXES = {
+    tinctures: {
+      keys: Object.keys(cat.tinctureColors),
+      from: (L) => normalizeKeys(L.tinctures),
+    },
+    shields: { keys: cat.shields, from: flattenLocaleShields },
+    divisions: { keys: cat.divisions, from: (L) => L.divisions ?? {} },
+    lines: { keys: cat.lines, from: (L) => L.lines ?? {} },
+    ordinaries: { keys: cat.ordinaries, from: (L) => L.ordinaries ?? {} },
+    charges: { keys: cat.charges, from: (L) => L.charges ?? {} },
+    patterns: { keys: cat.patterns, from: (L) => L.patterns ?? {} },
+    sizes: { keys: cat.sizes, from: (L) => L.editor ?? {} },
+  };
+  const paths = [];
+  for (const loc of LABEL_LOCALES) {
+    const L = JSON.parse(readLocale(loc)); // round-trip validates the JSON
+    const vocab = {};
+    for (const [axis, { keys, from }] of Object.entries(AXES)) {
+      const src = from(L);
+      const map = {};
+      for (const k of keys) if (src[k] != null) map[k] = src[k];
+      vocab[axis] = map;
+    }
+    const path = join(ROOT, `lang/armoria.${loc}.json`);
+    const out = JSON.stringify({ CS: { coa: { vocab } } }, null, 2);
+    writeFileSync(path, `${out}\n`, "utf8");
+    paths.push(path);
+  }
+  return paths;
 }
 
 async function fetchThumbs(charges) {
@@ -338,6 +617,7 @@ async function fetchThumbs(charges) {
 
 async function main() {
   const cat = extract();
+  assertGeometry(cat); // fail loud if an Armoria signature changed (drift, §5)
 
   const counts = {
     shields: cat.shields.length,
@@ -350,15 +630,33 @@ async function main() {
     tinctures: cat.tinctures.length,
     patterns: cat.patterns.length,
     sizes: cat.sizes.length,
+    // Geometry (spec 014).
+    positionCoords: Object.keys(cat.positionCoords).length,
+    lineData: Object.keys(cat.lineData).length,
+    divisionGeom: Object.keys(cat.divisionGeom).length,
+    "  linedDiv": cat.linedDivisions.length,
+    ordinaryGeom: Object.keys(cat.ordinaryGeom).length,
+    patternGeom: Object.keys(cat.patternGeom).length,
+    patternSizes: Object.keys(cat.patternSizes).length,
+    tinctureColors: Object.keys(cat.tinctureColors).length,
   };
   console.log("Extracted axis counts:");
   for (const [k, v] of Object.entries(counts))
-    console.log(`  ${k.padEnd(12)} ${v}`);
+    console.log(`  ${k.padEnd(14)} ${v}`);
+
+  // Charge art + thumbnail normalisation MUST run before emitCatalog, which scans
+  // the thumbnail dir into `chargeThumbs`.
+  const art = emitChargeArt(cat.charges);
+  console.log(
+    `Wrote ${art.path} (${art.count} charges with art; ${art.missing.length} without)`
+  );
+  const inesCount = emitInescutcheonThumbs(cat.charges, cat.shieldPaths);
+  console.log(`Generated ${inesCount} inescutcheon thumbnails`);
 
   const catPath = emitCatalog(cat);
-  console.log(`\nWrote ${catPath}`);
-  const labPath = emitLabels();
-  console.log(`Wrote ${labPath}`);
+  console.log(`Wrote ${catPath}`);
+  const labPaths = emitLabels(cat);
+  for (const p of labPaths) console.log(`Wrote ${p}`);
 
   if (DO_THUMBS) {
     console.log(`\nFetching charge thumbnails from ${HOST}/charges/*.svg ...`);

@@ -94,9 +94,17 @@ export class CSHouseActorSheet extends CSActorSheet {
     // Effects tab (shared across all actor types)
     this._prepareEffectsContext(context);
 
-    // Coat of arms (spec 013): show the manual "Re-render" affordance only when a
-    // definition exists but has no saved image (FR-020).
-    context.coaNeedsRender = actor.hasCoaDefinition() && !actor.system.coaImg;
+    // Coat of arms display (spec 014, D11): prefer the crisp vector SVG; fall back
+    // to actor.img (legacy PNG, or a user-set portrait). When actor.img already
+    // points at the saved SVG it carries the ?t cache-bust — use it so a re-render
+    // refreshes; otherwise use the clean coaSvg path.
+    const coaSvg = actor.system.coaSvg;
+    context.coaImage =
+      coaSvg && actor.img?.startsWith(coaSvg) ? actor.img : coaSvg || actor.img;
+    // Show the manual "Re-render" affordance only when a definition exists but has
+    // no saved image at all (neither SVG nor PNG — FR-010).
+    context.coaNeedsRender =
+      actor.hasCoaDefinition() && !actor.system.coaSvg && !actor.system.coaImg;
 
     // Prepare tab state
     context.tabs = this._getTabs();

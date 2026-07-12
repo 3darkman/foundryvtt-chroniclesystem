@@ -1,30 +1,30 @@
 // Coat of Arms editor — a standalone ApplicationV2 window (D1). Composes a COA
-// object in memory (source of truth while editing), previews it live via the
-// Armoria API (debounced), gates on the complexity budget, and on Save renders +
-// persists the image as the house identity. Layout + tokens follow the hifi design
-// handoff (docs/design_handoff_coat_of_arms): 3 columns 270/300/1fr, dark title
-// bar, blue section headers, complexity meter bar, colored layer type-icons.
+// object in memory (source of truth while editing), previews it live by building
+// the SVG LOCALLY on every edit (synchronous, no network, no debounce — SC-003),
+// and on Save renders + persists the SVG (sheet) + PNG (token) as the house
+// identity. Layout + tokens follow the hifi design handoff: 3 columns 270/300/1fr,
+// dark title bar, blue section headers, colored layer type-icons.
 //
 // ApplicationV2 note: the base has NO `document` getter — the live actor lives in
 // `this.options.document` (captured here as `#actor`).
 
-import { CATALOG, shieldPositions, chargeInfo } from "./cs-armoria-catalog.js";
+import { CATALOG, chargeInfo } from "./cs-armoria-catalog.js";
 import { label, searchCharges } from "./cs-coa-labels.js";
-import { buildUrl, CANONICAL_FORMAT, URL_BUDGET } from "./cs-armoria-url.js";
-import { validate, budget } from "./cs-coa-validation.js";
+import { buildCoaSvg } from "./render/cs-coa-svg.js";
+import { buildPattern } from "./render/cs-coa-patterns.js";
+import { getViewBox } from "./render/cs-coa-geometry.js";
+import { validate } from "./cs-coa-validation.js";
 import {
   renderAndSave,
   saveDefinitionOnly,
   canUpload,
 } from "./cs-coa-render.js";
-import { parseImport } from "./cs-coa-import.js";
+import { resolveImport } from "./cs-coa-import.js";
 import { randomCoa } from "./cs-coa-random.js";
 import SystemUtils from "../utils/systemUtils.js";
 
 const TP = "systems/chroniclesystem/templates/apps";
 const CHARGE_THUMB_DIR = "systems/chroniclesystem/assets/armoria/charges";
-const PREVIEW_DEBOUNCE_MS = 400;
-const DEFAULT_PREVIEW_SIZE = 250;
 const SAVE_SIZE = 500;
 
 // Canonical tincture swatch palette (design handoff). Sending the KEY renders
@@ -65,6 +65,69 @@ function defaultCoa() {
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
+// Pattern/semy size keywords in ascending visual order (Armoria's catalog order is
+// extraction-order, not semantic). "standard" is the default — it writes NO size
+// suffix and is the selection when a value carries no explicit size.
+const SIZE_ORDER = [
+  "smallest",
+  "smaller",
+  "small",
+  "standard",
+  "big",
+  "bigger",
+];
+
+// The FULL tincture vocabulary the renderer can paint (tinctureColors is the SSOT).
+// CATALOG.tinctures is only the 10 brand-swatch subset — classifying against it
+// made carnation / celeste / cendree read as "patterns" (and render grey). Every
+// tincture control classifies, swatches and lists against this complete set.
+const TINCTURE_KEYS = Object.keys(CATALOG.tinctureColors ?? {});
+const KNOWN_TINCTURE = new Set(
+  TINCTURE_KEYS.length ? TINCTURE_KEYS : CATALOG.tinctures
+);
+/** Swatch colour for a tincture key: brand palette first, else the render hex. */
+const swatchColor = (k) =>
+  TINCTURE_SWATCH[k] ?? CATALOG.tinctureColors?.[k] ?? "#888888";
+
+/**
+ * The ONE shield-silhouette SVG — shared by the shield picker AND the charge
+ * position map (DRY: never hand-build a second shield svg). `inner` is extra markup
+ * drawn over the shield (e.g. a position dot). Sized via the `.coa-shield-svg` class
+ * (CSS beats Foundry core's `svg` rule — width/height ATTRS get overridden). viewBox
+ * = the render's getViewBox, so overlaid coords (100 + posX, 100 + posY) line up with
+ * where a charge actually sits.
+ */
+function shieldSvg(shield, inner = "") {
+  const viewBox = getViewBox(shield, CATALOG.shieldPaths);
+  const path = CATALOG.shieldPaths[shield]?.path;
+  const shape = path
+    ? `<path d="${path}" fill="#c9d3e4" stroke="#5a6b86" stroke-width="4"/>`
+    : `<rect x="0" y="0" width="200" height="200" fill="#c9d3e4"/>`;
+  return `<svg class="coa-shield-svg" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet">${shape}${inner}</svg>`;
+}
+
+/**
+ * The ONE square cell-preview SVG — shared by the division / ordinary / pattern
+ * pickers (DRY). Sized via the `.coa-cell-svg` class, i.e. on the svg ELEMENT (like
+ * shieldSvg) — CSS beats Foundry core's `svg` rule; a `width:100%` on a wrapper span
+ * was unreliable (the svg overflowed/clipped). `inner` fills the 0-200 square.
+ */
+function cellSvg(inner) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="coa-cell-svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">${inner}</svg>`;
+}
+
+/**
+ * SVG string → `data:` URI for an `<img src>`. Loaded as an image, the SVG lives in
+ * its OWN isolated document, so `fill="url(#id)"` paint-server refs resolve (they do
+ * NOT when SVG with `<pattern>` is parsed in AppV2's detached part subtree and then
+ * re-parented — Chromium drops the binding) and pattern ids can never collide across
+ * swatches. Idiomatic for many SVG thumbnails (foundry-api-expert). `#` MUST be
+ * percent-encoded or the URI truncates at the fragment — encodeURIComponent covers it.
+ */
+function svgToDataUri(svg) {
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
 export class CoatOfArmsEditor extends CoaEditorBase {
   /** Live actor (ApplicationV2 has no `document` getter — use this). */
   #actor;
@@ -72,8 +135,6 @@ export class CoatOfArmsEditor extends CoaEditorBase {
   #coa;
   /** Transient UI state — never persisted (data-model §Estado de UI). */
   #ui;
-  /** Debounce handle for the live preview. */
-  #previewTimer = null;
 
   constructor(options = {}) {
     super(options);
@@ -85,10 +146,9 @@ export class CoatOfArmsEditor extends CoaEditorBase {
       importOpen: false,
       catalogOpen: false,
       catalogSelection: null,
+      catalogMode: "add", // "add" (new charge) | "swap" (replace) | "semy" (semy fill)
+      semyPath: null, // when catalogMode === "semy": the tincture path being edited
       tinctMode: {}, // path -> "tintura" | "padrao" | "semy"
-      format: "svg",
-      size: DEFAULT_PREVIEW_SIZE,
-      imgFailed: false,
     };
   }
 
@@ -105,6 +165,9 @@ export class CoatOfArmsEditor extends CoaEditorBase {
     actions: {
       selectLayer: CoatOfArmsEditor.#onSelectLayer,
       selectShield: CoatOfArmsEditor.#onSelectShield,
+      selectDivision: CoatOfArmsEditor.#onSelectDivision,
+      selectOrdinary: CoatOfArmsEditor.#onSelectOrdinary,
+      selectLine: CoatOfArmsEditor.#onSelectLine,
       addDivision: CoatOfArmsEditor.#onAddDivision,
       addOrdinary: CoatOfArmsEditor.#onAddOrdinary,
       addCharge: CoatOfArmsEditor.#onAddCharge,
@@ -112,9 +175,11 @@ export class CoatOfArmsEditor extends CoaEditorBase {
       moveLayer: CoatOfArmsEditor.#onMoveLayer,
       setTincture: CoatOfArmsEditor.#onSetTincture,
       setTinctMode: CoatOfArmsEditor.#onSetTinctMode,
+      selectPatternHead: CoatOfArmsEditor.#onSelectPatternHead,
+      setPatternColor: CoatOfArmsEditor.#onSetPatternColor,
+      openSemyCatalog: CoatOfArmsEditor.#onOpenSemyCatalog,
       restoreTincture: CoatOfArmsEditor.#onRestoreTincture,
       setPosition: CoatOfArmsEditor.#onSetPosition,
-      setPreviewFormat: CoatOfArmsEditor.#onSetPreviewFormat,
       toggleAdvanced: CoatOfArmsEditor.#onToggleAdvanced,
       toggleImport: CoatOfArmsEditor.#onToggleImport,
       loadImport: CoatOfArmsEditor.#onLoadImport,
@@ -131,6 +196,9 @@ export class CoatOfArmsEditor extends CoaEditorBase {
   static PARTS = {
     main: {
       template: `${TP}/coat-of-arms-editor.hbs`,
+      // Preserve each column's scroll position across re-renders (AppV2) — clicking
+      // an option in the inspector no longer jumps the scrollbar back to the top.
+      scrollable: [".coa-insp-body", ".coa-layer-list", ".coa-col-preview"],
       templates: [
         `${TP}/partials/coa-preview.hbs`,
         `${TP}/partials/coa-layers.hbs`,
@@ -177,25 +245,15 @@ export class CoatOfArmsEditor extends CoaEditorBase {
       layers: this.#buildLayers(),
       inspectorHeader: this.#inspectorHeader(),
       inspector: this.#buildInspector(),
-      preview: this.#buildPreview(),
-      meter: this.#buildMeter(),
+      preview: { caption: SystemUtils.localize("CS.coa.preview.live") },
+      background: {
+        on: !!(coa.background && coa.background !== "none"),
+        color: HEX_RE.test(coa.background)
+          ? coa.background.toLowerCase()
+          : "#ffffff",
+      },
       catalog: ui.catalogOpen ? this.#buildCatalog() : null,
       canUpload: canUpload(),
-    };
-  }
-
-  #buildPreview() {
-    const ui = this.#ui;
-    return {
-      url: buildUrl(this.#coa, { format: ui.format, size: ui.size }).url,
-      size: ui.size,
-      caption: ui.imgFailed
-        ? SystemUtils.localize("CS.coa.preview.unavailable")
-        : SystemUtils.localize("CS.coa.preview.live"),
-      formats: [
-        { value: "svg", label: "SVG", active: ui.format === "svg" },
-        { value: "png", label: "PNG", active: ui.format === "png" },
-      ],
     };
   }
 
@@ -306,16 +364,12 @@ export class CoatOfArmsEditor extends CoaEditorBase {
         return {
           ...base,
           isShield: true,
-          shields: CATALOG.shields.map((k) => {
-            const shape = CATALOG.shieldPaths?.[k];
-            return {
-              key: k,
-              label: label("shields", k),
-              selected: current === k,
-              path: shape?.path ?? null,
-              box: shape?.box ?? "0 0 200 200",
-            };
-          }),
+          shields: CATALOG.shields.map((k) => ({
+            key: k,
+            label: label("shields", k),
+            selected: current === k,
+            svg: shieldSvg(k), // shared component (DRY) — same as the position map
+          })),
         };
       }
       case "field":
@@ -335,8 +389,9 @@ export class CoatOfArmsEditor extends CoaEditorBase {
           ...base,
           isDivision: true,
           hasDivision: !!d.division,
-          divisions: this.#options("divisions", d.division, true),
-          lines: this.#options("lines", d.line, true),
+          lined: CATALOG.linedDivisions.includes(d.division),
+          divisionCells: this.#divisionCells(d.division),
+          lineCells: this.#lineCells(d.line),
           tincture: this.#tinctureControl(
             "division.t",
             d.t,
@@ -353,9 +408,9 @@ export class CoatOfArmsEditor extends CoaEditorBase {
           ...base,
           isOrdinary: true,
           index: sel.index,
-          ordinaries: this.#options("ordinaries", o.ordinary),
+          ordinaryCells: this.#ordinaryCells(o.ordinary),
           lined,
-          lines: lined ? this.#options("lines", o.line, true) : null,
+          lineCells: lined ? this.#lineCells(o.line) : null,
           tincture: this.#tinctureControl(
             `ordinaries.${sel.index}.t`,
             o.t,
@@ -382,7 +437,10 @@ export class CoatOfArmsEditor extends CoaEditorBase {
           index: sel.index,
           chargeLabel: label("charges", ch.charge),
           thumb: this.#chargeThumb(ch.charge),
-          positions: this.#positionGrid(ch.p),
+          positions: this.#positionCells(ch.p),
+          // "Divisor" — how the charge interacts with the field division. Only
+          // meaningful when a division exists (Armoria).
+          dividedOptions: this.#dividedOptions(ch.divided),
           tincture: this.#tinctureControl(
             `charges.${sel.index}.t`,
             ch.t,
@@ -410,6 +468,9 @@ export class CoatOfArmsEditor extends CoaEditorBase {
           allowSinister: !!info.sinister,
           allowReversed: !!info.reversed,
           allowLayered: !!info.layered,
+          // Outline (charge.stroke is a COLOR — "none" hides it; default is black).
+          strokeOn: ch.stroke !== "none",
+          strokeColor: HEX_RE.test(ch.stroke) ? ch.stroke : "#000000",
           ch,
         };
       }
@@ -431,7 +492,7 @@ export class CoatOfArmsEditor extends CoaEditorBase {
   /** A tincture control descriptor for the reusable partial. */
   #tinctureControl(path, value, labelKey, advanced) {
     const isHex = typeof value === "string" && HEX_RE.test(value);
-    const isKey = CATALOG.tinctures.includes(value);
+    const isKey = KNOWN_TINCTURE.has(value);
     // Mode: explicit UI choice, else derived from the value shape.
     let mode = this.#ui.tinctMode[path];
     if (!mode) {
@@ -442,13 +503,16 @@ export class CoatOfArmsEditor extends CoaEditorBase {
     }
     const swatchHex = this.#swatchHex(value);
     const parsed = this.#parseTincture(value) ?? {};
-    const opt = (axis, current) =>
-      CATALOG[axis].map((k) => ({
+    // Colour options span the full renderer vocabulary (13), not the 10-swatch set.
+    // Rendered as swatches (same `.csv2-swatch` as tintura mode) — not dropdowns.
+    const tinctOpt = (current) =>
+      [...KNOWN_TINCTURE].map((k) => ({
         key: k,
-        label: label(axis, k),
+        label: label("tinctures", k),
+        color: swatchColor(k),
         selected: current === k,
       }));
-    const headAxis = mode === "semy" ? "charges" : "patterns";
+    const semyKey = mode === "semy" ? parsed.head : null;
     return {
       path,
       label: SystemUtils.localize(labelKey),
@@ -463,11 +527,14 @@ export class CoatOfArmsEditor extends CoaEditorBase {
       segSemy: mode === "semy",
       isHex,
       hex: isHex ? value.toUpperCase() : swatchHex.toUpperCase(),
+      // Lowercase 6-digit hex for the native <input type="color"> (it rejects
+      // uppercase / short hex and would fall back to black).
+      colorHex: (isHex ? value : swatchHex).toLowerCase(),
       selLabel: this.#tinctureLabel(value),
-      swatches: CATALOG.tinctures.map((k) => ({
+      swatches: [...KNOWN_TINCTURE].map((k) => ({
         key: k,
         label: label("tinctures", k),
-        color: TINCTURE_SWATCH[k] ?? "#888888",
+        color: swatchColor(k),
         selected: value === k,
       })),
       headLabel: SystemUtils.localize(
@@ -475,26 +542,35 @@ export class CoatOfArmsEditor extends CoaEditorBase {
           ? "CS.coa.fields.semyPicker"
           : "CS.coa.fields.patternPicker"
       ),
-      headOptions: opt(headAxis, parsed.head),
-      color1: opt("tinctures", parsed.t1),
-      color2: opt("tinctures", parsed.t2),
-      sizeOptions: [
-        { key: "", label: "—", selected: !parsed.size },
-        ...opt("sizes", parsed.size),
-      ],
+      // Pattern shape grid (padrão) — visual, like the division / ordinary grids.
+      patternCells: mode === "padrao" ? this.#patternCells(parsed.head) : null,
+      // Semy charge (semy) — a symbol button that opens the shared charge catalog.
+      semyThumb: semyKey ? this.#chargeThumb(semyKey) : null,
+      semyChargeLabel: semyKey
+        ? label("charges", semyKey)
+        : SystemUtils.localize("CS.coa.fields.semyPickCharge"),
+      color1: tinctOpt(parsed.t1),
+      color2: tinctOpt(parsed.t2),
+      // Ascending size order; no "—" option — "standard" IS the default (selected
+      // when the value carries no explicit size).
+      sizeOptions: SIZE_ORDER.map((k) => ({
+        key: k,
+        label: label("sizes", k),
+        selected: (parsed.size || "standard") === k,
+      })),
     };
   }
 
   /** The swatch hex for a tincture value (key → palette, hex → itself). */
   #swatchHex(value) {
     if (typeof value === "string" && HEX_RE.test(value)) return value;
-    if (CATALOG.tinctures.includes(value)) return TINCTURE_SWATCH[value];
+    if (KNOWN_TINCTURE.has(value)) return swatchColor(value);
     return "#8a8688";
   }
 
   #tinctureLabel(value) {
     if (!value) return "—";
-    if (CATALOG.tinctures.includes(value)) return label("tinctures", value);
+    if (KNOWN_TINCTURE.has(value)) return label("tinctures", value);
     return value; // hex or pattern string
   }
 
@@ -504,64 +580,146 @@ export class CoatOfArmsEditor extends CoaEditorBase {
       : null;
   }
 
-  /** Select options with a selected flag; `withNone` prepends an empty option. */
-  #options(axis, current, withNone = false) {
-    const opts = CATALOG[axis].map((k) => ({
-      key: k,
-      label: label(axis, k),
-      selected: current === k,
-    }));
-    if (withNone) {
-      opts.unshift({ key: "", label: "—", selected: current == null });
+  /** Pattern picker cells: each pattern rendered as a two-tone swatch (same neutral
+   *  palette as the division / ordinary grids). Patterns fill via `url(#id)`, which
+   *  only paints when the SVG is an isolated `<img>` document (AppV2's detached part
+   *  parse drops paint-server refs) — so these are data-URI images, not inline SVG.
+   *  `current` = the selected head, if any. */
+  #patternCells(current) {
+    const A = "#c9d3e4"; // metal tone
+    const B = "#5a6b86"; // colour tone
+    const resolveKey = (k) => (k === "p2" ? B : A);
+    return CATALOG.patterns.map((key) => {
+      // Fixed placeholder tokens p1/p2 → the two neutral tones (shape preview only;
+      // real colours are chosen in the colour swatches below).
+      const pid = `${key}-p1-p2`;
+      const pat = buildPattern(pid, {
+        patternGeom: CATALOG.patternGeom,
+        resolveKey,
+      });
+      const svg = pat
+        ? cellSvg(
+            `<defs>${pat}</defs><rect width="200" height="200" fill="url(#${pid})"/>`
+          )
+        : cellSvg(`<rect width="200" height="200" fill="${A}"/>`);
+      return {
+        key,
+        label: label("patterns", key),
+        img: svgToDataUri(svg),
+        selected: current === key,
+      };
+    });
+  }
+
+  /** Division picker cells with an inline SVG preview of each partition (+ a
+   *  "none" cell to clear). Two-tone (field vs division region) like the shield grid. */
+  #divisionCells(current) {
+    const A = "#c9d3e4"; // field tone (matches shield-grid palette)
+    const B = "#5a6b86"; // division-region tone
+    const cells = [
+      {
+        key: "",
+        label: SystemUtils.localize("CS.coa.fields.noDivision"),
+        svg: cellSvg(`<rect width="200" height="200" fill="${A}"/>`),
+        selected: !current,
+      },
+    ];
+    for (const key of CATALOG.divisions) {
+      const tmpl = CATALOG.divisionGeom?.[key]?.template ?? "";
+      cells.push({
+        key,
+        label: label("divisions", key),
+        svg: cellSvg(
+          `<rect width="200" height="200" fill="${A}"/><g fill="${B}">${tmpl}</g>`
+        ),
+        selected: current === key,
+      });
     }
-    return opts;
+    return cells;
   }
 
-  /** 3×3 position grid (a–i) with invalid cells disabled per shield. */
-  #positionGrid(current) {
-    const valid = shieldPositions(this.#coa.shield ?? "heater");
-    const codes = ["a", "b", "c", "d", "e", "f", "g", "h", "i"];
-    return codes.map((code) => ({
-      code,
-      enabled: valid.includes(code),
-      selected: current === code,
+  /** Charge "Divisor" options (how it interacts with the field division): none |
+   *  field (behind the division) | division (clipped to it) | counter
+   *  (counterchanged). Null when the COA has no division (control is hidden). */
+  #dividedOptions(current) {
+    const d = this.#coa.division;
+    if (!d || !d.division || d.division === "no") return null;
+    return ["", "field", "division", "counter"].map((key) => ({
+      key,
+      label: SystemUtils.localize(
+        `CS.coa.fields.divided${
+          key ? key[0].toUpperCase() + key.slice(1) : "None"
+        }`
+      ),
+      selected: (current ?? "") === key,
     }));
   }
 
-  /** Complexity meter descriptor from the SAVED (canonical) URL length. */
-  #buildMeter() {
-    const coa = this.#coa;
-    const length = buildUrl(coa, {
-      format: CANONICAL_FORMAT,
-      size: SAVE_SIZE,
-    }).length;
-    const state = budget(length);
-    const key = { OK: "ok", WARN: "warn", BLOCK: "block" }[state];
-    const chips = {
-      ok: { bg: "#e6efe9", fg: "#2f7d4f", color: "#2f7d4f" },
-      warn: { bg: "#fbf4e6", fg: "#a5761b", color: "#c98a1e" },
-      block: { bg: "#fbeeee", fg: "#b04a4a", color: "#b04a4a" },
-    };
-    const nCharges = coa.charges?.length ?? 0;
-    const nOrd = coa.ordinaries?.length ?? 0;
-    return {
-      state,
-      cssClass: `is-${key}`,
-      badge: SystemUtils.localize(`CS.coa.meter.${key}`),
-      pct: Math.min(100, (length / URL_BUDGET.BLOCK) * 100).toFixed(1),
-      color: chips[key].color,
-      chipBg: chips[key].bg,
-      chipFg: chips[key].fg,
-      text: SystemUtils.format("CS.coa.meter.text", {
-        length,
-        max: URL_BUDGET.BLOCK,
-      }),
-      loads: SystemUtils.format("CS.coa.meter.loads", {
-        charges: nCharges,
-        ordinaries: nOrd,
-      }),
-      blocked: state === "BLOCK",
-    };
+  /** Ordinary picker cells with an inline preview of each ordinary on the field
+   *  (from ordinaryGeom; bordure/orle drawn as the shield outline, like the render). */
+  #ordinaryCells(current) {
+    const A = "#c9d3e4"; // field tone
+    const B = "#5a6b86"; // ordinary tone
+    const shieldPath =
+      CATALOG.shieldPaths?.[this.#coa.shield ?? "heater"]?.path;
+    return CATALOG.ordinaries.map((key) => {
+      let inner;
+      if ((key === "bordure" || key === "orle") && shieldPath) {
+        const w = key === "bordure" ? 33.3 : 10;
+        const tf =
+          key === "orle" ? ` transform="translate(15 15) scale(.85)"` : "";
+        inner = `<path d="${shieldPath}" fill="none" stroke="${B}" stroke-width="${w}"${tf}/>`;
+      } else {
+        inner = `<g fill="${B}">${
+          CATALOG.ordinaryGeom?.[key]?.template ?? ""
+        }</g>`;
+      }
+      return {
+        key,
+        label: label("ordinaries", key),
+        svg: cellSvg(`<rect width="200" height="200" fill="${A}"/>${inner}`),
+        selected: current === key,
+      };
+    });
+  }
+
+  /** Line-style picker cells with an inline preview of each edge (from lineData).
+   *  An unset line renders as "straight". */
+  #lineCells(current) {
+    const sel = current || "straight";
+    return CATALOG.lines.map((key) => {
+      const path = CATALOG.lineData?.[key] ?? "";
+      return {
+        key,
+        label: label("lines", key),
+        svg: `<svg class="coa-line-svg" viewBox="0 76 200 60" preserveAspectRatio="xMidYMid meet"><path d="${path}" fill="none" stroke="#5a6b86" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></svg>`,
+        selected: sel === key,
+      };
+    });
+  }
+
+  /** Position map: EVERY valid position for the current shield as a mini-shield-
+   *  with-dot cell (covers all of Armoria's positions, not just a 3×3, so an
+   *  imported / complex position can always be re-selected). `current` = ch.p,
+   *  which may hold several codes — each contained code is highlighted. A charge at
+   *  code p (size 1) sits at (100 + posX, 100 + posY) — see getElTransform. */
+  #positionCells(current) {
+    const shield = this.#coa.shield ?? "heater";
+    const coords =
+      CATALOG.positionCoords[shield] ?? CATALOG.positionCoords.spanish ?? {};
+    const on = String(current ?? "");
+    // Reuse the shared shieldSvg() component (DRY) and just overlay a bold dot at the
+    // exact spot the charge sits (100 + posX, 100 + posY). The IMAGE is the point —
+    // players can't read Armoria's letter codes, so no text label.
+    return Object.entries(coords).map(([code, [px, py]]) => {
+      const selected = on.includes(code);
+      const dot = `<circle cx="${100 + px}" cy="${100 + py}" r="${
+        selected ? 27 : 21
+      }" fill="${
+        selected ? "#015ea6" : "#c02231"
+      }" stroke="#fff" stroke-width="5"/>`;
+      return { code, selected, svg: shieldSvg(shield, dot) };
+    });
   }
 
   /** Full charge catalog (rendered once; searched client-side). */
@@ -592,12 +750,6 @@ export class CoatOfArmsEditor extends CoaEditorBase {
     htmlElement.addEventListener("input", this.#onFormInput.bind(this));
     htmlElement.addEventListener("change", this.#onFormChange.bind(this));
 
-    const img = htmlElement.querySelector(".coa-preview-img");
-    if (img) {
-      img.addEventListener("error", () => this.#setImgFailed(true));
-      img.addEventListener("load", () => this.#setImgFailed(false));
-    }
-
     if (this.#ui.catalogOpen) {
       const search = htmlElement.querySelector(".coa-catalog-search");
       if (search) {
@@ -618,7 +770,6 @@ export class CoatOfArmsEditor extends CoaEditorBase {
       });
     }
 
-    this.element?.classList.toggle("is-img-failed", this.#ui.imgFailed);
     this.#updatePreview();
   }
 
@@ -628,37 +779,42 @@ export class CoatOfArmsEditor extends CoaEditorBase {
       this.#rebuildPattern(el);
       return;
     }
-    // Division-type selects are owned by the change handler (special-cased).
-    if (el?.dataset?.divisionType !== undefined) return;
     if (!el?.dataset?.coa) return;
     this.#applyInput(el);
-    this.#schedulePreview();
+    this.#updatePreview();
   }
 
   #onFormChange(event) {
     const el = event.target;
-    if (el?.dataset?.previewSize !== undefined) {
-      const v = Math.max(16, parseInt(el.value, 10) || DEFAULT_PREVIEW_SIZE);
-      this.#ui.size = v;
-      this.#updatePreview();
-      return;
-    }
     if (el?.dataset?.tinctPart !== undefined) {
       this.#rebuildPattern(el);
       return;
     }
-    // Division type select: "" clears the whole division; a real type ensures a
-    // default tincture so the render never gets a half-formed division.
-    if (el?.dataset?.divisionType !== undefined) {
-      if (!el.value) delete this.#coa.division;
-      else {
-        this.#coa.division = {
-          division: el.value,
-          t: this.#coa.division?.t ?? "argent",
-          ...(this.#coa.division?.line
-            ? { line: this.#coa.division.line }
-            : {}),
-        };
+    // Outline toggle: checked → outline in the chosen colour; unchecked → "none"
+    // (charge.stroke is a colour string in the render — "none" hides the outline).
+    if (el?.dataset?.strokeToggle !== undefined) {
+      const index = Number(el.dataset.index);
+      const ch = this.#coa.charges?.[index];
+      if (ch) {
+        if (el.checked) {
+          const colorEl = this.element?.querySelector(
+            `[data-stroke-color][data-index="${index}"]`
+          );
+          ch.stroke = colorEl?.value || "#000000";
+        } else {
+          ch.stroke = "none";
+        }
+      }
+      this.render(); // re-render to enable/disable the colour input
+      return;
+    }
+    // Background toggle: checked → fill behind the shield; unchecked → transparent.
+    if (el?.dataset?.bgToggle !== undefined) {
+      if (el.checked) {
+        const colorEl = this.element?.querySelector("[data-bg-color]");
+        this.#coa.background = colorEl?.value || "#ffffff";
+      } else {
+        delete this.#coa.background;
       }
       this.render();
       return;
@@ -687,99 +843,52 @@ export class CoatOfArmsEditor extends CoaEditorBase {
     }
   }
 
-  /** Rebuild a pattern/semy composite tincture string from its part selects. */
-  #rebuildPattern(el) {
-    const container = el.closest("[data-tinct-path]");
-    if (!container) return;
-    const path = container.dataset.tinctPath;
-    const mode = container.dataset.tinctMode;
-    const get = (part) =>
-      container.querySelector(`[data-tinct-part="${part}"]`)?.value ?? "";
-    const head = get("head");
-    const t1 = get("t1");
-    const t2 = get("t2");
-    const size = get("size");
-    if (!head || !t1 || !t2) return;
-    const prefix = mode === "semy" ? `semy_of_${head}` : head;
+  /**
+   * SSOT for the pattern/semy composite tincture string. Merges `patch`
+   * ({head, t1, t2, size, semy}) over the current value's parsed parts and writes
+   * `<head>-<t1>-<t2>[-size]` (pattern) or `semy_of_<charge>-<t1>-<t2>[-size]` (semy)
+   * to `path`. Returns false when there is no head yet (nothing to compose).
+   */
+  #composeTincture(path, patch = {}) {
+    const cur = foundry.utils.getProperty(this.#coa, path);
+    const parsed = this.#parseTincture(cur) ?? {};
+    const isSemy =
+      patch.semy ?? (typeof cur === "string" && cur.startsWith("semy_of_"));
+    const head = patch.head ?? parsed.head;
+    if (!head) return false;
+    const t1 = patch.t1 ?? parsed.t1 ?? "argent";
+    const t2 = patch.t2 ?? parsed.t2 ?? (isSemy ? "sable" : "azure");
+    const size = patch.size ?? parsed.size ?? "";
+    const prefix = isSemy ? `semy_of_${head}` : head;
     const suffix = size && size !== "standard" ? `-${size}` : "";
     foundry.utils.setProperty(
       this.#coa,
       path,
       `${prefix}-${t1}-${t2}${suffix}`
     );
-    this.#schedulePreview();
+    return true;
+  }
+
+  /** Size select change (the only remaining pattern/semy part select) — colour and
+   *  head are chosen via swatches / grid, so just patch the size. */
+  #rebuildPattern(el) {
+    const container = el.closest("[data-tinct-path]");
+    if (!container) return;
+    this.#composeTincture(container.dataset.tinctPath, { size: el.value });
+    this.#updatePreview();
   }
 
   /* ------------------------------------------------------------------ */
-  /*  Preview (DOM only — no re-render)                                  */
+  /*  Preview (DOM only — no re-render, no network, synchronous)         */
   /* ------------------------------------------------------------------ */
 
-  #schedulePreview() {
-    if (this.#previewTimer) clearTimeout(this.#previewTimer);
-    this.#previewTimer = setTimeout(
-      () => this.#updatePreview(),
-      PREVIEW_DEBOUNCE_MS
-    );
-  }
-
+  /** Rebuild the SVG locally and inject it inline — <100 ms, no flicker (D10). */
   #updatePreview() {
-    const root = this.element;
-    if (!root) return;
-    const coa = this.#coa;
-
-    const img = root.querySelector(".coa-preview-img");
-    if (img) {
-      const { url } = buildUrl(coa, {
-        format: this.#ui.format,
-        size: this.#ui.size,
-      });
-      if (img.getAttribute("src") !== url) img.setAttribute("src", url);
-    }
-
-    const length = buildUrl(coa, {
-      format: CANONICAL_FORMAT,
-      size: SAVE_SIZE,
-    }).length;
-    const state = budget(length);
-    const key = { OK: "ok", WARN: "warn", BLOCK: "block" }[state];
-    const colors = { ok: "#2f7d4f", warn: "#c98a1e", block: "#b04a4a" };
-
-    const meter = root.querySelector(".coa-meter");
-    if (meter) {
-      meter.classList.remove("is-ok", "is-warn", "is-block");
-      meter.classList.add(`is-${key}`);
-      const fill = meter.querySelector(".coa-meter-fill");
-      if (fill) {
-        fill.style.width = `${Math.min(
-          100,
-          (length / URL_BUDGET.BLOCK) * 100
-        ).toFixed(1)}%`;
-        fill.style.background = colors[key];
-      }
-      const chip = meter.querySelector(".coa-meter-chip");
-      if (chip) chip.textContent = SystemUtils.localize(`CS.coa.meter.${key}`);
-      const text = meter.querySelector(".coa-meter-text");
-      if (text) {
-        text.textContent = SystemUtils.format("CS.coa.meter.text", {
-          length,
-          max: URL_BUDGET.BLOCK,
-        });
-      }
-    }
-
-    const save = root.querySelector('[data-action="save"]');
-    if (save) save.disabled = state === "BLOCK";
-  }
-
-  #setImgFailed(failed) {
-    this.#ui.imgFailed = failed;
-    this.element?.classList.toggle("is-img-failed", failed);
-    const cap = this.element?.querySelector(".coa-preview-caption");
-    if (cap) {
-      cap.textContent = SystemUtils.localize(
-        failed ? "CS.coa.preview.unavailable" : "CS.coa.preview.live"
-      );
-    }
+    const host = this.element?.querySelector(".coa-preview-svg");
+    if (!host) return;
+    const { svg } = buildCoaSvg(this.#coa, { size: SAVE_SIZE });
+    // Trusted, self-authored SVG (no cleanHTML — it would strip svg/path/g).
+    host.innerHTML = svg;
   }
 
   /* ------------------------------------------------------------------ */
@@ -821,6 +930,42 @@ export class CoatOfArmsEditor extends CoaEditorBase {
     this.render();
   }
 
+  /** Pick a division from the visual grid. Empty key clears the division; a real
+   *  type keeps the existing tincture/line (or defaults) so the render is complete. */
+  static #onSelectDivision(event, target) {
+    const key = target.dataset.division;
+    if (!key) {
+      delete this.#coa.division;
+    } else {
+      this.#coa.division = {
+        division: key,
+        t: this.#coa.division?.t ?? "argent",
+        ...(this.#coa.division?.line ? { line: this.#coa.division.line } : {}),
+      };
+    }
+    this.render();
+  }
+
+  /** Pick an ordinary type from the visual grid (for the selected ordinary). */
+  static #onSelectOrdinary(event, target) {
+    const sel = this.#ui.selected;
+    if (sel.type !== "ordinary" || !this.#coa.ordinaries?.[sel.index]) return;
+    this.#coa.ordinaries[sel.index].ordinary = target.dataset.ordinary;
+    this.render(); // lined-ness may change → the line grid appears/disappears
+  }
+
+  /** Pick a line style from the visual grid — for the division or the ordinary. */
+  static #onSelectLine(event, target) {
+    const sel = this.#ui.selected;
+    const line = target.dataset.line;
+    if (sel.type === "division" && this.#coa.division) {
+      this.#coa.division.line = line;
+    } else if (sel.type === "ordinary" && this.#coa.ordinaries?.[sel.index]) {
+      this.#coa.ordinaries[sel.index].line = line;
+    }
+    this.render();
+  }
+
   static #onAddDivision() {
     this.#coa.division = { division: CATALOG.divisions[0], t: "argent" };
     this.#ui.selected = { type: "division", index: null };
@@ -840,6 +985,7 @@ export class CoatOfArmsEditor extends CoaEditorBase {
   static #onAddCharge() {
     this.#ui.catalogOpen = true;
     this.#ui.catalogSelection = null;
+    this.#ui.catalogMode = "add"; // always append, even with a charge selected
     this.render();
   }
 
@@ -876,7 +1022,16 @@ export class CoatOfArmsEditor extends CoaEditorBase {
 
   static #onSetTinctMode(event, target) {
     const path = target.dataset.path;
-    this.#ui.tinctMode[path] = target.dataset.mode;
+    const mode = target.dataset.mode;
+    this.#ui.tinctMode[path] = mode;
+    // Switching back to solid removes any pattern/semy value (it has no solid
+    // meaning) — this is the "remove pattern/charge" affordance.
+    if (mode === "tintura") {
+      const val = foundry.utils.getProperty(this.#coa, path);
+      if (typeof val === "string" && val.includes("-") && !HEX_RE.test(val)) {
+        foundry.utils.setProperty(this.#coa, path, "argent");
+      }
+    }
     this.render();
   }
 
@@ -887,18 +1042,39 @@ export class CoatOfArmsEditor extends CoaEditorBase {
     this.render();
   }
 
+  /** Pick a pattern shape from the grid (padrão). Keeps the current colours/size. */
+  static #onSelectPatternHead(event, target) {
+    const path = target.dataset.path;
+    this.#ui.tinctMode[path] = "padrao";
+    this.#composeTincture(path, { head: target.dataset.head, semy: false });
+    this.render();
+  }
+
+  /** Pick colour 1 / colour 2 of a pattern/semy from a swatch (same swatches as
+   *  tintura mode). No-ops until a pattern/charge head is chosen. */
+  static #onSetPatternColor(event, target) {
+    const path = target.dataset.path;
+    this.#composeTincture(path, {
+      [target.dataset.part]: target.dataset.tincture,
+    });
+    this.render();
+  }
+
+  /** Open the shared charge catalog to choose the semy charge for a tincture. */
+  static #onOpenSemyCatalog(event, target) {
+    this.#ui.catalogOpen = true;
+    this.#ui.catalogSelection = null;
+    this.#ui.catalogMode = "semy";
+    this.#ui.semyPath = target.dataset.path;
+    this.render();
+  }
+
   static #onSetPosition(event, target) {
     const index = Number(target.dataset.index);
     if (this.#coa.charges?.[index]) {
       this.#coa.charges[index].p = target.dataset.code;
       this.render();
     }
-  }
-
-  static #onSetPreviewFormat(event, target) {
-    this.#ui.format = target.dataset.format === "png" ? "png" : "svg";
-    this.#ui.imgFailed = false;
-    this.render();
   }
 
   static #onToggleAdvanced() {
@@ -911,21 +1087,30 @@ export class CoatOfArmsEditor extends CoaEditorBase {
     this.render();
   }
 
-  static #onLoadImport() {
+  static async #onLoadImport() {
     const textarea = this.element?.querySelector(".coa-import-text");
     const text = textarea?.value ?? "";
-    const result = parseImport(text, CATALOG);
+    // resolveImport is local for COA strings / embedded links; a seed link makes
+    // ONE explicit fetch (US4/FR-008). On any error the layers stay intact (AC4.3).
+    const result = await resolveImport(text, CATALOG);
     if (result.error) {
-      ui.notifications?.warn(
-        SystemUtils.localize("CS.coa.errors.importFailed")
-      );
+      const key =
+        result.error === "invalid"
+          ? "CS.coa.warnings.unknownVocabulary"
+          : "CS.coa.errors.importFailed";
+      ui.notifications?.warn(SystemUtils.localize(key));
       return;
     }
+    // Armoria's edit link never carries the shield shape (it lives in a separate
+    // store there). Keep the shield already chosen so importing content doesn't
+    // silently reset it to the default — the panel note tells the user to set it.
+    if (!result.coa.shield) result.coa.shield = this.#coa.shield ?? "heater";
     this.#loadCoa(result.coa);
   }
 
   static #onOpenCatalog() {
     this.#ui.catalogOpen = true;
+    this.#ui.catalogMode = "swap"; // replace the selected charge's symbol
     this.render();
   }
 
@@ -947,9 +1132,26 @@ export class CoatOfArmsEditor extends CoaEditorBase {
   static #onUseCatalog() {
     const key = this.#ui.catalogSelection;
     if (!key) return;
-    // If a charge layer is selected, swap its charge; else append a new one.
+    // Semy: the catalog was opened from a tincture control to choose the charge
+    // strewn across the field — build the semy_of_<charge>-<t1>-<t2>[-size] string.
+    if (this.#ui.catalogMode === "semy" && this.#ui.semyPath) {
+      const path = this.#ui.semyPath;
+      this.#ui.tinctMode[path] = "semy";
+      this.#composeTincture(path, { head: key, semy: true });
+      this.#ui.catalogOpen = false;
+      this.#ui.semyPath = null;
+      this.render();
+      return;
+    }
+    // Swap ONLY when the catalog was opened to change a selected charge's symbol
+    // ("swap"); the "+ charge" button ("add") always appends a new charge, even
+    // while a charge is selected.
     const sel = this.#ui.selected;
-    if (sel.type === "charge" && this.#coa.charges?.[sel.index]) {
+    if (
+      this.#ui.catalogMode === "swap" &&
+      sel.type === "charge" &&
+      this.#coa.charges?.[sel.index]
+    ) {
       this.#coa.charges[sel.index].charge = key;
     } else {
       this.#coa.charges ??= [];
@@ -973,14 +1175,6 @@ export class CoatOfArmsEditor extends CoaEditorBase {
     if (!result.ok) {
       const first = result.errors[0];
       ui.notifications?.error(SystemUtils.format(first.key, first.data ?? {}));
-      return;
-    }
-    const length = buildUrl(coa, {
-      format: CANONICAL_FORMAT,
-      size: SAVE_SIZE,
-    }).length;
-    if (budget(length) === "BLOCK") {
-      ui.notifications?.error(SystemUtils.localize("CS.coa.errors.blocked"));
       return;
     }
 

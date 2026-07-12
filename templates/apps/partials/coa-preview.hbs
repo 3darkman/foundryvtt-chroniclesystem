@@ -1,53 +1,19 @@
-{{!-- Preview / output column: live Armoria image over a local sketch fallback,
-      format + size controls, and the complexity meter. --}}
+{{!-- Preview column: the coat of arms rendered LOCALLY and injected inline as a
+      vector SVG on every edit (no network, no complexity meter — spec 014). The
+      .coa-preview-svg host is filled by the editor's #updatePreview. --}}
 <div class="coa-preview-card">
-  <div class="coa-preview-stack">
-    <div class="coa-preview-sketch">
-      <div class="coa-sketch-field"></div>
-      <div class="coa-sketch-base"></div>
-      <div class="coa-sketch-fess"></div>
-    </div>
-    <svg class="coa-preview-outline" viewBox="0 0 190 216" width="190" height="216">
-      <path d="M12 9 H178 V92 C178 159 95 206 95 206 C95 206 12 159 12 92 Z"
-            fill="none" stroke="#0a0405" stroke-width="4"></path>
-    </svg>
-    <img class="coa-preview-img" src="{{preview.url}}" alt="Brasão" />
-  </div>
+  <div class="coa-preview-svg"></div>
 </div>
 <div class="coa-preview-caption">{{preview.caption}}</div>
 
-<div class="coa-preview-row">
-  <div class="coa-preview-field">
-    <div class="csv2-label">{{localize "CS.coa.fields.format"}}</div>
-    <div class="csv2-segmented">
-      {{#each preview.formats}}
-        <button type="button" class="{{#if this.active}}is-active{{/if}}"
-                data-action="setPreviewFormat" data-format="{{this.value}}">{{this.label}}</button>
-      {{/each}}
-    </div>
-  </div>
-  <div class="coa-preview-field coa-size-field">
-    <div class="csv2-label">{{localize "CS.coa.fields.previewSize"}}</div>
-    <div class="coa-size-box">
-      <input type="number" data-preview-size min="16" step="10" value="{{preview.size}}" />
-      <span class="coa-size-unit">px</span>
-    </div>
-  </div>
+<div class="coa-bg-row">
+  <label class="coa-toggle coa-bg-toggle">
+    <input type="checkbox" data-bg-toggle {{#if background.on}}checked{{/if}} />
+    <span>{{localize "CS.coa.fields.background"}}</span>
+  </label>
+  <input type="color" class="coa-hex-color" data-coa="background" data-dtype="String"
+         data-bg-color data-live value="{{background.color}}"
+         title="{{localize 'CS.coa.fields.background'}}" {{#unless background.on}}disabled{{/unless}} />
 </div>
 
-<div class="coa-meter {{meter.cssClass}}">
-  <div class="coa-meter-top">
-    <span class="csv2-label">{{localize "CS.coa.meter.label"}}</span>
-    <span class="csv2-chip">{{meter.badge}}</span>
-  </div>
-  <div class="coa-meter-track">
-    <div class="coa-meter-fill" style="width:{{meter.pct}}%;background:{{meter.color}}"></div>
-    <div class="coa-meter-ref"></div>
-  </div>
-  <div class="coa-meter-bot">
-    <span class="coa-meter-text">{{meter.text}}</span>
-    <span class="coa-meter-loads">{{meter.loads}}</span>
-  </div>
-</div>
-
-<p class="coa-note">{{localize "CS.coa.warnings.notRendered"}}</p>
+<p class="coa-note">{{localize "CS.coa.license.renderer"}}</p>

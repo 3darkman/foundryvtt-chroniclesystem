@@ -11,7 +11,6 @@
   /* Editor-only values that are NOT part of the shared token set. */
   --coa-preview-bg: #f7f8fb;
   --coa-chrome-fg2: #7f8794;
-  --coa-meter-warn: #c98a1e;
   color: var(--csv2-text);
 }
 
@@ -83,7 +82,7 @@
   color: var(--csv2-muted);
 }
 
-/* ---- Preview column ----------------------------------------------------- */
+/* ---- Preview column (inline vector SVG — spec 014) ---------------------- */
 .cs-coa-editor .coa-preview-card {
   display: flex;
   align-items: center;
@@ -94,59 +93,17 @@
   padding: 14px;
   min-height: 250px;
 }
-.cs-coa-editor .coa-preview-stack {
-  position: relative;
+.cs-coa-editor .coa-preview-svg {
   width: 190px;
-  height: 216px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-/* The local sketch is a FALLBACK — only shown when the live image fails. */
-.cs-coa-editor .coa-preview-sketch,
-.cs-coa-editor .coa-preview-outline {
-  display: none;
-}
-.cs-coa-editor.is-img-failed .coa-preview-sketch,
-.cs-coa-editor.is-img-failed .coa-preview-outline {
-  display: block;
-}
-.cs-coa-editor .coa-preview-sketch {
-  position: absolute;
-  inset: 0;
-  clip-path: path("M12 9 H178 V92 C178 159 95 206 95 206 C95 206 12 159 12 92 Z");
-}
-.cs-coa-editor .coa-sketch-field {
-  position: absolute;
-  inset: 0;
-  background: #2166ab;
-}
-.cs-coa-editor .coa-sketch-base {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 118px;
-  bottom: 0;
-  background: #e6e8ea;
-}
-.cs-coa-editor .coa-sketch-fess {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 106px;
-  height: 26px;
-  background: #e2b93b;
-}
-.cs-coa-editor .coa-preview-outline {
-  position: absolute;
-  inset: 0;
-}
-.cs-coa-editor .coa-preview-img {
-  position: absolute;
-  inset: 0;
+.cs-coa-editor .coa-preview-svg svg {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.cs-coa-editor.is-img-failed .coa-preview-img {
-  display: none;
+  height: auto;
+  display: block;
 }
 .cs-coa-editor .coa-preview-caption {
   font: 500 9.5px var(--csv2-font-sans);
@@ -154,94 +111,14 @@
   text-align: center;
   margin-top: -6px;
 }
-
-.cs-coa-editor .coa-preview-row {
+/* Background-fill control (behind the shield). */
+.cs-coa-editor .coa-bg-row {
   display: flex;
-  gap: 9px;
+  align-items: center;
+  gap: 8px;
 }
-.cs-coa-editor .coa-preview-field {
+.cs-coa-editor .coa-bg-toggle {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.cs-coa-editor .coa-size-field {
-  flex: none;
-  width: 92px;
-}
-.cs-coa-editor .coa-size-box {
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--csv2-input-border);
-  border-radius: 6px;
-  background: var(--csv2-bg);
-}
-.cs-coa-editor .coa-size-box input {
-  border: none;
-  background: transparent;
-  padding: 7px 8px;
-  font: 600 12px var(--csv2-font-mono);
-}
-.cs-coa-editor .coa-size-unit {
-  font: 500 10px var(--csv2-font-sans);
-  color: var(--csv2-muted);
-  padding-right: 9px;
-}
-
-/* ---- Complexity meter (chip is shared .csv2-chip; states tint it) ------- */
-.cs-coa-editor .coa-meter {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.cs-coa-editor .coa-meter-top,
-.cs-coa-editor .coa-meter-bot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.cs-coa-editor .coa-meter.is-ok .csv2-chip {
-  background: var(--csv2-verdict-success-bg);
-  color: var(--csv2-verdict-success-fg);
-}
-.cs-coa-editor .coa-meter.is-warn .csv2-chip {
-  background: var(--csv2-origin-user-bg);
-  color: var(--csv2-origin-user-fg);
-}
-.cs-coa-editor .coa-meter.is-block .csv2-chip {
-  background: var(--csv2-verdict-failure-bg);
-  color: var(--csv2-verdict-failure-fg);
-}
-.cs-coa-editor .coa-meter-track {
-  position: relative;
-  height: 8px;
-  border-radius: 5px;
-  background: #e2e6ee;
-  overflow: hidden;
-}
-.cs-coa-editor .coa-meter-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  border-radius: 5px;
-  background: var(--csv2-gain);
-}
-.cs-coa-editor .coa-meter-ref {
-  position: absolute;
-  left: 71%;
-  top: 0;
-  bottom: 0;
-  width: 1.5px;
-  background: rgba(10, 4, 5, 0.28);
-}
-.cs-coa-editor .coa-meter-text {
-  font: 500 10px var(--csv2-font-mono);
-  color: var(--csv2-muted-2);
-}
-.cs-coa-editor .coa-meter-loads {
-  font: 500 10px var(--csv2-font-sans);
-  color: var(--csv2-muted);
 }
 .cs-coa-editor .coa-note {
   font: 500 10px var(--csv2-font-sans);
@@ -296,6 +173,22 @@
   font-family: var(--csv2-font-mono);
   font-size: 11px;
   line-height: 1.4;
+}
+.cs-coa-editor .coa-import-hint {
+  font: 500 9.5px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+.cs-coa-editor .coa-import-note {
+  font: 600 10px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  line-height: 1.4;
+  margin: 0;
+  padding: 6px 9px;
+  border-left: 3px solid var(--csv2-primary);
+  background: var(--csv2-border-soft);
+  border-radius: 3px;
 }
 .cs-coa-editor .coa-import-actions {
   display: flex;
@@ -446,11 +339,6 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
-.cs-coa-editor .coa-three-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 7px;
-}
 .cs-coa-editor .coa-four-col {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -485,6 +373,24 @@
 .cs-coa-editor .coa-shield-svg {
   width: 26px;
   height: 30px;
+}
+/* Square cell preview (division / ordinary / pattern) — sized on the svg ELEMENT
+   (like .coa-shield-svg) so Foundry core's `svg` rule can't resize it. */
+.cs-coa-editor .coa-cell-svg {
+  width: 34px;
+  height: 34px;
+  display: block;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(10, 4, 5, 0.12);
+}
+/* Line-style picker: wide horizontal edge samples (svg sized directly). */
+.cs-coa-editor .coa-line-grid {
+  grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+}
+.cs-coa-editor .coa-line-svg {
+  width: 100%;
+  height: 22px;
+  display: block;
 }
 .cs-coa-editor .coa-shield-name {
   font: 500 8.5px var(--csv2-font-sans);
@@ -545,53 +451,29 @@
 .cs-coa-editor .coa-symbol-search {
   color: var(--csv2-muted);
 }
-.cs-coa-editor .coa-charge-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 14px;
-  align-items: start;
+/* Position map: every valid shield position as a mini-shield-with-dot cell. The
+   IMAGE is the whole point (players can't read Armoria's letter codes), so the
+   preview is large and there is no text label — the shield + dot say it all. */
+.cs-coa-editor .coa-posmap-grid {
+  grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 2px;
 }
-.cs-coa-editor .coa-charge-side {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
+.cs-coa-editor .coa-posmap-cell {
+  padding: 5px 4px;
 }
-.cs-coa-editor .coa-pos-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 26px);
-  grid-template-rows: repeat(3, 26px);
-  gap: 4px;
-}
-.cs-coa-editor .coa-pos-cell {
-  border: 1.5px solid var(--csv2-border);
-  border-radius: 5px;
-  background: var(--csv2-bg);
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.cs-coa-editor .coa-pos-cell .coa-pos-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #c3cad6;
-}
-.cs-coa-editor .coa-pos-cell.is-selected {
-  border-color: var(--csv2-primary);
-  background: var(--csv2-primary);
-}
-.cs-coa-editor .coa-pos-cell.is-selected .coa-pos-dot {
-  background: #fff;
-}
-.cs-coa-editor .coa-pos-cell:disabled {
-  opacity: 0.35;
-  cursor: default;
+/* Reuse the shared `.coa-shield-svg` component (DRY) — just size it up for the
+   position map so the shield (with its dot) reads clearly. Portrait so the whole
+   shield fits with breathing room. */
+.cs-coa-editor .coa-posmap-grid .coa-shield-svg {
+  width: 52px;
+  height: 62px;
 }
 .cs-coa-editor .coa-toggle-row {
   display: flex;
   gap: 8px;
+  margin-top: 9px;
 }
 .cs-coa-editor .coa-toggle {
   flex: 1;
@@ -603,6 +485,29 @@
 .cs-coa-editor input[type="range"] {
   width: 100%;
   accent-color: var(--csv2-primary);
+}
+/* Charge outline (stroke) control: show/hide toggle + colour swatch. */
+.cs-coa-editor .coa-stroke-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cs-coa-editor .coa-stroke-toggle {
+  flex: 1;
+}
+.cs-coa-editor .coa-stroke-color {
+  flex: none;
+  width: 40px;
+  height: 28px;
+  padding: 2px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 6px;
+  background: var(--csv2-bg);
+  cursor: pointer;
+}
+.cs-coa-editor .coa-stroke-color:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 /* ---- Advanced disclosure ------------------------------------------------ */
@@ -668,12 +573,15 @@
   border-radius: 6px;
   padding: 6px 8px;
 }
-.cs-coa-editor .coa-hex-swatch {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+.cs-coa-editor .coa-hex-color {
   flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 2px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  cursor: pointer;
 }
 .cs-coa-editor .coa-hex-name {
   font: 600 11.5px var(--csv2-font-sans);
@@ -724,20 +632,24 @@
 }
 
 /* ---- Catalog modal ------------------------------------------------------ */
+/* Anchored to .coa-body (position:relative), NOT position:fixed — an AppV2 window
+   is transform-positioned, so `fixed` resolves relative to the window and gets
+   clipped by .window-content{overflow:hidden}. `absolute` fills the editor body
+   so the modal is fully visible and its panel fits the window. */
 .cs-coa-editor .coa-catalog-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: rgba(10, 4, 5, 0.55);
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 30px;
+  padding: 20px;
 }
 .cs-coa-editor .coa-catalog-panel {
   width: 660px;
   max-width: 100%;
-  max-height: 82vh;
+  max-height: 100%;
   background: var(--csv2-bg);
   border-radius: 12px;
   overflow: hidden;
@@ -788,11 +700,13 @@
 .cs-coa-editor .coa-catalog-scroll {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px 17px;
 }
+/* Responsive columns — fit as many as the width allows, never scroll sideways. */
 .cs-coa-editor .coa-catalog-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
   gap: 10px;
 }
 .cs-coa-editor .coa-catalog-item {
@@ -825,7 +739,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--csv2-dark);
+}
+/* Charges with no bundled art — subtle "no preview" mark, not a stark black star. */
+.cs-coa-editor .coa-catalog-noimg {
+  color: var(--csv2-muted);
+  opacity: 0.55;
 }
 .cs-coa-editor .coa-catalog-label {
   font: 500 9px var(--csv2-font-sans);

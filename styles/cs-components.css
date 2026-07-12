@@ -114,6 +114,17 @@
   --csv2-reroll-accent: #8a6d1f;
 }
 
+/* Neutralize Foundry's maroon core scrollbar (#782e22) on EVERY v2 window — thin,
+   dark thumb on a light track. Overriding the `--color-scrollbar` vars is what
+   makes core's universal `* { scrollbar-color: var(--color-scrollbar) … }` rule
+   pick up the v2 palette (SSOT — was previously scoped to the effect config only). */
+.cs-v2 {
+  --color-scrollbar: var(--csv2-dark);
+  --color-scrollbar-track: var(--csv2-secondary);
+  scrollbar-width: thin;
+  scrollbar-color: var(--csv2-dark) var(--csv2-secondary);
+}
+
 /* =========================================================================
    Active Effect config window redesign (.cs-effect-config.cs-v2). Scoped with
    both classes so these clean-look rules win over the legacy effects.css rules

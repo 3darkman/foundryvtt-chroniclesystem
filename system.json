@@ -1,7 +1,7 @@
 {
     "title": "Chronicle System (Unofficial)",
     "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
-    "version": "0.12.0",
+    "version": "0.13.0",
     "esmodules": ["module/system/config.js"],
     "styles": [
         "styles/global.css",
@@ -19,6 +19,18 @@
             "lang": "en",
             "name": "English",
             "path": "lang/en.json",
+            "flags": {}
+        },
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "lang/armoria.en.json",
+            "flags": {}
+        },
+        {
+            "lang": "pt-BR",
+            "name": "Português (Brasil)",
+            "path": "lang/armoria.pt-BR.json",
             "flags": {}
         }
     ],

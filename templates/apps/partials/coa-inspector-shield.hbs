@@ -5,11 +5,7 @@
     {{#each shields}}
       <button type="button" class="coa-shield-cell {{#if this.selected}}is-selected{{/if}}"
               data-action="selectShield" data-shield="{{this.key}}" title="{{this.label}}">
-        {{#if this.path}}
-          <svg class="coa-shield-svg" viewBox="{{this.box}}" preserveAspectRatio="xMidYMid meet">
-            <path d="{{this.path}}" fill="#c9d3e4" stroke="#5a6b86" stroke-width="4"></path>
-          </svg>
-        {{/if}}
+        {{{this.svg}}}
         <span class="coa-shield-name">{{this.label}}</span>
       </button>
     {{/each}}

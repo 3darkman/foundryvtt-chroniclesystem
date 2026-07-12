@@ -13,33 +13,40 @@
   </button>
 </div>
 
-<div class="coa-charge-grid">
-  <div class="coa-field">
-    <div class="csv2-label">{{localize "CS.coa.fields.position"}} (p)</div>
-    <div class="coa-pos-grid">
-      {{#each positions}}
-        <button type="button" class="coa-pos-cell {{#if this.selected}}is-selected{{/if}}"
-                data-action="setPosition" data-index="{{../index}}" data-code="{{this.code}}"
-                {{#unless this.enabled}}disabled{{/unless}}><span class="coa-pos-dot"></span></button>
-      {{/each}}
-    </div>
-  </div>
-  <div class="coa-charge-side">
-    <label class="coa-field">
-      <span class="csv2-label">{{localize "CS.coa.fields.size"}}</span>
-      <input type="range" min="0.3" max="2" step="0.1" data-coa="charges.{{index}}.size"
-             data-dtype="Number" data-optional data-live value="{{ch.size}}" />
-    </label>
-    <div class="coa-toggle-row">
-      {{#if allowSinister}}
-      <label class="coa-toggle"><input type="checkbox" data-coa="charges.{{index}}.sinister" data-optional {{#if ch.sinister}}checked{{/if}} /> <span>sinister</span></label>
-      {{/if}}
-      {{#if allowReversed}}
-      <label class="coa-toggle"><input type="checkbox" data-coa="charges.{{index}}.reversed" data-optional {{#if ch.reversed}}checked{{/if}} /> <span>reversed</span></label>
-      {{/if}}
-    </div>
+<div class="coa-field">
+  <div class="csv2-label">{{localize "CS.coa.fields.position"}}</div>
+  <div class="coa-shield-grid coa-division-grid coa-posmap-grid">
+    {{#each positions}}
+      <button type="button" class="coa-shield-cell coa-posmap-cell {{#if this.selected}}is-selected{{/if}}"
+              data-action="setPosition" data-index="{{../index}}" data-code="{{this.code}}" title="{{this.code}}">
+        {{{this.svg}}}
+      </button>
+    {{/each}}
   </div>
 </div>
+
+<label class="coa-field">
+  <span class="csv2-label">{{localize "CS.coa.fields.size"}}</span>
+  <input type="range" min="0.3" max="2" step="0.1" data-coa="charges.{{index}}.size"
+         data-dtype="Number" data-optional data-live value="{{ch.size}}" />
+</label>
+<div class="coa-toggle-row">
+  {{#if allowSinister}}
+  <label class="coa-toggle"><input type="checkbox" data-coa="charges.{{index}}.sinister" data-optional {{#if ch.sinister}}checked{{/if}} /> <span>sinister</span></label>
+  {{/if}}
+  {{#if allowReversed}}
+  <label class="coa-toggle"><input type="checkbox" data-coa="charges.{{index}}.reversed" data-optional {{#if ch.reversed}}checked{{/if}} /> <span>reversed</span></label>
+  {{/if}}
+</div>
+
+{{#if dividedOptions}}
+<label class="coa-field">
+  <span class="csv2-label">{{localize "CS.coa.fields.divided"}}</span>
+  <select data-coa="charges.{{index}}.divided" data-optional>
+    {{#each dividedOptions}}<option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>{{/each}}
+  </select>
+</label>
+{{/if}}
 
 {{> "systems/chroniclesystem/templates/apps/partials/coa-tincture.hbs" tincture}}
 
@@ -54,11 +61,23 @@
     {{#if allowLayered}}
     <label class="coa-check"><input type="checkbox" data-coa="charges.{{index}}.layered" data-optional {{#if ch.layered}}checked{{/if}} /> <span>{{localize "CS.coa.fields.layered"}}</span></label>
     {{/if}}
+    <div class="coa-field">
+      <span class="coa-sub-label">{{localize "CS.coa.fields.outline"}}</span>
+      <div class="coa-stroke-row">
+        <label class="coa-toggle coa-stroke-toggle">
+          <input type="checkbox" data-stroke-toggle data-index="{{index}}" {{#if strokeOn}}checked{{/if}} />
+          <span>{{localize "CS.coa.fields.outlineShow"}}</span>
+        </label>
+        <input type="color" class="coa-stroke-color" data-coa="charges.{{index}}.stroke" data-dtype="String"
+               data-stroke-color data-index="{{index}}" data-live value="{{strokeColor}}"
+               title="{{localize 'CS.coa.fields.outlineColor'}}" {{#unless strokeOn}}disabled{{/unless}} />
+      </div>
+    </div>
     <div class="coa-four-col">
-      <label class="coa-field"><span class="coa-sub-label">stroke</span><input type="number" step="0.1" data-coa="charges.{{index}}.stroke" data-dtype="Number" data-optional data-live value="{{ch.stroke}}" /></label>
-      <label class="coa-field"><span class="coa-sub-label">stretch</span><input type="number" step="0.1" data-coa="charges.{{index}}.stretch" data-dtype="Number" data-optional data-live value="{{ch.stretch}}" /></label>
-      <label class="coa-field"><span class="coa-sub-label">angle</span><input type="number" step="1" data-coa="charges.{{index}}.angle" data-dtype="Number" data-optional data-live value="{{ch.angle}}" /></label>
-      <label class="coa-field"><span class="coa-sub-label">x</span><input type="number" step="1" data-coa="charges.{{index}}.x" data-dtype="Number" data-optional data-live value="{{ch.x}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">{{localize "CS.coa.fields.offsetX"}}</span><input type="number" step="1" data-coa="charges.{{index}}.x" data-dtype="Number" data-optional data-live value="{{ch.x}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">{{localize "CS.coa.fields.offsetY"}}</span><input type="number" step="1" data-coa="charges.{{index}}.y" data-dtype="Number" data-optional data-live value="{{ch.y}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">{{localize "CS.coa.fields.angle"}}</span><input type="number" step="1" data-coa="charges.{{index}}.angle" data-dtype="Number" data-optional data-live value="{{ch.angle}}" /></label>
+      <label class="coa-field"><span class="coa-sub-label">{{localize "CS.coa.fields.stretch"}}</span><input type="number" step="0.1" data-coa="charges.{{index}}.stretch" data-dtype="Number" data-optional data-live value="{{ch.stretch}}" /></label>
     </div>
   </div>
   {{/if}}

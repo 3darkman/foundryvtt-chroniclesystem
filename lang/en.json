@@ -29,13 +29,13 @@
         "charge": "Charge / symbol"
       },
       "preview": {
-        "live": "Live render · Armoria API",
-        "unavailable": "API unavailable — showing local sketch"
+        "live": "Live preview"
       },
       "catalog": {
         "title": "Symbol catalog",
         "count": "{shown} of {total}",
-        "empty": "No symbol found."
+        "empty": "No symbol found.",
+        "noArt": "No artwork bundled for this charge."
       },
       "actions": {
         "save": "Save coat of arms",
@@ -62,6 +62,7 @@
         "modePattern": "Pattern",
         "modeSemy": "Semy",
         "division": "Division",
+        "noDivision": "None",
         "line": "Line style",
         "ordinary": "Ordinary",
         "charge": "Charge",
@@ -74,8 +75,9 @@
         "thirdColor": "Third colour",
         "modeTincture": "Tincture",
         "modeSemyShort": "Semy",
-        "patternPicker": "Pattern (31)",
-        "semyPicker": "Charge (catalog of 399)",
+        "patternPicker": "Pattern (30)",
+        "semyPicker": "Semy charge",
+        "semyPickCharge": "Pick a charge…",
         "color1": "Colour 1",
         "color2": "Colour 2",
         "symbol": "Symbol",
@@ -84,48 +86,47 @@
         "reversed": "Mirror vertically",
         "above": "Draw above charges",
         "divided": "Divided",
+        "dividedNone": "None",
+        "dividedField": "Behind division",
+        "dividedDivision": "Within division",
+        "dividedCounter": "Counterchanged",
         "outside": "Outside",
         "layered": "Layered",
+        "background": "Background",
         "stroke": "Stroke",
+        "outline": "Outline",
+        "outlineShow": "Show",
+        "outlineColor": "Outline colour",
         "stretch": "Stretch",
         "angle": "Angle",
         "offsetX": "Offset X",
         "offsetY": "Offset Y",
-        "format": "Preview format",
-        "previewSize": "Preview size",
         "search": "Search charges…"
       },
-      "meter": {
-        "label": "COMPLEXITY / URL",
-        "ok": "OK",
-        "warn": "WARNING",
-        "block": "BLOCKED",
-        "text": "{length} / ~{max} characters",
-        "loads": "{charges} charge(s) · {ordinaries} ordinary(ies)",
-        "hint": "URL length {length} — simplify the design to save (max {max})."
-      },
       "import": {
-        "placeholder": "Paste a COA string (from Armoria: Save → Copy COA string) or an Armoria link…",
-        "help": "Paste the JSON copied from Armoria, or a link containing the definition."
+        "placeholder": "Paste an Armoria edit link (Save → Copy edit link) or a COA string…",
+        "help": "Paste the JSON copied from Armoria, or a link containing the definition.",
+        "networkHint": "Importing a seed link contacts Armoria once to resolve it — ensure you're online. Composing, preview and saving stay fully local.",
+        "shieldNote": "Heads up: Armoria's edit link doesn't include the shield shape — after importing, pick the shield yourself in the Base field panel."
       },
       "warnings": {
-        "notRendered": "Motto, diaper and zoom are not shown in the rendered image.",
-        "serviceUnavailable": "Render unavailable — the image service could not be reached.",
         "savedWithoutImage": "The definition was saved, but no image could be rendered. Use “Re-render image” later.",
-        "noUploadPermission": "You lack file-upload permission: the definition was saved without an image."
+        "noUploadPermission": "You lack file-upload permission: the definition was saved without an image.",
+        "chargeMissingArt": "Charge “{charge}” has no bundled artwork — rendered as a placeholder.",
+        "unknownVocabulary": "The imported design uses unknown heraldic vocabulary — it may not render fully."
       },
       "errors": {
         "missingField": "The base field (t1) is required.",
         "invalidValue": "Invalid {field}: “{value}”.",
         "invalidTincture": "Invalid tincture for {field}: “{value}”.",
         "invalidCharge": "Charge #{index} is not a valid charge: “{value}”.",
-        "importFailed": "Could not read that COA — paste the JSON copied from Armoria, or an Armoria link.",
-        "blocked": "The design is too complex to save. Remove some charges and try again."
+        "importFailed": "Could not read that COA — paste the JSON copied from Armoria, or an Armoria link."
       },
       "license": {
         "title": "Charge artwork licensing",
         "note": "Simple charges are CC0; complex charges (WappenWiki) are CC-BY-NC 3.0 / CC-BY-NC-SA 3.0.",
-        "source": "Source: Armoria (Azgaar) · wappenwiki.org"
+        "source": "Source: Armoria (Azgaar) · wappenwiki.org",
+        "renderer": "Renderer ported from Armoria (Azgaar / Maxim Ganiev) — MIT."
       }
     },
     "notifications": {
@@ -580,6 +581,8 @@
         "visibility": {
           "configure": "Configure public sheet",
           "done": "Done",
+          "view": "View public sheet",
+          "viewTooltip": "Open the read-only public sheet as players see it",
           "banner": "Tap each field's eye to choose what appears on the shared public sheet.",
           "public": "PUBLIC",
           "hidden": "HIDDEN",

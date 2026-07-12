@@ -23,7 +23,7 @@
     {{/each}}
   </div>
   <div class="coa-tincture-hex">
-    <span class="coa-hex-swatch" style="background:{{hex}}"></span>
+    <input type="color" class="coa-hex-color" data-coa="{{path}}" data-live value="{{colorHex}}" title="{{localize 'CS.coa.fields.customHex'}}" />
     <span class="coa-hex-name">{{selLabel}}</span>
     <input type="text" class="coa-hex-input" data-coa="{{path}}" data-live value="{{hex}}" />
     <a class="coa-hex-reset" data-action="restoreTincture" data-path="{{path}}" title="{{localize 'CS.coa.actions.restoreDefault'}}"><svg width="13" height="13"><use href="#coa-ico-reset"></use></svg></a>
@@ -32,20 +32,57 @@
 
   {{#if isPatternish}}
   <div class="coa-pattern" data-tinct-path="{{path}}" data-tinct-mode="{{mode}}">
-    <label class="coa-field">
+    {{#if isPadrao}}
+    <div class="coa-field">
       <span class="coa-sub-label">{{headLabel}}</span>
-      <select data-tinct-part="head">
-        {{#each headOptions}}<option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>{{/each}}
-      </select>
-    </label>
-    <div class="coa-three-col">
-      <label class="coa-field"><span class="coa-sub-label">{{localize "CS.coa.fields.color1"}}</span>
-        <select data-tinct-part="t1">{{#each color1}}<option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>{{/each}}</select></label>
-      <label class="coa-field"><span class="coa-sub-label">{{localize "CS.coa.fields.color2"}}</span>
-        <select data-tinct-part="t2">{{#each color2}}<option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>{{/each}}</select></label>
-      <label class="coa-field"><span class="coa-sub-label">{{localize "CS.coa.fields.size"}}</span>
-        <select data-tinct-part="size">{{#each sizeOptions}}<option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>{{/each}}</select></label>
+      <div class="coa-shield-grid coa-division-grid">
+        {{#each patternCells}}
+          <button type="button" class="coa-shield-cell {{#if this.selected}}is-selected{{/if}}"
+                  data-action="selectPatternHead" data-path="{{../path}}" data-head="{{this.key}}" title="{{this.label}}">
+            <img class="coa-cell-svg" src="{{this.img}}" alt="" />
+            <span class="coa-shield-name">{{this.label}}</span>
+          </button>
+        {{/each}}
+      </div>
     </div>
+    {{/if}}
+    {{#if isSemy}}
+    <div class="coa-field">
+      <span class="coa-sub-label">{{headLabel}}</span>
+      <button type="button" class="coa-symbol-btn" data-action="openSemyCatalog" data-path="{{path}}">
+        <span class="coa-symbol-thumb">
+          {{#if semyThumb}}<img src="{{semyThumb}}" alt="" />{{else}}<svg width="24" height="24"><use href="#gl-charge"></use></svg>{{/if}}
+        </span>
+        <div class="coa-symbol-text">
+          <div class="coa-symbol-name">{{semyChargeLabel}}</div>
+          <div class="coa-symbol-hint">{{localize "CS.coa.fields.swapCharge"}}</div>
+        </div>
+        <svg class="coa-symbol-search" width="14" height="14"><use href="#coa-ico-search"></use></svg>
+      </button>
+    </div>
+    {{/if}}
+    <div class="coa-field">
+      <span class="coa-sub-label">{{localize "CS.coa.fields.color1"}}</span>
+      <div class="coa-swatches">
+        {{#each color1}}
+          <button type="button" class="csv2-swatch {{#if this.selected}}is-selected{{/if}}" style="background:{{this.color}}"
+                  data-action="setPatternColor" data-path="{{../path}}" data-part="t1" data-tincture="{{this.key}}" title="{{this.label}}"></button>
+        {{/each}}
+      </div>
+    </div>
+    <div class="coa-field">
+      <span class="coa-sub-label">{{localize "CS.coa.fields.color2"}}</span>
+      <div class="coa-swatches">
+        {{#each color2}}
+          <button type="button" class="csv2-swatch {{#if this.selected}}is-selected{{/if}}" style="background:{{this.color}}"
+                  data-action="setPatternColor" data-path="{{../path}}" data-part="t2" data-tincture="{{this.key}}" title="{{this.label}}"></button>
+        {{/each}}
+      </div>
+    </div>
+    <label class="coa-field">
+      <span class="coa-sub-label">{{localize "CS.coa.fields.size"}}</span>
+      <select data-tinct-part="size">{{#each sizeOptions}}<option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>{{/each}}</select>
+    </label>
   </div>
   {{/if}}
 </div>

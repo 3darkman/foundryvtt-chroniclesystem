@@ -20,9 +20,10 @@ export class CSHouseActor extends CSActor {
   }
 
   /**
-   * Re-render the saved COA definition into an image (FR-020). MANUAL only — never
-   * automatic. No-op unless the definition exists, the user owns the house and can
-   * upload files. On service failure the definition is left untouched.
+   * Re-render the saved COA definition into an image (FR-010). MANUAL only — never
+   * automatic. Rendering is 100% local now; the only failure mode is the file
+   * upload. No-op unless the definition exists, the user owns the house and can
+   * upload files. On failure the definition is left untouched.
    */
   async reRenderCoa() {
     if (!this.hasCoaDefinition() || !this.isOwner || !canUpload()) return;
@@ -31,7 +32,7 @@ export class CSHouseActor extends CSActor {
     } catch (err) {
       LOGGER.warn(`CoA re-render failed for ${this.name}: ${err}`);
       ui.notifications?.warn(
-        SystemUtils.localize("CS.coa.warnings.serviceUnavailable")
+        SystemUtils.localize("CS.coa.warnings.savedWithoutImage")
       );
     }
   }

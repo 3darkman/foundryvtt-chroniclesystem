@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.280.0",
+    "@xmldom/xmldom": "^0.9.10",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -15,6 +16,7 @@
     "lint-staged": "^17.0.7",
     "pixi": "^0.3.1",
     "prettier": "^2.7.1",
+    "svg-path-bbox": "^2.1.0",
     "vitest": "^4.1.8"
   },
   "lint-staged": {
