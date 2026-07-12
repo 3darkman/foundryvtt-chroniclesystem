@@ -53,6 +53,22 @@ globalThis.foundry = {
       }
     },
   },
+  // Sheet classes destructure `foundry.applications.*` at module-eval time (class
+  // `extends HandlebarsApplicationMixin(ActorSheetV2)`), and csCharacterActor.js
+  // imports csPublicCharacterSheet.js — so these must exist or that import chain
+  // throws before any test runs. Minimal inert stand-ins (never instantiated by
+  // the pure-logic tests).
+  applications: {
+    api: { HandlebarsApplicationMixin: (Base) => Base },
+    sheets: { ActorSheetV2: class {}, ItemSheetV2: class {} },
+    ux: { TextEditor: { implementation: {} } },
+  },
+  documents: { ActiveEffect: class {}, Item: class {} },
+};
+
+// CONST globals some sheet modules read at eval/prepare time.
+globalThis.CONST = globalThis.CONST ?? {
+  DEFAULT_TOKEN: "icons/svg/mystery-man.svg",
 };
 
 // --- Runtime globals (exercised by the pure-logic paths under test) ---

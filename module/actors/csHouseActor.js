@@ -2,7 +2,7 @@ import { CSActor } from "./csActor.js";
 import LOGGER from "../utils/logger.js";
 import SystemUtils from "../utils/systemUtils.js";
 import { ChronicleSystem } from "../system/ChronicleSystem.js";
-import { CSConstants } from "../system/csConstants.js";
+import { renderAndSave, canUpload } from "../coat-of-arms/cs-coa-render.js";
 
 export class CSHouseActor extends CSActor {
   roleMap = {
@@ -13,6 +13,29 @@ export class CSHouseActor extends CSActor {
     RETAINER: "retainers",
     SERVANT: "servants",
   };
+
+  /** Does this house have a re-editable Coat of Arms definition? */
+  hasCoaDefinition() {
+    return !foundry.utils.isEmpty(this.system.coa);
+  }
+
+  /**
+   * Re-render the saved COA definition into an image (FR-010). MANUAL only — never
+   * automatic. Rendering is 100% local now; the only failure mode is the file
+   * upload. No-op unless the definition exists, the user owns the house and can
+   * upload files. On failure the definition is left untouched.
+   */
+  async reRenderCoa() {
+    if (!this.hasCoaDefinition() || !this.isOwner || !canUpload()) return;
+    try {
+      await renderAndSave(this, this.system.coa, { size: 500 });
+    } catch (err) {
+      LOGGER.warn(`CoA re-render failed for ${this.name}: ${err}`);
+      ui.notifications?.warn(
+        SystemUtils.localize("CS.coa.warnings.savedWithoutImage")
+      );
+    }
+  }
 
   removeCharacterFromHouse(
     actorId,
@@ -137,13 +160,14 @@ export class CSHouseActor extends CSActor {
       case "HEIR":
       case "FAMILY":
       case "RETAINER":
-      case "SERVANT":
+      case "SERVANT": {
         let index = this._getMemberIndexIfExists(role, actorId);
         if (index >= 0) {
           result.hasRole = true;
           result.index = index;
         }
         break;
+      }
     }
     if (result.hasRole) LOGGER.debug(`actor ${actorId} is founded as ${role}`);
     return result;
@@ -172,7 +196,7 @@ export class CSHouseActor extends CSActor {
       case "HEIR":
       case "FAMILY":
       case "RETAINER":
-      case "SERVANT":
+      case "SERVANT": {
         let list = this.getCSData().members[this.roleMap[role]];
         if (index < 0)
           index = this._getMemberIndexIfExists(role, actorId, list);
@@ -185,6 +209,7 @@ export class CSHouseActor extends CSActor {
           founded = true;
         }
         break;
+      }
     }
 
     if (founded) LOGGER.debug(`actor ${actorId} removed from ${role}`);
@@ -213,16 +238,18 @@ export class CSHouseActor extends CSActor {
         if (!description) {
           description = SystemUtils.localize("CS.sheets.house.labels.head");
         }
-      case "STEWARD":
+      // falls through
+      case "STEWARD": {
         let key = `system.members.${[this.roleMap[role]]}`;
         this.update({
           [key]: { id: actorId, description: description },
         });
         break;
+      }
       case "HEIR":
       case "FAMILY":
       case "RETAINER":
-      case "SERVANT":
+      case "SERVANT": {
         let list = this.getCSData().members[this.roleMap[role]];
         if (this._getMemberIndexIfExists(role, actorId, list) < 0) {
           list.push({ id: actorId, description: description });
@@ -236,6 +263,7 @@ export class CSHouseActor extends CSActor {
           );
         }
         break;
+      }
     }
   }
 

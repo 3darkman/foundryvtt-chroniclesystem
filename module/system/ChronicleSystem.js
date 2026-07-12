@@ -803,10 +803,27 @@ function resolveTraitBase(actor, abilityName, specialtyName = null) {
 
   const abilityData = ability?.getCSData?.() ?? ability?.system;
   const abilityKey = abilityData?.slug || slugify(ability?.name ?? abilityName);
-  const specialtyKey =
-    specialty != null
-      ? specialty.slug || scopedSpecialtySlug(abilityKey, specialty.name)
-      : null;
+  // The specialty-channel key: a REGISTERED specialty keys by its own (persisted
+  // or scoped) slug. When the rolled specialty is NOT a registered item — a weapon
+  // whose declared "Ability:Specialty" the character has no ranks in, or any test
+  // of a specialty they simply lack — still key by the scoped slug of the REQUESTED
+  // name, so effects/modifiers targeting that specialty apply even at rating 0 (the
+  // rating stays 0, so no bonus die is granted for ranks — only the effects reach
+  // the roll). `specialtyName` may already BE a scoped slug (calculateMovementData
+  // passes "athletics_run"): detected via the `abilityKey_` prefix to avoid double-
+  // scoping. A blank/degenerate name that scopes to the bare abilityKey is dropped
+  // to null so the ability bucket is never counted twice.
+  let specialtyKey = null;
+  if (specialty != null) {
+    specialtyKey =
+      specialty.slug || scopedSpecialtySlug(abilityKey, specialty.name);
+  } else if (specialtyName != null) {
+    const requested = slugify(specialtyName);
+    const scoped = requested.startsWith(`${abilityKey}_`)
+      ? requested
+      : scopedSpecialtySlug(abilityKey, specialtyName);
+    if (scoped && scoped !== abilityKey) specialtyKey = scoped;
+  }
   const basePool = ability ? ability.getCSData().rating : 2;
   const baseModifier = ability ? ability.getCSData().modifier : 0;
 

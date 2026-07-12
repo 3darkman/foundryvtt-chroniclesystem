@@ -148,6 +148,9 @@
       },
       "historicalEvents": [],
       "motto": "",
+      "coa": {},
+      "coaImg": "",
+      "coaSvg": "",
       "members": {
         "head": { "id": "", "description": "" },
         "steward": { "id": "", "description": "" },

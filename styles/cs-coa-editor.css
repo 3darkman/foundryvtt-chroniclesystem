@@ -1,0 +1,780 @@
+/* =============================================================================
+   cs-coa-editor.css — Coat of Arms editor (spec 013). ONLY the layout unique to
+   this window. Shared primitives — form controls, buttons (.csv2-btn*), segmented
+   (.csv2-segmented), swatch (.csv2-swatch), chip (.csv2-chip), eyebrow label
+   (.csv2-label) and the `--csv2-*` tokens — come from cs-components.css (SSOT,
+   Principle II). Do NOT re-declare those here. Matches the hifi design handoff
+   (docs/design_handoff_coat_of_arms). Scoped under `.cs-coa-editor`.
+   ========================================================================== */
+
+.cs-coa-editor {
+  /* Editor-only values that are NOT part of the shared token set. */
+  --coa-preview-bg: #f7f8fb;
+  --coa-chrome-fg2: #7f8794;
+  color: var(--csv2-text);
+}
+
+/* ---- Reset Foundry's default control chrome that inflates heights ------- */
+.cs-coa-editor button {
+  min-height: 0;
+  height: auto;
+  line-height: normal;
+  margin: 0;
+}
+
+/* ---- AppV2 window chrome overrides (dark title bar) --------------------- */
+.cs-coa-editor .window-header {
+  background: var(--csv2-dark);
+  color: var(--csv2-grid-head-text);
+  border-bottom: none;
+  padding: 8px 12px;
+}
+.cs-coa-editor .window-header .window-title {
+  font: 600 13px var(--csv2-font-sans);
+  color: var(--csv2-grid-head-text);
+}
+.cs-coa-editor .window-header .header-control {
+  color: var(--coa-chrome-fg2);
+}
+.cs-coa-editor .window-header .header-control:hover {
+  color: #fff;
+}
+.cs-coa-editor .window-content {
+  padding: 0;
+  background: var(--csv2-bg);
+  overflow: hidden;
+}
+.cs-coa-editor [data-application-part="main"] {
+  min-height: 0;
+}
+.cs-coa-editor .coa-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- 3-column grid ------------------------------------------------------ */
+.cs-coa-editor .coa-grid {
+  display: grid;
+  grid-template-columns: 270px 300px 1fr;
+  align-items: stretch;
+  height: 600px;
+}
+.cs-coa-editor .coa-col {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.cs-coa-editor .coa-col-preview {
+  background: var(--coa-preview-bg);
+  border-right: 1px solid var(--csv2-secondary);
+  padding: 16px;
+  gap: 13px;
+  overflow-y: auto;
+}
+.cs-coa-editor .coa-col-layers {
+  border-right: 1px solid var(--csv2-secondary);
+}
+
+.cs-coa-editor .coa-sub-label {
+  font: 500 10px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+
+/* ---- Preview column (inline vector SVG — spec 014) ---------------------- */
+.cs-coa-editor .coa-preview-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-border);
+  border-radius: 9px;
+  padding: 14px;
+  min-height: 250px;
+}
+.cs-coa-editor .coa-preview-svg {
+  width: 190px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cs-coa-editor .coa-preview-svg svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.cs-coa-editor .coa-preview-caption {
+  font: 500 9.5px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  text-align: center;
+  margin-top: -6px;
+}
+/* Background-fill control (behind the shield). */
+.cs-coa-editor .coa-bg-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cs-coa-editor .coa-bg-toggle {
+  flex: 1;
+}
+.cs-coa-editor .coa-note {
+  font: 500 10px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* ---- Import strip -------------------------------------------------------- */
+.cs-coa-editor .coa-import {
+  border-bottom: 1px solid var(--csv2-secondary);
+}
+.cs-coa-editor .coa-import-toggle,
+.cs-coa-editor .coa-section-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--csv2-primary);
+  border: none;
+  cursor: pointer;
+}
+.cs-coa-editor .coa-section-head {
+  cursor: default;
+  padding: 9px 14px;
+}
+.cs-coa-editor .coa-section-title {
+  font: 600 10.5px var(--csv2-font-mono);
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+.cs-coa-editor .coa-section-note {
+  font: 500 9px var(--csv2-font-mono);
+  color: rgba(255, 255, 255, 0.7);
+}
+.cs-coa-editor .coa-import-chevron {
+  color: rgba(255, 255, 255, 0.85);
+  transition: transform 0.15s;
+}
+.cs-coa-editor .coa-import-chevron.is-open {
+  transform: rotate(180deg);
+}
+.cs-coa-editor .coa-import-body {
+  padding: 12px 14px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cs-coa-editor .coa-import-text {
+  height: 62px;
+  font-family: var(--csv2-font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.cs-coa-editor .coa-import-hint {
+  font: 500 9.5px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+.cs-coa-editor .coa-import-note {
+  font: 600 10px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  line-height: 1.4;
+  margin: 0;
+  padding: 6px 9px;
+  border-left: 3px solid var(--csv2-primary);
+  background: var(--csv2-border-soft);
+  border-radius: 3px;
+}
+.cs-coa-editor .coa-import-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+/* ---- Layer list --------------------------------------------------------- */
+.cs-coa-editor .coa-layer-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.cs-coa-editor .coa-layer {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 13px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  border-bottom: 1px solid #eceef2;
+}
+.cs-coa-editor .coa-layer:hover {
+  filter: brightness(0.985);
+}
+.cs-coa-editor .coa-grip {
+  flex: none;
+  color: var(--csv2-muted);
+  cursor: grab;
+}
+.cs-coa-editor .coa-layer-icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(10, 4, 5, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cs-coa-editor .coa-layer-text {
+  flex: 1;
+  min-width: 0;
+}
+.cs-coa-editor .coa-layer-name {
+  font: 600 12px var(--csv2-font-sans);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cs-coa-editor .coa-layer-detail {
+  font: 500 9.5px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cs-coa-editor .coa-layer-swatch {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+.cs-coa-editor .coa-move,
+.cs-coa-editor .coa-trash {
+  flex: none;
+  display: flex;
+  color: var(--csv2-muted);
+  cursor: pointer;
+}
+.cs-coa-editor .coa-trash:hover {
+  color: var(--csv2-danger);
+}
+.cs-coa-editor .coa-move:hover {
+  color: var(--csv2-primary);
+}
+
+.cs-coa-editor .coa-add-row {
+  border-top: 1px solid var(--csv2-secondary);
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+}
+.cs-coa-editor .coa-add-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 0;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 7px;
+  background: var(--csv2-bg);
+  color: var(--csv2-primary);
+  font: 600 10.5px var(--csv2-font-sans);
+  cursor: pointer;
+}
+.cs-coa-editor .coa-add-btn:hover {
+  background: #eef3fb;
+  border-color: var(--csv2-primary);
+}
+
+/* ---- Inspector column --------------------------------------------------- */
+.cs-coa-editor .coa-insp-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  background: var(--csv2-primary);
+}
+.cs-coa-editor .coa-insp-icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.cs-coa-editor .coa-insp-name {
+  font: 700 13.5px var(--csv2-font-sans);
+  color: #fff;
+}
+.cs-coa-editor .coa-insp-kind {
+  font: 600 9.5px var(--csv2-font-sans);
+  color: rgba(255, 255, 255, 0.8);
+}
+.cs-coa-editor .coa-insp-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cs-coa-editor .coa-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.cs-coa-editor .coa-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.cs-coa-editor .coa-four-col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.cs-coa-editor .coa-check,
+.cs-coa-editor .coa-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font: 500 11.5px var(--csv2-font-sans);
+}
+
+/* ---- Shield grid (SVG shapes) ------------------------------------------- */
+.cs-coa-editor .coa-shield-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.cs-coa-editor .coa-shield-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 4px;
+  border: 1.5px solid var(--csv2-border);
+  border-radius: 8px;
+  background: var(--csv2-bg);
+  cursor: pointer;
+}
+.cs-coa-editor .coa-shield-svg {
+  width: 26px;
+  height: 30px;
+}
+/* Square cell preview (division / ordinary / pattern) — sized on the svg ELEMENT
+   (like .coa-shield-svg) so Foundry core's `svg` rule can't resize it. */
+.cs-coa-editor .coa-cell-svg {
+  width: 34px;
+  height: 34px;
+  display: block;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(10, 4, 5, 0.12);
+}
+/* Line-style picker: wide horizontal edge samples (svg sized directly). */
+.cs-coa-editor .coa-line-grid {
+  grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+}
+.cs-coa-editor .coa-line-svg {
+  width: 100%;
+  height: 22px;
+  display: block;
+}
+.cs-coa-editor .coa-shield-name {
+  font: 500 8.5px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  text-align: center;
+  line-height: 1.2;
+}
+.cs-coa-editor .coa-shield-cell:hover {
+  border-color: var(--csv2-primary);
+}
+.cs-coa-editor .coa-shield-cell.is-selected {
+  border-color: var(--csv2-primary);
+  background: #eef4fc;
+}
+
+/* ---- Charge inspector --------------------------------------------------- */
+.cs-coa-editor .coa-symbol-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 11px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 8px;
+  background: var(--csv2-bg);
+  cursor: pointer;
+  text-align: left;
+}
+.cs-coa-editor .coa-symbol-btn:hover {
+  border-color: var(--csv2-primary);
+}
+.cs-coa-editor .coa-symbol-thumb {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 7px;
+  background: #eef2f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--csv2-dark);
+}
+.cs-coa-editor .coa-symbol-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.cs-coa-editor .coa-symbol-text {
+  flex: 1;
+}
+.cs-coa-editor .coa-symbol-name {
+  font: 600 12.5px var(--csv2-font-sans);
+}
+.cs-coa-editor .coa-symbol-hint {
+  font: 500 10px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+.cs-coa-editor .coa-symbol-search {
+  color: var(--csv2-muted);
+}
+/* Position map: every valid shield position as a mini-shield-with-dot cell. The
+   IMAGE is the whole point (players can't read Armoria's letter codes), so the
+   preview is large and there is no text label — the shield + dot say it all. */
+.cs-coa-editor .coa-posmap-grid {
+  grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 2px;
+}
+.cs-coa-editor .coa-posmap-cell {
+  padding: 5px 4px;
+}
+/* Reuse the shared `.coa-shield-svg` component (DRY) — just size it up for the
+   position map so the shield (with its dot) reads clearly. Portrait so the whole
+   shield fits with breathing room. */
+.cs-coa-editor .coa-posmap-grid .coa-shield-svg {
+  width: 52px;
+  height: 62px;
+}
+.cs-coa-editor .coa-toggle-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 9px;
+}
+.cs-coa-editor .coa-toggle {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 6px;
+  font-size: 11px;
+}
+.cs-coa-editor input[type="range"] {
+  width: 100%;
+  accent-color: var(--csv2-primary);
+}
+/* Charge outline (stroke) control: show/hide toggle + colour swatch. */
+.cs-coa-editor .coa-stroke-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cs-coa-editor .coa-stroke-toggle {
+  flex: 1;
+}
+.cs-coa-editor .coa-stroke-color {
+  flex: none;
+  width: 40px;
+  height: 28px;
+  padding: 2px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 6px;
+  background: var(--csv2-bg);
+  cursor: pointer;
+}
+.cs-coa-editor .coa-stroke-color:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---- Advanced disclosure ------------------------------------------------ */
+.cs-coa-editor .coa-advanced {
+  border-top: 1px dashed var(--csv2-border);
+  padding-top: 11px;
+}
+.cs-coa-editor .coa-advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  color: var(--csv2-primary);
+  font: 600 10.5px var(--csv2-font-sans);
+}
+.cs-coa-editor .coa-advanced-toggle svg {
+  transition: transform 0.15s;
+}
+.cs-coa-editor .coa-advanced-toggle.is-open svg {
+  transform: rotate(180deg);
+}
+.cs-coa-editor .coa-advanced-body {
+  margin-top: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---- Tincture control (swatch/segmented/label are shared) --------------- */
+.cs-coa-editor .coa-tincture {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.cs-coa-editor .coa-tincture-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cs-coa-editor .coa-tincture-head .csv2-segmented {
+  flex: none;
+}
+.cs-coa-editor .coa-tincture-head .csv2-segmented button {
+  flex: none;
+  padding: 4px 9px;
+  font-size: 10px;
+}
+.cs-coa-editor .coa-swatches {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.cs-coa-editor .coa-tincture-hex {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #f4f6fb;
+  border: 1px solid var(--csv2-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.cs-coa-editor .coa-hex-color {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 2px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  cursor: pointer;
+}
+.cs-coa-editor .coa-hex-name {
+  font: 600 11.5px var(--csv2-font-sans);
+  flex: none;
+}
+.cs-coa-editor .coa-hex-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--csv2-font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 5px 7px;
+}
+.cs-coa-editor .coa-hex-reset {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 5px;
+  background: var(--csv2-bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--csv2-muted-2);
+}
+.cs-coa-editor .coa-hex-reset:hover {
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+}
+.cs-coa-editor .coa-pattern {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---- Footer ------------------------------------------------------------- */
+.cs-coa-editor .coa-footer {
+  border-top: 1px solid var(--csv2-secondary);
+  background: var(--coa-preview-bg);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cs-coa-editor .coa-footer-spacer {
+  flex: 1;
+}
+
+/* ---- Catalog modal ------------------------------------------------------ */
+/* Anchored to .coa-body (position:relative), NOT position:fixed — an AppV2 window
+   is transform-positioned, so `fixed` resolves relative to the window and gets
+   clipped by .window-content{overflow:hidden}. `absolute` fills the editor body
+   so the modal is fully visible and its panel fits the window. */
+.cs-coa-editor .coa-catalog-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 4, 5, 0.55);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.cs-coa-editor .coa-catalog-panel {
+  width: 660px;
+  max-width: 100%;
+  max-height: 100%;
+  background: var(--csv2-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(10, 4, 5, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+.cs-coa-editor .coa-catalog-head {
+  background: var(--csv2-dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 17px;
+}
+.cs-coa-editor .coa-catalog-title {
+  font: 600 13.5px var(--csv2-font-sans);
+}
+.cs-coa-editor .coa-catalog-close {
+  color: #9aa2ae;
+  cursor: pointer;
+  display: flex;
+}
+.cs-coa-editor .coa-catalog-close:hover {
+  color: #fff;
+}
+.cs-coa-editor .coa-catalog-search-row {
+  padding: 15px 17px;
+  border-bottom: 1px solid var(--csv2-secondary);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.cs-coa-editor .coa-catalog-search-ico {
+  color: var(--csv2-muted);
+  flex: none;
+}
+.cs-coa-editor .coa-catalog-search {
+  flex: 1;
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+.cs-coa-editor .coa-catalog-count {
+  font: 600 10.5px var(--csv2-font-mono);
+  color: var(--csv2-muted);
+  flex: none;
+}
+.cs-coa-editor .coa-catalog-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 17px;
+}
+/* Responsive columns — fit as many as the width allows, never scroll sideways. */
+.cs-coa-editor .coa-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+  gap: 10px;
+}
+.cs-coa-editor .coa-catalog-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 6px;
+  border: 1.5px solid var(--csv2-border);
+  border-radius: 9px;
+  background: var(--csv2-bg);
+  cursor: pointer;
+}
+.cs-coa-editor .coa-catalog-item:hover {
+  border-color: var(--csv2-primary);
+  background: #f4f8fd;
+}
+.cs-coa-editor .coa-catalog-item.is-selected {
+  border-color: var(--csv2-primary);
+  background: #eef4fc;
+}
+.cs-coa-editor .coa-catalog-item.is-hidden {
+  display: none;
+}
+.cs-coa-editor .coa-catalog-item img,
+.cs-coa-editor .coa-catalog-noimg {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Charges with no bundled art — subtle "no preview" mark, not a stark black star. */
+.cs-coa-editor .coa-catalog-noimg {
+  color: var(--csv2-muted);
+  opacity: 0.55;
+}
+.cs-coa-editor .coa-catalog-label {
+  font: 500 9px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  text-align: center;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.cs-coa-editor .coa-catalog-foot {
+  border-top: 1px solid var(--csv2-secondary);
+  padding: 12px 17px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.cs-coa-editor .coa-license-note {
+  font: 500 10px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+
+/* Edit-coat button on the house resources tab. */
+.coa-actions {
+  gap: 6px;
+  justify-content: center;
+  margin-top: 6px;
+}
+.coa-actions button {
+  font-size: 12px;
+  cursor: pointer;
+}

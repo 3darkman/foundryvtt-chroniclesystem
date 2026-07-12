@@ -1,0 +1,35 @@
+{{!-- Searchable charge catalog (~399) with bundled thumbnails + license note.
+      Context = the `catalog` object { items, count }. Backdrop click closes via a
+      manual listener (event.target === overlay). --}}
+<div class="coa-catalog-overlay">
+  <div class="coa-catalog-panel">
+    <div class="coa-catalog-head">
+      <span class="coa-catalog-title">{{localize "CS.coa.catalog.title"}}</span>
+      <a class="coa-catalog-close" data-action="closeCatalog" title="{{localize 'CS.coa.actions.close'}}"><svg width="15" height="15"><use href="#coa-ico-x"></use></svg></a>
+    </div>
+    <div class="coa-catalog-search-row">
+      <svg class="coa-catalog-search-ico" width="15" height="15"><use href="#coa-ico-search"></use></svg>
+      <input class="coa-catalog-search" type="search" placeholder="{{localize 'CS.coa.fields.search'}}" />
+      <span class="coa-catalog-count">{{count}}</span>
+    </div>
+    <div class="coa-catalog-scroll">
+      <div class="coa-catalog-grid">
+        {{#each items}}
+          <button type="button" class="coa-catalog-item {{#if this.selected}}is-selected{{/if}}"
+                  data-action="pickCatalog" data-charge="{{this.key}}" title="{{this.label}}">
+            {{#if this.thumb}}
+              <img src="{{this.thumb}}" alt="" loading="lazy" />
+            {{else}}
+              <span class="coa-catalog-noimg" title="{{localize 'CS.coa.catalog.noArt'}}"><svg width="26" height="26"><use href="#coa-ico-noart"></use></svg></span>
+            {{/if}}
+            <span class="coa-catalog-label">{{this.label}}</span>
+          </button>
+        {{/each}}
+      </div>
+    </div>
+    <div class="coa-catalog-foot">
+      <span class="coa-license-note">{{localize "CS.coa.license.note"}}</span>
+      <button type="button" class="csv2-btn csv2-btn--primary" data-action="useCatalog">{{localize "CS.coa.actions.useCharge"}}</button>
+    </div>
+  </div>
+</div>

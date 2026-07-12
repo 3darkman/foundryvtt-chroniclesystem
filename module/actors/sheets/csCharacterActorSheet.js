@@ -10,6 +10,7 @@ import SystemUtils from "../../utils/systemUtils.js";
 import { CSConstants } from "../../system/csConstants.js";
 import { INTRIGUE_TECHNIQUES } from "../../vocabulary/cs-intrigue-techniques.js";
 import { influenceFor } from "../../effects/cs-effect-modifiers.js";
+import { CSPublicCharacterSheet } from "./csPublicCharacterSheet.js";
 import {
   PUBLIC_VISIBILITY_FIELDS,
   PUBLIC_VISIBILITY_KEYS,
@@ -44,6 +45,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
       deleteWound: CSCharacterActorSheet._onClickWoundDelete,
       clickSquare: CSCharacterActorSheet._onClickSquare,
       openHouse: CSCharacterActorSheet._onOpenHouse,
+      viewPublicSheet: CSCharacterActorSheet._onViewPublicSheet,
       togglePubMode: CSCharacterActorSheet._onTogglePubMode,
       toggleFieldVisibility: CSCharacterActorSheet._onToggleFieldVisibility,
       // NOTE: `editImage` (portrait) and `configurePrototypeToken` (header
@@ -680,6 +682,29 @@ export class CSCharacterActorSheet extends CSActorSheet {
     event.preventDefault();
     const house = game.actors.get(target.dataset.actorId);
     if (house) house.sheet.render({ force: true });
+  }
+
+  /**
+   * Open the read-only Public Character Sheet of THIS actor as a preview, so the
+   * owner/GM can see exactly what a Limited player sees. A Limited user is routed
+   * to that sheet automatically (`CSCharacterActor#_getSheetClass`); this button
+   * lets a non-Limited user (owner/GM) open the same sheet on demand, alongside
+   * the standard sheet. The two sheets carry distinct application ids (the id
+   * embeds the class name), so they coexist without collision. Reuses the already-
+   * open preview if present (its id is deterministic) instead of stacking a
+   * duplicate window.
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  // eslint-disable-next-line no-unused-vars
+  static async _onViewPublicSheet(event, target) {
+    event.preventDefault();
+    const existing = Object.values(this.actor.apps).find(
+      (app) => app instanceof CSPublicCharacterSheet
+    );
+    const preview =
+      existing ?? new CSPublicCharacterSheet({ document: this.actor });
+    preview.render({ force: true });
   }
 
   /**

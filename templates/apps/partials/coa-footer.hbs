@@ -1,0 +1,11 @@
+{{!-- Footer actions. No complexity ceiling on Save — the renderer is local (FR-014). --}}
+<footer class="coa-footer">
+  <button type="button" class="csv2-btn csv2-btn--secondary" data-action="randomCoa">
+    <svg width="14" height="14"><use href="#coa-ico-shuffle"></use></svg> {{localize "CS.coa.actions.random"}}
+  </button>
+  <div class="coa-footer-spacer"></div>
+  <button type="button" class="csv2-btn csv2-btn--secondary" data-action="close">{{localize "CS.coa.actions.close"}}</button>
+  <button type="button" class="csv2-btn csv2-btn--primary" data-action="save">
+    <svg width="15" height="15"><use href="#coa-ico-save"></use></svg> {{localize "CS.coa.actions.save"}}
+  </button>
+</footer>

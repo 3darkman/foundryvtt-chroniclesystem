@@ -1,0 +1,13 @@
+{{!-- Shield inspector — navigable grid of all 45 shapes drawn as SVG. --}}
+<div class="coa-field">
+  <div class="csv2-label">{{localize "CS.coa.fields.shape"}} · 45</div>
+  <div class="coa-shield-grid">
+    {{#each shields}}
+      <button type="button" class="coa-shield-cell {{#if this.selected}}is-selected{{/if}}"
+              data-action="selectShield" data-shield="{{this.key}}" title="{{this.label}}">
+        {{{this.svg}}}
+        <span class="coa-shield-name">{{this.label}}</span>
+      </button>
+    {{/each}}
+  </div>
+</div>

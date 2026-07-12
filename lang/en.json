@@ -1,5 +1,134 @@
 {
   "CS": {
+    "coa": {
+      "title": "Coat of Arms — {name}",
+      "editButton": "Edit coat of arms",
+      "reRenderButton": "Re-render image",
+      "sections": {
+        "preview": "Preview",
+        "layers": "Layers",
+        "inspector": "Inspector",
+        "import": "Import COA"
+      },
+      "layers": {
+        "shield": "Shield",
+        "field": "Base field",
+        "division": "Division",
+        "ordinary": "Ordinary",
+        "charge": "Charge",
+        "ordinaries": "Ordinaries",
+        "charges": "Charges",
+        "topFront": "top = front",
+        "empty": "No layer selected — pick one on the left."
+      },
+      "kinds": {
+        "shield": "Shield shape",
+        "field": "Background tincture",
+        "division": "Field division",
+        "ordinary": "Ordinary",
+        "charge": "Charge / symbol"
+      },
+      "preview": {
+        "live": "Live preview"
+      },
+      "catalog": {
+        "title": "Symbol catalog",
+        "count": "{shown} of {total}",
+        "empty": "No symbol found.",
+        "noArt": "No artwork bundled for this charge."
+      },
+      "actions": {
+        "save": "Save coat of arms",
+        "random": "Random",
+        "import": "Import",
+        "load": "Load",
+        "close": "Close",
+        "addOrdinary": "+ Ordinary",
+        "addCharge": "+ Charge",
+        "remove": "Remove",
+        "moveUp": "Move up (front)",
+        "moveDown": "Move down (back)",
+        "openCatalog": "Browse charges…",
+        "useCharge": "Use selected",
+        "restoreDefault": "Restore default",
+        "advanced": "Advanced options"
+      },
+      "fields": {
+        "shape": "Shape",
+        "tincture": "Tincture",
+        "customHex": "Custom colour",
+        "mode": "Mode",
+        "modeSolid": "Solid",
+        "modePattern": "Pattern",
+        "modeSemy": "Semy",
+        "division": "Division",
+        "noDivision": "None",
+        "line": "Line style",
+        "ordinary": "Ordinary",
+        "charge": "Charge",
+        "position": "Position",
+        "size": "Size",
+        "fieldTincture": "Field tincture",
+        "secondHalfTincture": "Second-half tincture",
+        "chargeColor": "Colour (t)",
+        "secondColor": "Second colour",
+        "thirdColor": "Third colour",
+        "modeTincture": "Tincture",
+        "modeSemyShort": "Semy",
+        "patternPicker": "Pattern (30)",
+        "semyPicker": "Semy charge",
+        "semyPickCharge": "Pick a charge…",
+        "color1": "Colour 1",
+        "color2": "Colour 2",
+        "symbol": "Symbol",
+        "swapCharge": "Change — search the catalog of 399",
+        "sinister": "Mirror horizontally",
+        "reversed": "Mirror vertically",
+        "above": "Draw above charges",
+        "divided": "Divided",
+        "dividedNone": "None",
+        "dividedField": "Behind division",
+        "dividedDivision": "Within division",
+        "dividedCounter": "Counterchanged",
+        "outside": "Outside",
+        "layered": "Layered",
+        "background": "Background",
+        "stroke": "Stroke",
+        "outline": "Outline",
+        "outlineShow": "Show",
+        "outlineColor": "Outline colour",
+        "stretch": "Stretch",
+        "angle": "Angle",
+        "offsetX": "Offset X",
+        "offsetY": "Offset Y",
+        "search": "Search charges…"
+      },
+      "import": {
+        "placeholder": "Paste an Armoria edit link (Save → Copy edit link) or a COA string…",
+        "help": "Paste the JSON copied from Armoria, or a link containing the definition.",
+        "networkHint": "Importing a seed link contacts Armoria once to resolve it — ensure you're online. Composing, preview and saving stay fully local.",
+        "shieldNote": "Heads up: Armoria's edit link doesn't include the shield shape — after importing, pick the shield yourself in the Base field panel."
+      },
+      "warnings": {
+        "savedWithoutImage": "The definition was saved, but no image could be rendered. Use “Re-render image” later.",
+        "noUploadPermission": "You lack file-upload permission: the definition was saved without an image.",
+        "chargeMissingArt": "Charge “{charge}” has no bundled artwork — rendered as a placeholder.",
+        "unknownVocabulary": "The imported design uses unknown heraldic vocabulary — it may not render fully."
+      },
+      "errors": {
+        "missingField": "The base field (t1) is required.",
+        "invalidValue": "Invalid {field}: “{value}”.",
+        "invalidTincture": "Invalid tincture for {field}: “{value}”.",
+        "invalidCharge": "Charge #{index} is not a valid charge: “{value}”.",
+        "importFailed": "Could not read that COA — paste the JSON copied from Armoria, or an Armoria link."
+      },
+      "license": {
+        "title": "Charge artwork licensing",
+        "note": "Simple charges are CC0; complex charges (WappenWiki) are CC-BY-NC 3.0 / CC-BY-NC-SA 3.0.",
+        "source": "Source: Armoria (Azgaar) · wappenwiki.org",
+        "renderer": "Renderer ported from Armoria (Azgaar / Maxim Ganiev) — MIT."
+      }
+    },
     "notifications": {
       "dicePoolInvalid": "you cannot roll this test because your dice pool results in less than 1 die being kept.",
       "multipleTargets": "More than one target selected — target-derived difficulty and modifiers are omitted.",
@@ -452,6 +581,8 @@
         "visibility": {
           "configure": "Configure public sheet",
           "done": "Done",
+          "view": "View public sheet",
+          "viewTooltip": "Open the read-only public sheet as players see it",
           "banner": "Tap each field's eye to choose what appears on the shared public sheet.",
           "public": "PUBLIC",
           "hidden": "HIDDEN",

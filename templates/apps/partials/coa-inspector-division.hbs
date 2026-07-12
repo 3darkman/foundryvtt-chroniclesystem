@@ -1,0 +1,32 @@
+{{!-- Division inspector — visual partition grid + line (linear only) + 2nd-half tincture. --}}
+<div class="coa-field">
+  <div class="csv2-label">{{localize "CS.coa.fields.division"}} · 16</div>
+  <div class="coa-shield-grid coa-division-grid">
+    {{#each divisionCells}}
+      <button type="button" class="coa-shield-cell {{#if this.selected}}is-selected{{/if}}"
+              data-action="selectDivision" data-division="{{this.key}}" title="{{this.label}}">
+        {{{this.svg}}}
+        <span class="coa-shield-name">{{this.label}}</span>
+      </button>
+    {{/each}}
+  </div>
+</div>
+
+{{#if lined}}
+<div class="coa-field">
+  <div class="csv2-label">{{localize "CS.coa.fields.line"}} · 33</div>
+  <div class="coa-shield-grid coa-line-grid">
+    {{#each lineCells}}
+      <button type="button" class="coa-shield-cell {{#if this.selected}}is-selected{{/if}}"
+              data-action="selectLine" data-line="{{this.key}}" title="{{this.label}}">
+        {{{this.svg}}}
+        <span class="coa-shield-name">{{this.label}}</span>
+      </button>
+    {{/each}}
+  </div>
+</div>
+{{/if}}
+
+{{#if hasDivision}}
+  {{> "systems/chroniclesystem/templates/apps/partials/coa-tincture.hbs" tincture}}
+{{/if}}

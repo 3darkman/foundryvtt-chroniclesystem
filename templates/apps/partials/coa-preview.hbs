@@ -1,0 +1,19 @@
+{{!-- Preview column: the coat of arms rendered LOCALLY and injected inline as a
+      vector SVG on every edit (no network, no complexity meter — spec 014). The
+      .coa-preview-svg host is filled by the editor's #updatePreview. --}}
+<div class="coa-preview-card">
+  <div class="coa-preview-svg"></div>
+</div>
+<div class="coa-preview-caption">{{preview.caption}}</div>
+
+<div class="coa-bg-row">
+  <label class="coa-toggle coa-bg-toggle">
+    <input type="checkbox" data-bg-toggle {{#if background.on}}checked{{/if}} />
+    <span>{{localize "CS.coa.fields.background"}}</span>
+  </label>
+  <input type="color" class="coa-hex-color" data-coa="background" data-dtype="String"
+         data-bg-color data-live value="{{background.color}}"
+         title="{{localize 'CS.coa.fields.background'}}" {{#unless background.on}}disabled{{/unless}} />
+</div>
+
+<p class="coa-note">{{localize "CS.coa.license.renderer"}}</p>

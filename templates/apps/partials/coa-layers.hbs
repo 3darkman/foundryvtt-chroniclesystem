@@ -1,0 +1,46 @@
+{{!-- Layers column: import strip + layer list (top = front) + add buttons. --}}
+{{> "systems/chroniclesystem/templates/apps/partials/coa-import.hbs"}}
+
+<div class="coa-section-head">
+  <span class="coa-section-title">{{localize "CS.coa.sections.layers"}}</span>
+  <span class="coa-section-note">{{localize "CS.coa.layers.topFront"}}</span>
+</div>
+
+<div class="coa-layer-list">
+  {{#each layers}}
+    <div class="coa-layer {{#if this.selected}}is-selected{{/if}}"
+         style="background:{{this.rowBg}};border-left-color:{{this.accent}}"
+         data-action="selectLayer" data-layer-type="{{this.type}}"
+         {{#if this.hasIndex}}data-index="{{this.index}}"{{/if}}>
+      <svg class="coa-grip" width="13" height="13"><use href="#coa-ico-grip"></use></svg>
+      <span class="coa-layer-icon" style="background:{{this.iconBg}};color:{{this.iconFg}}">
+        <svg width="15" height="15"><use href="#{{this.glyph}}"></use></svg>
+      </span>
+      <div class="coa-layer-text">
+        <div class="coa-layer-name" style="color:{{this.nameColor}}">{{this.name}}</div>
+        <div class="coa-layer-detail">{{this.detail}}</div>
+      </div>
+      {{#if this.canMoveUp}}
+        <a class="coa-move" data-action="moveLayer" data-layer-type="{{this.type}}" data-index="{{this.index}}" data-dir="up" title="{{localize 'CS.coa.actions.moveUp'}}"><svg width="12" height="12"><use href="#coa-ico-up"></use></svg></a>
+      {{/if}}
+      {{#if this.canMoveDown}}
+        <a class="coa-move" data-action="moveLayer" data-layer-type="{{this.type}}" data-index="{{this.index}}" data-dir="down" title="{{localize 'CS.coa.actions.moveDown'}}"><svg width="12" height="12"><use href="#coa-ico-down"></use></svg></a>
+      {{/if}}
+      {{#if this.hasTinct}}
+        <span class="coa-layer-swatch" style="background:{{this.tinctHex}}"></span>
+      {{/if}}
+      {{#unless this.locked}}
+        <a class="coa-trash" data-action="removeLayer" data-layer-type="{{this.type}}" {{#if this.hasIndex}}data-index="{{this.index}}"{{/if}} title="{{localize 'CS.coa.actions.remove'}}"><svg width="13" height="13"><use href="#coa-ico-trash"></use></svg></a>
+      {{/unless}}
+    </div>
+  {{/each}}
+</div>
+
+<div class="coa-add-row">
+  <button type="button" class="coa-add-btn" data-action="addOrdinary">
+    <svg width="12" height="12"><use href="#coa-ico-plus"></use></svg> {{localize "CS.coa.layers.ordinary"}}
+  </button>
+  <button type="button" class="coa-add-btn" data-action="addCharge">
+    <svg width="12" height="12"><use href="#coa-ico-plus"></use></svg> {{localize "CS.coa.layers.charge"}}
+  </button>
+</div>
