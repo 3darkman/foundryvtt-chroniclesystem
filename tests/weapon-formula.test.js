@@ -71,6 +71,41 @@ describe("weapon damage — updateDamageValue (eval-based, characterized)", () =
     updateDamage.call(weapon, ability4);
     expect(weapon.damageValue).toBe(5);
   });
+
+  // 4.12–4.14: safe-fallback divergences from the old eval() (which returned 45
+  // for 4.12 and THREW SyntaxError for 4.13/4.14). The new parser is strictly
+  // more robust: any malformed/incomplete tail → the bare ability value (FR-006,
+  // clarification 2026-07-12). 4.15 pins the one preserved eval behavior (/0).
+
+  it("4.12 @Ability<number> with no operator → bare ability value (not eval concat)", () => {
+    const weapon = makeFakeWeapon({ damage: "@Fighting5" });
+    updateDamage.call(weapon, ability4);
+    expect(weapon.damageValue).toBe(4); // NOT 45
+  });
+
+  it("4.13 @Ability<operator> with no operand → bare ability value, no throw", () => {
+    const weapon = makeFakeWeapon({ damage: "@Fighting+" });
+    expect(() => updateDamage.call(weapon, ability4)).not.toThrow();
+    expect(weapon.damageValue).toBe(4);
+  });
+
+  it("4.14 malformed operator run → bare ability value, no throw", () => {
+    const weapon = makeFakeWeapon({ damage: "@Fighting++1" });
+    expect(() => updateDamage.call(weapon, ability4)).not.toThrow();
+    expect(weapon.damageValue).toBe(4);
+  });
+
+  it("4.15 @Ability/0 → Infinity (behavior-preserving; eval('4/0') was Infinity), no throw", () => {
+    const weapon = makeFakeWeapon({ damage: "@Fighting/0" });
+    expect(() => updateDamage.call(weapon, ability4)).not.toThrow();
+    expect(weapon.damageValue).toBe(Infinity);
+  });
+
+  it("US2: a code-like damage string is inert — resolves to the bare ability, never executes, no throw", () => {
+    const weapon = makeFakeWeapon({ damage: "@Fighting.constructor(1)" });
+    expect(() => updateDamage.call(weapon, ability4)).not.toThrow();
+    expect(weapon.damageValue).toBe(4); // regex captures only @Fighting; the rest is ignored
+  });
 });
 
 describe("weapon specialty — split via the 'weapon-test' helper", () => {
