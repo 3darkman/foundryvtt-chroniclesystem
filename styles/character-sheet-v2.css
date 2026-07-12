@@ -1530,6 +1530,14 @@
   color: var(--csv2-dark);
 }
 
+/* Right-side action cluster: "View public sheet" + the configure toggle. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
 /* Master toggle button — outline blue (off) / filled blue (on). */
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-toggle {
   display: inline-flex;

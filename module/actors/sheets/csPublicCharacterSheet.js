@@ -41,6 +41,18 @@ export class CSPublicCharacterSheet extends HandlebarsApplicationMixin(
   };
 
   /**
+   * Always read-only. A Limited user is not an OWNER, so this is already false
+   * on the auto-routed path — but the owner/GM "View public sheet" preview
+   * (csCharacterActorSheet) renders this same sheet for an OWNER, where the base
+   * getter would return true. Forcing false keeps the preview a faithful, non-
+   * editable projection (and would disable any control were one ever added).
+   * @override
+   */
+  get isEditable() {
+    return false;
+  }
+
+  /**
    * Compute a 1–2 letter avatar monogram from the actor name: first letter of the
    * first word + first letter of the last word (single word → its first two
    * letters), uppercased. Empty name → "?". A deterministic, locale-agnostic

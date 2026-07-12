@@ -3,10 +3,16 @@
     {{#if pub}}
     <div class="cs2-pub-bar">
         <h2 class="cs2-pub-title">{{localize "CS.sheets.character.tabs.description"}}</h2>
-        <button type="button" class="cs2-pub-toggle{{#if pubMode}} on{{/if}}" data-action="togglePubMode">
-            <svg width="13" height="13" aria-hidden="true"><use href="#ico-eye"></use></svg>
-            <span>{{pubLabel}}</span>
-        </button>
+        <div class="cs2-pub-actions">
+            <button type="button" class="cs2-pub-toggle" data-action="viewPublicSheet" title="{{localize "CS.sheets.character.visibility.viewTooltip"}}">
+                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                <span>{{localize "CS.sheets.character.visibility.view"}}</span>
+            </button>
+            <button type="button" class="cs2-pub-toggle{{#if pubMode}} on{{/if}}" data-action="togglePubMode">
+                <svg width="13" height="13" aria-hidden="true"><use href="#ico-eye"></use></svg>
+                <span>{{pubLabel}}</span>
+            </button>
+        </div>
     </div>
     {{#if pubMode}}
     <div class="cs2-pub-banner">
