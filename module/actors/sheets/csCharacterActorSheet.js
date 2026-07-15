@@ -143,29 +143,47 @@ export class CSCharacterActorSheet extends CSActorSheet {
       );
       formula = ChronicleSystem.adjustFormulaByWeapon(actor, formula, weapon);
       weapon.updateDamageValue(this.actor);
-      weapon.formula = formula;
+      // spec 017 (US2): the weapon test chip through the SSOT utility, using the
+      // SAME rollId string the Combat + Equipments templates built — so the same
+      // weapon renders an identical formula in both windows (FR-008).
+      weapon.weaponChip = ChronicleSystem.getRollChip(
+        actor,
+        `weapon-test:${weapon.name}:${formula.toStr()}`
+      );
     });
 
-    // US1: expose the EFFECTIVE roll formula (base + non-optional effects) per
-    // ability and per specialty so the chips show what a quick roll would total
-    // (paridade chip↔jogada, FR-003/SC-001) — the SAME getActorAbilityFormula
-    // the weapon/intrigue/sorcery/Fortune chips already consume.
+    // spec 017 (US2): the ability + specialty chips through the one SSOT utility
+    // (getRollChip), so every chip's DISPLAYED formula equals its effective quick
+    // roll (paridade chip↔jogada, FR-001/SC-001). The rollId strings match what
+    // the abilities template built (`ability:{name}` / `specialty:{spec}:{ability}`).
     character.owned.abilities.forEach((ability) => {
-      ability.rollFormula = ChronicleSystem.getActorAbilityFormula(
+      ability.abilityChip = ChronicleSystem.getRollChip(
         actor,
-        ability.name,
-        null
+        `ability:${ability.name}`
       );
       for (const specialty of Object.values(ability.system.specialties ?? {})) {
         if (!specialty.rating) continue;
-        specialty.rollFormula = ChronicleSystem.getActorAbilityFormula(
+        specialty.specialtyChip = ChronicleSystem.getRollChip(
           actor,
-          ability.name,
-          specialty.name
+          `specialty:${specialty.name}:${ability.name}`
         );
       }
     });
 
+    // spec 017 (US2): each sorcery-work test chip through the SSOT utility. The
+    // rollId is `formula:{ability}:{toStr}` — the SAME string the sorcery template
+    // built — so the displayed formula equals the effective quick roll.
+    const sorceryChip = (abilityName) => {
+      const f = ChronicleSystem.getActorAbilityFormula(
+        actor,
+        abilityName,
+        null
+      );
+      return ChronicleSystem.getRollChip(
+        actor,
+        `formula:${abilityName}:${f.toStr()}`
+      );
+    };
     character.owned.techniques.forEach((technique) => {
       let techniqueData = technique.system;
       let works = (context.currentInjuries = Object.values(
@@ -173,28 +191,11 @@ export class CSCharacterActorSheet extends CSActorSheet {
       ));
       works.forEach((work) => {
         if (work.type === "SPELL") {
-          work.test.spellcastingFormula =
-            ChronicleSystem.getActorAbilityFormula(
-              actor,
-              work.test.spellcasting,
-              null
-            );
+          work.test.spellcastingChip = sorceryChip(work.test.spellcasting);
         } else {
-          work.test.alignmentFormula = ChronicleSystem.getActorAbilityFormula(
-            actor,
-            work.test.alignment,
-            null
-          );
-          work.test.invocationFormula = ChronicleSystem.getActorAbilityFormula(
-            actor,
-            work.test.invocation,
-            null
-          );
-          work.test.unleashingFormula = ChronicleSystem.getActorAbilityFormula(
-            actor,
-            work.test.unleashing,
-            null
-          );
+          work.test.alignmentChip = sorceryChip(work.test.alignment);
+          work.test.invocationChip = sorceryChip(work.test.invocation);
+          work.test.unleashingChip = sorceryChip(work.test.unleashing);
         }
       });
     });
@@ -382,12 +383,28 @@ export class CSCharacterActorSheet extends CSActorSheet {
       const influenceValue =
         actor.getAbilityValueBySlug(entry.influenceAbilitySlug) +
         influenceFor(influence, entry.slug);
-      data.techniques[entry.slug] = new Technique(
-        SystemUtils.localize(entry.nameKey),
+      const name = SystemUtils.localize(entry.nameKey);
+      const deceptionFormula = deceptionByTechnique[entry.slug];
+      const technique = new Technique(
+        name,
         influenceValue,
         persuasionFormula,
-        deceptionByTechnique[entry.slug]
+        deceptionFormula
       );
+      // spec 017 (US1): route both intrigue chips through the SSOT so their
+      // DISPLAYED formula folds the disposition-level modifier (matching the
+      // effective quick roll), while the executed id stays byte-identical. The
+      // rollId strings are the SAME the template built from this.name / this
+      // formulas, so the roll is unchanged (no double-count, FR-004).
+      technique.persuasionChip = ChronicleSystem.getRollChip(
+        actor,
+        `persuasion:${name}:${persuasionFormula.toStr()}`
+      );
+      technique.deceptionChip = ChronicleSystem.getRollChip(
+        actor,
+        `deception:${name}:${deceptionFormula.toStr()}`
+      );
+      data.techniques[entry.slug] = technique;
     }
   }
 

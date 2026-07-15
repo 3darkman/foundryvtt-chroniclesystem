@@ -9,8 +9,8 @@
                 <div class="item ability cs2-row" data-item-id="{{ability._id}}" draggable="true" style="display:contents">
                     <div class="cs2-grid-cell center">
                         {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                            id=(concat "ability:" ability.name)
-                            label=(format-formula ability.rollFormula) }}
+                            id=ability.abilityChip.id
+                            label=ability.abilityChip.label }}
                     </div>
                     <div class="cs2-grid-cell">
                         <label class="ability-label item-edit" data-action="editItem"><a>{{ability.name}}</a></label>
@@ -19,8 +19,8 @@
                         {{#each ability.system.specialties as |specialty key|}}
                             {{#if specialty.rating}}
                             {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                                id=(concat "specialty:" specialty.name ":" ../this.name)
-                                label=(concat specialty.name " " (format-formula specialty.rollFormula)) }}
+                                id=specialty.specialtyChip.id
+                                label=(concat specialty.name " " specialty.specialtyChip.label) }}
                             {{/if}}
                         {{/each}}
                     </div>

@@ -26,8 +26,8 @@
                     <div class="cs2-grid-cell weapon-label item-edit" data-action="editItem"><a>{{weapon.name}}</a></div>
                     <div class="cs2-grid-cell center">
                         {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                            id=(concat "weapon-test:" weapon.name ":" (formulaToStr weapon.formula))
-                            label=(format-formula weapon.formula)
+                            id=weapon.weaponChip.id
+                            label=weapon.weaponChip.label
                             rollKind="weapon" itemId=weapon.id }}
                     </div>
                     <div class="cs2-grid-cell center mono weapon-damage">{{weapon.damageValue}}</div>
