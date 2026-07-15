@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { CSCharacterActor } from "../module/actors/csCharacterActor.js";
+import { CSActor } from "../module/actors/csActor.js";
 
 // Wave 2 read-side — the five channel getters share one buffer-aggregation helper.
 // Exercised against the REAL prototype methods (data-model §C double pattern).
 
-const proto = CSCharacterActor.prototype;
+const proto = CSActor.prototype;
 
 function actorWith(buffers) {
   return {

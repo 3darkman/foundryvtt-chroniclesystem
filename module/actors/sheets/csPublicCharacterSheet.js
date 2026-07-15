@@ -7,7 +7,7 @@ const { ActorSheetV2 } = foundry.applications.sheets;
 /**
  * spec 012 — the read-only **Public Character Sheet**. Opens automatically for a
  * user whose ownership of a character is exactly Limited (routed by
- * `CSCharacterActor#_getSheetClass`, contracts/sheet-routing.md). It renders
+ * `CSActor#_getSheetClass`, contracts/sheet-routing.md). It renders
  * ONLY description/roleplay content filtered by `system.publicVisibility` — never
  * any mechanical data (FR-002/FR-006/SC-001). Read-only is guaranteed twice over:
  * a Limited user is not an OWNER so ApplicationV2 forces `editable=false` (and

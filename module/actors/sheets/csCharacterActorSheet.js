@@ -687,7 +687,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
   /**
    * Open the read-only Public Character Sheet of THIS actor as a preview, so the
    * owner/GM can see exactly what a Limited player sees. A Limited user is routed
-   * to that sheet automatically (`CSCharacterActor#_getSheetClass`); this button
+   * to that sheet automatically (`CSActor#_getSheetClass`); this button
    * lets a non-Limited user (owner/GM) open the same sheet on demand, alongside
    * the standard sheet. The two sheets carry distinct application ids (the id
    * embeds the class name), so they coexist without collision. Reuses the already-

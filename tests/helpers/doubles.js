@@ -3,9 +3,9 @@
 // `CSClass.prototype.method.call(fake, ...)` — so the tests exercise production
 // logic (FR-014: module/** stays untouched), not a reimplementation.
 
-import { CSCharacterActor } from "../../module/actors/csCharacterActor.js";
+import { CSActor } from "../../module/actors/csActor.js";
 
-const proto = CSCharacterActor.prototype;
+const proto = CSActor.prototype;
 
 // Deep-merge plain objects (arrays/primitives replace). Used to let a test
 // override only the data slice it cares about while keeping the skeleton.

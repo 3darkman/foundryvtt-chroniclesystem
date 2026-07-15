@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { ChronicleSystem } from "../module/system/ChronicleSystem.js";
-import { CSCharacterActor } from "../module/actors/csCharacterActor.js";
+import { CSActor } from "../module/actors/csActor.js";
 import { collectEffectModifiers } from "../module/effects/cs-effect-modifiers.js";
 
 // Spec 008 / US1 — i18n PARITY harness (Quickstart §A). Renaming an ability or
@@ -10,7 +10,7 @@ import { collectEffectModifiers } from "../module/effects/cs-effect-modifiers.js
 // identical formulas. These exercise the REAL production methods via the
 // prototype (data-model §C) plus the REAL collector.
 
-const proto = CSCharacterActor.prototype;
+const proto = CSActor.prototype;
 
 /** Ability item with a persisted slug (rename = same slug, different name). */
 function ability(name, slug, rating, { modifier = 0, specialties = {} } = {}) {

@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { ChronicleSystem } from "../module/system/ChronicleSystem.js";
-import { CSCharacterActor } from "../module/actors/csCharacterActor.js";
+import { CSActor } from "../module/actors/csActor.js";
 import { collectItemizedAlwaysOn } from "../module/effects/cs-effect-modifiers.js";
 
 // US2 / Contract roll-dialog-composition §Testes. The itemized always-on list
 // (condition + equipment + permanent AE, labeled by origin) and the RAW base
 // formula (no channels). Pure: reads the actor doubles, no live Foundry.
 
-const proto = CSCharacterActor.prototype;
+const proto = CSActor.prototype;
 
 const fakeEffect = ({ id, name, changes }) => ({
   id,

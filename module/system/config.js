@@ -8,7 +8,7 @@
 import { CSItemSheet } from "../items/sheets/csItemSheet.js";
 import { preloadHandlebarsTemplates } from "./preloadTemplates.js";
 import { registerCustomHelpers } from "./handlebarsHelpers.js";
-import actorConstructor from "../actors/actorConstructor.js";
+import { CSActor } from "../actors/csActor.js";
 import registerSystemSettings from "./settings.js";
 import { CSCharacterActorSheet } from "../actors/sheets/csCharacterActorSheet.js";
 import { CSPublicCharacterSheet } from "../actors/sheets/csPublicCharacterSheet.js";
@@ -72,13 +72,13 @@ Hooks.once("init", async function () {
   registerCustomHelpers();
 
   // Define custom Document classes
-  CONFIG.Actor.documentClass = actorConstructor;
+  CONFIG.Actor.documentClass = CSActor;
   CONFIG.Item.documentClass = CSItem;
   CONFIG.Combat.documentClass = CsCombat;
   CONFIG.Combatant.documentClass = CsCombatant;
   // ActiveEffect is resolved directly from CONFIG (no Factory Proxy needed —
   // the core has no isSubclass(documentClass, ActiveEffect) check). The collector
-  // reads `effect.system.changes` directly in CSCharacterActor#applyActiveEffects,
+  // reads `effect.system.changes` directly in CSActor#applyActiveEffects,
   // so no `applyActiveEffect` hook is registered (that hook only fires for
   // `type: "custom"` changes — confirmed against the v14 bundle).
   CONFIG.ActiveEffect.documentClass = CSActiveEffect;
@@ -119,7 +119,7 @@ Hooks.once("init", async function () {
   );
   // spec 012: the read-only public sheet. Registered so the framework knows it,
   // but never user-selectable or default — routing is done directly by
-  // CSCharacterActor#_getSheetClass (canBeDefault/canConfigure false keeps the
+  // CSActor#_getSheetClass (canBeDefault/canConfigure false keeps the
   // standard sheet the sole configurable default). Per contracts/sheet-routing.md.
   foundry.documents.collections.Actors.registerSheet(
     "chroniclesystem",
