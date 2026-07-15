@@ -89,6 +89,56 @@ function _getFormula(roll_definition, actor) {
 }
 
 /**
+ * The single authoritative disposition-level modifier lookup (spec 017, C2),
+ * shared by the display side ({@link getRollChip}) and the roll-time path
+ * ({@link _deriveTargetConflict}). Returns the current disposition's modifier
+ * for the given intrigue kind, or 0 when the actor's `currentDisposition`
+ * matches no entry (G7). Exposes only the VALUE — the roll-time path still
+ * resolves the disposition entry itself for its localized name.
+ * @param {object} actor
+ * @param {"persuasion"|"deception"} kind
+ * @returns {number}
+ */
+export function _dispositionModifier(actor, kind) {
+  const disposition = ChronicleSystem.dispositions.find(
+    (d) => d.rating === actor.getCSData().currentDisposition
+  );
+  return kind === "deception"
+    ? disposition?.deceptionModifier ?? 0
+    : disposition?.persuasionModifier ?? 0;
+}
+
+/**
+ * Spec 017 (C1): the single SSOT producing a roll chip's descriptor for every
+ * chip-bearing sheet. Returns the EXECUTED `id` verbatim (so the roll is byte-
+ * identical and the disposition is never double-counted, G1) plus the EFFECTIVE
+ * display `label` — the shared base formula ({@link _getFormula}, the SAME
+ * builder the roll path uses) plus the synchronous mandatory always-on modifiers
+ * not already folded into the base. Today that is only the disposition-level
+ * modifier on `persuasion`/`deception` rolls; target-dependent and optional
+ * modifiers are added later in `_deriveTargetConflict`/the dialog and are NOT
+ * reachable from here (G4).
+ * @param {object} actor   the actor the chip belongs to
+ * @param {string} rollId  the ":"-joined roll definition, exactly as rendered
+ *   into the chip element id and read back by `_onRollDice`
+ * @returns {{id: string, label: string}}
+ */
+function getRollChip(actor, rollId) {
+  const roll_definition = rollId.split(":");
+  const formula = _getFormula(roll_definition, actor);
+  // Predicate parity with the roll-time path (_deriveTargetConflict keys on
+  // kind === "intrigue"): both mean "this is an intrigue roll". Keep them
+  // equivalent if a new intrigue prefix is ever added.
+  if (
+    roll_definition[0] === "persuasion" ||
+    roll_definition[0] === "deception"
+  ) {
+    formula.modifier += _dispositionModifier(actor, roll_definition[0]);
+  }
+  return { id: rollId, label: formula.ToFormattedStr() };
+}
+
+/**
  * Resolve the ability/specialty a roll targets so the dialog can offer the
  * matching optional effects. Only ability/specialty rolls carry that context;
  * the formula-string rolls (weapon-test, persuasion, deception, formula) resolve
@@ -403,13 +453,13 @@ async function _deriveTargetConflict(
   // applied to the effective formula whether or not there is a target. Extracted
   // from the technique's base formula (T034) so it is never double-counted.
   if (kind === "intrigue") {
+    // The disposition VALUE is SSOT'd in _dispositionModifier (spec 017, shared
+    // with getRollChip). The entry itself is still resolved here for its
+    // localized `name`, used in the itemized CS.conflict.disposition card row.
     const disposition = ChronicleSystem.dispositions.find(
       (d) => d.rating === actor.getCSData().currentDisposition
     );
-    const dispMod =
-      roll_definition[0] === "deception"
-        ? disposition?.deceptionModifier ?? 0
-        : disposition?.persuasionModifier ?? 0;
+    const dispMod = _dispositionModifier(actor, roll_definition[0]);
     if (dispMod !== 0) {
       formula.modifier += dispMod;
       itemized.push(
@@ -897,6 +947,7 @@ ChronicleSystem.adjustFormulaByWeapon = adjustFormulaByWeapon;
 ChronicleSystem.eventHandleRoll = eventHandleRoll;
 ChronicleSystem.handleRoll = handleRoll;
 ChronicleSystem.handleRollAsync = handleRollAsync;
+ChronicleSystem.getRollChip = getRollChip;
 ChronicleSystem.getActorAbilityFormula = getActorTestFormula;
 ChronicleSystem.getActorRawTestFormula = getActorRawTestFormula;
 
