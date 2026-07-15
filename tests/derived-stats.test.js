@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CSCharacterActor } from "../module/actors/csCharacterActor.js";
+import { CSActor } from "../module/actors/csActor.js";
 import { makeFakeActor, makeAbilityItem } from "./helpers/doubles.js";
 
 // Group 3 — US3 / Contract 3.1-3.11. Pins the rule-derived stats (Health =
@@ -7,7 +7,7 @@ import { makeFakeActor, makeAbilityItem } from "./helpers/doubles.js";
 // Movement) and guards the i18n constant trap + the missing-ability default.
 // Production methods are exercised in place via prototype `.call` (FR-014).
 
-const proto = CSCharacterActor.prototype;
+const proto = CSActor.prototype;
 
 describe("derived stats — endurance / will rules", () => {
   it("3.1 / 3.6 Health = Endurance × 3, Fatigue = Endurance", () => {

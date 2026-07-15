@@ -3,7 +3,7 @@ import {
   collectEffectModifiers,
   applyOwnedItemEffects,
 } from "../module/effects/cs-effect-modifiers.js";
-import { CSCharacterActor } from "../module/actors/csCharacterActor.js";
+import { CSActor } from "../module/actors/csActor.js";
 
 // Wave 4 — the four NON-roll channels: derivedstat, damage, quality (collected
 // into actor buffers + applied to fields/items) and armorrating (resolved
@@ -234,7 +234,7 @@ describe("applyOwnedItemEffects — armorrating mutates the armour's own rating"
 });
 
 describe("read-side getters (Wave 4 buffers)", () => {
-  const proto = CSCharacterActor.prototype;
+  const proto = CSActor.prototype;
   const entry = (mod, _id = "e") => ({ _id, mod, isDocument: false });
   const withBuffers = (buffers) => ({
     ...buffers,

@@ -54,7 +54,7 @@ globalThis.foundry = {
     },
   },
   // Sheet classes destructure `foundry.applications.*` at module-eval time (class
-  // `extends HandlebarsApplicationMixin(ActorSheetV2)`), and csCharacterActor.js
+  // `extends HandlebarsApplicationMixin(ActorSheetV2)`), and csActor.js
   // imports csPublicCharacterSheet.js — so these must exist or that import chain
   // throws before any test runs. Minimal inert stand-ins (never instantiated by
   // the pure-logic tests).

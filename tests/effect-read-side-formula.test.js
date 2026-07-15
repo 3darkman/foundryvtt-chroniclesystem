@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { ChronicleSystem } from "../module/system/ChronicleSystem.js";
-import { CSCharacterActor } from "../module/actors/csCharacterActor.js";
+import { CSActor } from "../module/actors/csActor.js";
 
 // Wave 2 — the integration the parity hinges on: getActorTestFormula
 // (exposed as ChronicleSystem.getActorAbilityFormula). It must (a) stay
 // byte-identical to the legacy formula when no new-channel effects exist, and
 // (b) count the global ALL bucket exactly ONCE across ability + specialty.
 
-const proto = CSCharacterActor.prototype;
+const proto = CSActor.prototype;
 
 // A channel getter honouring includeGlobal: total = bucket[type] + (global ? ALL : 0).
 const channel = (bucket) => (type, _detail, includeGlobal) => ({

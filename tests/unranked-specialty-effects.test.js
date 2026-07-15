@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { ChronicleSystem } from "../module/system/ChronicleSystem.js";
-import { CSCharacterActor } from "../module/actors/csCharacterActor.js";
+import { CSActor } from "../module/actors/csActor.js";
 import { collectEffectModifiers } from "../module/effects/cs-effect-modifiers.js";
 
 // Regression (bug 2026-07): a roll of a specialty the character has NO ranks in
@@ -12,7 +12,7 @@ import { collectEffectModifiers } from "../module/effects/cs-effect-modifiers.js
 // the key is derived from the requested specialty name, so the effect applies at
 // rating 0 (no rank bonus — only the effect). Applies to ANY test, weapon or not.
 
-const proto = CSCharacterActor.prototype;
+const proto = CSActor.prototype;
 
 const fakeEffect = (changes) => ({
   id: "wpn-eff",
