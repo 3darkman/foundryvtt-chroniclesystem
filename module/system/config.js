@@ -15,7 +15,7 @@ import { CSPublicCharacterSheet } from "../actors/sheets/csPublicCharacterSheet.
 import { CSHouseActorSheet } from "../actors/sheets/csHouseActorSheet.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
-import itemConstructor from "../items/itemConstructor.js";
+import { CSItem } from "../items/csItem.js";
 import { CSAbilityItemSheet } from "../items/sheets/csAbilityItemSheet.js";
 import { CSEventItemSheet } from "../items/sheets/csEventItemSheet.js";
 import { CSHoldingItemSheet } from "../items/sheets/csHoldingItemSheet.js";
@@ -73,7 +73,7 @@ Hooks.once("init", async function () {
 
   // Define custom Document classes
   CONFIG.Actor.documentClass = actorConstructor;
-  CONFIG.Item.documentClass = itemConstructor;
+  CONFIG.Item.documentClass = CSItem;
   CONFIG.Combat.documentClass = CsCombat;
   CONFIG.Combatant.documentClass = CsCombatant;
   // ActiveEffect is resolved directly from CONFIG (no Factory Proxy needed —

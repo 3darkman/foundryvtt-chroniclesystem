@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CSWeaponItem } from "../module/items/csWeaponItem.js";
+import { CSItem } from "../module/items/csItem.js";
 import { ChronicleSystem } from "../module/system/ChronicleSystem.js";
 import { registerCustomHelpers } from "../module/system/handlebarsHelpers.js";
 import { DiceRollFormula } from "../module/diceRollFormula.js";
@@ -10,7 +10,7 @@ import { makeFakeWeapon, makeFakeActor } from "./helpers/doubles.js";
 // split (Ability:Specialty) as a safety net for the Step-4 redesign. We pin
 // existing behavior — including eval — without changing module/** (FR-014).
 
-const updateDamage = CSWeaponItem.prototype.updateDamageValue;
+const updateDamage = CSItem.prototype.updateDamageValue;
 // spec 008: weapon damage resolves the @Ability token by slug.
 const ability4 = { getAbilityValueBySlug: () => 4 };
 
