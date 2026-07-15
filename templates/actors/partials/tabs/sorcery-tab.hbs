@@ -24,27 +24,27 @@
                         </div>
                         {{#ifEquals work.type "SPELL"}}
                             {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                                id=(concat "formula:" work.test.spellcasting ":" (formulaToStr work.test.spellcastingFormula))
-                                label=(format-formula work.test.spellcastingFormula) }}
+                                id=work.test.spellcastingChip.id
+                                label=work.test.spellcastingChip.label }}
                         {{else}}
                             <div class="cs2-work-tests">
                                 <div>
                                     <div class="cs2-work-test-label">{{localize "CS.sheets.techniqueItem.test.alignment"}}</div>
                                     {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                                        id=(concat "formula:" work.test.alignment ":" (formulaToStr work.test.alignmentFormula))
-                                        label=(format-formula work.test.alignmentFormula) }}
+                                        id=work.test.alignmentChip.id
+                                        label=work.test.alignmentChip.label }}
                                 </div>
                                 <div>
                                     <div class="cs2-work-test-label">{{localize "CS.sheets.techniqueItem.test.invocation"}}</div>
                                     {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                                        id=(concat "formula:" work.test.invocation ":" (formulaToStr work.test.invocationFormula))
-                                        label=(format-formula work.test.invocationFormula) }}
+                                        id=work.test.invocationChip.id
+                                        label=work.test.invocationChip.label }}
                                 </div>
                                 <div>
                                     <div class="cs2-work-test-label">{{localize "CS.sheets.techniqueItem.test.unleashing"}}</div>
                                     {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                                        id=(concat "formula:" work.test.unleashing ":" (formulaToStr work.test.unleashingFormula))
-                                        label=(format-formula work.test.unleashingFormula) }}
+                                        id=work.test.unleashingChip.id
+                                        label=work.test.unleashingChip.label }}
                                 </div>
                             </div>
                         {{/ifEquals}}

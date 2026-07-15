@@ -45,8 +45,10 @@
                     <div class="center">{{actor.system.fortune.lawMod}}</div>
                     <div class="center">{{actor.system.fortune.populationMod}}</div>
                     <div class="center">{{actor.system.fortune.holdingsMod}}</div>
-                    <div class="rollable center" data-action="rollDice" id="formula:{{localize "CS.constants.specialties.stewardship"}}:{{formulaToStr actor.system.fortune.formula}}">
-                        <a>{{format-formula actor.system.fortune.formula}}</a>
+                    <div class="center">
+                        {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                            id=actor.system.fortune.fortuneChip.id
+                            label=actor.system.fortune.fortuneChip.label }}
                     </div>
                     <div class="field item-controls">
                         <a class="item-control" data-id="{{actor.system.steward.id}}" data-role="STEWARD" data-action="removeMember"><i class="fas fa-trash"></i></a>

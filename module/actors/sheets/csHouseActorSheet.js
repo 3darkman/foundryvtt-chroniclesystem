@@ -179,7 +179,16 @@ export class CSHouseActorSheet extends CSActorSheet {
       house.fortune.lawMod +
       house.fortune.populationMod +
       house.fortune.holdingsFlat;
-    house.fortune.formula = stewardshipFormula;
+    // spec 017 (US2): the House Fortune chip through the SSOT utility, using the
+    // SAME rollId the template built (`formula:{Stewardship}:{toStr}`). Via T017
+    // the hand-rolled chip is migrated to the shared rollable-chip partial, so it
+    // inherits parity like every other chip (DRY/SSOT).
+    house.fortune.fortuneChip = ChronicleSystem.getRollChip(
+      data.actor,
+      `formula:${SystemUtils.localize(
+        "CS.constants.specialties.stewardship"
+      )}:${stewardshipFormula.toStr()}`
+    );
   }
 
   prepareHoldingData(house, data) {

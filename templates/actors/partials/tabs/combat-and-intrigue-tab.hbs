@@ -63,14 +63,14 @@
                     <div class="cs2-grid-cell center mono">{{this.influence}}</div>
                     <div class="cs2-grid-cell center">
                         {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                            id=(concat "persuasion:" this.name ":" (formulaToStr this.persuasion))
-                            label=(format-formula this.persuasion)
+                            id=this.persuasionChip.id
+                            label=this.persuasionChip.label
                             rollKind="intrigue" techniqueSlug=@key influence=this.influence }}
                     </div>
                     <div class="cs2-grid-cell center">
                         {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                            id=(concat "deception:" this.name ":" (formulaToStr this.deception))
-                            label=(format-formula this.deception)
+                            id=this.deceptionChip.id
+                            label=this.deceptionChip.label
                             rollKind="intrigue" techniqueSlug=@key influence=this.influence }}
                     </div>
                 </div>
@@ -162,8 +162,8 @@
                             <div class="cs2-grid-cell">{{weapon.name}} {{showIfEquals weapon.system.equipped 3 "(Off-hand)" : ""}}</div>
                             <div class="cs2-grid-cell center">
                                 {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                                    id=(concat "weapon-test:" weapon.name ":" (formulaToStr weapon.formula))
-                                    label=(format-formula weapon.formula)
+                                    id=weapon.weaponChip.id
+                                    label=weapon.weaponChip.label
                                     rollKind="weapon" itemId=weapon.id }}
                             </div>
                             <div class="cs2-grid-cell center mono">{{weapon.damageValue}}</div>
