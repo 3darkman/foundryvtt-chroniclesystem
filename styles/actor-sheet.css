@@ -186,9 +186,23 @@
 /* V2 migration: .flexrow still wraps in v13, and the v13 element defaults
    widened the columns' min-content, pushing the third column (techniques/
    weapons tables) onto a new line. Force a single row and let the table
-   columns shrink instead of wrapping. */
+   columns shrink instead of wrapping. Also stop the row's shorter columns
+   stretching to match the tallest sibling (core .flexrow default is
+   align-items:center, which "centers" a column shorter than its sibling,
+   leaving dead space above/below it instead of sitting flush at the top). */
 .chroniclesystem.sheet.actor .content.flexrow {
     flex-wrap: nowrap;
+    align-items: flex-start;
+}
+
+.chroniclesystem.sheet.actor .content .stats {
+    flex: 0 0 200px;
+}
+
+.chroniclesystem.sheet.actor .content .stats .form-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .chroniclesystem.sheet.actor .content .techniques,
@@ -205,6 +219,11 @@
 .chroniclesystem.sheet.actor .content .weapons {
     flex: 1;
     margin: 3px;
+}
+
+.chroniclesystem.sheet.actor .content .techniques table,
+.chroniclesystem.sheet.actor .content .weapons table {
+    width: 100%;
 }
 
 
@@ -343,9 +362,4 @@
 .chroniclesystem.sheet.actor .custom-checkbox .square:not(checked):hover {
     background: dimgray;
     color: white;
-}
-
-.chroniclesystem.sheet.actor section.stress .custom-checkbox {
-    margin: 10px 0 0 0;
-    height: fit-content;
 }
