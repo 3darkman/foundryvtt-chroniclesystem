@@ -194,6 +194,7 @@
 }
 .chroniclesystem.sheet .window-content .sheet-body .tab {
   height: 100%;
+  align-items: flex-start;
 }
 .chroniclesystem.sheet a.checkButton {
   color: #AAAAAA;

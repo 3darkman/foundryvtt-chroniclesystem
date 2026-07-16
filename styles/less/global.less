@@ -121,8 +121,14 @@
         overflow-y: auto;
       }
 
+      /* Foundry core's .flexrow utility (which every .tab carries) defaults
+         to align-items:center. A tab with little content (e.g. Abilities)
+         then renders vertically centered in the full tab height instead of
+         flush at the top; tabs with enough content to fill the space just
+         masked the same bug. */
       .sheet-body .tab {
         height: 100%;
+        align-items: flex-start;
       }
     }
 
