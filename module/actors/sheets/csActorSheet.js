@@ -35,6 +35,12 @@ export class CSActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
     _attachPartListeners(partId, htmlElement, options) {
         super._attachPartListeners(partId, htmlElement, options);
+        htmlElement.querySelectorAll("prose-mirror").forEach((editor) => {
+            editor.addEventListener("change", (event) => {
+                event.stopPropagation();
+                this.document.update({ [event.target.name]: event.target.value });
+            });
+        });
     }
 
     static _onToggleDescription(event, target) {

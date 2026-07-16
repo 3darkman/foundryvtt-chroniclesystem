@@ -65,6 +65,16 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
   _attachPartListeners(partId, htmlElement, options) {
     super._attachPartListeners(partId, htmlElement, options);
 
+    // Rich-text editors: submitOnChange never reaches document.update() for
+    // these fields, so commit directly on change instead of relying on the
+    // generic form pipeline.
+    htmlElement.querySelectorAll("prose-mirror").forEach((editor) => {
+      editor.addEventListener("change", (event) => {
+        event.stopPropagation();
+        this.document.update({ [event.target.name]: event.target.value });
+      });
+    });
+
     // Delete item button (V1 templates use class="item-delete")
     htmlElement.querySelectorAll(".item-delete").forEach((el) => {
       el.addEventListener("click", () => {
