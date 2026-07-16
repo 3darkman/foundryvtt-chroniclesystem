@@ -34,3 +34,35 @@ export const makeValidHouse = () => ({
     steward: { id: "", description: "" },
   },
 });
+
+// A messy legacy unit (spec 018): null/NaN/string numerics scattered across the
+// numeric sub-trees, plus valid non-numeric branches (description/types) that
+// must survive the coercion sweep intact.
+export const makeLegacyUnit = () => ({
+  derivedStats: {
+    combatDefense: { value: "5", modifier: null },
+    health: { total: NaN, modifier: "0", value: null, current: "3" },
+  },
+  xp: { value: "3.5", max: null },
+  trainingLevel: { base: "2", modifier: NaN },
+  status: { current: null },
+  currentEquipmentIndex: "1",
+  disorganizedPenalties: "abc",
+  description: "Cavalaria",
+  types: [{}],
+});
+
+// A unit already in the current shape (used for idempotency).
+export const makeValidUnit = () => ({
+  derivedStats: {
+    combatDefense: { value: 5, modifier: 0 },
+    health: { total: 9, modifier: 0, value: 9, current: 3 },
+  },
+  xp: { value: 3, max: 10 },
+  trainingLevel: { base: 2, modifier: 0 },
+  status: { current: 0 },
+  currentEquipmentIndex: 1,
+  disorganizedPenalties: 0,
+  description: "Cavalaria",
+  types: [],
+});

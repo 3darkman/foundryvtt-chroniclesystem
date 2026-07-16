@@ -34,6 +34,26 @@
             "flags": {}
         }
     ],
+    "documentTypes": {
+        "Actor": {
+            "character": {},
+            "house": {},
+            "unit": {}
+        },
+        "Item": {
+            "armor": {},
+            "weapon": {},
+            "ability": {},
+            "equipment": {},
+            "benefit": {},
+            "drawback": {},
+            "event": {},
+            "holding": {},
+            "technique": {},
+            "unitType": {},
+            "poison": {}
+        }
+    },
     "grid": {
         "distance": 5,
         "units": "ft"

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import CharacterData from "../module/data/actor/character-data.js";
 import HouseData from "../module/data/actor/house-data.js";
+import UnitData from "../module/data/actor/unit-data.js";
 import { deriveWorldSlugs } from "../module/migrations/task090-slug-identity.js";
 import { CANONICAL_ABILITIES } from "../module/vocabulary/cs-canonical-abilities.js";
 import {
@@ -8,6 +9,8 @@ import {
   makeValidCharacter,
   makeLegacyHouse,
   makeValidHouse,
+  makeLegacyUnit,
+  makeValidUnit,
 } from "./helpers/fixtures.js";
 
 // Group 2 — US2 / Contract 2.1-2.18. Protects the highest-risk asset (saved
@@ -248,5 +251,97 @@ describe("deriveWorldSlugs — spec 008 backfill", () => {
     ]);
     expect(updates[0]["system.specialties"][0].slug).toBe("persuasion_charm");
     expect(review).toEqual([]); // canonical ability + canonical specialty
+  });
+});
+
+// Group — spec 018 / Contract unit-migratedata.md (U1-U13). Shields legacy `unit`
+// actors: every numeric leaf (null/NaN/string) is coerced to a finite integer
+// before v13/v14 validation, while non-numeric branches survive intact.
+
+describe("UnitData.migrateData — numeric coercion", () => {
+  it("U1 coerces a null derived-stat leaf to 0", () => {
+    expect(
+      UnitData.migrateData({ derivedStats: { health: { value: null } } })
+        .derivedStats.health.value
+    ).toBe(0);
+  });
+
+  it("U2 coerces a NaN derived-stat leaf to 0", () => {
+    expect(
+      UnitData.migrateData({ derivedStats: { health: { modifier: NaN } } })
+        .derivedStats.health.modifier
+    ).toBe(0);
+  });
+
+  it("U3 coerces a numeric string to its integer", () => {
+    expect(
+      UnitData.migrateData({ derivedStats: { combatDefense: { value: "5" } } })
+        .derivedStats.combatDefense.value
+    ).toBe(5);
+  });
+
+  it("U4 coerces a non-numeric string to 0", () => {
+    expect(
+      UnitData.migrateData({
+        derivedStats: { combatDefense: { modifier: "abc" } },
+      }).derivedStats.combatDefense.modifier
+    ).toBe(0);
+  });
+
+  it("U5 truncates a fractional string to an integer", () => {
+    expect(UnitData.migrateData({ xp: { value: "3.5" } }).xp.value).toBe(3);
+  });
+
+  it("U6 leaves a valid integer unchanged", () => {
+    expect(
+      UnitData.migrateData({ trainingLevel: { base: 7 } }).trainingLevel.base
+    ).toBe(7);
+  });
+
+  it("U7 coerces a null nested scalar to 0", () => {
+    expect(
+      UnitData.migrateData({ status: { current: null } }).status.current
+    ).toBe(0);
+  });
+
+  it("U8 coerces a numeric-string top-level scalar", () => {
+    expect(
+      UnitData.migrateData({ disorganizedPenalties: "2" }).disorganizedPenalties
+    ).toBe(2);
+  });
+
+  it("U9 coerces a NaN top-level scalar to 0", () => {
+    expect(
+      UnitData.migrateData({ currentEquipmentIndex: NaN }).currentEquipmentIndex
+    ).toBe(0);
+  });
+
+  it("U10 preserves non-numeric branches (description / types) intact", () => {
+    const out = UnitData.migrateData({
+      description: "Cavalaria",
+      types: [{}],
+    });
+    expect(out.description).toBe("Cavalaria");
+    expect(out.types).toEqual([{}]);
+  });
+
+  it("U11 returns a defined object and never invents absent keys", () => {
+    const out = UnitData.migrateData({});
+    expect(out).toBeDefined();
+    expect(out.derivedStats).toBeUndefined();
+    expect(out.xp).toBeUndefined();
+    expect(out.trainingLevel).toBeUndefined();
+    expect(out.status).toBeUndefined();
+  });
+
+  it("U12 is idempotent — migrate(migrate(x)) equals migrate(x)", () => {
+    const once = UnitData.migrateData(makeLegacyUnit());
+    const twice = UnitData.migrateData(UnitData.migrateData(makeLegacyUnit()));
+    expect(twice).toEqual(once);
+  });
+
+  it("U13 returns a defined object for both fixtures", () => {
+    expect(UnitData.migrateData(makeLegacyUnit())).toBeDefined();
+    expect(UnitData.migrateData(makeValidUnit())).toBeDefined();
   });
 });

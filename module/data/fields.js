@@ -36,7 +36,7 @@ export function normalizeSlugSource(source) {
 }
 
 /**
- * Physical item fields from template.json "physicalItem" template.
+ * Physical item fields (the former "physicalItem" field group).
  * Used by: WeaponData, ArmorData
  */
 export function physicalItemFields() {
@@ -50,7 +50,7 @@ export function physicalItemFields() {
 }
 
 /**
- * Equipment item fields from template.json "equipmentItem" template.
+ * Equipment item fields (the former "equipmentItem" field group).
  * Used by: WeaponData, EquipmentData, PoisonData
  */
 export function equipmentItemFields() {
@@ -65,7 +65,7 @@ export function equipmentItemFields() {
 }
 
 /**
- * Item description fields from template.json "itemDescription" template.
+ * Item description fields (the former "itemDescription" field group).
  * Used by: WeaponData, ArmorData, AbilityData, BenefitData, DrawbackData, EquipmentData, PoisonData
  */
 export function itemDescriptionFields() {

@@ -823,5 +823,25 @@
       "slugReviewColSlug": "Derived slug",
       "slugReviewClose": "Close"
     }
+  },
+  "TYPES": {
+    "Actor": {
+      "character": "Character",
+      "house": "House",
+      "unit": "Unit"
+    },
+    "Item": {
+      "armor": "Armor",
+      "weapon": "Weapon",
+      "ability": "Ability",
+      "equipment": "Equipment",
+      "benefit": "Benefit",
+      "drawback": "Drawback",
+      "event": "Event",
+      "holding": "Holding",
+      "technique": "Technique",
+      "unitType": "Unit Type",
+      "poison": "Poison"
+    }
   }
 }
