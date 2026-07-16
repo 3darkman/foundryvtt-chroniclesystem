@@ -1,14 +1,13 @@
 export const preloadHandlebarsTemplates = async function () {
   const templatePaths = [
-    "systems/chroniclesystem/templates/items/partials/header.hbs",
-    "systems/chroniclesystem/templates/items/partials/header-delete.hbs",
-    "systems/chroniclesystem/templates/items/partials/description.hbs",
-    "systems/chroniclesystem/templates/items/partials/slug-field.hbs",
-    "systems/chroniclesystem/templates/items/partials/physical-item.hbs",
-    "systems/chroniclesystem/templates/items/partials/equipment-item.hbs",
-
-    "systems/chroniclesystem/templates/items/tabs/technique-details-tab.hbs",
-    "systems/chroniclesystem/templates/items/tabs/technique-works-tab.hbs",
+    // spec 019 — unified item sheet field-control components (invoked via
+    // `{{> "…"}}` inside the shared parts + per-type Sistema bodies). The skeleton
+    // parts (parts/header.hbs, parts/details.hbs) and the per-type system/<type>.hbs
+    // bodies are AppV2 PARTS, auto-loaded by the mixin — not registered here.
+    "systems/chroniclesystem/templates/items/components/field-cell.hbs",
+    "systems/chroniclesystem/templates/items/components/rich-text-field.hbs",
+    "systems/chroniclesystem/templates/items/components/repeatable-list.hbs",
+    "systems/chroniclesystem/templates/items/components/works-card.hbs",
 
     "systems/chroniclesystem/templates/actors/characters/public-character-sheet.hbs",
 

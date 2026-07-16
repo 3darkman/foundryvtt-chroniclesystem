@@ -1,0 +1,18 @@
+{{!-- Arma (weapon) Sistema body (spec 019). Scalar stats + Qualities list. --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.specialty" label="CS.sheets.item.fields.specialty" value=item.system.specialty}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.damage" label="CS.sheets.item.fields.damage" value=item.system.damage}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.reach" label="CS.sheets.item.fields.reach" value=item.system.reach}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.training" label="CS.sheets.item.fields.training" value=item.system.training}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.weight" label="CS.sheets.item.fields.weight" value=item.system.weight}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.cost" label="CS.sheets.item.fields.cost" value=item.system.cost}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.quantity" label="CS.sheets.item.fields.quantity" value=item.system.quantity owned=true}}
+        </div>
+    </div>
+    {{> "systems/chroniclesystem/templates/items/components/repeatable-list.hbs"
+          title="CS.sheets.item.qualities" addLabel="CS.sheets.item.add" path="system.qualities"
+          rows=item.system.qualities columns=qualityColumns showAdd=canEditLists}}
+</section>

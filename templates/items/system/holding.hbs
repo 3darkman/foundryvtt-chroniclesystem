@@ -1,0 +1,19 @@
+{{!-- Propriedade (holding) Sistema body (spec 019). Owner is a House. Resource is a
+      UI-enforced select over the 7 House resources. Features is owner-gated — the
+      empty-state note replaces the table until the holding is embedded in a House. --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.investment" label="CS.sheets.holdingItem.investment" value=item.system.investment}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.buildTime" label="CS.sheets.holdingItem.buildTime" value=item.system.buildTime}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="select" name="system.resource" label="CS.sheets.holdingItem.resource" value=item.system.resource options=typeDescriptor.resourceChoices}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.fortuneDice" label="CS.sheets.holdingItem.fortuneDice" value=item.system.fortuneDice}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.fortuneModifier" label="CS.sheets.holdingItem.fortuneModifier" value=item.system.fortuneModifier}}
+        </div>
+    </div>
+    {{> "systems/chroniclesystem/templates/items/components/repeatable-list.hbs"
+          title="CS.sheets.holdingItem.features" addLabel="CS.sheets.item.add" path="system.features"
+          rows=item.system.features columns=featureColumns showAdd=canAddFeatures
+          locked=featuresLocked emptyNote="CS.sheets.holdingItem.canAddFeatureAfter"}}
+</section>

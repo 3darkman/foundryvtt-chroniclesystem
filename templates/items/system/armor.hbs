@@ -1,0 +1,15 @@
+{{!-- Armadura (armor) Sistema body (spec 019). Scalar stats + Qualities list. --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.rating" label="CS.sheets.item.fields.rating" value=item.system.rating}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.penalty" label="CS.sheets.item.fields.penalty" value=item.system.penalty}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.bulk" label="CS.sheets.item.fields.bulk" value=item.system.bulk}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.weight" label="CS.sheets.item.fields.weight" value=item.system.weight}}
+        </div>
+    </div>
+    {{> "systems/chroniclesystem/templates/items/components/repeatable-list.hbs"
+          title="CS.sheets.item.qualities" addLabel="CS.sheets.item.add" path="system.qualities"
+          rows=item.system.qualities columns=qualityColumns showAdd=canEditLists}}
+</section>

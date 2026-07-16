@@ -1,0 +1,42 @@
+{{!-- Técnica (technique) Sistema body (spec 019). Type is a single-select chip group
+      over system.type (SPELL/RITUAL) — the handoff's "multi" is presentation-only,
+      D5. Folds the old separate Works tab into Sistema: Arts list + Works cards. --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <div class="csv2-field-grid">
+            <div class="csv2-field-cell">
+                <div class="csv2-label">{{localize "CS.sheets.techniqueItem.type"}}</div>
+                <div class="csv2-chip-group">
+                    {{#each techniqueTypeChips as |chip|}}
+                    <button type="button" class="csv2-chip{{#if chip.selected}} is-selected{{/if}}"
+                            data-action="toggleTechniqueType" data-type="{{chip.key}}">{{localize chip.label}}</button>
+                    {{/each}}
+                </div>
+            </div>
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.scales" label="CS.sheets.techniqueItem.scales" value=item.system.scales}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.learning.time" label="CS.sheets.techniqueItem.learningTime" value=item.system.learning.time}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.learning.difficult" label="CS.sheets.techniqueItem.learningDifficult" value=item.system.learning.difficult}}
+        </div>
+    </div>
+    {{> "systems/chroniclesystem/templates/items/components/repeatable-list.hbs"
+          title="CS.sheets.techniqueItem.arts" addLabel="CS.sheets.item.add" path="system.arts"
+          rows=item.system.arts columns=artColumns showAdd=canEditLists}}
+    <div class="csv2-card cs-works-panel">
+        <div class="csv2-card-header cs-rd-header-split">
+            <span>{{localize "CS.sheets.techniqueItem.tabs.works"}}</span>
+            {{#if canEditLists}}
+            <button type="button" class="csv2-btn csv2-btn--secondary csv2-btn--sm" data-action="listAdd" data-list="system.works">
+                <i class="fas fa-plus"></i>{{localize "CS.sheets.item.add"}}
+            </button>
+            {{/if}}
+        </div>
+        <div class="csv2-card-body">
+            <div class="cs-works-list">
+                {{#each works as |work|}}
+                {{> "systems/chroniclesystem/templates/items/components/works-card.hbs" work}}
+                {{/each}}
+            </div>
+        </div>
+    </div>
+</section>

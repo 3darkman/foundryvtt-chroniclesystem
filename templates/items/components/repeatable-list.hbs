@@ -1,0 +1,41 @@
+{{!-- Shared repeatable-list card (spec 019, FR-008). Parameterized by
+      title/path/addLabel/columns/rows/locked/emptyNote/showAdd. Every row sub-field
+      carries name="{{path}}.{{i}}.{{col.key}}" so the fully-replaced array has no
+      sparse holes. Add/Delete go through the generic listAdd/listDelete actions. --}}
+<div class="csv2-card csv2-list">
+    <div class="csv2-card-header">{{localize title}}
+        {{#if showAdd}}
+        <button type="button" class="csv2-btn csv2-btn--secondary csv2-btn--sm"
+                data-action="listAdd" data-list="{{path}}">
+            <i class="fas fa-plus"></i>{{localize addLabel}}
+        </button>
+        {{/if}}
+    </div>
+    {{#if locked}}
+    <div class="csv2-list-empty">{{localize emptyNote}}</div>
+    {{else}}
+    <div class="csv2-list-head">
+        <span class="csv2-list-grip"></span>
+        {{#each columns as |col|}}<span class="csv2-list-col">{{localize col.label}}</span>{{/each}}
+        <span class="csv2-list-del"></span>
+    </div>
+    {{#each rows as |row i|}}
+    <div class="csv2-list-row">
+        <span class="csv2-list-grip"><i class="fas fa-grip-vertical"></i></span>
+        {{#each ../columns as |col|}}
+        <span class="csv2-list-col">
+            <input type="{{col.inputType}}" class="{{col.cssClass}}"
+                   name="{{../../path}}.{{i}}.{{col.key}}" value="{{lookup row col.key}}"
+                   data-dtype="{{col.dtype}}" />
+        </span>
+        {{/each}}
+        <span class="csv2-list-del">
+            <button type="button" class="csv2-list-del-btn"
+                    data-action="listDelete" data-list="{{../path}}" data-index="{{i}}">
+                <i class="fa-regular fa-trash-can"></i>
+            </button>
+        </span>
+    </div>
+    {{/each}}
+    {{/if}}
+</div>

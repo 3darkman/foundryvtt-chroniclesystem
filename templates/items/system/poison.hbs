@@ -1,0 +1,23 @@
+{{!-- Veneno (poison) Sistema body (spec 019). Scalar stats + two INDEPENDENT
+      rich-text fields (mechanical Effects + Recovery), distinct from the narrative
+      Descrição in the Detalhes tab. --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.delivery" label="CS.sheets.item.fields.delivery" value=item.system.delivery}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.virulence" label="CS.sheets.item.fields.virulence" value=item.system.virulence}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.frequency" label="CS.sheets.item.fields.frequency" value=item.system.frequency}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.toxicity" label="CS.sheets.item.fields.toxicity" value=item.system.toxicity}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.diagnosis" label="CS.sheets.item.fields.diagnosis" value=item.system.diagnosis}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.quantity" label="CS.sheets.item.fields.quantity" value=item.system.quantity owned=true}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.cost" label="CS.sheets.item.fields.cost" value=item.system.cost}}
+        </div>
+    </div>
+    {{> "systems/chroniclesystem/templates/items/components/rich-text-field.hbs"
+          label="CS.sheets.item.fields.effects" hint="CS.sheets.item.hints.mechanicalEffect"
+          name="system.effects" value=item.system.effects enriched=enrichedEffects editable=editable}}
+    {{> "systems/chroniclesystem/templates/items/components/rich-text-field.hbs"
+          label="CS.sheets.item.fields.recovery" name="system.recovery"
+          value=item.system.recovery enriched=enrichedRecovery editable=editable}}
+</section>

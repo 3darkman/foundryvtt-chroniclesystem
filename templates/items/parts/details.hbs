@@ -1,0 +1,15 @@
+{{!-- Shared Detalhes part (spec 019) — Identidade (slug) + Descrição (rich text).
+      Uniform for all 10 types; does NOT swap. Root binds `tab.active` so the "1 tab =
+      1 part" layout restores itself on submitOnChange re-render (no manual changeTab). --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="details">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.sheets.item.identity"}}</div>
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="text" name="system.slug" label="CS.slug.label" value=item.system.slug }}
+        </div>
+    </div>
+    {{> "systems/chroniclesystem/templates/items/components/rich-text-field.hbs"
+          label="CS.sheets.generalLabels.description" name="system.description"
+          value=item.system.description enriched=enrichedDescription editable=editable }}
+</section>

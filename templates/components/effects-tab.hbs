@@ -2,7 +2,7 @@
       Root is a <div class="tab"> (NEVER a nested <form> — V2). Columns follow the
       design §7: NAME | ORIGIN | STATUS | ACTIONS. Control visibility follows each
       effect's `editable` flag (permission model FR-021/SC-009). --}}
-<div class="tab effects-tab" data-group="primary" data-tab="effects">
+<div class="tab effects-tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="effects">
     <div class="effects-toolbar">
         <a class="effect-control effect-create" data-action="effectCreate" title="{{localize 'CS.effects.create'}}">
             <i class="fas fa-plus"></i> {{localize "CS.effects.create"}}
@@ -33,10 +33,10 @@
                 <i class="effect-suspended-icon fas fa-link-slash" title="{{localize 'CS.effects.status.suspendedHint'}}"></i>
                 {{#if effect.editable}}
                 <a class="effect-control" data-action="effectEdit" data-effect-id="{{effect.id}}" title="{{localize 'CS.effects.edit'}}">
-                    <i class="fas fa-edit"></i>
+                    <i class="fa-regular fa-pen-to-square"></i>
                 </a>
                 <a class="effect-control effect-delete" data-action="effectDelete" data-effect-id="{{effect.id}}" title="{{localize 'CS.effects.delete'}}">
-                    <i class="fas fa-times"></i>
+                    <i class="fa-regular fa-trash-can"></i>
                 </a>
                 {{else}}
                 <i class="effect-lock fas fa-lock" title="{{localize 'CS.effects.locked'}}"></i>
@@ -46,10 +46,10 @@
                     <i class="fas {{#if effect.disabled}}fa-toggle-off{{else}}fa-toggle-on{{/if}}"></i>
                 </a>
                 <a class="effect-control" data-action="effectEdit" data-effect-id="{{effect.id}}" title="{{localize 'CS.effects.edit'}}">
-                    <i class="fas fa-edit"></i>
+                    <i class="fa-regular fa-pen-to-square"></i>
                 </a>
                 <a class="effect-control effect-delete" data-action="effectDelete" data-effect-id="{{effect.id}}" title="{{localize 'CS.effects.delete'}}">
-                    <i class="fas fa-times"></i>
+                    <i class="fa-regular fa-trash-can"></i>
                 </a>
                 {{else}}
                 <i class="effect-lock fas fa-lock" title="{{localize 'CS.effects.locked'}}"></i>

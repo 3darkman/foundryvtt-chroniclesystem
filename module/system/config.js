@@ -16,10 +16,6 @@ import { CSHouseActorSheet } from "../actors/sheets/csHouseActorSheet.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
 import { CSItem } from "../items/csItem.js";
-import { CSAbilityItemSheet } from "../items/sheets/csAbilityItemSheet.js";
-import { CSEventItemSheet } from "../items/sheets/csEventItemSheet.js";
-import { CSHoldingItemSheet } from "../items/sheets/csHoldingItemSheet.js";
-import { CSTechniqueItemSheet } from "../items/sheets/cs-technique-item-sheet.js";
 import { migrateData } from "../migrations/migration.js";
 import { showSlugReviewAlert } from "../migrations/slug-review-alert.js";
 import { CsCombat } from "../combat/cs-combat.js";
@@ -155,48 +151,26 @@ Hooks.once("init", async function () {
     "core",
     foundry.appv1.sheets.ItemSheet
   );
+  // spec 019: one unified sheet for all 10 handoff types (the 4 per-type subclasses
+  // are folded into CSItemSheet). `unitType` is intentionally omitted (out of scope,
+  // FR-018 — its latent open-crash is deferred to the Warfare epic).
   foundry.documents.collections.Items.registerSheet(
     "chroniclesystem",
     CSItemSheet,
     {
       label: SystemUtils.localize("CS.sheets.itemSheet"),
-      types: ["armor", "weapon", "equipment", "benefit", "drawback", "poison"],
-      makeDefault: true,
-    }
-  );
-  foundry.documents.collections.Items.registerSheet(
-    "chroniclesystem",
-    CSAbilityItemSheet,
-    {
-      label: SystemUtils.localize("CS.sheets.abilityItemSheet"),
-      types: ["ability"],
-      makeDefault: true,
-    }
-  );
-  foundry.documents.collections.Items.registerSheet(
-    "chroniclesystem",
-    CSEventItemSheet,
-    {
-      label: SystemUtils.localize("CS.sheets.eventItemSheet"),
-      types: ["event"],
-      makeDefault: true,
-    }
-  );
-  foundry.documents.collections.Items.registerSheet(
-    "chroniclesystem",
-    CSHoldingItemSheet,
-    {
-      label: SystemUtils.localize("CS.sheets.holdingItemSheet"),
-      types: ["holding"],
-      makeDefault: true,
-    }
-  );
-  foundry.documents.collections.Items.registerSheet(
-    "chroniclesystem",
-    CSTechniqueItemSheet,
-    {
-      label: SystemUtils.localize("CS.sheets.techniqueItemSheet"),
-      types: ["technique"],
+      types: [
+        "armor",
+        "weapon",
+        "equipment",
+        "benefit",
+        "drawback",
+        "poison",
+        "ability",
+        "event",
+        "holding",
+        "technique",
+      ],
       makeDefault: true,
     }
   );

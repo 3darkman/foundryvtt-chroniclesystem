@@ -471,6 +471,52 @@
       "houseSheet": "House Sheet",
       "itemSheet": "Item Sheet",
       "abilityItemSheet": "Ability Sheet",
+      "item": {
+        "tabs": {
+          "details": "Details",
+          "system": "System",
+          "effects": "Effects"
+        },
+        "identity": "Identity",
+        "delete": "Delete",
+        "add": "Add",
+        "qualities": "Qualities",
+        "specialties": "Specialties",
+        "houseResources": "House Resources",
+        "fields": {
+          "specialty": "Specialty",
+          "damage": "Damage",
+          "reach": "Reach",
+          "training": "Training",
+          "weight": "Weight",
+          "cost": "Cost",
+          "quantity": "Quantity",
+          "rating": "Rating",
+          "penalty": "Penalty",
+          "bulk": "Bulk",
+          "modifier": "Modifier",
+          "categories": "Categories",
+          "requirements": "Requirements",
+          "sorcerousArtAccess": "Sorcerous Art Access",
+          "requireSorcerousArt": "Require Sorcerous Art",
+          "isAStricture": "Is a Stricture",
+          "isAFlaw": "Is a Flaw",
+          "flawAttribute": "Flaw Attribute",
+          "delivery": "Delivery",
+          "virulence": "Virulence",
+          "frequency": "Frequency",
+          "toxicity": "Toxicity",
+          "diagnosis": "Diagnosis",
+          "effects": "Effects",
+          "recovery": "Recovery",
+          "formula": "Formula",
+          "name": "Name",
+          "parameter": "Parameter"
+        },
+        "hints": {
+          "mechanicalEffect": "mechanical effect"
+        }
+      },
       "generalLabels": {
         "none": "None",
         "description": "Description",
