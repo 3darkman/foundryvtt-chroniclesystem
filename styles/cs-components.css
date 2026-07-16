@@ -242,6 +242,7 @@
 }
 .cs-effect-config.cs-v2 .sheet-tabs > [data-tab],
 .cs-effect-config.cs-v2 nav.tabs > [data-tab] {
+  flex: none;
   padding: 10px 15px;
   border: none;
   background: transparent;
@@ -742,12 +743,13 @@
 .cs-effect-config.cs-v2 .cs-change-delete {
   position: static;
   flex: 0 0 auto;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   min-width: 0;
   min-height: 0;
   padding: 0;
@@ -755,14 +757,14 @@
   border-radius: 5px;
   background: var(--csv2-bg);
   color: var(--csv2-danger);
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
   cursor: pointer;
   box-shadow: none;
 }
 .cs-effect-config.cs-v2 .cs-change-delete > i {
   margin: 0;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
 }
 .cs-effect-config.cs-v2 .cs-change-delete:hover {
@@ -1133,6 +1135,16 @@
   color: var(--csv2-text);
   box-shadow: none;
 }
+.cs-v2 .csv2-btn--danger {
+  background: var(--csv2-bg);
+  border-color: var(--csv2-input-border);
+  color: var(--csv2-danger);
+}
+.cs-v2 .csv2-btn--danger:hover {
+  border-color: var(--csv2-danger);
+  color: var(--csv2-danger);
+  box-shadow: none;
+}
 .cs-v2 .csv2-btn--sm {
   padding: 7px 14px;
   font-size: 11.5px;
@@ -1193,6 +1205,228 @@
 }
 .cs-v2 .csv2-swatch.is-selected {
   border-color: var(--csv2-dark);
+}
+
+/* ===========================================================================
+   Item-sheet primitives (spec 019) — added HERE (shared SSOT), never copied
+   into item-sheet.css. Generalized from the character sheet's `.cs2-*` grids so
+   every `.cs-v2` window benefits (FR-006, Principle II).
+   ========================================================================== */
+
+/* ---------- Divided-cell field grid (T006) ---------- */
+/* A 3-up grid of stacked label+control cells with hairline dividers: a top rule
+   on every cell, a left rule except the first of each row. Generalized from
+   `.cs2-identity-grid` / `.cs2-field-grid`. */
+.cs-v2 .csv2-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.cs-v2 .csv2-field-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+  border-left: 1px solid var(--csv2-border-soft);
+}
+.cs-v2 .csv2-field-grid > .csv2-field-cell:nth-child(3n + 1) {
+  border-left: 0;
+}
+.cs-v2 input.is-mono {
+  font-family: var(--csv2-font-mono);
+}
+
+/* ---------- Boolean pill toggle (T035) ---------- */
+/* Styles a real (form-associated, submitOnChange-persisted) checkbox as a 34×18
+   pill: blue on / grey off, a white knob sliding L↔R. The native checkbox is
+   visually hidden but stays keyboard-focusable and in the DOM. */
+.cs-v2 .csv2-switch {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 34px;
+  height: 18px;
+  cursor: pointer;
+}
+.cs-v2 .csv2-switch input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  appearance: none;
+}
+.cs-v2 .csv2-switch .csv2-switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-track-border);
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+.cs-v2 .csv2-switch .csv2-switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--csv2-muted);
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease;
+}
+.cs-v2 .csv2-switch input[type="checkbox"]:checked + .csv2-switch-track {
+  background: var(--csv2-primary);
+  border-color: var(--csv2-primary);
+}
+.cs-v2 .csv2-switch input[type="checkbox"]:checked + .csv2-switch-track::after {
+  transform: translateX(16px);
+  background: var(--csv2-on-primary);
+}
+.cs-v2 .csv2-switch input[type="checkbox"]:focus-visible + .csv2-switch-track {
+  outline: 2px solid var(--csv2-primary);
+  outline-offset: 1px;
+}
+
+/* ---------- Selectable chip group (T035) ---------- */
+/* Extends the static `.csv2-chip` into a single-select radio group: `.is-selected`
+   is filled blue; the underlying radios are hidden but keep the value. */
+.cs-v2 .csv2-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cs-v2 .csv2-chip-group .csv2-chip {
+  cursor: pointer;
+  padding: 5px 12px;
+  font-size: 10px;
+  line-height: 1.4;
+  min-height: 0;
+  box-shadow: none;
+  background: var(--csv2-bg);
+  color: var(--csv2-muted-2);
+  border: 1px solid var(--csv2-input-border);
+}
+.cs-v2 .csv2-chip-group .csv2-chip input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+.cs-v2 .csv2-chip-group .csv2-chip.is-selected {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  border-color: var(--csv2-primary);
+}
+
+/* ---------- Repeatable-list card internals (T035) ---------- */
+.cs-v2 .csv2-list .csv2-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cs-v2 .csv2-list-head,
+.cs-v2 .csv2-list-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+}
+.cs-v2 .csv2-list-head {
+  background: var(--csv2-dark);
+  color: var(--csv2-grid-head-text);
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.cs-v2 .csv2-list-row {
+  border-top: 1px solid var(--csv2-border-soft);
+}
+.cs-v2 .csv2-list-row:nth-child(even) {
+  background: var(--csv2-secondary);
+}
+.cs-v2 .csv2-list-grip {
+  flex: 0 0 14px;
+  display: flex;
+  justify-content: center;
+  color: var(--csv2-muted);
+}
+.cs-v2 .csv2-list-del {
+  flex: 0 0 30px;
+  display: flex;
+  justify-content: center;
+}
+.cs-v2 .csv2-list-col {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.cs-v2 .csv2-list-col + .csv2-list-col {
+  flex: 0 0 90px;
+}
+.cs-v2 .csv2-list-col input.is-mono {
+  text-align: center;
+}
+.cs-v2 .csv2-list-empty {
+  padding: 12px;
+  text-align: center;
+  font-style: italic;
+  color: var(--csv2-muted);
+  background: var(--csv2-secondary);
+}
+.cs-v2 .csv2-list-del-btn {
+  flex: none;
+  box-sizing: border-box;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 6px;
+  color: var(--csv2-danger);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+.cs-v2 .csv2-list-del-btn:hover {
+  border-color: var(--csv2-danger);
+  background: var(--csv2-danger);
+  color: var(--csv2-on-primary);
+}
+/* Compact "Add" button in any list/panel card-header bar (was oversized as a full
+   pill). One rule for EVERY listAdd button (repeatable lists + Técnica works panel)
+   so they stay identical — keyed on the action, not the wrapper. */
+.cs-v2 .csv2-card-header .csv2-btn[data-action="listAdd"] {
+  box-sizing: border-box;
+  height: 19px;
+  min-height: 0;
+  padding: 0 10px;
+  gap: 5px;
+  font-size: 10px;
+  line-height: 1;
+  border-radius: 5px;
+}
+
+/* ---------- Card hint (rich-text-field sub-label) ---------- */
+.cs-v2 .csv2-card-hint {
+  margin-left: 8px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.85;
 }
 
 /* ---------- Shared: origin pill (filled per type) + value tones (T005/T006) ---------- */
@@ -2127,3 +2361,221 @@
 .chat-message .message-content:has(.cs-roll-card.cs-v2) .dice-roll {
   display: none;
 }
+
+/* --------------------------------------------------- effects tab (shared) - */
+/* Promoted from character-sheet-v2.css (spec 019, T030/FR-007): the item sheet
+   (.cs-v2) and character sheet (.cs-sheet-v2) share ONE effects-tab styling.
+   Declarations are byte-identical to the original; only the selector prefix was
+   generalized from `.chroniclesystem.character.sheet.actor .cs-sheet-v2`. */
+
+:is(.cs-v2, .cs-sheet-v2) .effects-tab {
+  --cs-ink: var(--csv2-text);
+  --cs-azure: var(--csv2-primary);
+  --cs-azure-soft: var(--csv2-primary);
+  --cs-gold: var(--csv2-primary);
+  --cs-bronze: var(--csv2-muted);
+  --cs-crimson: var(--csv2-danger);
+  --cs-parchment: var(--csv2-secondary);
+  --cs-parchment-hi: var(--csv2-bg);
+  --cs-stone: var(--csv2-border);
+  --cs-stone-dark: var(--csv2-muted);
+  --cs-serif: var(--csv2-font-sans);
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effects-toolbar {
+  margin-bottom: 10px;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effects-toolbar .effect-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  border-radius: 5px;
+  padding: 6px 12px;
+  font: 600 12px var(--csv2-font-sans);
+  text-decoration: none;
+}
+
+/* Fixed Status/Actions tracks: the header and every row are SEPARATE grids, so
+   `auto` tracks (and therefore the two 1fr tracks) would size differently per
+   grid and columns would not line up. Explicit widths make all grids agree. */
+:is(.cs-v2, .cs-sheet-v2) .effects-tab .effects-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 100px 120px;
+  background: var(--csv2-dark);
+  color: var(--csv2-grid-head-text);
+  border-radius: 7px 7px 0 0;
+  overflow: hidden;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effects-header .effect-col {
+  padding: 7px 12px;
+  font: 600 9.5px var(--csv2-font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  /* NAME + ORIGIN read left; overrides the generic global.css rule that centers
+     .effect-col-origin. STATUS/ACTIONS re-center below (later, equal specificity). */
+  text-align: left;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effects-header .effect-col-status,
+:is(.cs-v2, .cs-sheet-v2) .effects-header .effect-col-actions {
+  text-align: center;
+}
+/* ORIGIN header reads left to line up with the row's left-aligned origin value.
+   The `.effects-tab` scope lifts this to (0,4,0) so it beats the legacy
+   global.css `.chroniclesystem .effects-tab .effects-header .effect-col-origin`
+   (0,4,0) on load order — the generic .effect-col rule above (0,3,0) lost to it. */
+:is(.cs-v2, .cs-sheet-v2) .effects-tab .effects-header .effect-col-origin {
+  text-align: left;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effects-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--csv2-border);
+  border-top: none;
+  border-radius: 0 0 7px 7px;
+  overflow: hidden;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effects-list .effect {
+  display: grid;
+  grid-template-columns: 1fr 1fr 100px 120px;
+  align-items: center;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effects-list .effect:nth-child(even) {
+  background: var(--csv2-secondary);
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effects-list .effect.effect-disabled {
+  opacity: 0.55;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-cell-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 12px;
+  font: 600 12.5px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-img {
+  border-radius: 4px;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-origin-name {
+  padding: 8px 12px;
+  font: 400 12px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Status badge — Active (blue on light-blue) / Suppressed (muted on grey). */
+:is(.cs-v2, .cs-sheet-v2) .effect-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-status-badge {
+  font: 600 10px var(--csv2-font-mono);
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-status-badge.is-active {
+  background: var(--csv2-area);
+  color: var(--csv2-primary);
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-status-badge.is-suppressed {
+  background: var(--csv2-secondary);
+  color: var(--csv2-muted);
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effects-tab .effect-controls {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-control {
+  background: none;
+  border: 1px solid var(--csv2-border);
+  border-radius: 5px;
+  padding: 4px 7px;
+  color: var(--csv2-muted);
+  text-decoration: none;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-control:hover {
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+}
+
+/* Row action buttons are fixed-size icon buttons (design §7). Scoped to
+   .effect-controls so the toolbar "+ Create" (.effect-create) keeps its size. */
+:is(.cs-v2, .cs-sheet-v2) .effect-controls .effect-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 11px;
+}
+
+/* The enable toggle reads as a bare switch — no border box (design §7). */
+:is(.cs-v2, .cs-sheet-v2) .effect-controls .effect-toggle {
+  border: none;
+  width: 30px;
+  font-size: x-large;
+}
+
+/* Toggle reads on=blue / off=muted; delete warms to the danger colour. */
+:is(.cs-v2, .cs-sheet-v2) .effect-toggle.is-on {
+  color: var(--csv2-primary);
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-delete {
+  color: var(--csv2-danger);
+}
+:is(.cs-v2, .cs-sheet-v2) .effect-delete:hover {
+  border-color: var(--csv2-danger);
+  color: var(--csv2-danger);
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-lock {
+  color: var(--csv2-muted);
+  padding: 4px 7px;
+}
+
+:is(.cs-v2, .cs-sheet-v2) .effect-empty {
+  padding: 12px;
+  text-align: center;
+  color: var(--csv2-muted);
+  font-style: italic;
+}
+

@@ -1,0 +1,59 @@
+{{!-- Técnica Works card (spec 019, FR-015) — invoked once per work with the work
+      object as context (index/name/type/cost/resonance/test/collapsed/isSpell/
+      isRitual/enrichedDescription). The clickable chevron toggles collapse; the
+      header carries only the name input + delete (Type/Cost live in the body). The
+      body gates conditional sub-fields on the pre-computed isSpell/isRitual flags —
+      NO "SPELL"/"RITUAL" string literals here. Type/Cost are selects over the
+      constants; @root carries typeDescriptor + editable. --}}
+<div class="cs-works-card {{#if collapsed}}is-collapsed{{/if}}">
+    <div class="cs-works-head">
+        <i class="fas fa-chevron-down cs-works-chevron" data-action="toggleCollapse" data-index="{{index}}"></i>
+        <input class="cs-works-title" type="text" name="{{concat "system.works." index ".name"}}"
+               value="{{name}}" placeholder="{{localize 'CS.sheets.item.fields.name'}}" />
+        <button type="button" class="csv2-list-del-btn"
+                data-action="listDelete" data-list="system.works" data-index="{{index}}">
+            <i class="fa-regular fa-trash-can"></i>
+        </button>
+    </div>
+    {{#unless collapsed}}
+    <div class="cs-works-body">
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="select" name=(concat "system.works." index ".type")
+                  label="CS.sheets.techniqueItem.type" value=type
+                  options=@root.typeDescriptor.techniqueTypes }}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="select" name=(concat "system.works." index ".cost")
+                  label="CS.sheets.techniqueItem.cost" value=cost
+                  options=@root.typeDescriptor.techniqueCosts }}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="text" name=(concat "system.works." index ".resonance")
+                  label="CS.sheets.techniqueItem.resonance" value=resonance }}
+        </div>
+        {{#if isSpell}}
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="text" name=(concat "system.works." index ".test.spellcasting")
+                  label="CS.sheets.techniqueItem.test.spellcasting" value=test.spellcasting }}
+        </div>
+        {{/if}}
+        {{#if isRitual}}
+        <div class="cs-works-3up">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="text" name=(concat "system.works." index ".test.alignment")
+                  label="CS.sheets.techniqueItem.test.alignment" value=test.alignment }}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="text" name=(concat "system.works." index ".test.invocation")
+                  label="CS.sheets.techniqueItem.test.invocation" value=test.invocation }}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="text" name=(concat "system.works." index ".test.unleashing")
+                  label="CS.sheets.techniqueItem.test.unleashing" value=test.unleashing }}
+        </div>
+        {{/if}}
+        {{> "systems/chroniclesystem/templates/items/components/rich-text-field.hbs"
+              label="CS.sheets.generalLabels.description"
+              name=(concat "system.works." index ".description")
+              value=description enriched=enrichedDescription editable=@root.editable }}
+    </div>
+    {{/unless}}
+</div>

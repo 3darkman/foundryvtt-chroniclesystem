@@ -32,7 +32,10 @@
   }
 
   &.sheet {
-    .window-content {
+    /* The item sheet (.cs-item-v2) owns its whole part layout (item-sheet.css):
+       its tab bodies ARE the parts, so the generic part-flex rules below would
+       fight it. Exclude it from the entire .window-content block. */
+    &:not(.cs-item-v2) .window-content {
       padding: @medium-margin @biggest-margin @medium-margin @medium-margin;
       overflow-y: hidden;
       background: @background-color;

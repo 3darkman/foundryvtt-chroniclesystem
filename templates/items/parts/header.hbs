@@ -1,0 +1,17 @@
+{{!-- Shared item-sheet header part (spec 019) — editable image + type eyebrow +
+      name, and an owner-gated Delete. One file for all 10 types (SSOT). --}}
+<header class="cs-item-header">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" data-action="editImage"
+         title="{{item.name}}" alt="{{item.name}}" />
+    <div class="cs-item-header-text">
+        <div class="csv2-label">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <input class="cs-item-name" name="name" type="text" value="{{item.name}}"
+               placeholder="{{localize 'CS.sheets.generalLabels.name'}}" />
+    </div>
+    {{#if isEmbedded}}
+    <button type="button" class="csv2-btn csv2-btn--danger csv2-btn--sm cs-item-delete"
+            data-action="deleteItem" title="{{localize 'CS.sheets.item.delete'}}">
+        <i class="fa-regular fa-trash-can"></i>{{localize "CS.sheets.item.delete"}}
+    </button>
+    {{/if}}
+</header>

@@ -1,0 +1,26 @@
+{{!-- Evento (event) Sistema body (spec 019). Owner is a House. Choice fields +
+      Player Choice switch, and the fixed 7-row "Recursos da Casa" table pairing
+      Formula (system.formulas.<res>) with Modifier (system.modifiers.<res>). --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.numberOfChoices" label="CS.sheets.eventItem.numberOfChoices" value=item.system.numberOfChoices}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.bonusToChoices" label="CS.sheets.eventItem.bonusToChoices" value=item.system.bonusToChoices}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="bool" name="system.playerChoice" label="CS.sheets.eventItem.playerChoice" value=item.system.playerChoice}}
+        </div>
+    </div>
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.sheets.item.houseResources"}}</div>
+        <div class="cs-resources-table">
+            <span class="cs-res-cell cs-res-head">{{localize "CS.sheets.house.resources.title"}}</span>
+            <span class="cs-res-cell cs-res-head">{{localize "CS.sheets.item.fields.formula"}}</span>
+            <span class="cs-res-cell cs-res-head">{{localize "CS.sheets.item.fields.modifier"}}</span>
+            {{#each houseResources as |res|}}
+            <span class="cs-res-cell cs-res-label">{{localize (concat "CS.sheets.house.resources." res)}}</span>
+            <span class="cs-res-cell"><input type="text" name="{{concat "system.formulas." res}}" value="{{lookup @root.item.system.formulas res}}" /></span>
+            <span class="cs-res-cell"><input type="text" class="is-mono" name="{{concat "system.modifiers." res}}" value="{{lookup @root.item.system.modifiers res}}" data-dtype="Number" /></span>
+            {{/each}}
+        </div>
+    </div>
+</section>

@@ -1,0 +1,15 @@
+{{!-- Shared long rich-text control (spec 019). A full-width `.csv2-card` (blue strip
+      + optional hint) wrapping the form-associated `<prose-mirror>` web component —
+      NOT the `{{editor}}` helper, which emits the legacy click-to-activate editor that
+      does not auto-save under submitOnChange. Caller passes `value` (raw stored string,
+      for the value attr) + `enriched` (pre-enrichHTML'd, for display). --}}
+<div class="csv2-card csv2-richtext">
+    <div class="csv2-card-header">{{localize label}}{{#if hint}}<span class="csv2-card-hint">{{localize hint}}</span>{{/if}}</div>
+    <div class="csv2-card-body">
+        {{#if editable}}
+        <prose-mirror name="{{name}}" button="true" toggled="true" value="{{value}}">{{{enriched}}}</prose-mirror>
+        {{else}}
+        <div class="editor-content">{{{enriched}}}</div>
+        {{/if}}
+    </div>
+</div>

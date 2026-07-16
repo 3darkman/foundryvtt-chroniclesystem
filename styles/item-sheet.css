@@ -1,72 +1,217 @@
-.chroniclesystem.sheet.item .form-group input {
-    margin: 0 0 0 5px;
-    height: 34px;
+/* ============================================================================
+   Item sheet — item-ONLY v2 layout (spec 019). Scoped to `.cs-item-v2`.
+   Tokens, buttons, inputs, cards, field grids, switches, chips, and list rules
+   all live in the SHARED layer (cs-components.css, `.cs-v2 *`). This file holds
+   only chrome + layout unique to the item sheet (FR-006, CLAUDE.md SSOT rule).
+   ========================================================================== */
+
+/* ---------- Window chrome ---------- */
+.cs-item-v2 .window-content {
+  display: flex;
+  flex-direction: column;
+  /* Once the active tab is allowed to grow (see `.tab.active { height:auto }`),
+     THIS flex:1 child must be able to shrink to the frame so its own overflow-y
+     scrolls instead of pushing past the window bottom — min-height:auto would keep
+     it at content height. Not the cause of the "panel won't grow" bug (that was the
+     tab's height:100% leak); this just keeps the scroll inside the frame. */
+  min-height: 0;
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--csv2-bg);
 }
 
-/* Keep label and input on a single line in item-sheet form groups
-   (v13 core gives inputs width:100%, which otherwise wraps them
-   onto their own line). */
-.chroniclesystem.sheet.item .form-group {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
+/* Tab bodies: only the active one shows; it stacks its cards with a gap. The
+   inactive part wrappers collapse to zero height (their `.tab` is display:none),
+   so no stray gaps appear between the header, nav, and body. */
+.cs-item-v2 .tab {
+  display: none;
+}
+.cs-item-v2 .tab.active {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  /* Kill the legacy leak `.tab[data-tab].active { height: 100% }` (global.css:185,
+     a V1 character-sheet rule). It pinned this tab to a FIXED height; being a flex
+     column of `.csv2-card`s (which are overflow:hidden → min-height:0), the flex
+     algorithm then SHRANK the upper cards to make room as Works grew — so the Works
+     panel "didn't grow", the Arts list above it collapsed/hid, and content clipped
+     instead of scrolling. `height:auto` lets the tab grow with its content; the
+     window-content scroller (below) then handles overflow. Same specificity (0,3,0),
+     but item-sheet.css loads after global.css, so this wins the tie. */
+  height: auto;
+}
+/* The Effects tab is a self-contained table (toolbar + flush header/list); the
+   12px card gap would (a) split the header from the first row and (b) stack on
+   the toolbar's own margin-bottom. Zero it — the toolbar margin gives the
+   toolbar→header spacing, matching the character sheet. */
+.cs-item-v2 .tab.effects-tab.active {
+  gap: 0;
 }
 
-.chroniclesystem.sheet.item .form-group > label {
-    flex: 1 1 auto;
+/* ---------- Header (56×56 image · eyebrow/name · owned Delete) ---------- */
+.cs-item-v2 .cs-item-header {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--csv2-border);
+}
+.cs-item-v2 .cs-item-header .profile-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--csv2-border);
+  background: var(--csv2-secondary);
+  cursor: pointer;
+}
+.cs-item-v2 .cs-item-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+/* Name renders as a borderless heading, not a boxed input. The `.cs-item-header`
+   scope lifts specificity to 0,3,0 so it beats the shared `.cs-v2 :is(input…)`
+   control rule (0,2,1) — same technique as `.cs-effect-name-input`. */
+.cs-item-v2 .cs-item-header .cs-item-name {
+  border: none;
+  background: transparent;
+  margin-left: -4px;
+  padding: 2px 4px;
+  border-radius: 5px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--csv2-text);
+}
+.cs-item-v2 .cs-item-header .cs-item-name:hover {
+  background: var(--csv2-border-soft);
+}
+.cs-item-v2 .cs-item-header .cs-item-name:focus {
+  background: var(--csv2-bg);
+  box-shadow: inset 0 0 0 1px var(--csv2-input-border);
+  outline: none;
+}
+.cs-item-v2 .cs-item-delete {
+  flex: none;
 }
 
-.chroniclesystem.sheet.item .form-group > input {
-    min-width: 0;
+/* ---------- Tab navigation — segmented v2 (matches the character sheet & the
+   effect window). High specificity MIRRORS the character sheet's own scoped block
+   so it beats the legacy grey-chip rules in global.css (max 0,4,1) WITHOUT
+   excluding them; the full-width stretch + inner flex layout are inherited from
+   the shared global.css tab block, exactly as the character sheet inherits them.
+   Targets [data-tab] (present on every core tab link), not a bespoke element. --- */
+.chroniclesystem.item.sheet.cs-item-v2 nav.sheet-tabs {
+  background: var(--csv2-secondary);
+  border-top: none;
+  border-bottom: 1px solid var(--csv2-border);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+.chroniclesystem.item.sheet.cs-item-v2 nav.sheet-tabs [data-tab] {
+  flex: none;
+  margin: 0;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--csv2-muted-2);
+  font: 600 13px var(--csv2-font-sans);
+  box-shadow: none;
+  text-shadow: none;
+  text-decoration: none;
+}
+.chroniclesystem.item.sheet.cs-item-v2 nav.sheet-tabs [data-tab] i {
+  font-size: 11px;
+}
+.chroniclesystem.item.sheet.cs-item-v2 nav.sheet-tabs [data-tab]:hover {
+  text-shadow: none;
+}
+.chroniclesystem.item.sheet.cs-item-v2 nav.sheet-tabs [data-tab].active {
+  background: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  text-decoration: none;
 }
 
-/* Left column: the old 1 : 2.5 proportional share, widened by 20px. */
-.chroniclesystem.sheet.item .sheet-body .item-stats {
-    flex: 0 0 calc(100% / 3.5 + 20px);
+/* ---------- Evento — "Recursos da Casa" table (140px | 1fr | 96px) ---------- */
+.cs-item-v2 .cs-resources-table {
+  display: grid;
+  grid-template-columns: 140px 1fr 96px;
+  align-items: center;
+}
+.cs-item-v2 .cs-resources-table .cs-res-cell {
+  padding: 6px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+.cs-item-v2 .cs-resources-table .cs-res-head {
+  border-top: none;
+  background: var(--csv2-dark);
+  color: var(--csv2-grid-head-text);
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.cs-item-v2 .cs-resources-table .cs-res-label {
+  font-weight: 600;
+  color: var(--csv2-text);
 }
 
-.chroniclesystem.sheet.item .sheet-body .description {
-    flex: 1 1 0;
-    min-width: 0;
-    /* Stack header + editor and let the editor fill the column so the
-       description resizes with the sheet height (restores the pre-v13
-       behaviour for the migrated <prose-mirror> editor). */
-    display: flex;
-    flex-direction: column;
+/* ---------- Técnica — Works collapsible cards ---------- */
+/* The light-blue callout lives on the PANEL that holds every work (its card-body),
+   NOT on each work: the cards themselves are white so their name row reads clean. */
+.cs-item-v2 .cs-works-panel > .csv2-card-body {
+  background: var(--csv2-area);
 }
-
-.chroniclesystem.sheet.item .sheet-body .description .form-group {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    min-height: 0;
+.cs-item-v2 .cs-works-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-
-.chroniclesystem.sheet.item .sheet-body .description prose-mirror,
-.chroniclesystem.sheet.item .sheet-body .description .editor-content {
-    flex: 1 1 auto;
-    min-height: 0;
+.cs-item-v2 .cs-works-card {
+  border: 1px solid var(--csv2-callout-border);
+  border-left: 3px solid var(--csv2-primary);
+  border-radius: 7px;
+  background: var(--csv2-bg);
+  overflow: hidden;
 }
-
-.chroniclesystem.sheet.item .sheet-body .poison {
-    flex-grow: 2;
+.cs-item-v2 .cs-works-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
 }
-
-.chroniclesystem.sheet.item .sheet-header .item-control {
-    flex: 0 0 36px;
-    margin-left: 10px;
-    align-self: center;
-    align-items: center;
-    color: black;
-    line-height: normal;
+.cs-item-v2 .cs-works-chevron {
+  color: var(--csv2-muted-2);
+  transition: transform 0.15s ease;
 }
-
-.chroniclesystem.sheet.item {
-    min-width: 460px;
-    min-height: 400px;
+.cs-item-v2 .cs-works-card.is-collapsed .cs-works-chevron {
+  transform: rotate(-90deg);
 }
-
-.chroniclesystem.sheet.item .item-stats {
-    margin-right: 10px;
+.cs-item-v2 .cs-works-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--csv2-text);
+}
+.cs-item-v2 .cs-works-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: var(--csv2-bg);
+  border-top: 1px solid var(--csv2-callout-border);
+}
+.cs-item-v2 .cs-works-3up {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }

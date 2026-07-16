@@ -152,4 +152,16 @@ export const registerCustomHelpers = function () {
       return new Handlebars.SafeString(arg1 < arg2 ? result : result2);
     }
   );
+
+  // Boolean subexpression helpers (spec 019) — the shared field-cell gates an
+  // owned-only cell with `(csOr (csNot owned) @root.isEmbedded)`. `cs`-prefixed so
+  // they never shadow a Foundry built-in.
+  Handlebars.registerHelper("csOr", function (...positional) {
+    positional.pop(); // drop the trailing Handlebars options object
+    return positional.some(Boolean);
+  });
+
+  Handlebars.registerHelper("csNot", function (value) {
+    return !value;
+  });
 };

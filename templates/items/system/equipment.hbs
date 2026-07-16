@@ -1,0 +1,10 @@
+{{!-- Equipamento (equipment) Sistema body (spec 019). --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.quantity" label="CS.sheets.item.fields.quantity" value=item.system.quantity owned=true}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.cost" label="CS.sheets.item.fields.cost" value=item.system.cost}}
+        </div>
+    </div>
+</section>

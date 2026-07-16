@@ -1,0 +1,34 @@
+{{!-- Shared field-control cell (spec 019). One divided grid cell; `kind` picks the
+      control (text | number | select | bool | chips). `owned=true` omits the whole
+      cell — no `name` leak — unless the item is embedded in an owner. Compose these
+      inside a `.csv2-field-grid`. SSOT: never copy this markup into a per-type body. --}}
+{{#if (csOr (csNot owned) @root.isEmbedded)}}
+<div class="csv2-field-cell">
+    <div class="csv2-label">{{localize label}}</div>
+    {{#ifEquals kind "number"}}
+    <input type="text" class="is-mono" name="{{name}}" value="{{value}}" data-dtype="Number" />
+    {{/ifEquals}}
+    {{#ifEquals kind "text"}}
+    <input type="text" name="{{name}}" value="{{value}}" />
+    {{/ifEquals}}
+    {{#ifEquals kind "select"}}
+    <select name="{{name}}">{{selectOptions options selected=value localize=true}}</select>
+    {{/ifEquals}}
+    {{#ifEquals kind "bool"}}
+    <label class="csv2-switch">
+        <input type="checkbox" name="{{name}}" {{#if value}}checked{{/if}} />
+        <span class="csv2-switch-track"></span>
+    </label>
+    {{/ifEquals}}
+    {{#ifEquals kind "chips"}}
+    <div class="csv2-chip-group">
+        {{#each options as |lbl val|}}
+        <label class="csv2-chip {{#ifEquals val ../value}}is-selected{{/ifEquals}}">
+            <input type="radio" name="{{../name}}" value="{{val}}" {{#ifEquals val ../value}}checked{{/ifEquals}} />
+            {{localize lbl}}
+        </label>
+        {{/each}}
+    </div>
+    {{/ifEquals}}
+</div>
+{{/if}}

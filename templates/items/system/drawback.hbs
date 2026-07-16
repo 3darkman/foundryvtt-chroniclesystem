@@ -1,0 +1,13 @@
+{{!-- Fraqueza (drawback) Sistema body (spec 019). Text fields + boolean flags. --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.flawAttribute" label="CS.sheets.item.fields.flawAttribute" value=item.system.flawAttribute}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.requirements" label="CS.sheets.item.fields.requirements" value=item.system.requirements}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="bool" name="system.requireSorcerousArt" label="CS.sheets.item.fields.requireSorcerousArt" value=item.system.requireSorcerousArt}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="bool" name="system.isAStricture" label="CS.sheets.item.fields.isAStricture" value=item.system.isAStricture}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="bool" name="system.isAFlaw" label="CS.sheets.item.fields.isAFlaw" value=item.system.isAFlaw}}
+        </div>
+    </div>
+</section>
