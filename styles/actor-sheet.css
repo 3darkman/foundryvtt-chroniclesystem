@@ -40,6 +40,7 @@
     height: auto;
     min-height: 31px;
     margin: 3px;
+    flex: .3;
     align-self: stretch;
     align-items: center;
     flex-wrap: wrap;

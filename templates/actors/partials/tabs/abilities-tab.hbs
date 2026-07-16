@@ -3,7 +3,7 @@
         <header class="header-field">
             <span>Abilities</span>
         </header>
-        <ol  class="abilities-list">
+        <ol  class="abilities-list list">
             {{#each character.owned.abilities as |ability key|}}
                 <li  class="item ability flexrow" data-item-id="{{ability._id}}" draggable="true">
                     <div class="ability-value rollable" id="ability:{{ability.name}}" data-action="rollDice">
