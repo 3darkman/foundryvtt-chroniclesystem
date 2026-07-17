@@ -421,16 +421,17 @@ async function _deriveTargetConflict(
   formula
 ) {
   const kind = rollContext.kind;
-  const { getUserTarget, getAttackerToken, measureDistanceYards } =
-    await import("../combat/cs-targeting.js");
-  const {
-    rangeCategoryFromQualities,
-    rangePenalty,
-    combatDefenseSizeModifier,
-  } = await import("../combat/cs-conflict.js");
+  const { getUserTarget, getAttackerToken, measureDistance } = await import(
+    "../combat/cs-targeting.js"
+  );
+  const { rangePenalty, combatDefenseSizeModifier } = await import(
+    "../combat/cs-conflict.js"
+  );
+  const { weaponRangeBand } = await import("../effects/cs-effect-modifiers.js");
 
   const itemized = [];
   const weapon = kind === "weapon" ? actor.items.get(rollContext.itemId) : null;
+  let armorBypass = 0; // spec 020 — this weapon's Piercing/Penetration (per instance)
 
   // Resolve the ability/specialty this conflict roll actually exercises, so the
   // card/dialog itemize its ability/specialty-specific always-on modifiers
@@ -492,22 +493,23 @@ async function _deriveTargetConflict(
   let difficultyTargetValue = defense;
 
   if (kind === "weapon" && weapon) {
-    // Range penalty — ranged weapon (by slug) with a measurable attacker token.
-    const category = rangeCategoryFromQualities(weapon.system?.qualities);
-    if (category) {
+    // Range penalty — ranged weapon (data-driven range band) with a measurable
+    // attacker token; the distance and the band are both in the scene's units.
+    const band = weaponRangeBand(weapon);
+    if (band) {
       const attackerToken = getAttackerToken(actor);
-      const yd = attackerToken
-        ? measureDistanceYards(attackerToken, target.token)
+      const dist = attackerToken
+        ? measureDistance(attackerToken, target.token)
         : null;
-      if (yd != null) {
-        const pen = rangePenalty(yd, category);
+      if (dist != null) {
+        const pen = rangePenalty(dist, band);
         if (pen > 0) {
           formula.dicePenalty += pen;
           itemized.push(
             _decorateItem({
               sourceLabel: SystemUtils.format("CS.conflict.range", {
-                distance: Math.round(yd),
-                units: "yd",
+                distance: Math.round(dist),
+                units: canvas?.grid?.units ?? "",
               }),
               origin: "target",
               field: "dicePenalty",
@@ -555,6 +557,12 @@ async function _deriveTargetConflict(
   if (kind === "weapon" && weapon) {
     weapon.updateDamageValue(actor);
     baseValue = Number(weapon.damageValue) || 0;
+    // Attack-scoped armour bypass (Piercing/Penetration) — reduce the target's
+    // effective Armor Rating for THIS weapon's damage (spec 020, T028, per instance).
+    const { weaponAttackScopedTotal } = await import(
+      "../effects/cs-effect-modifiers.js"
+    );
+    armorBypass = weaponAttackScopedTotal(weapon, "armorbypass");
   } else if (kind === "intrigue") {
     baseValue = Number(rollContext.influenceValue) || 0;
   }
@@ -577,7 +585,9 @@ async function _deriveTargetConflict(
       kind,
       targetActor: target.actor,
       baseValue,
-      armorRating: target.armorRating,
+      // spec 020 — Piercing/Penetration bypass this weapon's hit against the
+      // target's armour (floored at 0); melee/no-bypass leaves it unchanged.
+      armorRating: Math.max(0, (Number(target.armorRating) || 0) - armorBypass),
       dispositionRating: target.dispositionRating,
     },
     itemizeAbility,
@@ -785,6 +795,26 @@ async function handleRollAsync(
     };
   }
 
+  // spec 020 (Decision 8, FR-030) — attacking WITH a Defensive weapon drops its
+  // passive Combat-Defense bonus until the owner's next turn: stamp a per-weapon,
+  // per-turn marker the collector honours (T029). Combat only; idempotent. The
+  // weapon is re-resolved here (it is local to _deriveTargetConflict above).
+  const rolledWeapon =
+    kind === "weapon" ? actor.items.get(rollContext.itemId) : null;
+  if (rolledWeapon && actor?.inCombat) {
+    await _markDefensiveSpent(actor, rolledWeapon);
+  }
+
+  // spec 020 (FR-018) — surface ALL of the rolled weapon's qualities on the result
+  // card so the GM sees them WITH the attack (targeted or not), as adjudication notes
+  // instead of repeating the chips on the character sheet.
+  if (rolledWeapon && conflictContext) {
+    const { weaponReminders } = await import(
+      "../effects/cs-effect-modifiers.js"
+    );
+    conflictContext.reminders = weaponReminders(rolledWeapon);
+  }
+
   let csRoll = new CSRoll(
     roll_definition[1],
     formula,
@@ -792,6 +822,46 @@ async function handleRollAsync(
     conflictContext
   );
   return await csRoll.doRoll(actor, true);
+}
+
+/**
+ * Create the per-turn Defensive-spent marker on the actor (spec 020, Decision 8).
+ * No-op unless the weapon actually grants Defensive; idempotent (one marker per
+ * weapon per turn). The collector skips that weapon's Defensive contribution while
+ * the marker is active; Foundry auto-expires it at the owner's next turn (RT-1).
+ */
+async function _markDefensiveSpent(actor, weapon) {
+  const { weaponHasQualityLever } = await import(
+    "../effects/cs-effect-modifiers.js"
+  );
+  if (!weaponHasQualityLever(weapon, "defensewhilewielded")) return;
+  // Delete any prior marker for THIS weapon before stamping a fresh one. The core
+  // default `CONFIG.ActiveEffect.expiryAction` is "update" (not "delete"), so an
+  // expired marker lingers (only `duration.expired` is flipped) — this both avoids
+  // accumulation and lets a LATER attack re-suppress Defensive (a stale, non-
+  // disabled marker would otherwise be mistaken for an active one). foundry-api-expert.
+  const stale = (actor.effects ?? [])
+    .filter(
+      (e) => e.getFlag?.("chroniclesystem", "defensiveSpent") === weapon.id
+    )
+    .map((e) => e.id);
+  if (stale.length) {
+    await actor.deleteEmbeddedDocuments("ActiveEffect", stale);
+  }
+  await actor.createEmbeddedDocuments("ActiveEffect", [
+    {
+      name: SystemUtils.format("CS.quality.defensiveSpent", {
+        weapon: weapon.name,
+      }),
+      img: weapon.img,
+      // rounds:1 + the default `turnStart` expiry keeps Defensive suppressed for the
+      // rest of THIS round and lifts at the next round boundary (≈ "my next turn" in
+      // one-turn-per-round initiative). No `changes` key — a marker; omitting it
+      // avoids the v14 top-level-`changes`→`system.changes` deprecation shim.
+      duration: { rounds: 1 },
+      flags: { chroniclesystem: { defensiveSpent: weapon.id } },
+    },
+  ]);
 }
 
 function adjustFormulaByWeapon(actor, formula, weapon) {

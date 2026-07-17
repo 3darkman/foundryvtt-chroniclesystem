@@ -690,6 +690,24 @@
   padding: 2px 7px;
   border-radius: 4px;
 }
+/* spec 020 — narrative-reminder quality chip (amber warning) + Defensive-stance
+   toggle active state (reuses the equip toggle chrome via .checkButton). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tag-reminder {
+  background: #f7f0dd;
+  border-color: #e3d3a0;
+  color: #8a6d1f;
+}
+/* spec 020 — unresolved quality reference (no world Quality with this slug): a
+   red "<slug> missing item" chip (mono slug) so the GM sees exactly what to fix. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tag-missing {
+  background: #fbeaea;
+  border-color: #e6b3b3;
+  color: #a23b3b;
+  font-family: var(--csv2-font-mono);
+}
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs-defensive.activated {
+  color: var(--csv2-primary);
+}
 
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-grid-scroll {
   overflow-x: auto;

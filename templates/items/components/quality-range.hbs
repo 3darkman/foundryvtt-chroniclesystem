@@ -1,0 +1,12 @@
+{{!-- Alcance card (spec 020) — shared so it renders identically whether it sits in
+      the left column (Parâmetro has a value) or full-width (Parâmetro = none). A
+      dedicated numeric field in the scene's units, resolved by weaponRangeBand. --}}
+<div class="csv2-card cs-range-card">
+    <div class="csv2-card-header">{{localize "CS.quality.rangeTitle"}}</div>
+    <div class="csv2-field-grid">
+        {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+              kind="number" name="system.range" label="CS.quality.rangeLabel"
+              value=item.system.range}}
+    </div>
+    <div class="csv2-card-hint">{{localize "CS.quality.rangeHint"}}</div>
+</div>

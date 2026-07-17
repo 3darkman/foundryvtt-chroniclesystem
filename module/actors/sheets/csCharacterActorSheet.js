@@ -9,7 +9,11 @@ import LOGGER from "../../utils/logger.js";
 import SystemUtils from "../../utils/systemUtils.js";
 import { CSConstants } from "../../system/csConstants.js";
 import { INTRIGUE_TECHNIQUES } from "../../vocabulary/cs-intrigue-techniques.js";
-import { influenceFor } from "../../effects/cs-effect-modifiers.js";
+import {
+  influenceFor,
+  weaponHasQualityLever,
+} from "../../effects/cs-effect-modifiers.js";
+import { weaponWieldingFlags } from "../../effects/cs-effect-vocabulary.js";
 import { CSPublicCharacterSheet } from "./csPublicCharacterSheet.js";
 import {
   PUBLIC_VISIBILITY_FIELDS,
@@ -39,6 +43,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
     actions: {
       changeDisposition: CSCharacterActorSheet._onDispositionChanged,
       toggleEquipped: CSCharacterActorSheet._onEquippedStateChanged,
+      defensiveStance: CSCharacterActorSheet._onDefensiveStance, // spec 020 (FR-030)
       createInjury: CSCharacterActorSheet._onClickInjuryCreate,
       deleteInjury: CSCharacterActorSheet._onClickInjuryDelete,
       createWound: CSCharacterActorSheet._onClickWoundCreate,
@@ -150,6 +155,16 @@ export class CSCharacterActorSheet extends CSActorSheet {
         actor,
         `weapon-test:${weapon.name}:${formula.toStr()}`
       );
+      // spec 020 — the out-of-combat Defensive stance toggle (FR-030). Stance is
+      // ON unless the flag is exactly `false`. Narrative reminders are NOT repeated
+      // here: the quality chip already shows the name; the reminder note surfaces on
+      // the roll RESULT card instead (FR-018).
+      weapon.hasDefensive = weaponHasQualityLever(
+        weapon,
+        "defensewhilewielded"
+      );
+      weapon.stanceActive =
+        weapon.getFlag("chroniclesystem", "defensiveStance") !== false;
     });
 
     // spec 017 (US2): the ability + specialty chips through the one SSOT utility
@@ -546,6 +561,21 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   /**
+   * spec 020 (FR-030) — toggle a weapon's out-of-combat Defensive stance. The
+   * collector reads a flag of exactly `false` as "bonus dropped" (default ON). In
+   * combat the per-turn marker governs Defensive instead; this is the fallback.
+   * @param {Event} event
+   * @param {HTMLElement} target
+   */
+  static async _onDefensiveStance(event, target) {
+    event.preventDefault();
+    const item = this.actor.getEmbeddedDocument("Item", target.dataset.itemId);
+    if (!item) return;
+    const active = item.getFlag("chroniclesystem", "defensiveStance") !== false;
+    await item.setFlag("chroniclesystem", "defensiveStance", !active);
+  }
+
+  /**
    * Static action handler for equipped state changes.
    * @param {Event} event    The originating click event
    * @param {HTMLElement} target  The element that was clicked
@@ -561,11 +591,11 @@ export class CSCharacterActorSheet extends CSActorSheet {
     let isUnequipping = parseInt(eventData.hand) === 0;
 
     if (isUnequipping) {
-      let adaptableQuality = Object.values(
-        currentItem.getCSData().qualities
-      ).filter((quality) => quality.name.toLowerCase() === "adaptable");
+      // spec 020 — resolve wielding by the referenced Quality's definition (by
+      // slug, FR-022 SSOT), replacing the old `quality.name === "adaptable"` match.
+      const isAdaptable = weaponWieldingFlags(currentItem).adaptable;
       if (
-        adaptableQuality.length > 0 &&
+        isAdaptable &&
         parseInt(eventData.hand) ===
           ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED &&
         currentItem.getCSData().equipped !==
@@ -599,10 +629,9 @@ export class CSCharacterActorSheet extends CSActorSheet {
           ChronicleSystem.equippedConstants.WEARING
         );
       } else {
-        let twoHandedQuality = Object.values(
-          currentItem.getCSData().qualities
-        ).filter((quality) => quality.name.toLowerCase() === "two-handed");
-        if (twoHandedQuality.length > 0) {
+        // spec 020 — Two-Handed occupies both hands, resolved from the referenced
+        // Quality's `wielding.occupiesBothHands` (by slug, was a name match).
+        if (weaponWieldingFlags(currentItem).occupiesBothHands) {
           collection = this.UnequipsAllItemsInTheSlots(
             [
               ChronicleSystem.equippedConstants.MAIN_HAND,

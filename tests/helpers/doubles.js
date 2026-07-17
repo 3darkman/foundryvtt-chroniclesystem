@@ -114,7 +114,9 @@ export function makeFakeWeapon({
 } = {}) {
   return {
     specialty,
-    system: { training },
+    // `system` mirrors getCSData() (spec 020: weaponWieldingFlags reads
+    // item.system.qualities directly, as production does — getCSData() === system).
+    system: { training, qualities, equipped, damage },
     getCSData: () => ({ damage, qualities, equipped }),
   };
 }

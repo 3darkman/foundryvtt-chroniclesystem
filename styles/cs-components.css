@@ -229,10 +229,13 @@
   color: var(--csv2-primary);
 }
 
-/* ③ Tab bar — flat segmented, matching the character sheet. */
+/* ③ Tab bar — flat segmented, matching the item (quality) tabs: left-aligned, each
+   tab compact (never stretched to full width). Descendant `[data-tab]` (not `>`) so
+   it matches however the core nests the tab links. */
 .cs-effect-config.cs-v2 .sheet-tabs,
 .cs-effect-config.cs-v2 nav.tabs {
   display: flex;
+  justify-content: flex-start;
   gap: 0;
   background: var(--csv2-secondary);
   border-bottom: 1px solid var(--csv2-border);
@@ -240,8 +243,8 @@
   margin: 0;
   padding: 0;
 }
-.cs-effect-config.cs-v2 .sheet-tabs > [data-tab],
-.cs-effect-config.cs-v2 nav.tabs > [data-tab] {
+.cs-effect-config.cs-v2 .sheet-tabs [data-tab],
+.cs-effect-config.cs-v2 nav.tabs [data-tab] {
   flex: none;
   padding: 10px 15px;
   border: none;
@@ -253,8 +256,8 @@
   cursor: pointer;
   text-decoration: none;
 }
-.cs-effect-config.cs-v2 .sheet-tabs > [data-tab].active,
-.cs-effect-config.cs-v2 nav.tabs > [data-tab].active {
+.cs-effect-config.cs-v2 .sheet-tabs [data-tab].active,
+.cs-effect-config.cs-v2 nav.tabs [data-tab].active {
   background: var(--csv2-primary);
   color: var(--csv2-on-primary);
   font-weight: 600;
@@ -309,6 +312,11 @@
 .cs-effect-config.cs-v2 .csv2-label {
   display: block;
   margin-bottom: 6px;
+}
+/* No tab-nav icons — the handoff tabs are text-only (the item sheet drops them at the
+   TABS config; the effect config inherits the core tabs, so hide the <i> here). */
+.cs-effect-config.cs-v2 :is(.tabs, .sheet-tabs) [data-tab] i {
+  display: none;
 }
 /* Text/number inputs + selects now come from the SHARED `.cs-v2 input/select`
    primitive (SSOT — see "Shared v2 form controls" below); no per-window copy. */
@@ -1039,8 +1047,9 @@
 .cs-v2 .csv2-label {
   font-family: var(--csv2-font-mono);
   font-weight: 600;
-  font-size: 10px;
-  letter-spacing: 0.06em;
+  /* Handoff eyebrow: 600 8.5px mono, letter-spacing .05em (was 10px / .06em). */
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--csv2-muted);
 }
@@ -1090,6 +1099,24 @@
 }
 .cs-v2 textarea {
   resize: vertical;
+}
+/* Read-only / disabled TEXT controls (e.g. a Quality opened from the LOCKED
+   compendium): the system's muted GREY — matching the character-sheet
+   `input[readonly]` — NOT the legacy `.chroniclesystem.sheet input:read-only`
+   bluish #DCE2EF (styles/less/global.css), overridden by this later-loaded rule.
+   Selects use `:disabled` ONLY: a `<select>` ALWAYS matches `:read-only` (no
+   editable text), so `select:read-only` would grey every dropdown (regression). */
+.cs-v2
+  :is(input[type="text"], input[type="number"], input[type="search"], textarea):is(
+    :read-only,
+    :disabled
+  ),
+.cs-v2 select:disabled {
+  background-color: var(--csv2-secondary);
+  color: var(--csv2-muted-2);
+  border-color: transparent;
+  box-shadow: none;
+  cursor: default;
 }
 
 /* Buttons — base + primary/secondary variants + a compact size. */
@@ -1304,9 +1331,14 @@
 }
 .cs-v2 .csv2-chip-group .csv2-chip {
   cursor: pointer;
-  padding: 5px 12px;
-  font-size: 10px;
-  line-height: 1.4;
+  padding: 6px 14px;
+  /* Handoff selector chips are IBM Plex SANS 12px, 5px radius — not the mono 8.5px
+     20px-radius status pill of the base `.csv2-chip`. Override all three here. */
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.2;
+  border-radius: 5px;
   min-height: 0;
   box-shadow: none;
   background: var(--csv2-bg);
@@ -1418,6 +1450,25 @@
   font-size: 10px;
   line-height: 1;
   border-radius: 5px;
+  /* Handoff "+ add": a white pill with PRIMARY (blue) text on the blue card header —
+     not the muted-grey bordered secondary button. */
+  color: var(--csv2-primary);
+  border-color: transparent;
+}
+/* Same "+ add", but on the LIGHT `.cs-opt-head` (Parâmetro Opções): transparent,
+   borderless, blue text (handoff §Parâmetro). */
+.cs-v2 .cs-opt-head .csv2-btn[data-action="listAdd"] {
+  box-sizing: border-box;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  background: none;
+  border-color: transparent;
+  color: var(--csv2-primary);
 }
 
 /* ---------- Card hint (rich-text-field sub-label) ---------- */
@@ -2348,6 +2399,33 @@
 .cs-roll-card.cs-v2 .cs-apply-btn:hover {
   background: var(--csv2-primary-dark);
   box-shadow: none;
+}
+/* 9 · Weapon qualities (spec 020, FR-018) — amber note listing every quality of the
+   rolled weapon as an adjudication reminder (name + parameter, full text on hover). */
+.cs-roll-card.cs-v2 .cs-rc-reminders {
+  border: 1px solid #e3d3a0;
+  background: #f7f0dd;
+  border-radius: 6px;
+  padding: 7px 9px;
+}
+.cs-roll-card.cs-v2 .cs-rc-reminders-header {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 8px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #8a6d1f;
+  margin-bottom: 4px;
+}
+.cs-roll-card.cs-v2 .cs-rc-reminder {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+  color: #8a6d1f;
+}
+.cs-roll-card.cs-v2 .cs-rc-reminder > i {
+  font-size: 10px;
 }
 
 /* =========================================================================

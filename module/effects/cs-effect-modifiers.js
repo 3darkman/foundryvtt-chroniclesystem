@@ -27,6 +27,8 @@ import {
   ROLL_CHANNEL_TO_FORMULA_FIELD,
   slugify,
   weaponTypeSlug,
+  qualityBySlug,
+  QUALITY_LEVER_MAP,
 } from "./cs-effect-vocabulary.js";
 import { scopedSpecialtySlug } from "../vocabulary/cs-canonical-abilities.js";
 import { resolveEffectValue } from "./cs-effect-value.js";
@@ -401,29 +403,250 @@ function collectArmorModifiers(item, modifiers) {
   }
 }
 
-/** Weapon contribution: each `bulk` quality adds to the bulk channel (owned). */
-function collectWeaponBulk(item, modifiers) {
-  const M = ChronicleSystem.modifiersConstants;
-  const qualities = itemData(item).qualities
-    ? Object.values(itemData(item).qualities)
-    : [];
-  for (const quality of qualities) {
-    if ((quality?.name ?? "").toLowerCase() === M.BULK) {
-      pushEntry(modifiers, M.BULK, item._id, parseInt(quality.parameter), true);
-    }
-  }
-}
-
 /**
  * Source 2 — owned equipment, read live from item data. Dispatches to the
- * per-type collectors (keeping nesting ≤ 3, constitution §I).
+ * per-type collectors (keeping nesting ≤ 3, constitution §I). Weapon Bulk is NOT
+ * handled here anymore: it is a data-driven quality rule (`lever:"bulk"`) routed by
+ * {@link collectReferencedQualities} (equipped-gated, resolves the definition) — a
+ * GM's custom bulk-like quality works the same, and there is no hardcoded slug.
  * @param {object} actor
  * @param {object} modifiers
  */
 function collectItemModifiers(actor, modifiers) {
   for (const item of actor?.items ?? []) {
     if (item.type === "armor") collectArmorModifiers(item, modifiers);
-    else if (item.type === "weapon") collectWeaponBulk(item, modifiers);
+  }
+}
+
+/* ------------------- referenced qualities (spec 020) --------------------- */
+
+/**
+ * Resolve a Quality rule's value against its per-instance parameter (contract C6).
+ * A fixed number (`+1`, `-2`, `3`), or the `@param` / `-@param` bind (→ ±the
+ * reference's parameter). Blank / unparseable → 0 (never `NaN`; FR-005 edge case).
+ * @param {string} rawValue the rule's authored `value`
+ * @param {string} parameter the weapon/armour reference's per-instance parameter
+ * @returns {number}
+ */
+export function resolveRuleValue(rawValue, parameter) {
+  const raw = String(rawValue ?? "").trim();
+  if (!raw) return 0;
+  const p = Number(parameter);
+  const param = Number.isFinite(p) ? p : 0;
+  if (raw === "@param") return param;
+  if (raw === "-@param") return -param;
+  const fixed = Number(raw);
+  return Number.isFinite(fixed) ? fixed : 0;
+}
+
+/**
+ * The effective quality set of a weapon/armour: the UNION of its `{slug}`
+ * references and the slugs arriving via the `cs.quality` grant channel, keyed by
+ * slug so a quality present through BOTH applies exactly once (FR-028, SC-006,
+ * contract C7). References win (keep their per-instance parameter); a grant-only
+ * slug is added carrying its own slug. Pure → Vitest.
+ * @param {Array<{slug: string, parameter?: string}>} references
+ * @param {Array<{name?: string, slug?: string, parameter?: string}>} grants
+ * @returns {Array<{slug: string, parameter?: string}>}
+ */
+export function dedupeQualitiesBySlug(references = [], grants = []) {
+  const seen = new Set();
+  const result = [];
+  for (const ref of references) {
+    const slug = ref?.slug;
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    result.push(ref);
+  }
+  for (const grant of grants) {
+    const slug = grant?.slug ?? slugify(grant?.name ?? "");
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    result.push({ ...grant, slug });
+  }
+  return result;
+}
+
+/**
+ * Is a weapon's Defensive contribution suppressed for this actor right now
+ * (spec 020, Decision 8 / FR-030)? True while an active marker AE carries
+ * `flags.chroniclesystem.defensiveSpent === weaponId` (per-turn, created on attack
+ * — US4), OR while the weapon's manual out-of-combat stance flag is explicitly off.
+ * No marker + no stance-off → Defensive is on (default). Read-only.
+ * @param {object} actor
+ * @param {object} weapon the wielded weapon Item
+ * @returns {boolean}
+ */
+function isDefensiveSuppressed(actor, weapon) {
+  const weaponId = weapon?._id ?? weapon?.id;
+  // The marker lives on the ACTOR (`actor.effects`); a changes-less marker may not
+  // reach `appliedEffects`, so read the embedded collection directly.
+  for (const effect of actor?.effects ?? actor?.appliedEffects ?? []) {
+    // Skip disabled AND expired-but-not-deleted markers (expiryAction "update" only
+    // flips `duration.expired`, never disables/deletes — foundry-api-expert).
+    if (!effect || effect.disabled || effect.duration?.expired) continue;
+    const spent =
+      typeof effect.getFlag === "function"
+        ? effect.getFlag("chroniclesystem", "defensiveSpent")
+        : effect.flags?.chroniclesystem?.defensiveSpent;
+    if (spent !== weaponId) continue;
+    // Active while its combat duration has not expired (remaining null = no live
+    // duration tracking → treat as active). RT-1: validate the exact expiry turn.
+    const remaining = effect.duration?.remaining;
+    if (remaining == null || remaining > 0) return true;
+  }
+  // Out-of-combat manual stance: a weapon flag of exactly `false` drops the bonus
+  // (FR-030). Undefined (never toggled) keeps Defensive on.
+  const stance =
+    typeof weapon?.getFlag === "function"
+      ? weapon.getFlag("chroniclesystem", "defensiveStance")
+      : weapon?.flags?.chroniclesystem?.defensiveStance;
+  if (stance === false && !actor?.inCombat) return true;
+  return false;
+}
+
+/** Route one resolved (passive/auto, non-attack) quality rule into its buffer. The
+ *  attack-scoped levers (damage/armorbypass/range) are NOT routed here — they are
+ *  applied per-weapon at roll time in `_deriveTargetConflict` (FR-016 parity). */
+function routeReferencedRule(lever, value, item, buffers, actor) {
+  const M = ChronicleSystem.modifiersConstants;
+  switch (lever.channel) {
+    case EFFECT_CHANNELS.DERIVED_STAT:
+      // Defensive → Combat Defense while wielded (honours per-turn suppression).
+      if (
+        lever.id === "defensewhilewielded" &&
+        isDefensiveSuppressed(actor, item)
+      )
+        return;
+      pushEntry(buffers.derivedStats, lever.target, item._id, value, true);
+      break;
+    case EFFECT_CHANNELS.BULK:
+      pushEntry(buffers.modifiers, M.BULK, item._id, value, true);
+      break;
+    case EFFECT_CHANNELS.ARMOR_PENALTY:
+      // Mirrors the armour's own penalty: agility + combat-defence reduction.
+      pushEntry(buffers.modifiers, M.AGILITY, item._id, value, true);
+      pushEntry(buffers.modifiers, M.COMBAT_DEFENSE, item._id, value, true);
+      break;
+    case EFFECT_CHANNELS.ARMOR_RATING:
+      pushEntry(buffers.modifiers, M.DAMAGE_TAKEN, item._id, value, true);
+      break;
+    case EFFECT_CHANNELS.TEST_DICE:
+      pushEntry(buffers.testDice, M.ALL, item._id, value, true);
+      break;
+    case EFFECT_CHANNELS.PENALTY:
+      pushEntry(buffers.penalties, M.ALL, item._id, value, true);
+      break;
+    default:
+      break; // unhandled channel → inert (attack-scoped levers already filtered)
+  }
+}
+
+/**
+ * Route the referenced qualities of one EQUIPPED weapon/armour into the buffers
+ * (contract C6, US3). Resolves each `{slug}` reference to its live Quality
+ * definition (null → skip, label-only elsewhere, FR-012), then each passive/auto
+ * non-attack rule → its buffer. Attack-scoped levers and `optional` rules are
+ * skipped here (roll-time / dialog). Runs only over equipped items, so unequipping
+ * removes 100% of the contribution (SC-003).
+ * @param {object} actor
+ * @param {object} item an equipped weapon or armour
+ * @param {object} buffers
+ */
+function collectReferencedQualities(actor, item, buffers) {
+  const refs = itemData(item).qualities;
+  if (!Array.isArray(refs)) return;
+  for (const ref of refs) {
+    const def = qualityBySlug(ref?.slug);
+    if (!def) continue; // unresolved slug → label-only, applies no rule
+    for (const rule of def.system?.rules ?? []) {
+      const lever = QUALITY_LEVER_MAP[rule?.lever];
+      if (!lever) continue; // blank/unknown lever → inert (FR-005)
+      if (lever.attackScoped) continue; // applied at roll time (_deriveTargetConflict)
+      if (rule.scope === "optional") continue; // offered in the modifier dialog (US4)
+      const value = resolveRuleValue(rule.value, ref.parameter);
+      routeReferencedRule(lever, value, item, buffers, actor);
+    }
+  }
+}
+
+/**
+ * Sum the ATTACK-SCOPED value of a lever across a weapon's referenced qualities,
+ * resolved at ROLL TIME (spec 020, T027/T028 — `armorbypass`, `damage`, `range`).
+ * Bound to the specific weapon instance (`rollContext.itemId`), so it contributes
+ * to that weapon's roll only and is NEVER summed onto passive stats or the chip
+ * (FR-016 parity, spec 017). @returns {number}
+ */
+export function weaponAttackScopedTotal(item, leverId) {
+  let total = 0;
+  for (const ref of item?.system?.qualities ?? []) {
+    const def = qualityBySlug(ref?.slug);
+    if (!def) continue;
+    for (const rule of def.system?.rules ?? []) {
+      if (rule?.lever !== leverId) continue;
+      total += resolveRuleValue(rule.value, ref.parameter);
+    }
+  }
+  return total;
+}
+
+/**
+ * Resolve a weapon's effective range band from its referenced qualities' `range`
+ * field (spec 020 — data-driven, replaces the hardcoded close/long slugs in
+ * cs-conflict). The WIDEST range wins (a longbow's 100 beats a throwing knife's 10);
+ * `inc === free` (−1D per full range-increment beyond it). In the SCENE's distance
+ * units, so it compares directly to the measured distance. `null` = melee (no
+ * referenced quality declares a range). Needs the live definition (`qualityBySlug`).
+ * @param {object} item a weapon Item
+ * @returns {{free: number, inc: number} | null}
+ */
+export function weaponRangeBand(item) {
+  let free = 0;
+  for (const ref of item?.system?.qualities ?? []) {
+    const r = Number(qualityBySlug(ref?.slug)?.system?.range);
+    if (Number.isFinite(r) && r > free) free = r;
+  }
+  return free > 0 ? { free, inc: free } : null;
+}
+
+/** True when any of an item's referenced qualities defines a rule on `leverId`
+ *  (spec 020 — e.g. the attack flow asking "does this weapon grant Defensive?"). */
+export function weaponHasQualityLever(item, leverId) {
+  for (const ref of item?.system?.qualities ?? []) {
+    const def = qualityBySlug(ref?.slug);
+    if (def?.system?.rules?.some((rule) => rule.lever === leverId)) return true;
+  }
+  return false;
+}
+
+/** ALL of a weapon's referenced qualities, as `{name, parameter, description}`, for
+ *  the attack RESULT card (spec 020, FR-018 — revised: the card lists EVERY quality
+ *  of the rolled weapon as an adjudication note, targeted or not, so a dedicated
+ *  `reminder` lever is no longer needed). Each ref resolves live (world ∪ seed
+ *  catalog); an unresolved slug falls back to its stamped name/slug so nothing is
+ *  silently dropped. Blank references are skipped. */
+export function weaponReminders(item) {
+  const out = [];
+  for (const ref of item?.system?.qualities ?? []) {
+    const def = qualityBySlug(ref?.slug);
+    const name = def?.name || ref?.name || ref?.slug || "";
+    if (!name) continue;
+    out.push({
+      name,
+      parameter: ref?.parameter ?? "",
+      description: def?.system?.description ?? ref?.description ?? "",
+    });
+  }
+  return out;
+}
+
+/** Collect the referenced-quality rules of every EQUIPPED weapon/armour (US3). */
+function collectReferencedQualityModifiers(actor, buffers) {
+  for (const item of actor?.items ?? []) {
+    if (item.type !== "weapon" && item.type !== "armor") continue;
+    if ((Number(itemData(item).equipped) || 0) > 0) {
+      collectReferencedQualities(actor, item, buffers);
+    }
   }
 }
 
@@ -487,6 +710,7 @@ export function collectEffectModifiers(actor) {
   };
   collectAuthoredEffects(actor, buffers);
   collectItemModifiers(actor, buffers.modifiers);
+  collectReferencedQualityModifiers(actor, buffers); // spec 020 — referenced qualities
   collectConditionModifiers(actor, buffers.modifiers, buffers.penalties);
   return buffers;
 }
@@ -521,7 +745,9 @@ function ownEffectChannelTotal(item, channel, accessors) {
 }
 
 /** Append the granted qualities matching a weapon (its type slug + ALL) onto its
- *  prepared `system.qualities` (transient; reset each prepare cycle). */
+ *  prepared `system.qualities` (transient; reset each prepare cycle). spec 020 —
+ *  each grant carries a `slug`, and a grant duplicating one of the weapon's own
+ *  references is skipped so the quality appears exactly once (FR-028). */
 function grantWeaponQualities(item, qualityBuffer) {
   const sys = item.system;
   if (!Array.isArray(sys?.qualities)) return;
@@ -531,8 +757,32 @@ function grantWeaponQualities(item, qualityBuffer) {
     ...(qualityBuffer[allKey] ?? []),
     ...(typeSlug && typeSlug !== allKey ? qualityBuffer[typeSlug] ?? [] : []),
   ];
+  const seen = new Set(sys.qualities.map((q) => q.slug).filter(Boolean));
   for (const grant of grants) {
-    sys.qualities.push({ name: grant.name, parameter: grant.parameter });
+    const slug = slugify(grant.name);
+    if (seen.has(slug)) continue; // dedupe against references + other grants
+    seen.add(slug);
+    sys.qualities.push({ slug, name: grant.name, parameter: grant.parameter });
+  }
+}
+
+/** Stamp a transient display `name` + `missing` flag on each quality reference that
+ *  lacks a name (the persisted rows are `{slug, parameter}`), resolved from the live
+ *  world definition — so the character-sheet quality chips read a name (or a
+ *  "<slug> missing item" chip when no world Quality has that slug), never a blank
+ *  (transient; reset each prepare cycle). Resolution is SYNC → world only (matches
+ *  the collector); a slug that lives only in a compendium is materialised into the
+ *  world by the migration, so it resolves here too. */
+function stampQualityDisplayNames(item) {
+  const qualities = item.system?.qualities;
+  if (!Array.isArray(qualities)) return;
+  for (const ref of qualities) {
+    if (!ref) continue;
+    const def = qualityBySlug(ref.slug);
+    ref.description = def?.system?.description ?? ""; // hover tooltip (FR-018)
+    if (ref.name) continue; // grants already carry a name (not missing)
+    ref.missing = !def;
+    ref.name = def?.name ?? ref.slug ?? "";
   }
 }
 
@@ -562,8 +812,13 @@ export function applyOwnedItemEffects(actor) {
   const qualityBuffer = actor?.weaponQuality ?? {};
   const accessors = actorValueAccessors(actor);
   for (const item of actor?.items ?? []) {
-    if (item.type === "weapon") grantWeaponQualities(item, qualityBuffer);
-    else if (item.type === "armor") applyArmorRating(item, accessors);
+    if (item.type === "weapon") {
+      grantWeaponQualities(item, qualityBuffer);
+      stampQualityDisplayNames(item);
+    } else if (item.type === "armor") {
+      applyArmorRating(item, accessors);
+      stampQualityDisplayNames(item);
+    }
   }
 }
 

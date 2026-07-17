@@ -1,0 +1,56 @@
+{{!-- Shared Qualities reference list (spec 020, C10a) — reused by weapon.hbs and
+      armor.hbs (DRY). Qualities are added ONLY by dragging a Quality item (from the
+      "Chronicle Qualities" compendium or the world) onto this sheet — there is NO
+      picker. Each row: the resolved name chip (an amber "<slug> missing item" chip
+      when no item with that slug exists in world or compendium — the reference is
+      kept, never discarded, FR-012) + the per-instance parameter control (only when
+      the definition declares one) + an always-visible remove button. --}}
+<div class="csv2-card csv2-list cs-qref-card">
+    <div class="csv2-card-header">{{localize "CS.sheets.item.qualities"}}</div>
+
+    {{#if qualityRefs.length}}
+    {{#each qualityRefs as |row|}}
+    <div class="csv2-list-row cs-qref-row">
+        <input type="hidden" name="system.qualities.{{row.index}}.slug" value="{{row.slug}}" />
+        <span class="cs-qref-chip {{#if row.missing}}is-missing{{/if}}" {{#if row.description}}data-tooltip="{{row.description}}"{{/if}}>
+            {{#if row.missing}}
+                <span class="cs-qref-slug">{{#if row.slug}}{{row.slug}}{{else}}(empty){{/if}}</span>
+                <span class="cs-qref-tag">{{localize "CS.quality.picker.missingItem"}}</span>
+            {{else}}
+                {{row.name}}
+            {{/if}}
+        </span>
+        {{#if row.showParam}}
+            {{#if row.isChoice}}
+            <select class="cs-qref-param" name="system.qualities.{{row.index}}.parameter">
+                {{selectOptions row.paramOptions selected=row.parameter}}
+            </select>
+            {{else}}
+            <input class="cs-qref-param is-mono" type="text" name="system.qualities.{{row.index}}.parameter"
+                   value="{{row.parameter}}" placeholder="{{row.paramLabel}}" />
+            {{/if}}
+        {{else}}
+        <input type="hidden" name="system.qualities.{{row.index}}.parameter" value="{{row.parameter}}" />
+        {{/if}}
+        {{#if @root.canEditLists}}
+        <button type="button" class="csv2-list-del-btn cs-qref-del" data-action="listDelete"
+                data-list="system.qualities" data-index="{{row.index}}"
+                data-tooltip="{{localize "CS.sheets.item.delete"}}">
+            <i class="fa-regular fa-trash-can"></i>
+        </button>
+        {{/if}}
+    </div>
+    {{/each}}
+    {{else}}
+    <div class="csv2-list-empty cs-qref-empty">
+        <div>{{localize "CS.quality.picker.empty"}}</div>
+        <div class="cs-qref-hint">{{localize "CS.quality.picker.dragHint"}}</div>
+    </div>
+    {{/if}}
+
+    {{#if qualityRefs.length}}
+    <div class="csv2-card-hint cs-qref-drag">
+        <i class="fa-solid fa-hand-pointer"></i> {{localize "CS.quality.picker.dragHint"}}
+    </div>
+    {{/if}}
+</div>

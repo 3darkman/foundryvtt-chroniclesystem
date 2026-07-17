@@ -99,5 +99,18 @@
             </button>
         </div>
         {{/if}}
+
+        {{!-- 9 · Weapon qualities (spec 020, FR-018) — every quality of the rolled
+              weapon, listed here as adjudication notes (name + parameter, full text
+              on hover) so they travel with the attack instead of being repeated on
+              the character sheet. --}}
+        {{#if reminders.length}}
+        <div class="cs-rc-reminders">
+            <div class="cs-rc-reminders-header">{{localize "CS.quality.qualitiesTitle"}}</div>
+            {{#each reminders}}
+            <div class="cs-rc-reminder" {{#if description}}data-tooltip="{{description}}"{{/if}}><i class="fas fa-tag"></i> <span>{{name}}{{#if parameter}} {{parameter}}{{/if}}</span></div>
+            {{/each}}
+        </div>
+        {{/if}}
     </div>
 </div>

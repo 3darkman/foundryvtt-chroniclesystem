@@ -48,6 +48,7 @@ import HoldingData from "../data/item/holding-data.js";
 import PoisonData from "../data/item/poison-data.js";
 import TechniqueData from "../data/item/technique-data.js";
 import UnitTypeData from "../data/item/unit-type-data.js";
+import QualityData from "../data/item/quality-data.js";
 
 /* -------------------------------------------- */
 /*  Foundry VTT Initialization                  */
@@ -97,6 +98,7 @@ Hooks.once("init", async function () {
     poison: PoisonData,
     technique: TechniqueData,
     unitType: UnitTypeData,
+    quality: QualityData,
   };
 
   // Register sheet application classes
@@ -170,6 +172,7 @@ Hooks.once("init", async function () {
         "event",
         "holding",
         "technique",
+        "quality",
       ],
       makeDefault: true,
     }
@@ -243,6 +246,27 @@ Hooks.once("ready", async () => {
   await migrateData();
   // spec 008 (FR-014): surface the actionable slug-review list, if any.
   showSlugReviewAlert();
+});
+
+/* -------------------------------------------- */
+/*  spec 020 (Decision 8) — purge transient     */
+/*  Defensive-spent markers when combat ends so  */
+/*  they don't linger (expiryAction "update"     */
+/*  never deletes them). Active GM only.         */
+/* -------------------------------------------- */
+
+Hooks.on("deleteCombat", async (combat) => {
+  if (game.users?.activeGM !== game.user) return;
+  for (const combatant of combat.combatants) {
+    const actor = combatant.actor;
+    if (!actor) continue;
+    const stale = actor.effects
+      .filter((e) => e.getFlag("chroniclesystem", "defensiveSpent"))
+      .map((e) => e.id);
+    if (stale.length) {
+      await actor.deleteEmbeddedDocuments("ActiveEffect", stale);
+    }
+  }
 });
 
 Hooks.on("createItem", (item) => {

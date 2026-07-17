@@ -34,9 +34,12 @@
                     <div class="cs2-grid-cell center muted">{{weapon.system.weight}} lb</div>
                     <div class="cs2-grid-cell center muted">{{weapon.system.cost}}</div>
                     <div class="cs2-grid-cell cs2-tags">
-                        {{#each weapon.system.qualities}}<span class="cs2-tag">{{name}} {{parameter}}</span>{{/each}}
+                        {{#each weapon.system.qualities}}{{#if missing}}<span class="cs2-tag cs2-tag-missing" title="{{localize 'CS.quality.picker.missing'}}">{{#if slug}}{{slug}}{{else}}(empty){{/if}} · {{localize 'CS.quality.picker.missingItem'}}</span>{{else}}<span class="cs2-tag" {{#if description}}data-tooltip="{{description}}"{{/if}}>{{name}} {{parameter}}</span>{{/if}}{{/each}}
                     </div>
                     <div class="cs2-grid-cell center">
+                        {{#if weapon.hasDefensive}}
+                        <a class="checkButton cs-defensive {{#if weapon.stanceActive}}activated{{/if}}" data-item-id="{{_id}}" data-action="defensiveStance" title="{{localize 'CS.quality.defensiveStance'}}"><i class="fas fa-shield-halved"></i></a>
+                        {{/if}}
                         <a class="checkButton equipped {{showIfContains "2|4" weapon.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "2|4" weapon.system.equipped 0 2}}" data-type="weapon" data-action="toggleEquipped"><i class="fa fa-hand-paper"></i></a>
                         <a class="checkButton equipped off-hand {{showIfContains "3|4" weapon.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfContains "3|4" weapon.system.equipped 0 3}}" data-type="weapon" data-action="toggleEquipped"><i class="fa fa-hand-paper"></i></a>
                     </div>
@@ -67,7 +70,7 @@
                     <div class="cs2-grid-cell center muted">{{armor.system.weight}} lb</div>
                     <div class="cs2-grid-cell center muted">{{armor.system.cost}}</div>
                     <div class="cs2-grid-cell cs2-tags">
-                        {{#each armor.system.qualities}}<span class="cs2-tag">{{name}} {{parameter}}</span>{{/each}}
+                        {{#each armor.system.qualities}}{{#if missing}}<span class="cs2-tag cs2-tag-missing" title="{{localize 'CS.quality.picker.missing'}}">{{#if slug}}{{slug}}{{else}}(empty){{/if}} · {{localize 'CS.quality.picker.missingItem'}}</span>{{else}}<span class="cs2-tag" {{#if description}}data-tooltip="{{description}}"{{/if}}>{{name}} {{parameter}}</span>{{/if}}{{/each}}
                     </div>
                     <div class="cs2-grid-cell center">
                         <a class="checkButton equipped {{showIfEquals "1" armor.system.equipped "activated" ""}}" data-item-id="{{_id}}" data-hand="{{showIfEquals "1" armor.system.equipped 0 1}}" data-type="armor" data-action="toggleEquipped"><i class="fas fa-shield-alt"></i></a>

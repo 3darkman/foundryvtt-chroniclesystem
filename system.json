@@ -1,7 +1,7 @@
 {
     "title": "Chronicle System (Unofficial)",
     "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
-    "version": "0.13.0",
+    "version": "0.16.0",
     "esmodules": ["module/system/config.js"],
     "styles": [
         "styles/global.css",
@@ -51,9 +51,24 @@
             "holding": {},
             "technique": {},
             "unitType": {},
-            "poison": {}
+            "poison": {},
+            "quality": {}
         }
     },
+    "packs": [
+        {
+            "name": "qualities",
+            "label": "Chronicle Qualities",
+            "path": "packs/qualities",
+            "type": "Item",
+            "system": "chroniclesystem",
+            "ownership": {
+                "PLAYER": "OBSERVER",
+                "ASSISTANT": "OWNER"
+            },
+            "flags": {}
+        }
+    ],
     "grid": {
         "distance": 5,
         "units": "ft"

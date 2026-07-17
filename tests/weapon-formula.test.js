@@ -52,10 +52,21 @@ describe("weapon damage — updateDamageValue (eval-based, characterized)", () =
     expect(weapon.damageValue).toBe(99);
   });
 
+  // spec 020: Adaptable is now a referenced Quality — updateDamageValue reads its
+  // definition's `wielding.adaptable` by slug (SSOT), not the old name match.
+  globalThis.game = globalThis.game ?? {};
+  globalThis.game.items = [
+    {
+      type: "quality",
+      name: "Adaptable",
+      system: { slug: "adaptable", wielding: { adaptable: true } },
+    },
+  ];
+
   it("4.7 adaptable + BOTH_HANDS adds +1", () => {
     const weapon = makeFakeWeapon({
       damage: "@Fighting+1",
-      qualities: [{ name: "adaptable" }],
+      qualities: [{ slug: "adaptable" }],
       equipped: ChronicleSystem.equippedConstants.BOTH_HANDS,
     });
     updateDamage.call(weapon, ability4);
@@ -65,7 +76,7 @@ describe("weapon damage — updateDamageValue (eval-based, characterized)", () =
   it("4.8 adaptable + MAIN_HAND gets no bonus", () => {
     const weapon = makeFakeWeapon({
       damage: "@Fighting+1",
-      qualities: [{ name: "adaptable" }],
+      qualities: [{ slug: "adaptable" }],
       equipped: ChronicleSystem.equippedConstants.MAIN_HAND,
     });
     updateDamage.call(weapon, ability4);

@@ -7,6 +7,7 @@
 
 import { ChronicleSystem } from "../system/ChronicleSystem.js";
 import { slugify } from "./cs-slugify.js";
+import { SEED_BY_SLUG, buildSeedItemData } from "../data/quality-seeds.js";
 
 // Re-export the shared slug normaliser (its definition moved to the
 // dependency-free cs-slugify.js so ChronicleSystem can key by slug without an
@@ -33,6 +34,11 @@ export const EFFECT_CHANNELS = {
   DAMAGE: "damage", // weapon damage
   QUALITY: "quality", // grant a quality to an item
   INFLUENCE: "influence", // intrigue-technique influence (US4)
+  // spec 020 — quality rule levers (Decision 3). Attack-scoped/self channels: no
+  // authored-AE routing (scoped to the Quality rule list, not the AE dropdown),
+  // but they carry a `cs.*` key + parser branch so the grammar round-trips.
+  ARMOR_BYPASS: "armorbypass", // attack-scoped: reduce the TARGET's Armor Rating (Piercing/Penetration)
+  ARMOR_PENALTY: "armorpenalty", // armour's own Armor Penalty
 };
 
 /** Channels that target a roll (all / ability / specialty). */
@@ -48,6 +54,13 @@ const ROLL_CHANNELS = new Set([
 const WEAPON_CHANNELS = new Set([
   EFFECT_CHANNELS.DAMAGE,
   EFFECT_CHANNELS.QUALITY,
+]);
+
+/** spec 020 — quality levers stored as a bare `cs.<channel>` key (self-scoped, no
+ *  target segment); their parse/build branches mirror `armorrating`. */
+const SELF_SCOPED_QUALITY_CHANNELS = new Set([
+  EFFECT_CHANNELS.ARMOR_BYPASS,
+  EFFECT_CHANNELS.ARMOR_PENALTY,
 ]);
 
 /** True for the five roll channels (all/ability/specialty targets). */
@@ -282,6 +295,13 @@ export function parseEffectKey(key) {
       ? { channel, targetKind: TARGET_KINDS.ALL, target: null }
       : null;
   }
+  // spec 020 — the four self-scoped quality levers mirror the armorrating/bulk
+  // "bare channel key" shape (no target segment). A trailing segment is rejected.
+  if (SELF_SCOPED_QUALITY_CHANNELS.has(channel)) {
+    return rest.length === 0
+      ? { channel, targetKind: TARGET_KINDS.SELF, target: null }
+      : null;
+  }
   return null;
 }
 
@@ -362,6 +382,9 @@ export function buildEffectKey({ channel, targetKind, target = null } = {}) {
   if (channel === EFFECT_CHANNELS.ARMOR_RATING)
     return `${EFFECT_KEY_PREFIX}${channel}`;
   if (channel === EFFECT_CHANNELS.BULK) return `${EFFECT_KEY_PREFIX}${channel}`;
+  // spec 020 — self-scoped quality levers round-trip to their bare `cs.<channel>` key.
+  if (SELF_SCOPED_QUALITY_CHANNELS.has(channel))
+    return `${EFFECT_KEY_PREFIX}${channel}`;
   return "";
 }
 
@@ -373,4 +396,160 @@ export function getChannelLabel(channel) {
 /** i18n key for a target-kind label (authoring dropdown). */
 export function getTargetKindLabel(targetKind) {
   return `CS.effects.targetKinds.${targetKind}`;
+}
+
+/* --------------------------- quality levers (spec 020) ------------------------- */
+
+/**
+ * The authoring vocabulary for a Quality's "Efeitos de Regra" list (Decision 3,
+ * handoff §1.4). SSOT: each lever maps to a backing `EFFECT_CHANNELS` channel and
+ * carries the metadata the collector needs — `attackScoped` (bound to the rolled
+ * weapon at roll time, NOT summed onto passive stats or the chip — FR-016), the
+ * natural `defaultScope`, and an optional fixed `target` (e.g. combat-defense for
+ * Defensive). Ordered for the dropdown; the label is `CS.quality.levers.<id>`.
+ * @type {ReadonlyArray<{id: string, channel: string, attackScoped: boolean, defaultScope: "passive"|"auto"|"optional", target?: string}>}
+ */
+export const QUALITY_LEVERS = [
+  {
+    id: "damage",
+    channel: EFFECT_CHANNELS.DAMAGE,
+    attackScoped: true,
+    defaultScope: "auto",
+  },
+  {
+    id: "armorbypass",
+    channel: EFFECT_CHANNELS.ARMOR_BYPASS,
+    attackScoped: true,
+    defaultScope: "auto",
+  },
+  {
+    id: "defensewhilewielded",
+    channel: EFFECT_CHANNELS.DERIVED_STAT,
+    attackScoped: false,
+    defaultScope: "passive",
+    target: DERIVED_STATS.COMBAT_DEFENSE,
+  },
+  {
+    id: "bulk",
+    channel: EFFECT_CHANNELS.BULK,
+    attackScoped: false,
+    defaultScope: "passive",
+  },
+  {
+    id: "testdice",
+    channel: EFFECT_CHANNELS.TEST_DICE,
+    attackScoped: true,
+    defaultScope: "auto",
+  },
+  {
+    id: "penalty",
+    channel: EFFECT_CHANNELS.PENALTY,
+    attackScoped: true,
+    defaultScope: "auto",
+  },
+  {
+    id: "armorrating",
+    channel: EFFECT_CHANNELS.ARMOR_RATING,
+    attackScoped: false,
+    defaultScope: "passive",
+  },
+  {
+    id: "armorpenalty",
+    channel: EFFECT_CHANNELS.ARMOR_PENALTY,
+    attackScoped: false,
+    defaultScope: "passive",
+  },
+];
+
+/** Lever id → its descriptor (SSOT lookup derived from {@link QUALITY_LEVERS}). */
+export const QUALITY_LEVER_MAP = Object.freeze(
+  Object.fromEntries(QUALITY_LEVERS.map((lever) => [lever.id, lever]))
+);
+
+/**
+ * The descriptor for a lever id, or `null` for a blank/unknown lever (the
+ * collector treats that as inert — FR-005 authoring resilience).
+ * @param {string} id
+ * @returns {{id: string, channel: string, attackScoped: boolean, defaultScope: string, target?: string}|null}
+ */
+export function qualityLever(id) {
+  return QUALITY_LEVER_MAP[id] ?? null;
+}
+
+/** i18n key for a quality-lever label (authoring dropdown). */
+export function getQualityLeverLabel(id) {
+  return `CS.quality.levers.${id}`;
+}
+
+/**
+ * Applicability filter (FR-010, contract C4). Pure — used by both the picker
+ * (offer list) and the drop handler (accept/ignore). Accepts a Quality document
+ * (`quality.system.applicability`), a compendium index row, or a bare
+ * `{applicability}` object.
+ * @param {object} quality
+ * @param {"weapon"|"armor"} itemType
+ * @returns {boolean}
+ */
+export function qualityAppliesTo(quality, itemType) {
+  const app =
+    quality?.system?.applicability ?? quality?.applicability ?? "both";
+  if (itemType === "weapon") return app === "weapon" || app === "both";
+  if (itemType === "armor") return app === "armor" || app === "both";
+  return false;
+}
+
+/**
+ * Resolve a Quality definition by stable slug (contract C5). **Synchronous** —
+ * the collector runs in `prepareData` and MUST NOT await.
+ *
+ * Resolution order: (1) a WORLD Quality item with that slug — a GM's own homebrew
+ * OR a customised copy of a seed quality (world-first, so GM edits win); (2) the
+ * canonical SEED catalog (`SEED_BY_SLUG`) as a synthetic `{name, system}` def. The
+ * seed fallback means a built-in quality ALWAYS resolves — a weapon never shows
+ * "missing item" for a catalog quality, and a deleted/absent world copy self-heals
+ * without a version-gated migration re-run. Only a genuine homebrew slug with no
+ * world item AND no seed returns `null` (label-only chip, applies no rule, FR-012).
+ * Guarded so it is a no-op (→ seed or null) outside Foundry (Vitest): `game` is absent.
+ * @param {string} slug
+ * @returns {object|null} the Quality Item document, a synthetic seed def, or null
+ */
+export function qualityBySlug(slug) {
+  if (!slug) return null;
+  for (const item of game?.items ?? []) {
+    if (item.type !== "quality") continue;
+    if ((item.system?.slug || slugify(item.name)) === slug) return item;
+  }
+  // Canonical fallback — resolve the built-in seed without a materialised world
+  // copy. Shaped like an item ({name, system}) so every read-only caller (rules,
+  // parameter, range, wielding, name, description) works unchanged.
+  const seed = SEED_BY_SLUG[slug];
+  if (seed) {
+    const data = buildSeedItemData(seed);
+    return { name: data.name, system: data.system };
+  }
+  return null;
+}
+
+/**
+ * Resolve a weapon's wielding behaviour from its referenced qualities' definitions
+ * (spec 020, FR-022 SSOT — by slug, NOT by name). OR-s the `wielding.*` booleans
+ * across every referenced Quality that resolves. Used by the equip logic (US5) and
+ * `updateDamageValue`'s Adaptable +1 (US2) so both read one wielding state.
+ * @param {object} item a weapon Item (its `system.qualities` reference list)
+ * @returns {{occupiesBothHands: boolean, offHandEligible: boolean, adaptable: boolean}}
+ */
+export function weaponWieldingFlags(item) {
+  const flags = {
+    occupiesBothHands: false,
+    offHandEligible: false,
+    adaptable: false,
+  };
+  for (const ref of item?.system?.qualities ?? []) {
+    const wielding = qualityBySlug(ref?.slug)?.system?.wielding;
+    if (!wielding) continue;
+    if (wielding.occupiesBothHands) flags.occupiesBothHands = true;
+    if (wielding.offHandEligible) flags.offHandEligible = true;
+    if (wielding.adaptable) flags.adaptable = true;
+  }
+  return flags;
 }
