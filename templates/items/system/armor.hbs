@@ -1,4 +1,6 @@
-{{!-- Armadura (armor) Sistema body (spec 019). Scalar stats + Qualities list. --}}
+{{!-- Armadura (armor) Sistema body (spec 019 + 020). Scalar stats + Qualities as
+      slug references (added by dragging a Quality onto the sheet; tidy empty state —
+      armour rarely has named qualities beyond Proofed). --}}
 <section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
     <div class="csv2-card">
         <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
@@ -9,7 +11,5 @@
             {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.weight" label="CS.sheets.item.fields.weight" value=item.system.weight}}
         </div>
     </div>
-    {{> "systems/chroniclesystem/templates/items/components/repeatable-list.hbs"
-          title="CS.sheets.item.qualities" addLabel="CS.sheets.item.add" path="system.qualities"
-          rows=item.system.qualities columns=qualityColumns showAdd=canEditLists}}
+    {{> "systems/chroniclesystem/templates/items/components/quality-refs.hbs"}}
 </section>

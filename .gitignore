@@ -13,6 +13,11 @@ CLAUDE.md
 specs/
 nul
 
+# Foundry LevelDB pack runtime artifacts — ship the pack DATA, not the lock/debug logs
+packs/**/LOCK
+packs/**/LOG
+packs/**/LOG.old
+
 
 docs/
 docs/foundation-roadmap.md

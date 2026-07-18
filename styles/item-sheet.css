@@ -215,3 +215,166 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
+
+/* ---------- Qualidade (spec 020) — authoring layout ---------- */
+/* APLICABILIDADE + PARÂMETRO side by side; align-items:start so the Parâmetro card
+   grows independently when its Opções list appears (handoff §1.3). */
+.cs-item-v2 .cs-quality-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+/* Quality authoring (handoff §Qualidade) — most cards carry a single control
+   (Aplicabilidade / Parâmetro tipo, now segmented chips; Rótulo; Alcance), so their
+   field-grid is single-column full-width (a lone control stranded at 1/3 in the
+   shared 3-col grid was the off-pattern look). The Empunhadura grip KEEPS the shared
+   3-col divided grid, with each boolean as mono-label-left / pill-toggle-right.
+   Reuses field-cell + .csv2-switch — layout-only, no new component (SSOT). */
+.cs-item-v2 .cs-quality-authoring .csv2-field-grid {
+  grid-template-columns: 1fr;
+}
+.cs-item-v2 .cs-quality-authoring .csv2-field-grid.cs-grip-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.cs-item-v2 .cs-quality-authoring .csv2-field-cell:has(.csv2-switch) {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+/* Hints (handoff): 11px sans, muted, pulled up snug under the control above
+   (margin-top -4px). Overrides the inline `.csv2-card-hint` sub-label look; scoped
+   to the authoring tab so the rich-text sub-label elsewhere is untouched. */
+.cs-item-v2 .cs-quality-authoring .csv2-card-hint {
+  display: block;
+  margin: -4px 0 0;
+  padding: 0 12px 8px;
+  font-family: var(--csv2-font-sans);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--csv2-muted);
+  opacity: 1;
+}
+.cs-item-v2 .cs-quality-authoring .csv2-list-empty {
+  background: transparent;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--csv2-muted);
+}
+/* The left column stacks Aplicabilidade + Alcance; Parâmetro (right column) grows
+   independently (grid `align-items:start`), so Alcance sits beside a taller Parâmetro
+   and always stays above Empunhadura. */
+.cs-item-v2 .cs-quality-authoring .cs-quality-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+/* Parâmetro Opções (kind = choice) — a bordered mini-table (handoff §Parâmetro):
+   a light mono header + white rows with a top divider. NOT the bluish `--csv2-area`
+   fill it had before (that read as "blue input backgrounds"). */
+.cs-item-v2 .cs-opt-list {
+  margin: 4px 12px 12px;
+  border: 1px solid var(--csv2-secondary);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.cs-item-v2 .cs-opt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--csv2-border-soft);
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+.cs-item-v2 .cs-opt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+.cs-item-v2 .cs-opt-row input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+/* Efeitos de Regra list — grid (lever | value | scope | delete). The compound
+   selector (.csv2-list-row.cs-rule-row) lifts specificity to 0,3,0 so the grid
+   beats the shared flex `.cs-v2 .csv2-list-row` (0,2,0) despite load order. */
+.cs-item-v2 .csv2-list-head.cs-rule-head,
+.cs-item-v2 .csv2-list-row.cs-rule-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px 160px 30px;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ---------- Arma/Armadura (spec 020) — Qualities reference rows (drag-drop) ---------- */
+/* Reference row (flex, NOT grid): the name chip pushes everything after it to the
+   right edge (margin-right:auto), so the per-instance parameter and the always-
+   visible delete button cluster at the right whether or not a parameter is shown
+   (a no-param row's hidden inputs are display:none and never steal the delete slot). */
+.cs-item-v2 .csv2-list-row.cs-qref-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cs-item-v2 .cs-qref-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-right: auto; /* push parameter + delete to the right edge */
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #dfe5f3;
+  color: var(--csv2-text);
+  font-weight: 600;
+  font-size: 12px;
+}
+.cs-item-v2 .cs-qref-param {
+  flex: 0 0 96px;
+}
+/* Graceful degradation — no item with this slug (world or compendium): amber chip
+   showing the raw slug + a "missing item" tag; the row stays removable. */
+.cs-item-v2 .cs-qref-chip.is-missing {
+  background: #f7f0dd;
+  border: 1px solid #e3d3a0;
+  color: #8a6d1f;
+}
+.cs-item-v2 .cs-qref-slug {
+  font-family: var(--csv2-font-mono);
+}
+.cs-item-v2 .cs-qref-tag {
+  font-family: var(--csv2-font-mono);
+  font-weight: 700;
+  font-size: 8px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #a8894a;
+}
+.cs-item-v2 .cs-qref-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cs-item-v2 .cs-qref-hint {
+  font-size: 11px;
+  font-style: normal;
+  opacity: 0.75;
+}
+.cs-item-v2 .cs-qref-drag {
+  padding: 6px 12px 2px;
+  font-size: 10px;
+  font-style: italic;
+  opacity: 0.6;
+}

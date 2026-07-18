@@ -2,6 +2,8 @@ import {
   itemDescriptionFields,
   physicalItemFields,
   normalizeSlugSource,
+  qualityRefField,
+  migrateQualityRefs,
 } from "../fields.js";
 
 const fields = foundry.data.fields;
@@ -26,7 +28,7 @@ export default class ArmorData extends foundry.abstract.TypeDataModel {
         initial: 0,
         integer: true,
       }),
-      qualities: new fields.ArrayField(new fields.ObjectField()),
+      ...qualityRefField(), // spec 020 — {slug, parameter} references (was ObjectField)
       equipped: new fields.NumberField({
         required: true,
         initial: 0,
@@ -37,6 +39,7 @@ export default class ArmorData extends foundry.abstract.TypeDataModel {
 
   static migrateData(source) {
     normalizeSlugSource(source);
+    migrateQualityRefs(source); // spec 020 — legacy {name}→{slug}, non-destructive
     return super.migrateData(source);
   }
 }

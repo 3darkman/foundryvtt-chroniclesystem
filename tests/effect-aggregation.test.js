@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
   applyModifiers,
   collectEffectModifiers,
@@ -213,6 +213,26 @@ describe("collectEffectModifiers (authored routing)", () => {
 // (research §D1; legacy csArmorItem/csWeaponItem). This pins them against
 // regression as the redesign proceeds.
 describe("collectEffectModifiers (equipment + conditions)", () => {
+  // spec 020 — weapon Bulk is now a data-driven, equipped-gated quality rule; the
+  // collector resolves the "bulk" definition from game.items (was a hardcoded slug).
+  beforeAll(() => {
+    globalThis.game = globalThis.game ?? {};
+    globalThis.game.items = [
+      {
+        type: "quality",
+        name: "Bulk",
+        system: {
+          slug: "bulk",
+          parameter: { kind: "number" },
+          rules: [{ lever: "bulk", value: "@param", scope: "passive" }],
+        },
+      },
+    ];
+  });
+  afterAll(() => {
+    globalThis.game.items = [];
+  });
+
   const equippedActor = {
     appliedEffects: [],
     items: [
@@ -224,7 +244,7 @@ describe("collectEffectModifiers (equipment + conditions)", () => {
       {
         type: "weapon",
         _id: "wpn",
-        system: { qualities: { q1: { name: "Bulk", parameter: "1" } } },
+        system: { equipped: 2, qualities: [{ slug: "bulk", parameter: "1" }] },
       },
     ],
     getCSData: () => ({

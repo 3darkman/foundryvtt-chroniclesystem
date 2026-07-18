@@ -4,6 +4,13 @@ import {
   canUserModifyEffect,
 } from "../../effects/cs-active-effect.js";
 import { CSConstants } from "../../system/csConstants.js";
+import {
+  QUALITY_LEVERS,
+  getQualityLeverLabel,
+  qualityAppliesTo,
+  qualityBySlug,
+  slugify,
+} from "../../effects/cs-effect-vocabulary.js";
 
 // The 7 House resources, in handoff order — the Evento "Recursos da Casa" table
 // rows and the Propriedade Resource select choices (spec 019, D6).
@@ -98,13 +105,10 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
 
   // Fixed 3-tab bar for every type: Detalhes · Sistema · Efeitos. Single group →
   // `context.tabs` is auto-injected by ApplicationV2._prepareContext.
+  // No tab icons — the handoff tabs are text-only (label from `labelPrefix`).
   static TABS = {
     primary: {
-      tabs: [
-        { id: "details", icon: "fa-solid fa-feather" },
-        { id: "system", icon: "fa-solid fa-gears" },
-        { id: "effects", icon: "fa-solid fa-bolt" },
-      ],
+      tabs: [{ id: "details" }, { id: "system" }, { id: "effects" }],
       initial: "details",
       labelPrefix: "CS.sheets.item.tabs",
     },
@@ -113,7 +117,18 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
   // SSOT for each repeatable list's new-row shape (D1/D6) — mirrors the element
   // shapes the deleted per-type create-handlers wrote, now centralized.
   static LIST_ELEMENT_FACTORIES = {
-    "system.qualities": () => ({ name: "", parameter: "" }),
+    // spec 020 — weapon/armour `system.qualities` are slug references added by
+    // dragging a Quality onto the sheet (not the generic blank-row listAdd) — no
+    // factory here. Rows are removed via the generic listDelete action.
+    // A Quality's authored rule rows (blank lever = not-yet-chosen,
+    // inert in the collector) and its parameter-choice options (plain strings).
+    "system.rules": () => ({
+      lever: "",
+      value: "",
+      scope: "passive",
+      target: "",
+    }),
+    "system.parameter.options": () => "",
     "system.specialties": () => ({ name: "", rating: 0, modifier: 0 }),
     "system.features": () => ({ name: "", rating: 0, modifier: 0 }),
     "system.arts": () => ({ name: "" }),
@@ -231,22 +246,11 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
         : []),
     ];
 
-    // Fixed list columns (data, consumed by repeatable-list.hbs). Habilidade
-    // Specialties columns are owner-aware (above); these are constant.
-    context.qualityColumns = [
-      {
-        key: "name",
-        label: "CS.sheets.item.fields.name",
-        inputType: "text",
-        dtype: "String",
-      },
-      {
-        key: "parameter",
-        label: "CS.sheets.item.fields.parameter",
-        inputType: "text",
-        dtype: "String",
-      },
-    ];
+    // spec 020 — weapon/armour Qualities are slug references added by DRAG-DROP
+    // (no picker): resolve each reference against the world + the compendium.
+    if (item.type === "weapon" || item.type === "armor") {
+      await this._prepareQualityReferences(context, item, system);
+    }
     context.artColumns = [
       {
         key: "name",
@@ -304,6 +308,119 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
         }))
       );
     }
+
+    // spec 020 — Quality authoring dropdowns, all sourced from the shared SSOT
+    // constants (QUALITY_LEVERS / the schema `choices`). Empunhadura shows only
+    // when the applicability includes weapon (FR-001). Values are i18n keys so the
+    // `selectOptions … localize=true` helper renders the localized labels.
+    if (item.type === "quality") {
+      context.qualityShowWielding = system.applicability !== "armor";
+      context.qualityDescriptor = {
+        applicabilityOptions: {
+          weapon: "CS.quality.applicability.weapon",
+          armor: "CS.quality.applicability.armor",
+          both: "CS.quality.applicability.both",
+        },
+        parameterKinds: {
+          none: "CS.quality.parameterKinds.none",
+          number: "CS.quality.parameterKinds.number",
+          choice: "CS.quality.parameterKinds.choice",
+        },
+        scopeOptions: {
+          passive: "CS.quality.scopes.passive",
+          auto: "CS.quality.scopes.auto",
+          optional: "CS.quality.scopes.optional",
+        },
+        leverOptions: Object.fromEntries([
+          ["", getQualityLeverLabel("none")],
+          ...QUALITY_LEVERS.map((lever) => [
+            lever.id,
+            getQualityLeverLabel(lever.id),
+          ]),
+        ]),
+      };
+    }
+  }
+
+  /**
+   * spec 020 — build the weapon/armour Quality reference rows. Each reference is a
+   * stable slug; it resolves LIVE against the world (a real Quality item) and, as a
+   * fallback, the quality compendium index (async — sheet render only, never the
+   * synchronous collector). Resolved → the real name + the per-instance parameter
+   * control the definition declares (number input vs option select). Unresolved (no
+   * item with that slug in world OR compendium) → a "<slug> missing item" chip that
+   * stays removable; the reference is NEVER discarded (FR-012).
+   */
+  async _prepareQualityReferences(context, item, system) {
+    const refs = Array.isArray(system?.qualities) ? system.qualities : [];
+
+    // Compendium fallback: slug → {name, parameter} from each Item pack's index
+    // (world items are resolved directly via qualityBySlug, below).
+    const packDefs = new Map();
+    for (const pack of game.packs ?? []) {
+      if (pack.metadata?.type !== "Item") continue;
+      let index;
+      try {
+        index = await pack.getIndex({
+          fields: [
+            "system.slug",
+            "system.description",
+            "system.parameter.kind",
+            "system.parameter.label",
+            "system.parameter.options",
+          ],
+        });
+      } catch {
+        continue;
+      }
+      for (const entry of index) {
+        if (entry.type !== "quality") continue;
+        const slug = entry.system?.slug || slugify(entry.name);
+        if (slug && !packDefs.has(slug)) {
+          packDefs.set(slug, {
+            name: entry.name,
+            description: entry.system?.description ?? "",
+            parameter: entry.system?.parameter ?? { kind: "none" },
+          });
+        }
+      }
+    }
+
+    // World first (full item), then the compendium fallback; null when unresolved.
+    const resolve = (slug) => {
+      const world = qualityBySlug(slug);
+      if (world) {
+        return {
+          name: world.name,
+          description: world.system?.description ?? "",
+          parameter: world.system?.parameter ?? { kind: "none" },
+        };
+      }
+      return packDefs.get(slug) ?? null;
+    };
+
+    context.qualityRefs = refs.map((ref, index) => {
+      const slug = ref.slug ?? "";
+      const def = slug ? resolve(slug) : null;
+      const paramKind = def?.parameter?.kind ?? "none";
+      return {
+        index,
+        slug,
+        parameter: ref.parameter ?? "",
+        name: def?.name ?? slug,
+        description: def?.description ?? "",
+        missing: !def,
+        showParam: paramKind === "number" || paramKind === "choice",
+        isChoice: paramKind === "choice",
+        paramLabel: def?.parameter?.label ?? "",
+        paramOptions:
+          paramKind === "choice"
+            ? Object.fromEntries(
+                (def.parameter.options ?? []).filter(Boolean).map((o) => [o, o])
+              )
+            : {},
+      };
+    });
   }
 
   /** @override — the core convention: hand each tab-body part its own tab state so
@@ -341,6 +458,35 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     );
     arr.splice(i, 1);
     return this.item.update({ [path]: arr });
+  }
+
+  /* -------------------------------------------- */
+  /*  Quality references — drag-drop only         */
+  /* -------------------------------------------- */
+
+  /**
+   * @override — accept a dropped **Quality** Item as a slug reference on a
+   * weapon/armour sheet (spec 020, contract C10a). The whole sheet is the drop
+   * target (inherited; no dropSelector). Wrong type / applicability / duplicate are
+   * silently ignored; everything else falls through to the core handler (which
+   * preserves the inherited ActiveEffect drop).
+   */
+  async _onDropDocument(event, document) {
+    if (document?.documentName === "Item" && document.type === "quality") {
+      if (!this.isEditable) return null;
+      if (!["weapon", "armor"].includes(this.item.type)) return null;
+      if (!qualityAppliesTo(document, this.item.type)) return null;
+      const slug = document.system?.slug || slugify(document.name);
+      const arr = foundry.utils.deepClone(this.item.system.qualities ?? []);
+      if (arr.some((q) => q.slug === slug)) return null; // dedupe
+      if (document.pack && !qualityBySlug(slug)) {
+        await CONFIG.Item.documentClass.create(document.toObject());
+      }
+      arr.push({ slug, parameter: "" });
+      await this.item.update({ "system.qualities": arr });
+      return document;
+    }
+    return super._onDropDocument(event, document);
   }
 
   /** Action: toggle a Técnica Work card open/closed (ephemeral UI state). */

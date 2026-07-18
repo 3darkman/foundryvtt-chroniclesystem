@@ -1,0 +1,133 @@
+{{!-- Qualidade (quality) Sistema body (spec 020, US1). The GM authors a quality
+      definition: Aplicabilidade · Parâmetro · Empunhadura (weapon-only) · Efeitos
+      de Regra. All controls reuse the shared v2 components (field-cell, list card,
+      selectOptions); layout-only rules live in item-sheet.css (.cs-item-v2). --}}
+<section class="tab cs-quality-authoring {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+
+    {{!-- Left column (Aplicabilidade + Alcance) | Parâmetro. align-items:start so
+          Parâmetro grows independently and Alcance sits beside it. --}}
+    <div class="cs-quality-grid2">
+        <div class="cs-quality-col">
+        <div class="csv2-card">
+            <div class="csv2-card-header">{{localize "CS.quality.applicabilityTitle"}}</div>
+            <div class="csv2-field-grid">
+                {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                      kind="chips" name="system.applicability" label="CS.quality.appliesTo"
+                      value=item.system.applicability options=qualityDescriptor.applicabilityOptions}}
+            </div>
+        </div>
+
+        {{!-- ALCANCE — in the left column (below Aplicabilidade, beside Parâmetro)
+              when Parâmetro has a value; full-width below the grid when none. --}}
+        {{#if qualityShowWielding}}{{#ifDifferent item.system.parameter.kind "none"}}
+        {{> "systems/chroniclesystem/templates/items/components/quality-range.hbs"}}
+        {{/ifDifferent}}{{/if}}
+        </div>
+
+        <div class="csv2-card">
+            <div class="csv2-card-header">{{localize "CS.quality.parameterTitle"}}</div>
+            <div class="csv2-field-grid">
+                {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                      kind="chips" name="system.parameter.kind" label="CS.quality.parameterKind"
+                      value=item.system.parameter.kind options=qualityDescriptor.parameterKinds}}
+            </div>
+            {{#ifDifferent item.system.parameter.kind "none"}}
+            <div class="csv2-field-grid">
+                {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                      kind="text" name="system.parameter.label" label="CS.quality.parameterLabel"
+                      value=item.system.parameter.label}}
+            </div>
+            {{/ifDifferent}}
+            {{#ifEquals item.system.parameter.kind "choice"}}
+            <div class="cs-opt-list">
+                <div class="cs-opt-head">{{localize "CS.quality.parameterOptions"}}
+                    {{#if canEditLists}}
+                    <button type="button" class="csv2-btn csv2-btn--secondary csv2-btn--sm"
+                            data-action="listAdd" data-list="system.parameter.options">
+                        <i class="fas fa-plus"></i>{{localize "CS.quality.addOption"}}
+                    </button>
+                    {{/if}}
+                </div>
+                {{#each item.system.parameter.options as |opt i|}}
+                <div class="cs-opt-row">
+                    <input type="text" name="system.parameter.options.{{i}}" value="{{opt}}" />
+                    <button type="button" class="csv2-list-del-btn"
+                            data-action="listDelete" data-list="system.parameter.options" data-index="{{i}}">
+                        <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                </div>
+                {{/each}}
+            </div>
+            {{/ifEquals}}
+        </div>
+    </div>
+
+    {{!-- ALCANCE full-width when Parâmetro = none (spare room). Always above Empunhadura. --}}
+    {{#if qualityShowWielding}}{{#ifEquals item.system.parameter.kind "none"}}
+    {{> "systems/chroniclesystem/templates/items/components/quality-range.hbs"}}
+    {{/ifEquals}}{{/if}}
+
+    {{!-- EMPUNHADURA — weapon/both applicability only --}}
+    {{#if qualityShowWielding}}
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.quality.wieldingTitle"}}</div>
+        <div class="csv2-field-grid cs-grip-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="bool" name="system.wielding.occupiesBothHands"
+                  label="CS.quality.wielding.occupiesBothHands" value=item.system.wielding.occupiesBothHands}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="bool" name="system.wielding.offHandEligible"
+                  label="CS.quality.wielding.offHandEligible" value=item.system.wielding.offHandEligible}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
+                  kind="bool" name="system.wielding.adaptable"
+                  label="CS.quality.wielding.adaptable" value=item.system.wielding.adaptable}}
+        </div>
+    </div>
+    {{/if}}
+
+    {{!-- EFEITOS DE REGRA — the authored levers (reuses the shared list card) --}}
+    <div class="csv2-card csv2-list">
+        <div class="csv2-card-header">{{localize "CS.quality.rulesTitle"}}
+            {{#if canEditLists}}
+            <button type="button" class="csv2-btn csv2-btn--secondary csv2-btn--sm"
+                    data-action="listAdd" data-list="system.rules">
+                <i class="fas fa-plus"></i>{{localize "CS.quality.addRule"}}
+            </button>
+            {{/if}}
+        </div>
+        {{#if item.system.rules.length}}
+        <div class="csv2-list-head cs-rule-head">
+            <span class="csv2-list-col">{{localize "CS.quality.leverColumn"}}</span>
+            <span class="csv2-list-col">{{localize "CS.quality.valueColumn"}}</span>
+            <span class="csv2-list-col">{{localize "CS.quality.scopeColumn"}}</span>
+            <span class="csv2-list-del"></span>
+        </div>
+        {{#each item.system.rules as |rule i|}}
+        <div class="csv2-list-row cs-rule-row">
+            <span class="csv2-list-col">
+                <select name="system.rules.{{i}}.lever">
+                    {{selectOptions @root.qualityDescriptor.leverOptions selected=rule.lever localize=true}}
+                </select>
+            </span>
+            <span class="csv2-list-col">
+                <input type="text" name="system.rules.{{i}}.value" value="{{rule.value}}"
+                       placeholder="{{localize 'CS.quality.valuePlaceholder'}}" />
+            </span>
+            <span class="csv2-list-col">
+                <select name="system.rules.{{i}}.scope">
+                    {{selectOptions @root.qualityDescriptor.scopeOptions selected=rule.scope localize=true}}
+                </select>
+            </span>
+            <span class="csv2-list-del">
+                <button type="button" class="csv2-list-del-btn"
+                        data-action="listDelete" data-list="system.rules" data-index="{{i}}">
+                    <i class="fa-regular fa-trash-can"></i>
+                </button>
+            </span>
+        </div>
+        {{/each}}
+        {{else}}
+        <div class="csv2-list-empty">{{localize "CS.quality.rulesEmpty"}}</div>
+        {{/if}}
+    </div>
+</section>

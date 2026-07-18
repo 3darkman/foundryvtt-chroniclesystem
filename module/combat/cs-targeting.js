@@ -4,7 +4,6 @@
 // are delegated to the pure layer. Contract: targeting-and-distance.md.
 
 import SystemUtils from "../utils/systemUtils.js";
-import { distanceToYards } from "./cs-conflict.js";
 
 /**
  * Resolve the user's single target into the roll-time target context. NEVER
@@ -76,19 +75,22 @@ export function getAttackerToken(actor) {
 }
 
 /**
- * The game (ruler) distance between two tokens, in YARDS. Grid-aware on a gridded
- * scene, straight line when gridless — matching what the player measures on the
- * canvas. `null` when the canvas isn't ready or a token is missing (range omitted).
- * NEVER uses `canvas.grid.measureDistance` (removed in v13+).
+ * The game (ruler) distance between two tokens, in the SCENE's distance units
+ * (`canvas.grid.units`). Grid-aware on a gridded scene, straight line when gridless —
+ * matching what the player measures on the canvas. Compared directly to a quality's
+ * `range` field, which the GM authors in those same units (spec 020 — no yards
+ * conversion, so metres/feet/etc. work). `null` when the canvas isn't ready or a
+ * token is missing (range omitted). NEVER uses `canvas.grid.measureDistance`
+ * (removed in v13+).
  * @param {Token} attackerToken
  * @param {Token} targetToken
  * @returns {number|null}
  */
-export function measureDistanceYards(attackerToken, targetToken) {
+export function measureDistance(attackerToken, targetToken) {
   if (!canvas?.ready || !attackerToken || !targetToken) return null;
   const { distance } = canvas.grid.measurePath([
     attackerToken.center,
     targetToken.center,
   ]);
-  return distanceToYards(distance, canvas.grid.units);
+  return distance;
 }

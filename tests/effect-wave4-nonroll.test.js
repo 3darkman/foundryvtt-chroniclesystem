@@ -193,9 +193,23 @@ describe("applyOwnedItemEffects — quality grants on weapons", () => {
         axes: [{ _id: "e", name: "Piercing", parameter: "1" }],
       },
     });
+    // The grant carries its own name; `stampQualityDisplayNames` now also stamps the
+    // seed description (hover tooltip) via the seed-catalog fallback in qualityBySlug.
     expect(axe.system.qualities).toEqual([
-      { name: "Vicious", parameter: "" },
-      { name: "Piercing", parameter: "1" },
+      {
+        slug: "vicious",
+        name: "Vicious",
+        parameter: "",
+        description:
+          "If you defeat a foe with a Vicious weapon, the consequence of defeat is death (a Destiny Point may avoid this fate).",
+      },
+      {
+        slug: "piercing",
+        name: "Piercing",
+        parameter: "1",
+        description:
+          "On a hit, your damage ignores an amount of the target's Armor Rating equal to the listed value.",
+      },
     ]);
   });
 

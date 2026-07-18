@@ -1,10 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  RANGE_BANDS,
-  DISTANCE_UNIT_TO_YARDS,
   SIZE_DEFENSE_MODIFIER,
-  distanceToYards,
-  rangeCategoryFromQualities,
   rangePenalty,
   degreesOfSuccess,
   computeDamage,
@@ -16,75 +12,46 @@ import {
 // conflict module — no Foundry runtime (numbers/qualities in, numbers out).
 
 describe("constants (SSOT)", () => {
-  it("exposes the frozen range bands and unit factors", () => {
-    expect(RANGE_BANDS.close).toEqual({ free: 10, inc: 10 });
-    expect(RANGE_BANDS.long).toEqual({ free: 100, inc: 100 });
-    expect(Object.isFrozen(RANGE_BANDS)).toBe(true);
-    expect(DISTANCE_UNIT_TO_YARDS.ft).toBeCloseTo(1 / 3);
+  it("exposes the frozen size→defense modifier map", () => {
     expect(SIZE_DEFENSE_MODIFIER).toEqual({ small: 2, medium: 0, large: -2 });
+    expect(Object.isFrozen(SIZE_DEFENSE_MODIFIER)).toBe(true);
   });
 });
 
-describe("distanceToYards", () => {
-  const cases = [
-    [30, "ft", 10],
-    [10, "m", 10],
-    [10, "yd", 10],
-    [1, "km", 1000],
-    [15, "parsec", 15], // unknown unit → 1:1
-    [30, "FT", 10], // case-insensitive
-  ];
-  for (const [distance, units, yards] of cases) {
-    it(`${distance} ${units} → ${yards} yd`, () => {
-      expect(distanceToYards(distance, units)).toBeCloseTo(yards);
-    });
-  }
-});
-
-describe("rangeCategoryFromQualities — by stable slug", () => {
-  it("resolves long / close / melee (null)", () => {
-    expect(rangeCategoryFromQualities([{ name: "Long Range" }])).toBe("long");
-    expect(rangeCategoryFromQualities([{ name: "Close Range" }])).toBe("close");
-    expect(rangeCategoryFromQualities([{ name: "Piercing" }])).toBe(null);
-    expect(rangeCategoryFromQualities([])).toBe(null);
-    expect(rangeCategoryFromQualities(undefined)).toBe(null);
-  });
-  it("long wins when both are present (inconsistent data → wider band)", () => {
-    expect(
-      rangeCategoryFromQualities([
-        { name: "Close Range" },
-        { name: "Long Range" },
-      ])
-    ).toBe("long");
-  });
-});
-
-describe("rangePenalty — band started rounds up (ceil)", () => {
-  const close = [
+describe("rangePenalty — data-driven band, started increment rounds up (ceil)", () => {
+  // The band {free, inc} comes from the weapon's range quality (weaponRangeBand),
+  // in the scene's units — no yards conversion, so any unit / custom value works.
+  const close = { free: 10, inc: 10 }; // Close Range seed
+  for (const [dist, pen] of [
     [10, 0],
     [11, 1],
     [20, 1],
     [21, 2],
     [30, 2],
-  ];
-  for (const [yd, pen] of close) {
-    it(`Close: ${yd} yd → ${pen}`, () => {
-      expect(rangePenalty(yd, "close")).toBe(pen);
+  ]) {
+    it(`Close band (10): ${dist} → ${pen}`, () => {
+      expect(rangePenalty(dist, close)).toBe(pen);
     });
   }
-  const long = [
+  const long = { free: 100, inc: 100 }; // Long Range seed
+  for (const [dist, pen] of [
     [100, 0],
     [101, 1],
     [200, 1],
     [201, 2],
     [300, 2],
-  ];
-  for (const [yd, pen] of long) {
-    it(`Long: ${yd} yd → ${pen}`, () => {
-      expect(rangePenalty(yd, "long")).toBe(pen);
+  ]) {
+    it(`Long band (100): ${dist} → ${pen}`, () => {
+      expect(rangePenalty(dist, long)).toBe(pen);
     });
   }
-  it("null category (melee) → 0 at any distance", () => {
+  it("honours a GM's custom band (e.g. 25 metres)", () => {
+    const m25 = { free: 25, inc: 25 };
+    expect(rangePenalty(25, m25)).toBe(0);
+    expect(rangePenalty(26, m25)).toBe(1);
+    expect(rangePenalty(51, m25)).toBe(2);
+  });
+  it("null band (melee) → 0 at any distance", () => {
     expect(rangePenalty(0, null)).toBe(0);
     expect(rangePenalty(9999, null)).toBe(0);
   });

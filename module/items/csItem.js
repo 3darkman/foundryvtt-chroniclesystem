@@ -1,6 +1,10 @@
 import { ChronicleSystem } from "../system/ChronicleSystem.js";
 import LOGGER from "../utils/logger.js";
-import { weaponTypeSlug, slugify } from "../effects/cs-effect-vocabulary.js";
+import {
+  weaponTypeSlug,
+  slugify,
+  weaponWieldingFlags,
+} from "../effects/cs-effect-vocabulary.js";
 
 // Evaluate the arithmetic tail of a damage formula over integers. Never uses
 // eval; never throws. Any malformed/incomplete tail → the bare `base` value.
@@ -81,11 +85,11 @@ export class CSItem extends Item {
       // formula survives a rename to any language.
       let ability = actor.getAbilityValueBySlug(slugify(matches[1]));
       this.damageValue = applyDamageOperator(ability, matches[2], matches[3]);
-      let adaptableQuality = Object.values(this.getCSData().qualities).filter(
-        (quality) => quality.name.toLowerCase() === "adaptable"
-      );
+      // Adaptable: +1 damage when wielded two-handed. Resolve the referenced
+      // quality's definition by slug (spec 020, FR-022 SSOT — was a name match) and
+      // read the SAME `equipped` wielding state the hand-slot logic uses.
       if (
-        adaptableQuality.length > 0 &&
+        weaponWieldingFlags(this).adaptable &&
         this.getCSData().equipped ===
           ChronicleSystem.equippedConstants.BOTH_HANDS
       ) {

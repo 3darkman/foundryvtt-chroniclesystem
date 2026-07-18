@@ -281,7 +281,10 @@
         "quality": "Grant weapon quality",
         "bulk": "Bulk (movement)",
         "disposition": "Disposition delta",
-        "influence": "Intrigue influence"
+        "influence": "Intrigue influence",
+        "armorbypass": "Bypass target's armor",
+        "armorpenalty": "Armor penalty",
+        "range": "Range band"
       },
       "targetKinds": {
         "all": "All / global",
@@ -396,6 +399,69 @@
         "showIconHint": "Should the icon representing this Effect be displayed in the UI while this effect is active?",
         "startNow": "Now"
       }
+    },
+    "quality": {
+      "applicabilityTitle": "Applicability",
+      "appliesTo": "Applies to",
+      "applicability": {
+        "weapon": "Weapon",
+        "armor": "Armor",
+        "both": "Both"
+      },
+      "parameterTitle": "Parameter",
+      "parameterKind": "Parameter type",
+      "parameterLabel": "Parameter label",
+      "parameterKinds": {
+        "none": "None",
+        "number": "Number",
+        "choice": "Options"
+      },
+      "parameterOptions": "Parameter options",
+      "addOption": "Option",
+      "wieldingTitle": "Wielding",
+      "wielding": {
+        "occupiesBothHands": "Occupies both hands",
+        "offHandEligible": "Wieldable off-hand",
+        "adaptable": "Adaptable (1 or 2 hands)"
+      },
+      "rangeTitle": "Range",
+      "rangeLabel": "Effective range",
+      "rangeHint": "Max distance with no penalty, in the scene's units (10 / 100 in the book, or metres, etc.). −1D per full increment beyond it. 0 = melee.",
+      "rulesTitle": "Rule Effects",
+      "rulesEmpty": "No rule effects yet.",
+      "addRule": "Rule effect",
+      "leverColumn": "What changes",
+      "valueColumn": "Value",
+      "scopeColumn": "Scope / mode",
+      "valuePlaceholder": "+1, -2, or @param",
+      "levers": {
+        "none": "Select…",
+        "damage": "Weapon damage",
+        "armorbypass": "Bypass target's armor",
+        "defensewhilewielded": "Combat Defense while wielded",
+        "bulk": "Movement penalty / Bulk",
+        "testdice": "Attack test dice (+#D)",
+        "penalty": "Attack test penalty (−#D)",
+        "armorrating": "Armor Rating",
+        "armorpenalty": "Armor Penalty"
+      },
+      "scopes": {
+        "passive": "Passive while equipped",
+        "auto": "Auto-conditional",
+        "optional": "Optional (toggled on the roll)"
+      },
+      "picker": {
+        "add": "Quality",
+        "search": "Search qualities…",
+        "empty": "No qualities yet",
+        "emptyHint": "Drag a Quality onto this sheet to add it.",
+        "dragHint": "Drag a Quality from the Chronicle Qualities compendium onto this sheet.",
+        "missing": "MISSING DEFINITION",
+        "missingItem": "missing item"
+      },
+      "defensiveSpent": "Defensive spent ({weapon})",
+      "defensiveStance": "Defensive stance",
+      "qualitiesTitle": "Qualities"
     },
     "intrigue": {
       "techniques": {
@@ -887,7 +953,8 @@
       "holding": "Holding",
       "technique": "Technique",
       "unitType": "Unit Type",
-      "poison": "Poison"
+      "poison": "Poison",
+      "quality": "Quality"
     }
   }
 }

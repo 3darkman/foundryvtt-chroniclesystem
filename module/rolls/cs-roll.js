@@ -157,6 +157,9 @@ export class CSRoll {
         dice,
         roll,
         resolution,
+        // spec 020 (FR-018) — all of THIS weapon's qualities ({name, parameter,
+        // description}) listed on the result card as adjudication notes.
+        reminders: cc?.reminders ?? [],
       }
     );
     const messageData = {

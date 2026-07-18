@@ -8,6 +8,8 @@ export const preloadHandlebarsTemplates = async function () {
     "systems/chroniclesystem/templates/items/components/rich-text-field.hbs",
     "systems/chroniclesystem/templates/items/components/repeatable-list.hbs",
     "systems/chroniclesystem/templates/items/components/works-card.hbs",
+    "systems/chroniclesystem/templates/items/components/quality-refs.hbs",
+    "systems/chroniclesystem/templates/items/components/quality-range.hbs",
 
     "systems/chroniclesystem/templates/actors/characters/public-character-sheet.hbs",
 
