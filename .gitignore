@@ -13,10 +13,18 @@ CLAUDE.md
 specs/
 nul
 
-# Foundry LevelDB pack runtime artifacts — ship the pack DATA, not the lock/debug logs
+# Foundry LevelDB pack runtime artifacts — ship the pack DATA (*.ldb), not the
+# volatile per-session bookkeeping. LevelDB rotates these every time the world
+# opens/writes/compacts (new *.log, renumbered MANIFEST-*, updated CURRENT), and
+# they get OS-locked while Foundry runs — committing them churns the tree and
+# breaks checkout/merge. The compendium content is re-seeded at runtime from the
+# code seeds (quality-seeds.js), so these files are a disposable cache.
 packs/**/LOCK
 packs/**/LOG
 packs/**/LOG.old
+packs/**/*.log
+packs/**/MANIFEST-*
+packs/**/CURRENT
 
 
 docs/
