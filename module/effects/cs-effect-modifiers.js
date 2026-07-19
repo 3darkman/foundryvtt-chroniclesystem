@@ -29,6 +29,8 @@ import {
   weaponTypeSlug,
   qualityBySlug,
   QUALITY_LEVER_MAP,
+  APPLY_CONDITION_LEVER,
+  effectiveWeaponQualityRefs,
 } from "./cs-effect-vocabulary.js";
 import { scopedSpecialtySlug } from "../vocabulary/cs-canonical-abilities.js";
 import { resolveEffectValue } from "./cs-effect-value.js";
@@ -467,6 +469,12 @@ export function dedupeQualitiesBySlug(references = [], grants = []) {
   return result;
 }
 
+// spec 021 (D4) — `effectiveWeaponQualityRefs` (conferral resolver) lives in
+// cs-effect-vocabulary.js (co-located with qualityBySlug/weaponWieldingFlags to
+// avoid an eval-time import cycle) and is imported above; RE-EXPORTED here so the
+// roll-time pass and the collectors resolve it from this module (contract location).
+export { effectiveWeaponQualityRefs };
+
 /**
  * Is a weapon's Defensive contribution suppressed for this actor right now
  * (spec 020, Decision 8 / FR-030)? True while an active marker AE carries
@@ -554,7 +562,7 @@ function routeReferencedRule(lever, value, item, buffers, actor) {
  * @param {object} buffers
  */
 function collectReferencedQualities(actor, item, buffers) {
-  const refs = itemData(item).qualities;
+  const refs = effectiveWeaponQualityRefs(item); // includes conferred slugs (D4)
   if (!Array.isArray(refs)) return;
   for (const ref of refs) {
     const def = qualityBySlug(ref?.slug);
@@ -577,17 +585,151 @@ function collectReferencedQualities(actor, item, buffers) {
  * to that weapon's roll only and is NEVER summed onto passive stats or the chip
  * (FR-016 parity, spec 017). @returns {number}
  */
-export function weaponAttackScopedTotal(item, leverId) {
+export function weaponAttackScopedTotal(item, leverId, { scope } = {}) {
   let total = 0;
-  for (const ref of item?.system?.qualities ?? []) {
+  for (const ref of effectiveWeaponQualityRefs(item)) {
     const def = qualityBySlug(ref?.slug);
     if (!def) continue;
     for (const rule of def.system?.rules ?? []) {
       if (rule?.lever !== leverId) continue;
+      // spec 021 (D9/D11) — optional scope filter so the roll-time pass sums `auto`
+      // only and leaves `optional` (Off-hand/Powerful) for the dialog (no double count).
+      if (scope && rule.scope !== scope) continue;
       total += resolveRuleValue(rule.value, ref.parameter);
     }
   }
   return total;
+}
+
+/**
+ * The total armour bypass this weapon's Piercing/Penetration/Penetrating grants
+ * against a target at `dist` scene units (spec 021, D1/FR-001). Per quality: a
+ * quality with its OWN `system.range > 0` (Penetration, seeded 10) DECAYS by 1 for
+ * each full increment of that range beyond 0 — `max(0, raw − floor(dist / range))`;
+ * a range-0 quality (Piercing/Penetrating) stays flat; no measurable distance
+ * (`dist == null`) → full value (US1.6 fallback). Summed across effective refs.
+ * Replaces the flat `weaponAttackScopedTotal(weapon,"armorbypass")` — that flattened
+ * Piercing + Penetration into one distance-blind number.
+ * @param {object} weapon a weapon Item
+ * @param {number|null} dist measured distance in scene units, or null (no canvas/token)
+ * @returns {number}
+ */
+export function weaponArmorBypassTotal(weapon, dist) {
+  let total = 0;
+  for (const ref of effectiveWeaponQualityRefs(weapon)) {
+    const def = qualityBySlug(ref?.slug);
+    if (!def) continue;
+    const range = Number(def.system?.range) || 0;
+    for (const rule of def.system?.rules ?? []) {
+      if (rule?.lever !== "armorbypass") continue;
+      const raw = resolveRuleValue(rule.value, ref.parameter);
+      total +=
+        range > 0 && dist != null
+          ? Math.max(0, raw - Math.floor(dist / range))
+          : raw;
+    }
+  }
+  return total;
+}
+
+/**
+ * The product of every `rangemultiplier` lever value across a weapon's effective
+ * qualities (spec 021, D5/FR-002) — Inaccurate contributes ×2. Default 1 (no
+ * multiplier quality). Multiplies the measured distance BEFORE the range-penalty
+ * computation; the card row still shows the real distance (D5).
+ * @param {object} weapon a weapon Item
+ * @returns {number}
+ */
+export function productOfRangeMultipliers(weapon) {
+  let product = 1;
+  for (const ref of effectiveWeaponQualityRefs(weapon)) {
+    const def = qualityBySlug(ref?.slug);
+    if (!def) continue;
+    for (const rule of def.system?.rules ?? []) {
+      if (rule?.lever !== "rangemultiplier") continue;
+      const v = resolveRuleValue(rule.value, ref.parameter);
+      if (v) product *= v;
+    }
+  }
+  return product;
+}
+
+/**
+ * The OPTIONAL (dialog-toggled) weapon-damage qualities of a weapon (spec 021,
+ * D11/FR-006) — each `scope:"optional"` rule on the `damage` channel
+ * (Powerful/Off-hand), as `{name, value, slug}`. Surfaced in the modifier dialog
+ * as default-off toggles that add their value to the resolution's base damage
+ * (never a dice-formula field). Distinct from the auto `damage` levers
+ * (Extraordinary) applied at roll time — no double counting.
+ * @param {object} weapon a weapon Item
+ * @returns {Array<{name: string, value: number, slug: string}>}
+ */
+export function collectOptionalWeaponDamageToggles(weapon) {
+  const out = [];
+  for (const ref of effectiveWeaponQualityRefs(weapon)) {
+    const def = qualityBySlug(ref?.slug);
+    if (!def) continue;
+    for (const rule of def.system?.rules ?? []) {
+      if (rule?.scope !== "optional") continue;
+      const lever = QUALITY_LEVER_MAP[rule?.lever];
+      if (lever?.channel !== EFFECT_CHANNELS.DAMAGE) continue;
+      const value = resolveRuleValue(rule.value, ref.parameter);
+      if (!value) continue;
+      out.push({ name: def.name || ref?.slug || "", value, slug: ref?.slug });
+    }
+  }
+  return out;
+}
+
+/** The itemizable formula/damage field each auto lever channel feeds (spec 021,
+ *  D9). `armorbypass`/`rangemultiplier` are intentionally absent — they are applied
+ *  by their own dedicated functions (weaponArmorBypassTotal/productOfRangeMultipliers). */
+const AUTO_LEVER_FIELD_BY_CHANNEL = {
+  [EFFECT_CHANNELS.PENALTY]: "dicePenalty", // Poor/Reach −1 die
+  [EFFECT_CHANNELS.TEST_DICE]: "pool", // +#D kept
+  [EFFECT_CHANNELS.RESULT]: "modifier", // Superior/Extraordinary +1 result
+  [EFFECT_CHANNELS.DAMAGE]: "damage", // Extraordinary +1 base damage (auto only)
+};
+
+/**
+ * The generalised attack-scoped `auto` lever contributions of a weapon at roll time
+ * (spec 021, D6/D9/FR-003/FR-015): each `scope:"auto"` rule whose lever routes to a
+ * formula field (`penalty`→dicePenalty, `testdice`→pool, `result`→modifier) or to
+ * base damage (`damage`→"damage"), that passes its optional `maxDistance` gate.
+ * `armorbypass`/`rangemultiplier` are excluded (handled by their own functions).
+ * The distance gate (D6): a rule with `maxDistance != null` fires ONLY when a
+ * measurable distance exists AND `gridSpaces <= maxDistance` (Reach within 1 space);
+ * `gridSpaces == null` (no canvas/token) → the gated rule is omitted. The caller
+ * (`_deriveTargetConflict`) applies each to the formula/baseValue and itemizes it.
+ * @param {object} weapon a weapon Item
+ * @param {number|null} gridSpaces measured distance in grid spaces, or null
+ * @returns {Array<{name: string, field: string, value: number, slug: string}>}
+ */
+export function collectAutoAttackLevers(weapon, gridSpaces) {
+  const out = [];
+  for (const ref of effectiveWeaponQualityRefs(weapon)) {
+    const def = qualityBySlug(ref?.slug);
+    if (!def) continue;
+    for (const rule of def.system?.rules ?? []) {
+      if (rule?.scope !== "auto") continue;
+      const lever = QUALITY_LEVER_MAP[rule?.lever];
+      if (!lever) continue; // blank/unknown lever → inert (FR-005)
+      const field = AUTO_LEVER_FIELD_BY_CHANNEL[lever.channel];
+      if (!field) continue; // armorbypass/rangemultiplier applied elsewhere
+      if (rule.maxDistance != null) {
+        if (gridSpaces == null || gridSpaces > rule.maxDistance) continue;
+      }
+      const value = resolveRuleValue(rule.value, ref.parameter);
+      if (!value) continue;
+      out.push({
+        name: def.name || ref?.slug || "",
+        field,
+        value,
+        slug: ref?.slug,
+      });
+    }
+  }
+  return out;
 }
 
 /**
@@ -602,8 +744,14 @@ export function weaponAttackScopedTotal(item, leverId) {
  */
 export function weaponRangeBand(item) {
   let free = 0;
-  for (const ref of item?.system?.qualities ?? []) {
-    const r = Number(qualityBySlug(ref?.slug)?.system?.range);
+  for (const ref of effectiveWeaponQualityRefs(item)) {
+    const def = qualityBySlug(ref?.slug);
+    // spec 021 (D2) — a quality that carries an `armorbypass` rule (Penetration)
+    // uses its `range` ONLY as an armour-bypass decay increment, NOT as a range
+    // penalty band; skip it here so it never adds a spurious range penalty.
+    if (def?.system?.rules?.some((rule) => rule?.lever === "armorbypass"))
+      continue;
+    const r = Number(def?.system?.range);
     if (Number.isFinite(r) && r > free) free = r;
   }
   return free > 0 ? { free, inc: free } : null;
@@ -612,7 +760,7 @@ export function weaponRangeBand(item) {
 /** True when any of an item's referenced qualities defines a rule on `leverId`
  *  (spec 020 — e.g. the attack flow asking "does this weapon grant Defensive?"). */
 export function weaponHasQualityLever(item, leverId) {
-  for (const ref of item?.system?.qualities ?? []) {
+  for (const ref of effectiveWeaponQualityRefs(item)) {
     const def = qualityBySlug(ref?.slug);
     if (def?.system?.rules?.some((rule) => rule.lever === leverId)) return true;
   }
@@ -627,14 +775,34 @@ export function weaponHasQualityLever(item, leverId) {
  *  silently dropped. Blank references are skipped. */
 export function weaponReminders(item) {
   const out = [];
-  for (const ref of item?.system?.qualities ?? []) {
+  for (const ref of effectiveWeaponQualityRefs(item)) {
     const def = qualityBySlug(ref?.slug);
     const name = def?.name || ref?.name || ref?.slug || "";
     if (!name) continue;
+    const rules = def?.system?.rules ?? [];
+    // spec 021 (D13/D14) — the degree/count trigger this quality highlights on
+    // (first rule carrying a non-"none" trigger); US2 evaluates it against the roll.
+    const triggerRule = rules.find(
+      (r) => r?.trigger?.kind && r.trigger.kind !== "none"
+    );
+    // spec 021 (D16/D19) — the "apply condition to target" rules (US3): each with the
+    // authored effect NAME it applies + its own trigger (an ungated rule fires on any
+    // hit). Keyed on the `applycondition` lever (the UI redesign's single canonical
+    // signal, replacing the old `scope:"target"` marker). The effect itself is
+    // resolved async at apply time (world ∪ compendium).
+    const targetRules = rules
+      .filter((r) => r?.lever === APPLY_CONDITION_LEVER && r?.effectRef)
+      .map((r) => ({
+        effectRef: r.effectRef,
+        trigger: r.trigger ?? { kind: "none", threshold: null },
+      }));
     out.push({
       name,
       parameter: ref?.parameter ?? "",
       description: def?.system?.description ?? ref?.description ?? "",
+      slug: ref?.slug ?? "",
+      trigger: triggerRule?.trigger ?? { kind: "none", threshold: null },
+      targetRules,
     });
   }
   return out;

@@ -8,6 +8,8 @@ import {
 } from "../combat/cs-conflict.js";
 import { buildDieFormula } from "./cs-die-formula.js";
 import { collapseDiceResults } from "./cs-die-view.js";
+import { evaluateTrigger } from "../combat/cs-quality-triggers.js";
+import { resolveConditionEffectData } from "../combat/cs-conflict-apply.js";
 
 export class CSRoll {
   /**
@@ -124,6 +126,61 @@ export class CSRoll {
       }
     );
 
+    // spec 021 (US2, D14/D15): the number of 1s the player actually SEES on the
+    // collapsed dice view (after the rN=1 re-roll collapse) — the Treacherous count.
+    const onesCount = dice.filter((d) => d.value === 1).length;
+    // Enrich each quality reminder with whether it FIRED on this roll (degree/count
+    // trigger vs the actual outcome). A miss fires nothing (FR-008, forced inside
+    // evaluateTrigger). `countKindLabel` is the i18n key the card renders.
+    const reminders = (cc?.reminders ?? []).map((reminder) => {
+      const fired = evaluateTrigger(reminder.trigger, {
+        success: verdict.success,
+        degrees,
+        onesCount,
+        parameter: reminder.parameter,
+      });
+      return {
+        ...reminder,
+        ...fired,
+        countKindLabel: fired.countKind
+          ? `CS.quality.trigger.${fired.countKind}`
+          : null,
+      };
+    });
+
+    // spec 021 (US3, D16/D19) — one apply-condition entry per TRIGGERED
+    // `scope:"target"` rule: on a HIT with a valid target, resolve the quality's
+    // authored effect (world ∪ compendium) and stamp it for the card's apply
+    // button. An ungated target rule fires on any hit; a gated one per its trigger.
+    // A deleted/absent effect yields no entry (FR-014). Always the TARGET actor —
+    // never the wielder (the apply relay only ever receives the target).
+    const applyConditions = [];
+    if (verdict.success && cc?.targetActor) {
+      for (const reminder of reminders) {
+        for (const targetRule of reminder.targetRules ?? []) {
+          const fired =
+            targetRule.trigger?.kind === "none" ||
+            evaluateTrigger(targetRule.trigger, {
+              success: verdict.success,
+              degrees,
+              onesCount,
+              parameter: reminder.parameter,
+            }).triggered;
+          if (!fired) continue;
+          const effectData = await resolveConditionEffectData(
+            reminder.slug,
+            targetRule.effectRef
+          );
+          if (!effectData) continue;
+          applyConditions.push({
+            targetUuid: cc.targetActor.uuid,
+            effectData,
+            label: effectData.name ?? targetRule.effectRef,
+          });
+        }
+      }
+    }
+
     const resolution = this._resolveConflict(verdict);
     // The reduction unit shown beside the resolution value ("−2 armor" / "… disposition").
     if (resolution) {
@@ -157,9 +214,12 @@ export class CSRoll {
         dice,
         roll,
         resolution,
-        // spec 020 (FR-018) — all of THIS weapon's qualities ({name, parameter,
-        // description}) listed on the result card as adjudication notes.
-        reminders: cc?.reminders ?? [],
+        // spec 020 (FR-018) — all of THIS weapon's qualities listed on the result
+        // card as adjudication notes; spec 021 (US2) enriches each with whether it
+        // FIRED (is-triggered/is-dimmed) + the count/countKindLabel.
+        reminders,
+        // spec 021 (US3) — one apply-condition button per triggered target rule.
+        applyConditions,
       }
     );
     const messageData = {
@@ -184,6 +244,9 @@ export class CSRoll {
                 },
               }
             : {}),
+          // spec 021 (US3) — the per-target-rule condition data the card's apply
+          // button(s) hand to the GM relay (an array; index = data-cond-index).
+          ...(applyConditions.length ? { applyConditions } : {}),
         },
       },
     };

@@ -201,7 +201,7 @@ describe("weaponReminders — every quality as a roll-card note (FR-018, revised
 
   const weapon = (refs) => ({ system: { qualities: refs } });
 
-  it("lists ALL referenced qualities as {name, parameter, description} (seed fallback)", () => {
+  it("lists ALL referenced qualities as {name, parameter, description, slug, trigger, targetRules} (seed fallback)", () => {
     expect(
       weaponReminders(
         weapon([
@@ -215,12 +215,18 @@ describe("weaponReminders — every quality as a roll-card note (FR-018, revised
         parameter: "",
         description:
           "If you defeat a foe with a Vicious weapon, the consequence of defeat is death (a Destiny Point may avoid this fate).",
+        slug: "vicious",
+        trigger: { kind: "none", threshold: null },
+        targetRules: [],
       },
       {
         name: "Piercing",
         parameter: "2",
         description:
           "On a hit, your damage ignores an amount of the target's Armor Rating equal to the listed value.",
+        slug: "piercing",
+        trigger: { kind: "none", threshold: null },
+        targetRules: [],
       },
     ]);
   });
@@ -228,9 +234,25 @@ describe("weaponReminders — every quality as a roll-card note (FR-018, revised
   it("keeps an unresolved slug visible via its stamped name, then its slug (never dropped)", () => {
     expect(
       weaponReminders(weapon([{ slug: "homebrew_x", name: "Homebrew X" }]))
-    ).toEqual([{ name: "Homebrew X", parameter: "", description: "" }]);
+    ).toEqual([
+      {
+        name: "Homebrew X",
+        parameter: "",
+        description: "",
+        slug: "homebrew_x",
+        trigger: { kind: "none", threshold: null },
+        targetRules: [],
+      },
+    ]);
     expect(weaponReminders(weapon([{ slug: "unknown_slug" }]))).toEqual([
-      { name: "unknown_slug", parameter: "", description: "" },
+      {
+        name: "unknown_slug",
+        parameter: "",
+        description: "",
+        slug: "unknown_slug",
+        trigger: { kind: "none", threshold: null },
+        targetRules: [],
+      },
     ]);
   });
 

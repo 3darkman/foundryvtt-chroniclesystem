@@ -90,8 +90,49 @@ export async function ensureQualityCompendium() {
         pack: pack.collection,
       });
     }
+    // spec 021 — sync each seed's authored condition effects (Grabbed/Impaled/…)
+    // into the pack MASTER, so a compendium seeded before spec 021 (its entries have
+    // NO effects) gains them. Done WITHIN the unlock window, GM-only (migrateData
+    // gate). NOTE: effects are deliberately NOT put in the parent `updateDocuments`
+    // above — id-less effect data there duplicates on every `ready` (not idempotent,
+    // foundry-api-expert); this pass diffs by effect NAME instead. The world-first
+    // FR-025 contract is untouched: only the LOCKED master (never GM-edited) is
+    // refreshed, never a divergent world copy.
+    await syncSeedEffects(pack);
   } finally {
     if (wasLocked) await pack.configure({ locked: true });
+  }
+}
+
+/**
+ * Ensure every seed Quality that declares condition `effects` has them on its pack
+ * MASTER document (spec 021, US3). Idempotent by effect NAME: loads the full pack
+ * document (the index carries no embedded effects) and creates only the MISSING
+ * effects — never duplicates on re-run, never overwrites/deletes an existing one
+ * (a conservative, non-destructive refresh; the locked master is a seed mirror).
+ * Embedded CRUD on a pack document inherits its pack automatically (no `{pack}` arg).
+ * @param {CompendiumCollection} pack the unlocked qualities pack
+ */
+async function syncSeedEffects(pack) {
+  const withEffects = SEED_QUALITIES.filter((seed) => seed.effects?.length);
+  if (!withEffects.length) return;
+
+  await pack.getIndex({ fields: ["system.slug"] });
+  const idBySlug = new Map();
+  for (const entry of pack.index) {
+    idBySlug.set(entry.system?.slug || slugify(entry.name), entry._id);
+  }
+
+  for (const seed of withEffects) {
+    const id = idBySlug.get(seed.slug);
+    if (!id) continue;
+    const doc = await pack.getDocument(id);
+    if (!doc) continue;
+    const existingNames = new Set(doc.effects.map((effect) => effect.name));
+    const missing = seed.effects.filter((eff) => !existingNames.has(eff.name));
+    if (missing.length) {
+      await doc.createEmbeddedDocuments("ActiveEffect", missing);
+    }
   }
 }
 

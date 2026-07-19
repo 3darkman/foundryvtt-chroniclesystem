@@ -37,6 +37,8 @@ CSConstants.Settings = {
   MODIFIER_DIALOG_AS_DEFAULT: "isModifierDialogDefault",
   SLUG_REVIEW: "slugReview",
   DIFFICULTY_TABLE: "difficultyTable",
+  // spec 021 (US5, FR-021) — gates the optional SIFRP weapon Training rule.
+  WEAPON_TRAINING_RULE: "weaponTrainingRule",
 };
 
 CSConstants.HouseResources = {

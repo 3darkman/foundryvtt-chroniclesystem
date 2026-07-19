@@ -188,15 +188,22 @@ export class CSCharacterActorSheet extends CSActorSheet {
     // spec 017 (US2): each sorcery-work test chip through the SSOT utility. The
     // rollId is `formula:{ability}:{toStr}` — the SAME string the sorcery template
     // built — so the displayed formula equals the effective quick roll.
-    const sorceryChip = (abilityName) => {
+    // spec 021 (US4, D21) — a sorcery test value is now an `Ability` or
+    // `Ability:Specialty` dropdown value; split it (mirrors the weapon path) so the
+    // specialty feeds the formula. The rollId's title segment must be colon-free
+    // (the id is `:`-split), so a specialty value is shown space-joined; the
+    // executed formula string is unchanged.
+    const sorceryChip = (value) => {
+      const [ability, specialty = null] = String(value ?? "").split(":");
       const f = ChronicleSystem.getActorAbilityFormula(
         actor,
-        abilityName,
-        null
+        ability,
+        specialty ?? null
       );
+      const title = specialty ? `${ability} ${specialty}` : ability;
       return ChronicleSystem.getRollChip(
         actor,
-        `formula:${abilityName}:${f.toStr()}`
+        `formula:${title}:${f.toStr()}`
       );
     };
     character.owned.techniques.forEach((technique) => {

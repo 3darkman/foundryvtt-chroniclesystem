@@ -2,6 +2,7 @@ import { DiceRollFormula } from "../diceRollFormula.js";
 import { Disposition } from "../disposition.js";
 import LOGGER from "../utils/logger.js";
 import { CSRoll } from "../rolls/cs-roll.js";
+import { applyWeaponTraining } from "../rolls/cs-weapon-training.js";
 import { CSConstants } from "./csConstants.js";
 import SystemUtils from "../utils/systemUtils.js";
 import { slugify } from "../effects/cs-slugify.js";
@@ -225,6 +226,9 @@ function _withUnit(value, field) {
   if (field === "difficulty") return _signed(value);
   if (field === "bonusDice") return `${_signed(value)}B`;
   if (field === "dicePenalty") return `-${Math.abs(value)}d`;
+  // spec 021 (D12) — weapon-quality damage (Powerful/Off-hand/Extraordinary) is a
+  // flat unit-less bonus on the resolved base damage.
+  if (field === "damage") return _signed(value);
   return `${_signed(value)}${DICE_FORMULA_FIELDS.has(field) ? "d" : ""}`;
 }
 
@@ -238,6 +242,8 @@ function _valueTone(value, field) {
   // `reReoll` keeps the codebase-wide typo (F7) — it is a beneficial re-roll count.
   if (field === "pool" || field === "bonusDice" || field === "reReoll")
     return "gain";
+  // spec 021 (D12) — a positive weapon-quality damage bonus helps (green).
+  if (field === "damage") return value >= 0 ? "gain" : "loss";
   return value >= 0 ? "gain" : "loss";
 }
 
@@ -282,6 +288,39 @@ function _checkedOptionalItemized(form, optionalEffects) {
         field,
         value,
         condition: eff?.condition ?? "",
+      });
+    });
+  return out;
+}
+
+/**
+ * The dialog's CHECKED optional weapon-damage toggles (spec 021, D11/D12 —
+ * Powerful/Off-hand) as itemized `field:"damage"` rows. These carry
+ * `data-damage-toggle` (NOT `data-field`), so `_applyCheckedOptionalEffects` never
+ * touches them — they add to the resolution's BASE DAMAGE, not a dice-formula field.
+ * Matched to their descriptor by `data-slug` (mirrors the effect-id match above).
+ * @param {HTMLFormElement} form
+ * @param {Array<{slug: string, name: string, value: number}>} damageToggles
+ * @returns {Array<object>}
+ */
+function _checkedDamageToggleItems(form, damageToggles) {
+  if (!form?.querySelectorAll) return [];
+  const bySlug = new Map((damageToggles ?? []).map((t) => [t.slug, t]));
+  const out = [];
+  form
+    .querySelectorAll(
+      ".cs-optional-effect input[type=checkbox][data-damage-toggle]:checked:not([disabled])"
+    )
+    .forEach((cb) => {
+      const value = parseInt(cb.dataset.value);
+      if (Number.isNaN(value)) return;
+      const toggle = bySlug.get(cb.dataset.slug);
+      out.push({
+        sourceLabel: toggle?.name ?? "",
+        origin: "character",
+        field: "damage",
+        value,
+        condition: "",
       });
     });
   return out;
@@ -427,11 +466,17 @@ async function _deriveTargetConflict(
   const { rangePenalty, combatDefenseSizeModifier } = await import(
     "../combat/cs-conflict.js"
   );
-  const { weaponRangeBand } = await import("../effects/cs-effect-modifiers.js");
+  const {
+    weaponRangeBand,
+    weaponArmorBypassTotal,
+    productOfRangeMultipliers,
+    collectAutoAttackLevers,
+  } = await import("../effects/cs-effect-modifiers.js");
 
   const itemized = [];
   const weapon = kind === "weapon" ? actor.items.get(rollContext.itemId) : null;
   let armorBypass = 0; // spec 020 — this weapon's Piercing/Penetration (per instance)
+  let baseValue = 0; // spec 021 — resolved base damage/influence (weapon branch sets it)
 
   // Resolve the ability/specialty this conflict roll actually exercises, so the
   // card/dialog itemize its ability/specialty-specific always-on modifiers
@@ -493,31 +538,37 @@ async function _deriveTargetConflict(
   let difficultyTargetValue = defense;
 
   if (kind === "weapon" && weapon) {
-    // Range penalty — ranged weapon (data-driven range band) with a measurable
-    // attacker token; the distance and the band are both in the scene's units.
+    // Distance (spec 021, D8 — hoisted ONCE out of the range-band block): scene
+    // units + grid spaces, both null-safe. Feeds the range penalty (D5), the
+    // Penetration decay (D1) and the distance-gated auto rules (Reach, D6).
+    const attackerToken = getAttackerToken(actor);
+    const dist = attackerToken
+      ? measureDistance(attackerToken, target.token)
+      : null;
+    const gridSpaces =
+      dist == null ? null : dist / (canvas?.grid?.distance || 1);
+
+    // Range penalty — ranged weapon (data-driven band, now EXCLUDING armour-bypass
+    // qualities, D2) with a measurable distance. Inaccurate (D5) multiplies the
+    // distance BEFORE the penalty; the card row still shows the REAL distance.
     const band = weaponRangeBand(weapon);
-    if (band) {
-      const attackerToken = getAttackerToken(actor);
-      const dist = attackerToken
-        ? measureDistance(attackerToken, target.token)
-        : null;
-      if (dist != null) {
-        const pen = rangePenalty(dist, band);
-        if (pen > 0) {
-          formula.dicePenalty += pen;
-          itemized.push(
-            _decorateItem({
-              sourceLabel: SystemUtils.format("CS.conflict.range", {
-                distance: Math.round(dist),
-                units: canvas?.grid?.units ?? "",
-              }),
-              origin: "target",
-              field: "dicePenalty",
-              value: pen,
-              condition: "",
-            })
-          );
-        }
+    if (band && dist != null) {
+      const effDist = dist * productOfRangeMultipliers(weapon);
+      const pen = rangePenalty(effDist, band);
+      if (pen > 0) {
+        formula.dicePenalty += pen;
+        itemized.push(
+          _decorateItem({
+            sourceLabel: SystemUtils.format("CS.conflict.range", {
+              distance: Math.round(dist),
+              units: canvas?.grid?.units ?? "",
+            }),
+            origin: "target",
+            field: "dicePenalty",
+            value: pen,
+            condition: "",
+          })
+        );
       }
     }
     // Prone target — +1 Test Die, Fighting only (the weapon's ability half).
@@ -550,20 +601,36 @@ async function _deriveTargetConflict(
         })
       );
     }
-  }
 
-  // Resolution inputs (US4): the base value + the target's reductions.
-  let baseValue = 0;
-  if (kind === "weapon" && weapon) {
+    // Base damage — computed here so auto `damage` levers (Extraordinary) add onto it.
     weapon.updateDamageValue(actor);
     baseValue = Number(weapon.damageValue) || 0;
-    // Attack-scoped armour bypass (Piercing/Penetration) — reduce the target's
-    // effective Armor Rating for THIS weapon's damage (spec 020, T028, per instance).
-    const { weaponAttackScopedTotal } = await import(
-      "../effects/cs-effect-modifiers.js"
-    );
-    armorBypass = weaponAttackScopedTotal(weapon, "armorbypass");
+
+    // Generalised attack-scoped `auto` lever pass (spec 021, D6/D9/FR-003/FR-015):
+    // penalty → dicePenalty (Poor/Reach), testdice → pool, result → modifier
+    // (Superior/Extraordinary), damage → base damage (Extraordinary). Each
+    // distance-gated rule (Reach) fires only within range. Itemized as its own row;
+    // armorbypass/rangemultiplier are applied by their dedicated functions below.
+    for (const lev of collectAutoAttackLevers(weapon, gridSpaces)) {
+      if (lev.field === "damage") baseValue += lev.value;
+      else formula[lev.field] += lev.value;
+      itemized.push(
+        _decorateItem({
+          sourceLabel: lev.name,
+          origin: "character",
+          field: lev.field,
+          value: lev.value,
+          condition: "",
+        })
+      );
+    }
+
+    // Attack-scoped armour bypass with per-quality range decay (spec 021, D1):
+    // Penetration decays with distance; Piercing/Penetrating flat; no distance →
+    // full value (US1.6). Feeds `armorRating: max(0, target.armorRating - bypass)`.
+    armorBypass = weaponArmorBypassTotal(weapon, dist);
   } else if (kind === "intrigue") {
+    // Resolution input (US4): intrigue influence base value.
     baseValue = Number(rollContext.influenceValue) || 0;
   }
 
@@ -664,8 +731,11 @@ async function handleRollAsync(
     // Lazy import: a static one would close the eval-time cycle
     // ChronicleSystem → cs-effect-modifiers → cs-effect-vocabulary →
     // ChronicleSystem (vocabulary reads modifiersConstants at module-eval time).
-    const { collectOptionalRollEffects, collectItemizedAlwaysOn } =
-      await import("../effects/cs-effect-modifiers.js");
+    const {
+      collectOptionalRollEffects,
+      collectItemizedAlwaysOn,
+      collectOptionalWeaponDamageToggles,
+    } = await import("../effects/cs-effect-modifiers.js");
 
     // US2: itemize every always-on source (labeled by origin); the target rows
     // (spec 010) are shown in the SAME list. The RAW base is shown read-only —
@@ -681,8 +751,11 @@ async function handleRollAsync(
       formula,
       abilityName,
       specialtyName,
-      // The size row (field "difficulty") never touches the formula — exclude it.
-      displayedItemized.filter((i) => i.field !== "difficulty")
+      // The size row (field "difficulty") and weapon-damage rows (field "damage",
+      // spec 021) never touch the dice formula — exclude them from the raw base.
+      displayedItemized.filter(
+        (i) => i.field !== "difficulty" && i.field !== "damage"
+      )
     );
     const optionalEffects = collectOptionalRollEffects(
       actor,
@@ -693,6 +766,17 @@ async function handleRollAsync(
       displayValue: _withUnit(effect.value, effect.formulaField),
       tone: _valueTone(effect.value, effect.formulaField),
     }));
+    // spec 021 (D11/D12) — optional weapon-damage toggles (Powerful/Off-hand),
+    // default OFF; add to the resolution BASE DAMAGE, not a dice-formula field.
+    const damageToggles =
+      kind === "weapon" && rollContext.itemId
+        ? collectOptionalWeaponDamageToggles(
+            actor.items.get(rollContext.itemId)
+          ).map((toggle) => ({
+            ...toggle,
+            displayValue: _withUnit(toggle.value, "damage"),
+          }))
+        : [];
     const difficultyOptions = difficultyTable.entries.map((entry, index) => ({
       index,
       label: entryLabel(entry, SystemUtils.localize),
@@ -703,12 +787,19 @@ async function handleRollAsync(
       base,
       itemizedAlwaysOn: displayedItemized,
       optionalEffects,
+      damageToggles,
       difficultyOptions,
       noneSelected: difficultyTable.defaultIndex < 0,
       targetDifficulty,
       // Show BOTH modifier lists together whenever either has content, so the
       // two-column pairing is preserved even when one side is empty.
-      showModifiers: displayedItemized.length > 0 || optionalEffects.length > 0,
+      showModifiers:
+        displayedItemized.length > 0 ||
+        optionalEffects.length > 0 ||
+        damageToggles.length > 0,
+      // True when the optional column has ANY entry (effect or damage toggle) —
+      // suppresses the "empty" placeholder when only damage toggles are present.
+      hasOptional: optionalEffects.length > 0 || damageToggles.length > 0,
     });
     if (!formData) return null;
 
@@ -722,8 +813,17 @@ async function handleRollAsync(
     rolled.reRoll = formula.reRoll ?? 0;
     const optionalApplied = _applyCheckedOptionalEffects(formData, rolled);
     const extrasApplied = _applyUserExtras(formData, rolled);
-    rolled.isUserChanged = optionalApplied || extrasApplied;
     formula = rolled;
+
+    // spec 021 (D11) — checked optional damage toggles (Powerful/Off-hand) add to
+    // the resolution BASE DAMAGE (not a dice-formula field); itemized as
+    // `field:"damage"` rows on the card (D12).
+    const damageToggleRows = _checkedDamageToggleItems(formData, damageToggles);
+    if (resolutionCtx) {
+      for (const row of damageToggleRows) resolutionCtx.baseValue += row.value;
+    }
+    rolled.isUserChanged =
+      optionalApplied || extrasApplied || damageToggleRows.length > 0;
 
     // spec 010: with a target, its defense IS the difficulty (read-only, already
     // set before the dialog). Only the table selector — shown when there is no
@@ -736,10 +836,11 @@ async function handleRollAsync(
     }
 
     // The card decomposition (FR-025): the displayed always-on/target rows plus
-    // the optionals + extras actually applied (parity with the quick roll).
+    // the optionals + extras + damage toggles actually applied (parity w/ quick roll).
     dialogItemized = [
       ...displayedItemized,
       ..._checkedOptionalItemized(formData, optionalEffects).map(_decorateItem),
+      ...damageToggleRows.map(_decorateItem),
       ..._extrasItemized(formData).map(_decorateItem),
     ];
   }
@@ -777,7 +878,8 @@ async function handleRollAsync(
       formula,
       abilityName,
       specialtyName,
-      itemized.filter((i) => i.field !== "difficulty")
+      // Exclude non-formula rows (size → "difficulty"; weapon damage → "damage").
+      itemized.filter((i) => i.field !== "difficulty" && i.field !== "damage")
     );
     conflictContext = {
       itemized,
@@ -865,18 +967,21 @@ async function _markDefensiveSpent(actor, weapon) {
 }
 
 function adjustFormulaByWeapon(actor, formula, weapon) {
-  let weaponData = weapon.system;
-  if (!weaponData.training) return formula;
-  let poolModifier = formula.bonusDice - weaponData.training;
-
-  if (poolModifier <= 0) {
-    formula.pool += poolModifier;
-    formula.bonusDice = 0;
-  } else {
-    formula.bonusDice = poolModifier;
+  // spec 021 (US5, D20/FR-021) — the SIFRP Training rule is OPTIONAL: gate on the
+  // world setting (default off). `?.` so the pure-logic tests (no game.settings) see
+  // undefined = off. Gating the two chip-builder call sites also gates the roll (the
+  // roll re-parses the chip string), so the general dice-pool formula never changes.
+  if (
+    !game.settings?.get?.(
+      CSConstants.Settings.SYSTEM_NAME,
+      CSConstants.Settings.WEAPON_TRAINING_RULE
+    )
+  ) {
+    return formula;
   }
-
-  return formula;
+  // The corrected math (shortfall → penalty dice, base pool untouched) lives in the
+  // pure, Vitest-tested helper.
+  return applyWeaponTraining(formula, Number(weapon.system?.training) || 0);
 }
 
 /**

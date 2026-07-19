@@ -35,7 +35,13 @@
                 <div class="csv2-row-label">{{localize "CS.effects.redesign.applyTitle"}}</div>
                 <p class="csv2-help">{{localize "CS.effects.redesign.applyHint"}}</p>
             </div>
+            {{!-- spec 021 (US7) — a quality's effect never transfers to the wielder:
+                  off + disabled (cannot be turned on). --}}
+            {{#if qualityTransferLocked}}
+            {{formInput fields.transfer value=false disabled=true}}
+            {{else}}
             {{formInput fields.transfer value=source.transfer}}
+            {{/if}}
         </div>
         {{/if}}
     </div>

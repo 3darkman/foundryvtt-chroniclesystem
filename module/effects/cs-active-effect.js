@@ -74,7 +74,10 @@ export function buildNewEffectData(parent, user) {
     img: "icons/svg/aura.svg",
     origin: parent.uuid,
     // Item-borne effects transfer to the owning actor; actor effects do not.
-    transfer: parent.documentName === "Item",
+    // spec 021 (D17/FR-012) — a QUALITY's effects are target-only condition
+    // templates, NEVER transferred to the wielder, so they always default off.
+    transfer:
+      parent.type === "quality" ? false : parent.documentName === "Item",
     flags: {
       chroniclesystem: isPlayer
         ? { origin: "player", authorId: user.id }

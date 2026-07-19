@@ -31,6 +31,7 @@ import { registerSlugLifecycleHooks } from "../data/slug-lifecycle.js";
 import {
   registerApplyQuery,
   applyResourceDelta,
+  applyConditionToTarget,
 } from "../combat/cs-conflict-apply.js";
 
 // TypeDataModel classes
@@ -199,15 +200,35 @@ Hooks.once("init", async function () {
 /* -------------------------------------------- */
 
 Hooks.on("renderChatMessageHTML", (message, html) => {
+  // Apply damage/influence (spec 010).
   const btn = html.querySelector("[data-action='cs-apply-resource']");
-  if (!btn) return;
   const apply = message.getFlag("chroniclesystem", "apply");
-  if (!apply) return;
-  btn.addEventListener("click", async (ev) => {
-    ev.preventDefault();
-    const actor = await fromUuid(apply.targetUuid);
-    await applyResourceDelta(actor, apply.path, apply.delta);
-  });
+  if (btn && apply) {
+    btn.addEventListener("click", async (ev) => {
+      ev.preventDefault();
+      const actor = await fromUuid(apply.targetUuid);
+      await applyResourceDelta(actor, apply.path, apply.delta);
+    });
+  }
+
+  // spec 021 (US3) — apply an authored condition to the TARGET (one button per
+  // triggered scope:"target" rule, discriminated by data-cond-index). Reads the
+  // per-index entry from the flag; `if (!entry) return` guards a deleted effect
+  // (FR-014). Never the wielder — the target uuid comes from the flag entry.
+  const conditions = message.getFlag("chroniclesystem", "applyConditions");
+  if (Array.isArray(conditions)) {
+    for (const condBtn of html.querySelectorAll(
+      "[data-action='cs-apply-condition']"
+    )) {
+      const entry = conditions[Number(condBtn.dataset.condIndex)];
+      if (!entry) continue;
+      condBtn.addEventListener("click", async (ev) => {
+        ev.preventDefault();
+        const target = await fromUuid(entry.targetUuid);
+        await applyConditionToTarget(target, entry.effectData);
+      });
+    }
+  }
 });
 
 /* -------------------------------------------- */
@@ -217,6 +238,11 @@ Hooks.on("renderChatMessageHTML", (message, html) => {
 /* -------------------------------------------- */
 
 Hooks.on("preCreateActiveEffect", (effect, data, options, userId) => {
+  // spec 021 (D17/FR-012) — a QUALITY's effects are target-only condition templates
+  // that NEVER transfer to the wielder; force transfer off at the data layer.
+  if (effect.parent?.type === "quality" && effect.transfer !== false) {
+    effect.updateSource({ transfer: false });
+  }
   const user = game.users?.get(userId);
   if (!user || user.isGM) return; // GM-authored effects default to origin "item"
   // Stamp player authorship so the permission rule lets them manage their own.
@@ -229,6 +255,10 @@ Hooks.on("preCreateActiveEffect", (effect, data, options, userId) => {
 });
 
 Hooks.on("preUpdateActiveEffect", (effect, changes, options, userId) => {
+  // spec 021 (D17) — never let a quality's effect be flipped back to transfer:true.
+  if (effect.parent?.type === "quality" && changes.transfer === true) {
+    changes.transfer = false;
+  }
   const user = game.users?.get(userId);
   if (canUserModifyEffect(user, effect)) return;
   ui.notifications?.warn(SystemUtils.localize(effectBlockMessageKey(effect)));

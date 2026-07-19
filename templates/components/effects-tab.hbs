@@ -3,6 +3,11 @@
       design §7: NAME | ORIGIN | STATUS | ACTIONS. Control visibility follows each
       effect's `editable` flag (permission model FR-021/SC-009). --}}
 <div class="tab effects-tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="effects">
+    {{!-- spec 021 (US7, FR-020) — on a Quality these effects are TARGET conditions
+          applied to the foe on a hit, never wielder buffs; say so up front. --}}
+    {{#if effectsAreTargetConditions}}
+    <p class="csv2-help cs-effects-target-note"><i class="fas fa-circle-info"></i> {{localize "CS.effects.targetConditionsNote"}}</p>
+    {{/if}}
     <div class="effects-toolbar">
         <a class="effect-control effect-create" data-action="effectCreate" title="{{localize 'CS.effects.create'}}">
             <i class="fas fa-plus"></i> {{localize "CS.effects.create"}}

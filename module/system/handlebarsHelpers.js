@@ -1,6 +1,7 @@
 import { ChronicleSystem } from "./ChronicleSystem.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
+import { encodeTriggerCompound } from "../combat/cs-quality-triggers.js";
 
 export const registerCustomHelpers = function () {
   Handlebars.registerHelper("modifier", (str) => {
@@ -85,6 +86,14 @@ export const registerCustomHelpers = function () {
   Handlebars.registerHelper("ifDifferent", function (arg1, arg2, options) {
     return arg1 != arg2 ? options.fn(this) : options.inverse(this);
   });
+
+  // spec 021 (US3 UI redesign) — collapse a quality condition rule's `{kind, threshold}`
+  // trigger into the single compound value the "Scope / mode" dropdown selects on
+  // ("none" | "degrees:N" | "ones"); `_processFormData` decomposes it back on submit.
+  // The encode/decode grammar is owned by cs-quality-triggers.js (SSOT, §II).
+  Handlebars.registerHelper("csTriggerCompound", (trigger) =>
+    encodeTriggerCompound(trigger)
+  );
 
   Handlebars.registerHelper(
     "showIfEquals",
