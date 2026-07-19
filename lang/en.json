@@ -215,6 +215,10 @@
         "name": "ASoIaF Defense Style",
         "hint": "The armor penalty influences the character's combat defense. This Needs Foundry refresh (F5)."
       },
+      "weaponTrainingRule": {
+        "name": "Weapon Training Rule",
+        "hint": "Enables the optional SIFRP weapon Training rule: a weapon's Training value converts that many bonus dice into penalty dice on its attack. When off, the Training field is hidden and has no effect (stored values are kept)."
+      },
       "isModifierDialogDefault": {
         "name": "Modifier Dialog as Default?",
         "hint": "if checked, when clicking on dice rolls on an actor's sheet, it will show the modifiers window, and will make the roll without showing the window when holding the SHIFT key. Each player defines his configuration."
@@ -240,6 +244,7 @@
       "delete": "Delete Effect",
       "toggle": "Toggle Effect",
       "empty": "No effects defined.",
+      "targetConditionsNote": "These are target conditions — applied to the target of a qualifying attack, not to the wielder. The transfer-to-actor control is off and locked.",
       "columns": {
         "name": "Name",
         "source": "Source",
@@ -431,9 +436,10 @@
       "rulesEmpty": "No rule effects yet.",
       "addRule": "Rule effect",
       "leverColumn": "What changes",
-      "valueColumn": "Value",
+      "valueColumn": "Value / effect",
       "scopeColumn": "Scope / mode",
       "valuePlaceholder": "+1, -2, or @param",
+      "conditionPlaceholder": "Select an effect…",
       "levers": {
         "none": "Select…",
         "damage": "Weapon damage",
@@ -443,7 +449,10 @@
         "testdice": "Attack test dice (+#D)",
         "penalty": "Attack test penalty (−#D)",
         "armorrating": "Armor Rating",
-        "armorpenalty": "Armor Penalty"
+        "armorpenalty": "Armor Penalty",
+        "result": "Test result (±N)",
+        "rangemultiplier": "Range distance multiplier",
+        "applycondition": "Apply condition to target"
       },
       "scopes": {
         "passive": "Passive while equipped",
@@ -461,7 +470,16 @@
       },
       "defensiveSpent": "Defensive spent ({weapon})",
       "defensiveStance": "Defensive stance",
-      "qualitiesTitle": "Qualities"
+      "qualitiesTitle": "Qualities",
+      "trigger": {
+        "degrees": "degrees",
+        "ones": "ones",
+        "kinds": {
+          "none": "On any hit",
+          "degrees": "On {n}+ degrees",
+          "ones": "Per 1 rolled"
+        }
+      }
     },
     "intrigue": {
       "techniques": {
@@ -523,7 +541,8 @@
       },
       "apply": {
         "damage": "Apply damage",
-        "influence": "Apply influence"
+        "influence": "Apply influence",
+        "condition": "Apply"
       }
     },
     "sizes": {
@@ -568,6 +587,7 @@
           "isAStricture": "Is a Stricture",
           "isAFlaw": "Is a Flaw",
           "flawAttribute": "Flaw Attribute",
+          "ability": "Ability",
           "delivery": "Delivery",
           "virulence": "Virulence",
           "frequency": "Frequency",

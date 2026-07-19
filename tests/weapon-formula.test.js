@@ -3,6 +3,7 @@ import { CSItem } from "../module/items/csItem.js";
 import { ChronicleSystem } from "../module/system/ChronicleSystem.js";
 import { registerCustomHelpers } from "../module/system/handlebarsHelpers.js";
 import { DiceRollFormula } from "../module/diceRollFormula.js";
+import { applyWeaponTraining } from "../module/rolls/cs-weapon-training.js";
 import { makeFakeWeapon, makeFakeActor } from "./helpers/doubles.js";
 
 // Group 4 — US4 / Contract 4.1-4.11. Characterizes the CURRENT damage parsing
@@ -116,6 +117,52 @@ describe("weapon damage — updateDamageValue (eval-based, characterized)", () =
     const weapon = makeFakeWeapon({ damage: "@Fighting.constructor(1)" });
     expect(() => updateDamage.call(weapon, ability4)).not.toThrow();
     expect(weapon.damageValue).toBe(4); // regex captures only @Fighting; the rest is ignored
+  });
+});
+
+// spec 021 (US5, D20/FR-023) — the pure Training transform: shortfall → PENALTY
+// dice (never the base pool). SC-006 whip example (Training 2) + no-op cases.
+describe("applyWeaponTraining — SIFRP Training rule (SC-006)", () => {
+  const f = (bonusDice, dicePenalty = 0) => ({ pool: 5, bonusDice, dicePenalty });
+
+  it("whip Training 2, 1 bonus die → 0 bonus + 1 penalty die (pool untouched)", () => {
+    expect(applyWeaponTraining(f(1), 2)).toEqual({
+      pool: 5,
+      bonusDice: 0,
+      dicePenalty: 1,
+    });
+  });
+
+  it("whip Training 2, 0 bonus dice → 2 penalty dice (pool untouched)", () => {
+    expect(applyWeaponTraining(f(0), 2)).toEqual({
+      pool: 5,
+      bonusDice: 0,
+      dicePenalty: 2,
+    });
+  });
+
+  it("whip Training 2, 3 bonus dice → 1 bonus die remains (no penalty)", () => {
+    expect(applyWeaponTraining(f(3), 2)).toEqual({
+      pool: 5,
+      bonusDice: 1,
+      dicePenalty: 0,
+    });
+  });
+
+  it("adds to an existing penalty (never overwrites it)", () => {
+    expect(applyWeaponTraining(f(0, 1), 2)).toEqual({
+      pool: 5,
+      bonusDice: 0,
+      dicePenalty: 3,
+    });
+  });
+
+  it("Training 0 (or falsy) is a no-op — nothing touched", () => {
+    expect(applyWeaponTraining(f(2), 0)).toEqual({
+      pool: 5,
+      bonusDice: 2,
+      dicePenalty: 0,
+    });
   });
 });
 

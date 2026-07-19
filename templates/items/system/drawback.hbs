@@ -3,7 +3,11 @@
     <div class="csv2-card">
         <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
         <div class="csv2-field-grid">
-            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.flawAttribute" label="CS.sheets.item.fields.flawAttribute" value=item.system.flawAttribute}}
+            {{!-- spec 021 (US4, FR-018) — the flaw's Ability is a dropdown, shown only
+                  when this drawback is a flaw. Value stays the bare canonical name. --}}
+            {{#if item.system.isAFlaw}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="select" name="system.flawAttribute" label="CS.sheets.item.fields.ability" value=item.system.flawAttribute options=@root.typeDescriptor.abilityChoices}}
+            {{/if}}
             {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="text" name="system.requirements" label="CS.sheets.item.fields.requirements" value=item.system.requirements}}
             {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="bool" name="system.requireSorcerousArt" label="CS.sheets.item.fields.requireSorcerousArt" value=item.system.requireSorcerousArt}}
             {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="bool" name="system.isAStricture" label="CS.sheets.item.fields.isAStricture" value=item.system.isAStricture}}

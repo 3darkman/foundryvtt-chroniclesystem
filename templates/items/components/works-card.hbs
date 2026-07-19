@@ -30,24 +30,30 @@
                   kind="text" name=(concat "system.works." index ".resonance")
                   label="CS.sheets.techniqueItem.resonance" value=resonance }}
         </div>
+        {{!-- spec 021 (US4, FR-017/FR-019) — spell/ritual tests are dropdowns of
+              canonical abilities AND specialties (`Ability` or `Ability:Specialty`). --}}
         {{#if isSpell}}
         <div class="csv2-field-grid">
             {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
-                  kind="text" name=(concat "system.works." index ".test.spellcasting")
-                  label="CS.sheets.techniqueItem.test.spellcasting" value=test.spellcasting }}
+                  kind="select" name=(concat "system.works." index ".test.spellcasting")
+                  label="CS.sheets.techniqueItem.test.spellcasting" value=test.spellcasting
+                  options=@root.typeDescriptor.sorceryTestChoices }}
         </div>
         {{/if}}
         {{#if isRitual}}
         <div class="cs-works-3up">
             {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
-                  kind="text" name=(concat "system.works." index ".test.alignment")
-                  label="CS.sheets.techniqueItem.test.alignment" value=test.alignment }}
+                  kind="select" name=(concat "system.works." index ".test.alignment")
+                  label="CS.sheets.techniqueItem.test.alignment" value=test.alignment
+                  options=@root.typeDescriptor.sorceryTestChoices }}
             {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
-                  kind="text" name=(concat "system.works." index ".test.invocation")
-                  label="CS.sheets.techniqueItem.test.invocation" value=test.invocation }}
+                  kind="select" name=(concat "system.works." index ".test.invocation")
+                  label="CS.sheets.techniqueItem.test.invocation" value=test.invocation
+                  options=@root.typeDescriptor.sorceryTestChoices }}
             {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
-                  kind="text" name=(concat "system.works." index ".test.unleashing")
-                  label="CS.sheets.techniqueItem.test.unleashing" value=test.unleashing }}
+                  kind="select" name=(concat "system.works." index ".test.unleashing")
+                  label="CS.sheets.techniqueItem.test.unleashing" value=test.unleashing
+                  options=@root.typeDescriptor.sorceryTestChoices }}
         </div>
         {{/if}}
         {{> "systems/chroniclesystem/templates/items/components/rich-text-field.hbs"

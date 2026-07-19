@@ -88,7 +88,19 @@
                 {{#if this.condition}}<div class="cs-opt-condition">{{this.condition}}</div>{{/if}}
             </label>
             {{/each}}
-            {{#unless optionalEffects.length}}<div class="cs-rd-mod-empty">{{localize "CS.dialogs.rollModifier.emptyList"}}</div>{{/unless}}
+            {{!-- spec 021 (D11) — optional weapon-damage toggles (Powerful/Off-hand):
+                  NO data-field (so _applyCheckedOptionalEffects skips them); they add
+                  to the resolution base damage via data-damage-toggle/data-slug. --}}
+            {{#each damageToggles}}
+            <label class="cs-optional-effect cs-opt-row">
+                <div class="cs-opt-main">
+                    <input type="checkbox" data-damage-toggle data-value="{{this.value}}" data-slug="{{this.slug}}" />
+                    <span class="cs-opt-name">{{this.name}}</span>
+                    <span class="cs-opt-value cs-value-gain">{{this.displayValue}}</span>
+                </div>
+            </label>
+            {{/each}}
+            {{#unless hasOptional}}<div class="cs-rd-mod-empty">{{localize "CS.dialogs.rollModifier.emptyList"}}</div>{{/unless}}
         </div>
     </section>
     {{/if}}

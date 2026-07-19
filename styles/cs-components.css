@@ -2400,6 +2400,19 @@
   background: var(--csv2-primary-dark);
   box-shadow: none;
 }
+/* spec 021 (US3) — the apply-condition button stack (one per triggered target
+   rule); a secondary tone so it reads distinct from the primary damage apply. */
+.cs-roll-card.cs-v2 .cs-rc-conditions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.cs-roll-card.cs-v2 .cs-apply-condition-btn {
+  background: var(--csv2-secondary, #5a6b7a);
+}
+.cs-roll-card.cs-v2 .cs-apply-condition-btn:hover {
+  background: var(--csv2-secondary-dark, #47555f);
+}
 /* 9 · Weapon qualities (spec 020, FR-018) — amber note listing every quality of the
    rolled weapon as an adjudication reminder (name + parameter, full text on hover). */
 .cs-roll-card.cs-v2 .cs-rc-reminders {
@@ -2426,6 +2439,27 @@
 }
 .cs-roll-card.cs-v2 .cs-rc-reminder > i {
   font-size: 10px;
+}
+/* spec 021 (US2) — a quality that FIRED on this roll is highlighted (bold, full
+   amber, a soft tint); the rest are dimmed to a low-emphasis adjudication note. */
+.cs-roll-card.cs-v2 .cs-rc-reminder.is-triggered {
+  color: #6b520f;
+  font-weight: 600;
+  background: #efe2b6;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin: 0 -5px;
+}
+.cs-roll-card.cs-v2 .cs-rc-reminder.is-dimmed {
+  opacity: 0.55;
+}
+.cs-roll-card.cs-v2 .cs-rc-reminder-count {
+  margin-left: auto;
+  font-family: var(--csv2-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* =========================================================================

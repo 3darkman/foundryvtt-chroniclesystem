@@ -313,7 +313,10 @@
 .cs-item-v2 .csv2-list-head.cs-rule-head,
 .cs-item-v2 .csv2-list-row.cs-rule-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 84px 160px 30px;
+  /* lever | value-or-condition-effect | scope-or-trigger | delete. The middle
+     column is flexible (spec 021 US3 redesign) so it fits both a short "@param"
+     value and a condition's effect-name dropdown; the mode column is fixed. */
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 160px 30px;
   gap: 8px;
   align-items: center;
 }

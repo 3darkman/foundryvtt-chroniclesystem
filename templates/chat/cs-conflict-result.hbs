@@ -100,15 +100,33 @@
         </div>
         {{/if}}
 
+        {{!-- 8b · Apply conditions (spec 021, US3) — one button per triggered
+              scope:"target" rule; the array is empty when there is no valid target
+              or nothing fired, so nothing renders in that case. --}}
+        {{#if applyConditions.length}}
+        <div class="cs-rc-conditions">
+            {{#each applyConditions}}
+            <button type="button" class="cs-apply-btn cs-apply-condition-btn" data-action="cs-apply-condition" data-cond-index="{{@index}}">
+                <i class="fas fa-hand-sparkles"></i> {{localize "CS.conflict.apply.condition"}} {{this.label}}
+            </button>
+            {{/each}}
+        </div>
+        {{/if}}
+
         {{!-- 9 · Weapon qualities (spec 020, FR-018) — every quality of the rolled
-              weapon, listed here as adjudication notes (name + parameter, full text
-              on hover) so they travel with the attack instead of being repeated on
-              the character sheet. --}}
+              weapon, listed as adjudication notes. spec 021 (US2) evaluates each
+              degree/count-gated quality against the actual roll: a quality that
+              FIRED is highlighted with its count; the rest are dimmed; none on a
+              miss (FR-008). --}}
         {{#if reminders.length}}
         <div class="cs-rc-reminders">
             <div class="cs-rc-reminders-header">{{localize "CS.quality.qualitiesTitle"}}</div>
             {{#each reminders}}
-            <div class="cs-rc-reminder" {{#if description}}data-tooltip="{{description}}"{{/if}}><i class="fas fa-tag"></i> <span>{{name}}{{#if parameter}} {{parameter}}{{/if}}</span></div>
+            <div class="cs-rc-reminder {{#if this.triggered}}is-triggered{{else}}is-dimmed{{/if}}" {{#if description}}data-tooltip="{{description}}"{{/if}}>
+                <i class="fas fa-tag"></i>
+                <span class="cs-rc-reminder-name">{{name}}{{#if parameter}} {{parameter}}{{/if}}</span>
+                {{#if this.triggered}}<span class="cs-rc-reminder-count">{{this.count}} {{localize this.countKindLabel}}</span>{{/if}}
+            </div>
             {{/each}}
         </div>
         {{/if}}

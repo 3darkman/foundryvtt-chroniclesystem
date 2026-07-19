@@ -86,6 +86,10 @@ export default class QualityData extends foundry.abstract.TypeDataModel {
           scope: new fields.StringField({
             required: true,
             initial: "passive",
+            // spec 021 UI redesign — a condition rule is now identified by its
+            // `lever:"applycondition"` (a real "What changes" choice), NOT by a
+            // `scope:"target"` value. Legacy `target` scopes are rewritten to
+            // `auto` in `migrateData` before this stricter choice set validates.
             choices: ["passive", "auto", "optional"],
           }),
           // Lever refinement (e.g. which stat/ability); usually blank.
@@ -94,13 +98,67 @@ export default class QualityData extends foundry.abstract.TypeDataModel {
             blank: true,
             initial: "",
           }),
+          // spec 021 (D6, FR-003a) — optional distance gate in GRID SPACES; `null`
+          // = ungated (fires always). Evaluated only at roll time when a measurable
+          // distance exists; `dist == null` → the rule is omitted.
+          maxDistance: new fields.NumberField({
+            required: false,
+            nullable: true,
+            initial: null,
+            min: 0,
+          }),
+          // spec 021 (D19, FR-010) — for a `scope:"target"` rule, the NAME of the
+          // authored effect on this Quality to apply to the target. Blank on a
+          // `target` rule → the rule is inert (no error; FR-014 resilience).
+          effectRef: new fields.StringField({
+            required: false,
+            blank: true,
+            initial: "",
+          }),
+          // spec 021 (D13, FR-007/FR-010) — degree/count gate, shared by US2 (result
+          // card highlight) and US3 (apply-to-target gate). `kind:"none"` = ungated.
+          // For `kind:"ones"` a null threshold falls back to the reference's
+          // parameter at eval time (Treacherous uses its per-instance value).
+          trigger: new fields.SchemaField({
+            kind: new fields.StringField({
+              required: true,
+              initial: "none",
+              choices: ["none", "degrees", "ones"],
+            }),
+            threshold: new fields.NumberField({
+              required: false,
+              nullable: true,
+              initial: null,
+            }),
+          }),
         })
       ),
+
+      // spec 021 (D4, FR-005) — component quality slugs this quality confers
+      // (Longarm → Long Range/Slow/Two-Handed/Unwieldy). Expanded + deduped by
+      // `effectiveWeaponQualityRefs`; an unknown slug resolves to null and is
+      // skipped (never throws).
+      confers: new fields.ArrayField(new fields.StringField({ blank: false })),
     };
   }
 
   static migrateData(source) {
     normalizeSlugSource(source); // sanitise a stored slug (a fresh type has no legacy data)
+    // spec 021 UI redesign — migrate the pre-redesign condition-rule shape
+    // (`scope:"target"` + blank lever) to the new canonical signal
+    // (`lever:"applycondition"`, `scope:"auto"`). Runs BEFORE validation, so a
+    // stored `"target"` scope never trips the now-stricter `choices`. Non-
+    // destructive: `effectRef`/`trigger`/`maxDistance` are untouched, and rules
+    // that already use the new shape (or are plain numeric levers) are left alone.
+    // NOTE: the `"applycondition"` literal cannot be imported from
+    // cs-effect-vocabulary.js here — the data layer MUST NOT depend on the effects
+    // layer (constitution §IV, inward-only dependencies).
+    const rules = Array.isArray(source?.rules) ? source.rules : [];
+    for (const rule of rules) {
+      if (rule?.scope !== "target") continue;
+      if (!rule.lever) rule.lever = "applycondition";
+      rule.scope = "auto";
+    }
     return super.migrateData(source);
   }
 }

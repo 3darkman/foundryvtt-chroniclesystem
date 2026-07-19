@@ -6,11 +6,17 @@ import {
 import { CSConstants } from "../../system/csConstants.js";
 import {
   QUALITY_LEVERS,
+  APPLY_CONDITION_LEVER,
   getQualityLeverLabel,
   qualityAppliesTo,
   qualityBySlug,
   slugify,
 } from "../../effects/cs-effect-vocabulary.js";
+import { abilitySpecialtyChoiceMaps } from "../../vocabulary/cs-canonical-abilities.js";
+import {
+  decodeTriggerCompound,
+  TRIGGER_COMPOUND_DEGREES_PREFIX,
+} from "../../combat/cs-quality-triggers.js";
 
 // The 7 House resources, in handoff order — the Evento "Recursos da Casa" table
 // rows and the Propriedade Resource select choices (spec 019, D6).
@@ -23,6 +29,11 @@ const HOUSE_RESOURCES = [
   "power",
   "wealth",
 ];
+
+// spec 021 (US3) — the degree thresholds a condition rule's "Scope / mode" dropdown
+// offers ("On N+ degrees"); Chronicle degrees of success realistically span 2..5.
+const CONDITION_DEGREE_MIN = 2;
+const CONDITION_DEGREE_MAX = 5;
 
 // The Técnica `system.type` stays a free-text StringField (existing user data like
 // "Ritual, Spell") — the sheet presents it as interactive multi-chips via this
@@ -169,6 +180,13 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     // user-permission flag unrelated to embedding).
     context.isEmbedded = !!item.actor;
     context.editable = this.isEditable;
+    // spec 021 (US5, FR-022) — the weapon Training field is shown only while the
+    // optional Training rule is on; when off it is hidden (stored value untouched).
+    context.weaponTrainingEnabled =
+      game.settings?.get?.(
+        CSConstants.Settings.SYSTEM_NAME,
+        CSConstants.Settings.WEAPON_TRAINING_RULE
+      ) ?? false;
 
     // Pre-enrich rich text (separate context vars so the raw stored value is never
     // corrupted). Each rich-text-field renders the enriched HTML but saves the raw.
@@ -184,10 +202,75 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     context.effects = Array.from(item.effects).map((e) =>
       buildEffectContext(e, game.user, item)
     );
+    // spec 021 (US7, FR-020) — a Quality's effects are TARGET conditions (applied to
+    // the foe on a hit), never wielder buffs; frame the tab so it isn't misleading.
+    context.effectsAreTargetConditions = item.type === "quality";
 
     await this._prepareTypeContext(context, item, system);
 
     return context;
+  }
+
+  // The repeatable object-lists that are `ArrayField(ObjectField())` — each element
+  // is a free-form blob REPLACED wholesale on submit, so any field NOT in the form
+  // (a collapsed Works card, a ritual's `test.spellcasting` while the ritual layout
+  // shows alignment/invocation/unleashing, owner-gated Specialty rating/modifier
+  // columns) would be DROPPED. Listed here so the submit merges them field-by-field.
+  static OBJECT_LIST_FIELDS = ["works", "specialties", "features", "arts"];
+
+  /**
+   * @override — spec 021 data-loss fix. `_processFormData` runs BEFORE validation
+   * (foundry-api-expert), so the merged data is what gets validated + persisted. For
+   * each `ArrayField(ObjectField())` list, deep-merge the SUBMITTED (partial) element
+   * onto the STORED (`_source`, raw persisted) element by index — preserving every
+   * key the current form didn't render. `mergeObject` treats arrays atomically, hence
+   * the per-index merge. Add/delete go through `document.update` directly (not the
+   * form), so the submitted count always matches the stored count.
+   */
+  _processFormData(event, form, formData) {
+    const submitData = super._processFormData(event, form, formData);
+    for (const field of CSItemSheet.OBJECT_LIST_FIELDS) {
+      const submitted = submitData.system?.[field];
+      const stored = this.document._source.system?.[field];
+      if (!submitted || !Array.isArray(stored)) continue;
+      // `submitted` is an object keyed by numeric strings ({0:…,1:…}); iterate the
+      // stored array (source of truth for length) and apply the patch at each index.
+      submitData.system[field] = stored.map((entry, i) => {
+        const patch = submitted[i];
+        return patch
+          ? foundry.utils.mergeObject(foundry.utils.deepClone(entry), patch, {
+              inplace: false,
+            })
+          : foundry.utils.deepClone(entry);
+      });
+    }
+    if (this.document.type === "quality") {
+      CSItemSheet._decomposeConditionTriggers(submitData);
+    }
+    return submitData;
+  }
+
+  /**
+   * spec 021 (US3 UI redesign) — a quality condition rule's "Scope / mode" dropdown
+   * submits a single compound value (`_triggerCompound`: "none" | "degrees:N" |
+   * "ones"); expand it back into the schema's `trigger.{kind, threshold}` and strip
+   * the synthetic key BEFORE validation (this runs inside `_processFormData`). Rules
+   * without the synthetic key (plain numeric levers, whose trigger round-trips via
+   * hidden inputs) are left untouched.
+   * @param {object} submitData the expanded submit object
+   */
+  static _decomposeConditionTriggers(submitData) {
+    const rules = submitData.system?.rules;
+    if (!rules) return;
+    // At this point `system.rules` is an object keyed by numeric strings
+    // ({0:…,1:…}), NOT an array — `_processFormData` returns `expandObject(...)`,
+    // which builds plain objects (foundry-api-expert); iterate its values.
+    const entries = Array.isArray(rules) ? rules : Object.values(rules);
+    for (const rule of entries) {
+      if (!rule || !("_triggerCompound" in rule)) continue;
+      rule.trigger = decodeTriggerCompound(rule._triggerCompound);
+      delete rule._triggerCompound;
+    }
   }
 
   /**
@@ -205,6 +288,43 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
       ),
       techniqueTypes: CSConstants.TechniqueType,
       techniqueCosts: CSConstants.TechniqueCost,
+    };
+
+    // spec 021 (US4, D21) — ability/specialty dropdown option maps. Option VALUE =
+    // the English canonical display name (`Ability` / `Ability:Specialty`, the
+    // format downstream name-matching keys by); the LABEL is localized here. A
+    // legacy off-list stored value is injected per field below so `submitOnChange`
+    // never clobbers a custom/typo'd value (SC-007). `localize=true` in the template
+    // passes these composite label strings through unchanged.
+    // CRITICAL: each map STARTS with a blank "" option — a `<select>` whose stored
+    // value is empty (or not in the list) would otherwise auto-select the FIRST
+    // option and SAVE that on the next submit, silently clobbering an empty field
+    // (e.g. an unfilled sorcery test rendering as "Agility"). The blank option keeps
+    // empty values empty and non-destructive.
+    const csChoiceMaps = abilitySpecialtyChoiceMaps();
+    const localizeName = (key) => game.i18n.localize(key);
+    const abilityChoices = { "": "" };
+    for (const a of csChoiceMaps.abilities) {
+      abilityChoices[a.value] = localizeName(a.nameKey);
+    }
+    const specialtyComboChoices = { "": "" };
+    for (const s of csChoiceMaps.specialties) {
+      specialtyComboChoices[s.value] = `${localizeName(
+        s.abilityNameKey
+      )}: ${localizeName(s.specialtyNameKey)}`;
+    }
+    const injectOffList = (map, value) => {
+      if (value && !(value in map)) map[value] = value;
+    };
+    if (item.type === "weapon")
+      injectOffList(specialtyComboChoices, system.specialty);
+    if (item.type === "drawback")
+      injectOffList(abilityChoices, system.flawAttribute);
+    context.typeDescriptor.abilityChoices = abilityChoices;
+    context.typeDescriptor.specialtyComboChoices = specialtyComboChoices;
+    context.typeDescriptor.sorceryTestChoices = {
+      ...abilityChoices,
+      ...specialtyComboChoices,
     };
 
     // Evento "Recursos da Casa" — fixed 7 rows in handoff order.
@@ -307,6 +427,21 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
             : "",
         }))
       );
+      // spec 021 (US4, SC-007) — preserve any legacy off-list sorcery test value so
+      // the dropdown shows the stored value selected instead of clobbering it.
+      for (const w of works) {
+        const test = w.test ?? {};
+        for (const value of [
+          test.alignment,
+          test.invocation,
+          test.unleashing,
+          test.spellcasting,
+        ]) {
+          if (value && !(value in context.typeDescriptor.sorceryTestChoices)) {
+            context.typeDescriptor.sorceryTestChoices[value] = value;
+          }
+        }
+      }
     }
 
     // spec 020 — Quality authoring dropdowns, all sourced from the shared SSOT
@@ -315,6 +450,25 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     // `selectOptions … localize=true` helper renders the localized labels.
     if (item.type === "quality") {
       context.qualityShowWielding = system.applicability !== "armor";
+      const loc = (k) => game.i18n.localize(k);
+      const fmt = (k, d) => game.i18n.format(k, d);
+      // spec 021 (US3 redesign) — the "Value / effect" dropdown for a condition rule:
+      // the quality's OWN authored effects, matched by NAME (`effectRef`, D19). Blank =
+      // a placeholder prompt (localized here, so the select renders with localize:false).
+      const effectChoices = { "": loc("CS.quality.conditionPlaceholder") };
+      for (const eff of item.effects) effectChoices[eff.name] = eff.name;
+      // The "Scope / mode" dropdown for a condition rule: a single compound gate the
+      // template selects on and `_processFormData` decomposes into `{kind, threshold}`.
+      const triggerCompoundOptions = {
+        none: loc("CS.quality.trigger.kinds.none"),
+      };
+      for (let n = CONDITION_DEGREE_MIN; n <= CONDITION_DEGREE_MAX; n++) {
+        triggerCompoundOptions[`${TRIGGER_COMPOUND_DEGREES_PREFIX}${n}`] = fmt(
+          "CS.quality.trigger.kinds.degrees",
+          { n }
+        );
+      }
+      triggerCompoundOptions.ones = loc("CS.quality.trigger.kinds.ones");
       context.qualityDescriptor = {
         applicabilityOptions: {
           weapon: "CS.quality.applicability.weapon",
@@ -337,7 +491,13 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
             lever.id,
             getQualityLeverLabel(lever.id),
           ]),
+          // spec 021 (US3) — "Apply condition to target" (not a QUALITY_LEVERS
+          // channel; the buffer collector treats it as inert, the condition
+          // pipeline keys on it).
+          [APPLY_CONDITION_LEVER, getQualityLeverLabel(APPLY_CONDITION_LEVER)],
         ]),
+        effectChoices,
+        triggerCompoundOptions,
       };
     }
   }

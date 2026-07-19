@@ -39,6 +39,11 @@ export const EFFECT_CHANNELS = {
   // but they carry a `cs.*` key + parser branch so the grammar round-trips.
   ARMOR_BYPASS: "armorbypass", // attack-scoped: reduce the TARGET's Armor Rating (Piercing/Penetration)
   ARMOR_PENALTY: "armorpenalty", // armour's own Armor Penalty
+  // spec 021 (D5) — roll-time ONLY: value is a MULTIPLIER on the measured distance
+  // (Inaccurate ×2), read directly by _deriveTargetConflict. Routes to no formula
+  // field and carries no `cs.*` key (never parsed/built), an intentional exception
+  // to the additive-±N lever norm (tracked complexity, research Part C).
+  RANGE_MULTIPLIER: "rangemultiplier",
 };
 
 /** Channels that target a roll (all / ability / specialty). */
@@ -401,6 +406,17 @@ export function getTargetKindLabel(targetKind) {
 /* --------------------------- quality levers (spec 020) ------------------------- */
 
 /**
+ * spec 021 (US3 UI redesign) — the lever id marking an "apply condition to target"
+ * rule. Deliberately NOT a member of {@link QUALITY_LEVERS} (it carries no `cs.*`
+ * channel, so the buffer collector's `QUALITY_LEVER_MAP[rule.lever]` lookup returns
+ * undefined and treats it as inert). Instead it is the SINGLE canonical signal the
+ * target-condition pipeline (`weaponReminders`) keys on — replacing the old
+ * `scope:"target"` marker so the rule editor can present it as the "What changes"
+ * lever with the effect as its value. A `migrateData` converts legacy rows.
+ */
+export const APPLY_CONDITION_LEVER = "applycondition";
+
+/**
  * The authoring vocabulary for a Quality's "Efeitos de Regra" list (Decision 3,
  * handoff §1.4). SSOT: each lever maps to a backing `EFFECT_CHANNELS` channel and
  * carries the metadata the collector needs — `attackScoped` (bound to the rolled
@@ -458,6 +474,22 @@ export const QUALITY_LEVERS = [
     channel: EFFECT_CHANNELS.ARMOR_PENALTY,
     attackScoped: false,
     defaultScope: "passive",
+  },
+  // spec 021 (D10) — flat ±N on the test result (Superior "+1 result", grades). The
+  // RESULT channel already maps to formula.modifier via ROLL_CHANNEL_TO_FORMULA_FIELD.
+  {
+    id: "result",
+    channel: EFFECT_CHANNELS.RESULT,
+    attackScoped: true,
+    defaultScope: "auto",
+  },
+  // spec 021 (D5) — Inaccurate ×2 distance. Value is a MULTIPLIER read directly by
+  // the roll-time range-penalty site (not routed to any formula field).
+  {
+    id: "rangemultiplier",
+    channel: EFFECT_CHANNELS.RANGE_MULTIPLIER,
+    attackScoped: true,
+    defaultScope: "auto",
   },
 ];
 
@@ -544,7 +576,7 @@ export function weaponWieldingFlags(item) {
     offHandEligible: false,
     adaptable: false,
   };
-  for (const ref of item?.system?.qualities ?? []) {
+  for (const ref of effectiveWeaponQualityRefs(item)) {
     const wielding = qualityBySlug(ref?.slug)?.system?.wielding;
     if (!wielding) continue;
     if (wielding.occupiesBothHands) flags.occupiesBothHands = true;
@@ -552,4 +584,45 @@ export function weaponWieldingFlags(item) {
     if (wielding.adaptable) flags.adaptable = true;
   }
   return flags;
+}
+
+/**
+ * The EFFECTIVE quality references of a weapon/armour (spec 021, D4/FR-005): its
+ * own `{slug, parameter}` references PLUS every component slug those references
+ * `confer` (Longarm → Long Range/Slow/Two-Handed/Unwieldy), deduped by slug so a
+ * component present directly counts exactly once (references win, keeping their
+ * per-instance parameter; conferred refs carry no parameter). ONE SSOT indirection
+ * (constitution §II) — every iterator (`collectReferencedQualities`,
+ * `weaponRangeBand`, `weaponReminders`, `weaponWieldingFlags`,
+ * `weaponHasQualityLever`, and the roll-time lever pass) routes through this
+ * instead of raw `item.system.qualities`, so conferral works everywhere without
+ * touching per-lever routing. Conferral is one level (a conferred quality's own
+ * `confers` is not re-expanded — no seed needs it). Defined HERE (not in
+ * cs-effect-modifiers.js) to avoid an eval-time import cycle; re-exported from
+ * cs-effect-modifiers.js for the contract location. Pure → Vitest.
+ * @param {object} item a weapon/armour Item (its `system.qualities` reference list)
+ * @returns {Array<{slug: string, parameter?: string}>}
+ */
+export function effectiveWeaponQualityRefs(item) {
+  const refs = item?.system?.qualities ?? [];
+  // Reuse the dedupeQualitiesBySlug Set pattern inline (that helper lives in
+  // cs-effect-modifiers.js; importing it here would close an eval-time cycle).
+  const seen = new Set();
+  const result = [];
+  for (const ref of refs) {
+    const slug = ref?.slug;
+    if (!slug || seen.has(slug)) continue; // references win, keep their parameter
+    seen.add(slug);
+    result.push(ref);
+  }
+  for (const ref of refs) {
+    const confers = qualityBySlug(ref?.slug)?.system?.confers;
+    if (!Array.isArray(confers)) continue;
+    for (const slug of confers) {
+      if (!slug || seen.has(slug)) continue; // conferred refs carry no parameter
+      seen.add(slug);
+      result.push({ slug });
+    }
+  }
+  return result;
 }

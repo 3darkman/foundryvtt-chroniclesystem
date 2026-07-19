@@ -117,6 +117,10 @@ export const CANONICAL_ABILITIES = Object.freeze(
     const abilitySlug = slugify(ability.name);
     const entry = {
       slug: abilitySlug,
+      // English display name (spec 021, D21) — the dropdown option VALUE downstream
+      // matching keys by (`Ability:Specialty`); the localized LABEL is built in the
+      // sheet from `nameKey`, so this stays language-independent identity data.
+      name: ability.name,
       nameKey: `CS.abilities.${abilitySlug}`,
       specialties: Object.freeze(
         ability.specialties.map((name) => {
@@ -125,6 +129,7 @@ export const CANONICAL_ABILITIES = Object.freeze(
           const suffix = slugify(name);
           return Object.freeze({
             slug,
+            name, // English specialty name (D21)
             nameKey: `CS.specialties.${abilitySlug}.${suffix}`,
           });
         })
@@ -134,6 +139,31 @@ export const CANONICAL_ABILITIES = Object.freeze(
     return Object.freeze(entry);
   })
 );
+
+/**
+ * Pure choice-map source for the item-sheet dropdowns (spec 021, D21). Returns the
+ * canonical option VALUES (English display names — the format downstream logic
+ * matches by: bare ability, or `Ability:Specialty`) plus the i18n keys the sheet
+ * localizes the LABELS with. NO `game.i18n` here — the file stays Foundry-runtime-
+ * free (Vitest). Specialties are EVERY `Ability:Specialty` combo, no bare abilities.
+ * @returns {{abilities: Array<{value: string, nameKey: string}>,
+ *   specialties: Array<{value: string, abilityNameKey: string, specialtyNameKey: string}>}}
+ */
+export function abilitySpecialtyChoiceMaps() {
+  const abilities = [];
+  const specialties = [];
+  for (const ability of CANONICAL_ABILITIES) {
+    abilities.push({ value: ability.name, nameKey: ability.nameKey });
+    for (const spec of ability.specialties) {
+      specialties.push({
+        value: `${ability.name}:${spec.name}`,
+        abilityNameKey: ability.nameKey,
+        specialtyNameKey: spec.nameKey,
+      });
+    }
+  }
+  return { abilities, specialties };
+}
 
 /** Set of every canonical ability slug. */
 export const ABILITY_SLUGS = Object.freeze(

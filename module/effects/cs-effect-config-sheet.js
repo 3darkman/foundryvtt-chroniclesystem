@@ -237,6 +237,14 @@ export class CSActiveEffectConfig extends ActiveEffectConfigBase {
         this.document.getFlag("chroniclesystem", "condition") ?? "";
       return partContext;
     }
+    if (partId === "details") {
+      // spec 021 (US7, D17/FR-020) — a QUALITY's effects are target-only condition
+      // templates: render the transfer-to-actor control OFF + disabled (a disabled
+      // input is not submitted, so it can never be turned on).
+      partContext.qualityTransferLocked =
+        this.document.parent?.type === "quality";
+      return partContext;
+    }
     if (partId !== "changes") return partContext;
 
     // Homebrew slugs present in the world (not already in the canonical dropdown),

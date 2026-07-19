@@ -109,6 +109,29 @@
                     {{selectOptions @root.qualityDescriptor.leverOptions selected=rule.lever localize=true}}
                 </select>
             </span>
+            {{#ifEquals rule.lever "applycondition"}}
+            {{!-- spec 021 (US3 redesign) — CONDITION rule: value = a dropdown of this
+                  quality's OWN authored effects (effectRef, matched by name); mode = a
+                  single compound degree/count gate (decomposed to trigger.{kind,threshold}
+                  on submit). scope is forced to `auto` (round-tripped hidden). --}}
+            <span class="csv2-list-col">
+                <select name="system.rules.{{i}}.effectRef">
+                    {{selectOptions @root.qualityDescriptor.effectChoices selected=rule.effectRef}}
+                </select>
+            </span>
+            <span class="csv2-list-col">
+                <select name="system.rules.{{i}}._triggerCompound">
+                    {{selectOptions @root.qualityDescriptor.triggerCompoundOptions selected=(csTriggerCompound rule.trigger)}}
+                </select>
+            </span>
+            <input type="hidden" name="system.rules.{{i}}.value" value="{{rule.value}}" />
+            <input type="hidden" name="system.rules.{{i}}.scope" value="auto" />
+            <input type="hidden" name="system.rules.{{i}}.target" value="{{rule.target}}" />
+            <input type="hidden" name="system.rules.{{i}}.maxDistance" value="{{rule.maxDistance}}" data-dtype="Number" />
+            {{else}}
+            {{!-- NUMERIC lever: value text + passive/auto/optional scope. The
+                  condition-only fields (effectRef/trigger) round-trip via hidden inputs
+                  so switching the lever never wipes a previously authored condition. --}}
             <span class="csv2-list-col">
                 <input type="text" name="system.rules.{{i}}.value" value="{{rule.value}}"
                        placeholder="{{localize 'CS.quality.valuePlaceholder'}}" />
@@ -118,6 +141,12 @@
                     {{selectOptions @root.qualityDescriptor.scopeOptions selected=rule.scope localize=true}}
                 </select>
             </span>
+            <input type="hidden" name="system.rules.{{i}}.target" value="{{rule.target}}" />
+            <input type="hidden" name="system.rules.{{i}}.maxDistance" value="{{rule.maxDistance}}" data-dtype="Number" />
+            <input type="hidden" name="system.rules.{{i}}.effectRef" value="{{rule.effectRef}}" />
+            <input type="hidden" name="system.rules.{{i}}.trigger.kind" value="{{rule.trigger.kind}}" />
+            <input type="hidden" name="system.rules.{{i}}.trigger.threshold" value="{{rule.trigger.threshold}}" data-dtype="Number" />
+            {{/ifEquals}}
             <span class="csv2-list-del">
                 <button type="button" class="csv2-list-del-btn"
                         data-action="listDelete" data-list="system.rules" data-index="{{i}}">

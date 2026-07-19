@@ -57,6 +57,24 @@ const registerSystemSettings = () => {
     }
   );
 
+  // spec 021 (US5, FR-021) — the optional SIFRP weapon Training rule, default OFF.
+  // World-scoped; re-render open windows so the weapon sheet field + chips update.
+  game.settings.register(
+    CSConstants.Settings.SYSTEM_NAME,
+    CSConstants.Settings.WEAPON_TRAINING_RULE,
+    {
+      name: "CS.settings.weaponTrainingRule.name",
+      hint: "CS.settings.weaponTrainingRule.hint",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: false,
+      onChange: () => {
+        for (const app of Object.values(ui.windows)) app.render(false);
+      },
+    }
+  );
+
   game.settings.register(
     CSConstants.Settings.SYSTEM_NAME,
     CSConstants.Settings.CURRENT_VERSION,
