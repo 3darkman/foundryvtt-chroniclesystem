@@ -681,7 +681,24 @@
           "qualities": "Qualities",
           "sorcery": "Sorcery",
           "equipments": "Equipments",
-          "description": "Description"
+          "description": "Description",
+          "relationships": "Relationships"
+        },
+        "relationships": {
+          "title": "Relationships",
+          "dragInstruction": "Drag a character onto the sheet to add them.",
+          "searchPlaceholder": "Search relationships…",
+          "empty": {
+            "title": "No relationships yet",
+            "hint": "Drag a character actor onto the sheet to register a contact."
+          },
+          "noResults": "No relationships match “{query}”.",
+          "noNote": "No note.",
+          "dispositionLabel": "Disposition",
+          "noteLabel": "Note",
+          "remove": "Remove relationship",
+          "openPublicSheet": "Open {name}'s public sheet",
+          "brokenRef": "Unknown character"
         },
         "publicSheet": {
           "public": "PUBLIC",

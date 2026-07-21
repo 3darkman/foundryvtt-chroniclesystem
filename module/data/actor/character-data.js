@@ -79,6 +79,27 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     ) {
       delete source.publicVisibility;
     }
+    // spec 022: `relationships` is a new ArrayField(SchemaField{uuid,disp,note}).
+    // Defensive, NON-destructive parity with the clauses above — never discard a
+    // real reference (a blank/garbage uuid renders as an orphan card, FR-014).
+    // - present but not an array → drop it so the schema `initial: []` applies;
+    // - drop non-object entries; coerce a missing/NaN `disp` to 4 and clamp [1,7];
+    //   keep a blank uuid entry (orphan). (Absent → `initial` covers it.)
+    if (source.relationships !== undefined) {
+      if (!Array.isArray(source.relationships)) {
+        delete source.relationships;
+      } else {
+        source.relationships = source.relationships
+          .filter((r) => r && typeof r === "object" && !Array.isArray(r))
+          .map((r) => {
+            const disp = Number(r.disp);
+            return {
+              ...r,
+              disp: Number.isFinite(disp) ? Math.min(Math.max(disp, 1), 7) : 4,
+            };
+          });
+      }
+    }
     return super.migrateData(source);
   }
 
@@ -375,6 +396,36 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
         oaths: new fields.BooleanField({ required: true, initial: false }),
         motto: new fields.BooleanField({ required: true, initial: false }),
       }),
+
+      // === spec 022: relationships (per-character bond registry) ===
+      // A list of one-directional bonds. Each entry stores ONLY a reference to a
+      // target character (`uuid`), a disposition rating, and a rich-text note —
+      // name/portrait/subtitle are derived live at render (FR-003, SSOT). `uuid`
+      // is `blank: true` on purpose: a blank/garbage reference must never fail
+      // strict load validation and eject the actor (the spec 020 blank-slug
+      // lesson) — the sheet filters/renders it as an orphan card instead (FR-014).
+      // `disp` has NO `choices` so a legacy/garbage rating never rejects the
+      // document (migrateData clamps it). Decoupled from intrigue rolls (FR-020).
+      relationships: new fields.ArrayField(
+        new fields.SchemaField({
+          uuid: new fields.StringField({
+            required: true,
+            blank: true,
+            initial: "",
+          }),
+          disp: new fields.NumberField({
+            required: true,
+            initial: 4,
+            integer: true,
+          }),
+          note: new fields.StringField({
+            required: true,
+            blank: true,
+            initial: "",
+          }),
+        }),
+        { initial: [] }
+      ),
     };
   }
 }

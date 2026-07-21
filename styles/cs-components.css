@@ -1044,7 +1044,10 @@
 }
 
 /* ---------- Shared: field label eyebrow (T004) ---------- */
-.cs-v2 .csv2-label {
+/* Dual-scoped (spec 022, R10): the character sheet carries `.cs-sheet-v2`, not
+   `.cs-v2`, so the Relationships tab reaches this shared eyebrow via the
+   established `:is(.cs-v2, .cs-sheet-v2)` bridge — no per-window re-declaration. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-label {
   font-family: var(--csv2-font-mono);
   font-weight: 600;
   /* Handoff eyebrow: 600 8.5px mono, letter-spacing .05em (was 10px / .06em). */
@@ -2644,9 +2647,12 @@
   color: var(--csv2-primary);
 }
 
-/* Row action buttons are fixed-size icon buttons (design §7). Scoped to
-   .effect-controls so the toolbar "+ Create" (.effect-create) keeps its size. */
-:is(.cs-v2, .cs-sheet-v2) .effect-controls .effect-control {
+/* Row action buttons are fixed-size icon buttons (design §7). Scoped to a
+   controls container so the toolbar "+ Create" (.effect-create) keeps its size.
+   .cs2-icon-actions is the reusable icon-control row for other windows/tabs
+   (e.g. the Relationships cards) — same treatment, SSOT, no duplication. */
+:is(.cs-v2, .cs-sheet-v2) .effect-controls .effect-control,
+:is(.cs-v2, .cs-sheet-v2) .cs2-icon-actions .effect-control {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2657,6 +2663,14 @@
   padding: 0;
   box-sizing: border-box;
   font-size: 11px;
+}
+
+/* Reusable row of icon controls (edit/delete) outside the effects table. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-icon-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
 }
 
 /* The enable toggle reads as a bare switch — no border box (design §7). */

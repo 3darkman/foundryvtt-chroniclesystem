@@ -1,0 +1,30 @@
+{{!-- spec 022 (R11): shared inline SVG sprite for the Relationships tab. Four
+      STATIC symbols referenced by id (<use href="#ico-…">); never rebind a <use
+      href> at runtime (paint-server/detached-parse hazard). Include ONCE per
+      sheet render; all sites only <use> the ids. 16×16, stroke=currentColor so
+      each glyph inherits the surrounding color.
+      Note: the remove control uses the system trash convention (fas fa-trash),
+      and the note editor uses the native <prose-mirror> pencil — so no ico-x /
+      ico-edit is defined here. --}}
+<svg width="0" height="0" aria-hidden="true" focusable="false"
+     style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="ico-grip" viewBox="0 0 16 16">
+        <circle cx="6" cy="4" r="1.1" fill="currentColor"></circle>
+        <circle cx="10" cy="4" r="1.1" fill="currentColor"></circle>
+        <circle cx="6" cy="8" r="1.1" fill="currentColor"></circle>
+        <circle cx="10" cy="8" r="1.1" fill="currentColor"></circle>
+        <circle cx="6" cy="12" r="1.1" fill="currentColor"></circle>
+        <circle cx="10" cy="12" r="1.1" fill="currentColor"></circle>
+    </symbol>
+    <symbol id="ico-chevron" viewBox="0 0 16 16">
+        <path d="M4.5 6.5L8 10l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    </symbol>
+    <symbol id="ico-note" viewBox="0 0 16 16">
+        <rect x="3.3" y="2.6" width="9.4" height="10.8" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+        <path d="M5.6 5.8h4.8M5.6 8h4.8M5.6 10.2h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"></path>
+    </symbol>
+    <symbol id="ico-search" viewBox="0 0 16 16">
+        <circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.4"></circle>
+        <path d="M10.2 10.2L13.5 13.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+    </symbol>
+</svg>

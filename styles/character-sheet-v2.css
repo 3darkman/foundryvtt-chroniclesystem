@@ -534,21 +534,28 @@
   text-transform: none;
 }
 
+/* spec 022 (R4/T020) — disposition palette SSOT: a single [data-disp]-keyed
+   source defining `--disp-color` (rail/chip/swatch fill) and `--disp-ink` (the
+   contrast text: dark on the two lightest ratings 1–2, else white, FR-017).
+   Consumed by BOTH the Combat & Intrigue disposition rails (below) and the
+   Relationships chip + dropdown swatch — no per-rating hex is written twice.
+   The four literals here are RELOCATED from the old :nth-child rules (same
+   values), not new hex. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 [data-disp="1"] { --disp-color: var(--csv2-area); --disp-ink: var(--csv2-dark); }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 [data-disp="2"] { --disp-color: #b9cbe6; --disp-ink: var(--csv2-dark); }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 [data-disp="3"] { --disp-color: #7ea6d0; --disp-ink: var(--csv2-on-primary); }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 [data-disp="4"] { --disp-color: #3b7fb8; --disp-ink: var(--csv2-on-primary); }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 [data-disp="5"] { --disp-color: var(--csv2-primary); --disp-ink: var(--csv2-on-primary); }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 [data-disp="6"] { --disp-color: #073e6c; --disp-ink: var(--csv2-on-primary); }
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 [data-disp="7"] { --disp-color: var(--csv2-dark); --disp-ink: var(--csv2-on-primary); }
+
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .disposition.option::before {
   content: "";
   width: 6px;
   border-radius: 3px;
   flex: none;
-  background: var(--csv2-area);
+  background: var(--disp-color, var(--csv2-area));
 }
-
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(1)::before { background: var(--csv2-area); }
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(2)::before { background: #b9cbe6; }
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(3)::before { background: #7ea6d0; }
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(4)::before { background: #3b7fb8; }
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(5)::before { background: var(--csv2-primary); }
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(6)::before { background: #073e6c; }
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-disposition-list .disposition.option:nth-child(7)::before { background: var(--csv2-dark); }
 
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .disposition.option .cs2-disposition-row {
   flex: 1;
@@ -962,13 +969,17 @@
   color: var(--csv2-text);
 }
 
-/* The row's delete control matches the input height (design), not the fixed
-   20px used by the accordion edit-pencil. */
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split-item .cs2-icon-btn {
+/* The row's delete control (canonical .effect-control) matches the input height
+   (design), not the fixed 22px used by the effects-table icon row. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-split-item .effect-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: auto;
   align-self: stretch;
   width: 26px;
   flex: none;
+  padding: 0;
 }
 
 /* ---------------------------------------------------------------- description */
@@ -1486,4 +1497,354 @@
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-pub-ind-inline svg {
   display: block;
   flex: none;
+}
+
+/* ==================================================== spec 022 relationships = */
+/* Layout-only rules for the Relationships tab. Colors reuse --csv2-* tokens and
+   the shared [data-disp] palette source (above); zero new hex (Constitution
+   §II/§III). NO card wrapper — the section title, bands and grid sit FREE in the
+   tab (handoff parity). Scoped under .cs-sheet-v2 .relationships-tab. */
+
+/* section header — a NEUTRAL total-count badge beside the shared section title */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-count {
+  font: 600 11px var(--csv2-font-mono);
+  color: var(--csv2-muted);
+  background: var(--csv2-secondary);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-ico {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  color: var(--csv2-muted);
+}
+
+/* drag-instruction band — a filled callout, always visible (FR-010) */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-drag {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--csv2-area);
+  border: 1px solid var(--csv2-callout-border);
+  border-radius: 7px;
+  padding: 9px 13px;
+  margin-bottom: 12px;
+  font: 500 12px var(--csv2-font-sans);
+  color: var(--csv2-primary);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-drag .cs2-rel-ico {
+  color: var(--csv2-primary);
+}
+
+/* search — free-standing, magnifier inside on the left (FR-026) */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-search {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-search .cs2-rel-ico {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 6px;
+  padding: 8px 12px 8px 33px;
+  font: 500 12.5px var(--csv2-font-sans);
+  color: var(--csv2-text);
+}
+
+/* ----------------------------------------------------------- card grid ----- */
+/* 3 columns at the 750px sheet width (minmax 200px); reflows below. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--csv2-border);
+  border-radius: 8px;
+  background: var(--csv2-bg);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-card.is-hidden {
+  display: none;
+}
+
+/* top row: portrait + body + icon actions */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-main {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 11px 8px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-portrait {
+  position: relative;
+  flex: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--csv2-border);
+  background: var(--csv2-secondary);
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-card.is-broken .cs2-rel-img {
+  opacity: 0.55;
+}
+
+/* note badge over the portrait's bottom-right corner (shown when hasNote); the
+   full note sits in its title (hover tooltip, FR-…). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-note-badge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 19px;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-border);
+  color: var(--csv2-primary);
+  cursor: help;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-note-badge svg {
+  width: 11px;
+  height: 11px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-body {
+  flex: 1;
+  min-width: 0; /* enable ellipsis truncation of long name/subtitle */
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-name {
+  display: block;
+  font: 700 14px var(--csv2-font-sans);
+  color: var(--csv2-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-name:hover {
+  text-decoration: underline;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-subtitle {
+  font: 500 11px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-broken {
+  font: 500 11px var(--csv2-font-sans);
+  color: var(--csv2-danger);
+  margin-top: 3px;
+}
+
+/* ---------------------------------------------------------------- note ----- */
+/* Read preview wraps to ~2 lines (truncateText already caps ~82 chars — NO
+   forced single-line ellipsis). The collapsed native <prose-mirror> is hidden;
+   clicking the preview or the pencil sets pm.open=true to reveal the editor. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-note {
+  padding: 0 12px 9px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-note-preview {
+  font: 400 11px/1.45 var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+  font-style: italic;
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-note-preview.is-empty {
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-note prose-mirror {
+  display: block;
+  margin-top: 4px;
+}
+
+/* collapsed editor is hidden — the read preview + pencil are the affordances
+   (higher specificity than the base rule above, so it wins while closed) */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-note prose-mirror:not([open]) {
+  display: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-note:has(prose-mirror[open]) .cs2-rel-note-preview {
+  display: none;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-note-read {
+  font: 400 11.5px/1.5 var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+}
+
+/* --------------------------------------------------- disposition (row) ----- */
+/* Divider + label (left) + chip/dropdown (right) on ONE line (handoff). */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid var(--csv2-border-soft);
+  padding: 8px 11px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp-row .csv2-label {
+  margin: 0;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp {
+  position: relative;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--disp-color, var(--csv2-area));
+  color: var(--disp-ink, var(--csv2-on-primary));
+  border: 1px solid rgba(10, 4, 5, 0.1);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font: 600 11.5px var(--csv2-font-sans);
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp-chip.is-static {
+  cursor: default;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-chevron {
+  width: 12px;
+  height: 12px;
+  color: currentColor;
+  transition: transform 0.12s ease;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp.is-open .cs2-rel-chevron {
+  transform: rotate(180deg);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp-menu {
+  display: none;
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  right: 0;
+  left: auto;
+  min-width: 158px;
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-callout-border);
+  border-radius: 7px;
+  /* same elevation shadow as the sheet's existing dropdowns (DRY) */
+  box-shadow: 0 12px 30px rgba(10, 4, 5, 0.18);
+  padding: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp.is-open .cs2-rel-disp-menu {
+  display: block;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp-opt {
+  display: flex;
+  align-items: center;
+  /* core styles <button> as inline-flex + justify-content:center; declare
+     flex-start so the swatch + name align to the LEFT, not centered. */
+  justify-content: flex-start;
+  gap: 9px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font: 500 12px var(--csv2-font-sans);
+  color: var(--csv2-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp-opt:hover {
+  background: var(--csv2-border-soft);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-disp-opt.is-current {
+  background: var(--csv2-area);
+  font-weight: 700;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-swatch {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border-radius: 3px;
+  background: var(--disp-color, var(--csv2-area));
+  border: 1px solid rgba(10, 4, 5, 0.14);
+}
+
+/* ------------------------------------------------- empty / no-results ------ */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-empty {
+  border: 1px dashed var(--csv2-callout-border);
+  border-radius: 8px;
+  padding: 30px 16px;
+  text-align: center;
+  background: var(--csv2-bg);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-empty-title {
+  font: 500 13px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-empty-hint {
+  font: 400 11.5px var(--csv2-font-sans);
+  font-style: italic;
+  color: var(--csv2-muted);
+  margin-top: 4px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-noresults {
+  display: block;
+  border: 1px dashed var(--csv2-callout-border);
+  border-radius: 8px;
+  padding: 24px 16px;
+  margin-top: 10px;
+  text-align: center;
+  background: var(--csv2-bg);
+  font: 500 12.5px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-noresults.is-hidden {
+  display: none;
 }

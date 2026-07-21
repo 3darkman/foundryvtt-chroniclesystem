@@ -20,6 +20,10 @@ import {
   PUBLIC_VISIBILITY_KEYS,
 } from "../../system/public-visibility.js";
 
+// spec 022 (FR-022) — the one-line relationship-note preview budget, in
+// characters. A named constant, not a magic number (Clean Code §I).
+const NOTE_PREVIEW_MAX = 82;
+
 export class CSCharacterActorSheet extends CSActorSheet {
   itemTypesPermitted = [
     "ability",
@@ -35,6 +39,12 @@ export class CSCharacterActorSheet extends CSActorSheet {
   // spec 012 (US2): transient "configure public sheet" mode — UI-only, never
   // persisted, off on each open (FR-018). Flipped by the togglePubMode action.
   _pubMode = false;
+
+  // spec 022 (US3, L-2): MutationObserver enforcing one open relationship-note
+  // editor at a time. The <prose-mirror> `open` event does NOT bubble (core
+  // bug), so single-open is coordinated by observing the reflected `open`
+  // attribute instead of event delegation. Reconnected each render.
+  #relNoteObserver = null;
 
   static DEFAULT_OPTIONS = {
     classes: ["chroniclesystem", "character", "sheet", "actor"],
@@ -53,6 +63,10 @@ export class CSCharacterActorSheet extends CSActorSheet {
       viewPublicSheet: CSCharacterActorSheet._onViewPublicSheet,
       togglePubMode: CSCharacterActorSheet._onTogglePubMode,
       toggleFieldVisibility: CSCharacterActorSheet._onToggleFieldVisibility,
+      // spec 022 — Relationships tab (US1/US2)
+      openRelationshipSheet: CSCharacterActorSheet._onOpenRelationshipSheet,
+      removeRelationship: CSCharacterActorSheet._onRemoveRelationship,
+      setRelDisposition: CSCharacterActorSheet._onSetRelDisposition,
       // NOTE: `editImage` (portrait) and `configurePrototypeToken` (header
       // avatar) are inherited from DocumentSheetV2/ActorSheetV2 and merged in
       // additively — no need to redeclare them here.
@@ -81,6 +95,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
         "sorcery",
         "equipments",
         "actor-description",
+        "relationships",
         "effects",
       ],
       initial: "abilities",
@@ -320,6 +335,13 @@ export class CSCharacterActorSheet extends CSActorSheet {
       { async: true, relativeTo: actor }
     );
 
+    // spec 022 — Relationships tab card projection. Identity/subtitle/order are
+    // DERIVED live every render from the resolved target (SSOT, FR-003/011/032);
+    // nothing derived is stored. References resolve orphan-safe (null guard,
+    // FR-014, SC-006) — NEVER the House sheet's unguarded crash. `disp` is read
+    // here ONLY for display; no roll/intrigue path reads it (FR-020, D-4).
+    await this._prepareRelationshipsContext(context, actor, TextEditorImpl);
+
     // Effects tab (shared across all actor types)
     this._prepareEffectsContext(context);
 
@@ -340,6 +362,149 @@ export class CSCharacterActorSheet extends CSActorSheet {
       tabs[tab] = { active: tab === activeTab };
       return tabs;
     }, {});
+  }
+
+  /**
+   * spec 022 — build the Relationships tab render context: section flags + the
+   * per-card view-models (identity/subtitle/note derived live from the resolved
+   * target). See contracts/relationship-card-context.md.
+   * @param {object} context   the render context being populated
+   * @param {Actor} actor      this sheet's actor
+   * @param {object} TextEditorImpl  foundry.applications.ux.TextEditor.implementation
+   */
+  async _prepareRelationshipsContext(context, actor, TextEditorImpl) {
+    const rawRels = actor.system.relationships ?? [];
+    context.relCount = rawRels.length; // FULL count, filter-independent (FR-015)
+    context.relHasAny = context.relCount > 0; // gates the search field (FR-026)
+    // The 7-level ladder for the dropdown — rating + localized name only; colors
+    // live in CSS keyed by data-disp (no color in JS, R-CTX-6).
+    context.dispositionLevels = ChronicleSystem.dispositions.map((d) => ({
+      rating: d.rating,
+      name: SystemUtils.localize(d.name),
+    }));
+
+    const brokenLabel = SystemUtils.localize(
+      "CS.sheets.character.relationships.brokenRef"
+    );
+    const noNote = SystemUtils.localize(
+      "CS.sheets.character.relationships.noNote"
+    );
+
+    const cards = await Promise.all(
+      rawRels.map(async (entry, index) => {
+        const target = entry.uuid
+          ? foundry.utils.fromUuidSync(entry.uuid)
+          : null;
+        const broken = !target;
+
+        // Subtitle: the target's house + position, each visibility-gated
+        // (FR-013). Observer+ sees both; otherwise only the fields the target
+        // flagged public. Empty when neither is visible/present.
+        let subtitle = "";
+        if (target) {
+          const canSee = target.testUserPermission(game.user, "OBSERVER");
+          const pv = target.system.publicVisibility ?? {};
+          const role = target.getHouseRole();
+          if (role) {
+            const parts = [];
+            if (canSee || pv.house === true) parts.push(role.houseName);
+            if (canSee || pv.position === true) {
+              const pos = role.description
+                ? `${role.role}/${role.description}`
+                : role.role;
+              if (pos) parts.push(pos);
+            }
+            subtitle = parts.join(" · ");
+          }
+        }
+
+        // Disposition (US2): rating + localized level name; CSS colors by
+        // data-disp. A garbage rating falls back to indifferent for the label.
+        const disp = Number.isFinite(entry.disp) ? entry.disp : 4;
+        const level = ChronicleSystem.dispositions.find(
+          (d) => d.rating === disp
+        );
+        const dispName = SystemUtils.localize(
+          level ? level.name : "CS.sheets.character.dispositions.indifferent"
+        );
+
+        // Note (US3): enriched HTML for display + a PLAIN-TEXT projection driving
+        // the one-line preview, the tooltip, and search — never the raw HTML, so
+        // tags/links can't leak into the preview or match a search (FR-021/022).
+        const note = entry.note ?? "";
+        const hasNote = note.trim().length > 0;
+        const enrichedNote = hasNote
+          ? await TextEditorImpl.enrichHTML(note, {
+              async: true,
+              relativeTo: actor,
+            })
+          : "";
+        const notePlain =
+          new DOMParser().parseFromString(note, "text/html").body.textContent ??
+          "";
+        const noteShort = hasNote
+          ? TextEditorImpl.truncateText(notePlain, {
+              maxLength: NOTE_PREVIEW_MAX,
+              splitWords: true,
+            })
+          : noNote;
+
+        const name = broken ? brokenLabel : target.name;
+        // Pre-lowercased searchable text — VISIBLE subtitle only (never a hidden
+        // field) + the plain-text note, so search matches content not tags and
+        // never leaks a hidden subtitle portion (FR-027).
+        const search = `${name} ${subtitle} ${notePlain}`.toLowerCase();
+
+        return {
+          index,
+          uuid: entry.uuid,
+          broken,
+          name,
+          img: broken ? CONST.DEFAULT_TOKEN : target.img,
+          subtitle,
+          disp,
+          dispName,
+          note,
+          hasNote,
+          enrichedNote,
+          notePlain,
+          noteShort,
+          noteTitle: notePlain,
+          search,
+        };
+      })
+    );
+
+    // Sort by live name, case-insensitive (FR-032); orphans by fallback label.
+    // Re-sorts automatically on a target rename because `name` is derived.
+    cards.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    );
+    context.relationships = cards;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * spec 022 (US1, FR-006/007/008/009/029) — add a relationship by dragging a
+   * character actor onto the sheet. ActorSheetV2 supplies the drag-drop plumbing
+   * and hands over an ALREADY-RESOLVED Actor document (not raw data), so this
+   * override just guards and appends. Every write replaces the WHOLE array
+   * (whole-array persistence — no indexed sub-path survives ArrayField._cast).
+   * @param {DragEvent} event
+   * @param {Actor} actor  the resolved dropped actor
+   * @returns {Promise<Actor|null>}
+   * @override
+   */
+  async _onDropActor(event, actor) {
+    if (!this.actor.isOwner || !this.isEditable) return null; // FR-029
+    if (actor?.type !== "character") return null; // FR-009 (ignore house/unit/non-actor)
+    if (actor.uuid === this.actor.uuid) return null; // FR-008 (no self)
+    const rels = foundry.utils.deepClone(this.actor.system.relationships ?? []);
+    if (rels.some((r) => r.uuid === actor.uuid)) return null; // FR-007 (no duplicate)
+    rels.push({ uuid: actor.uuid, disp: 4, note: "" }); // FR-006 (default indifferent)
+    await this.actor.update({ "system.relationships": rels });
+    return actor;
   }
 
   _calculateIntrigueTechniques(data, actor) {
@@ -431,6 +596,114 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   /* -------------------------------------------- */
+
+  /** @override */
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    this._wireRelationshipsTab();
+  }
+
+  /**
+   * spec 022 — DOM-only transient listeners for the Relationships tab (never
+   * persisted, R8). The `.relationships-tab` DOM is replaced on every render, so
+   * element-scoped listeners are discarded with the old DOM (no leak); only the
+   * MutationObserver is a persistent handle, disconnected before re-observing.
+   * - L-1 disposition dropdown: open/close, single-open, outside-click/Escape.
+   * - L-2 note editor: one open at a time (observe the reflected `open`
+   *   attribute — the native `open` event does not bubble); the read preview OR
+   *   the top-row edit pencil opens it (the collapsed native editor is hidden).
+   * - L-3 live search: filter by name + visible subtitle + plain note; the count
+   *   badge is never touched (FR-015).
+   */
+  _wireRelationshipsTab() {
+    const tab = this.element?.querySelector(".relationships-tab");
+    if (!tab) return;
+
+    // ---- L-1 disposition dropdown ---------------------------------------
+    const closeAllDisp = (except = null) => {
+      tab.querySelectorAll(".cs2-rel-disp.is-open").forEach((d) => {
+        if (d !== except) d.classList.remove("is-open");
+      });
+    };
+    tab.querySelectorAll("button.cs2-rel-disp-chip").forEach((chip) => {
+      chip.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const wrap = chip.closest(".cs2-rel-disp");
+        const wasOpen = wrap.classList.contains("is-open");
+        closeAllDisp();
+        if (!wasOpen) wrap.classList.add("is-open"); // FR-019 (one at a time)
+      });
+    });
+    tab.addEventListener("click", (ev) => {
+      if (!ev.target.closest(".cs2-rel-disp")) closeAllDisp();
+    });
+    tab.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape") closeAllDisp();
+    });
+
+    // ---- L-2 note editor single-open ------------------------------------
+    const editors = () => Array.from(tab.querySelectorAll("prose-mirror"));
+    const closeOtherEditors = (except) => {
+      editors().forEach((pm) => {
+        if (pm !== except && pm.hasAttribute("open")) pm.open = false;
+      });
+    };
+    this.#relNoteObserver?.disconnect();
+    this.#relNoteObserver = new MutationObserver((records) => {
+      for (const r of records) {
+        const el = r.target;
+        if (el.matches?.("prose-mirror") && el.hasAttribute("open")) {
+          closeOtherEditors(el); // FR-025
+        }
+      }
+    });
+    this.#relNoteObserver.observe(tab, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["open"],
+    });
+    // Open the editor from the read preview OR the top-row edit pencil; the
+    // collapsed native editor is hidden by CSS, so these are the affordances
+    // (pm.open=true reveals it; the observer collapses+saves any other, FR-023/025).
+    tab
+      .querySelectorAll(".cs2-rel-note-preview, .cs2-rel-edit")
+      .forEach((opener) => {
+        opener.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          const pm = opener
+            .closest(".cs2-rel-card")
+            ?.querySelector("prose-mirror");
+          if (pm) pm.open = true;
+        });
+      });
+
+    // ---- L-3 live search ------------------------------------------------
+    const input = tab.querySelector(".cs2-rel-search-input");
+    const noResults = tab.querySelector(".cs2-rel-noresults");
+    if (input) {
+      input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        const cards = tab.querySelectorAll(".cs2-rel-card");
+        let visible = 0;
+        cards.forEach((card) => {
+          const hit = !q || (card.dataset.search ?? "").includes(q);
+          card.classList.toggle("is-hidden", !hit); // FR-027
+          if (hit) visible++;
+        });
+        if (noResults) {
+          const show = cards.length > 0 && visible === 0; // FR-028
+          noResults.classList.toggle("is-hidden", !show);
+          if (show) {
+            noResults.textContent = game.i18n.format(
+              "CS.sheets.character.relationships.noResults",
+              { query: input.value.trim() }
+            );
+          }
+        }
+      });
+    }
+  }
 
   /** @override */
   _attachPartListeners(partId, htmlElement, options) {
@@ -787,6 +1060,69 @@ export class CSCharacterActorSheet extends CSActorSheet {
     if (!PUBLIC_VISIBILITY_KEYS.includes(key)) return;
     const current = this.actor.system.publicVisibility?.[key] === true;
     await this.actor.update({ ["system.publicVisibility." + key]: !current });
+  }
+
+  /* ---------------------------------------------------- spec 022 actions -- */
+
+  /**
+   * spec 022 (US1, A-4/FR-012) — open the target's sheet from a card's
+   * portrait/name. Routed by the VIEWER's permission via the target's own
+   * `_getSheetClass` (spec 012): GM / Owner / Observer get the full sheet, a
+   * Limited-only user gets the read-only public sheet — so the GM/owner sees the
+   * complete sheet, not the public one. `actor.sheet` is the core-cached
+   * singleton, so this also reuses an already-open window. Not owner-gated
+   * (viewing). Orphan-safe: an unresolved uuid is an inert link (no-op).
+   * @param {Event} event
+   * @param {HTMLElement} target  carries data-uuid
+   */
+  static async _onOpenRelationshipSheet(event, target) {
+    event.preventDefault();
+    const uuid = target.dataset.uuid;
+    if (!uuid) return; // blank reference — inert orphan link (SC-006)
+    const targetActor = foundry.utils.fromUuidSync(uuid);
+    if (!targetActor) return; // deleted target — inert (SC-006)
+    targetActor.sheet.render({ force: true });
+  }
+
+  /**
+   * spec 022 (US1, A-3/FR-030) — remove a relationship card. Owner-gated;
+   * immediate, NO confirmation; NEVER touches the referenced actor. Whole-array
+   * write (no indexed sub-path survives ArrayField._cast).
+   * @param {Event} event
+   * @param {HTMLElement} target  carries data-index
+   */
+  static async _onRemoveRelationship(event, target) {
+    event.preventDefault();
+    if (!this.actor.isOwner) return; // FR-029 (defense-in-depth)
+    const index = Number(target.dataset.index);
+    const rels = foundry.utils.deepClone(this.actor.system.relationships ?? []);
+    if (index < 0 || index >= rels.length) return;
+    rels.splice(index, 1);
+    await this.actor.update({ "system.relationships": rels });
+  }
+
+  /**
+   * spec 022 (US2, A-2/FR-016/018/020) — set a relationship's disposition rating.
+   * Owner-gated; validates the rating against the ladder (mirrors
+   * `_onDispositionChanged`); persists `disp` ONLY — never
+   * `system.currentDisposition`, never a roll path (decoupling invariant, D-4).
+   * Whole-array write.
+   * @param {Event} event
+   * @param {HTMLElement} target  carries data-index + data-rating
+   */
+  static async _onSetRelDisposition(event, target) {
+    event.preventDefault();
+    if (!this.actor.isOwner) return; // FR-029 (defense-in-depth)
+    const rating = Number(target.dataset.rating);
+    if (!ChronicleSystem.dispositions.find((d) => d.rating === rating)) {
+      LOGGER.warn("the informed disposition does not exist.");
+      return;
+    }
+    const index = Number(target.dataset.index);
+    const rels = foundry.utils.deepClone(this.actor.system.relationships ?? []);
+    if (index < 0 || index >= rels.length) return;
+    rels[index].disp = rating;
+    await this.actor.update({ "system.relationships": rels });
   }
 
   /* -------------------------------------------- */

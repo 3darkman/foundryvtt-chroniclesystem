@@ -1,0 +1,137 @@
+{{!-- spec 022 — Relationships tab. Root is a <div class="tab"> (NEVER a nested
+      <form> — V2). NO card wrapper: the section title + drag band + search +
+      grid sit FREE in the tab (handoff parity, like the other tabs). Cards are
+      derived every render from system.relationships + live resolved targets
+      (contracts/relationship-card-context.md). Owner-gated edit affordances;
+      non-owners read-only (FR-029). --}}
+<div class="tab relationships-tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="relationships">
+    {{!-- section header: shared blue rail + title + NEUTRAL total-count badge --}}
+    <div class="cs2-section-title cs2-rel-title">
+        <span class="cs2-rail"></span>
+        <span>{{localize "CS.sheets.character.relationships.title"}}</span>
+        <span class="cs2-rel-count">{{relCount}}</span>
+    </div>
+
+    {{!-- always-visible drag-instruction band (FR-010) --}}
+    <div class="cs2-rel-drag">
+        <svg class="cs2-rel-ico" aria-hidden="true"><use href="#ico-grip"></use></svg>
+        <span>{{localize "CS.sheets.character.relationships.dragInstruction"}}</span>
+    </div>
+
+    {{!-- search — only when the list is non-empty (FR-026); nameless so it never
+          participates in FormDataExtended (transient UI, FR-004) --}}
+    {{#if relHasAny}}
+    <div class="cs2-rel-search">
+        <svg class="cs2-rel-ico" aria-hidden="true"><use href="#ico-search"></use></svg>
+        <input type="text" class="cs2-rel-search-input" autocomplete="off"
+               placeholder="{{localize 'CS.sheets.character.relationships.searchPlaceholder'}}"/>
+    </div>
+    {{/if}}
+
+    {{#if relCount}}
+    <div class="cs2-rel-grid">
+        {{#each relationships as |rel|}}
+        <div class="cs2-rel-card {{#if rel.broken}}is-broken{{/if}}" data-index="{{rel.index}}" data-search="{{rel.search}}">
+            {{!-- top row: portrait (+note badge) · name/subtitle · edit + remove --}}
+            <div class="cs2-rel-main">
+                <div class="cs2-rel-portrait">
+                    <img class="cs2-rel-img" src="{{rel.img}}" alt="{{rel.name}}"
+                         data-action="openRelationshipSheet" data-uuid="{{rel.uuid}}"
+                         title="{{localize 'CS.sheets.character.relationships.openPublicSheet' name=rel.name}}"/>
+                    {{#if rel.hasNote}}
+                    <span class="cs2-rel-note-badge" title="{{rel.noteTitle}}">
+                        <svg aria-hidden="true"><use href="#ico-note"></use></svg>
+                    </span>
+                    {{/if}}
+                </div>
+                <div class="cs2-rel-body">
+                    <a class="cs2-rel-name" data-action="openRelationshipSheet" data-uuid="{{rel.uuid}}"
+                       title="{{localize 'CS.sheets.character.relationships.openPublicSheet' name=rel.name}}">{{rel.name}}</a>
+                    {{#if rel.subtitle}}<div class="cs2-rel-subtitle">{{rel.subtitle}}</div>{{/if}}
+                    {{#if rel.broken}}
+                    <div class="cs2-rel-broken"><i class="fas fa-triangle-exclamation"></i> {{localize "CS.sheets.character.relationships.brokenRef"}}</div>
+                    {{/if}}
+                </div>
+                {{#if ../owner}}
+                {{!-- edit + remove: the sheet-wide canonical icon controls (SSOT:
+                      the effects tab). Edit opens the note editor (wired in JS). --}}
+                <div class="cs2-icon-actions">
+                    <a class="effect-control cs2-rel-edit" data-index="{{rel.index}}"
+                       title="{{localize 'CS.sheets.character.relationships.noteLabel'}}"><i class="fa-regular fa-pen-to-square"></i></a>
+                    <a class="effect-control effect-delete" data-action="removeRelationship" data-index="{{rel.index}}"
+                       title="{{localize 'CS.sheets.character.relationships.remove'}}"><i class="fa-regular fa-trash-can"></i></a>
+                </div>
+                {{/if}}
+            </div>
+
+            {{!-- note (US3): read PREVIEW (clickable, wraps to ~2 lines) → native
+                  <prose-mirror> editor, hidden while collapsed and revealed on
+                  preview/pencil click (pm.open=true; the ✓ toolbar button saves
+                  + collapses). NO label (handoff). Non-owner: read-only. --}}
+            {{#if ../owner}}
+            <div class="cs2-rel-note">
+                <div class="cs2-rel-note-preview {{#unless rel.hasNote}}is-empty{{/unless}}" title="{{rel.noteTitle}}">{{rel.noteShort}}</div>
+                <prose-mirror name="system.relationships.{{rel.index}}.note" value="{{rel.note}}" toggled="true">{{{rel.enrichedNote}}}</prose-mirror>
+            </div>
+            {{else}}
+            <div class="cs2-rel-note">
+                {{#if rel.hasNote}}
+                <div class="cs2-rel-note-read editor-content">{{{rel.enrichedNote}}}</div>
+                {{else}}
+                <div class="cs2-rel-note-preview is-empty">{{rel.noteShort}}</div>
+                {{/if}}
+            </div>
+            {{/if}}
+
+            {{!-- disposition (US2): divider + label(left) + chip/dropdown(right) on
+                  ONE line (handoff). Owner = interactive; non-owner = static chip. --}}
+            <div class="cs2-rel-disp-row">
+                <span class="csv2-label">{{localize "CS.sheets.character.relationships.dispositionLabel"}}</span>
+                {{#if ../owner}}
+                <div class="cs2-rel-disp">
+                    <button type="button" class="cs2-rel-disp-chip" data-disp="{{rel.disp}}">
+                        <span class="cs2-rel-disp-name">{{rel.dispName}}</span>
+                        <svg class="cs2-rel-chevron" aria-hidden="true"><use href="#ico-chevron"></use></svg>
+                    </button>
+                    <div class="cs2-rel-disp-menu">
+                        {{#each ../dispositionLevels as |lvl|}}
+                        <button type="button" class="cs2-rel-disp-opt {{#ifEquals lvl.rating rel.disp}}is-current{{/ifEquals}}"
+                                data-action="setRelDisposition" data-index="{{rel.index}}" data-rating="{{lvl.rating}}">
+                            <span class="cs2-rel-swatch" data-disp="{{lvl.rating}}"></span>
+                            <span class="cs2-rel-disp-optname">{{lvl.name}}</span>
+                        </button>
+                        {{/each}}
+                    </div>
+                </div>
+                {{else}}
+                <span class="cs2-rel-disp-chip is-static" data-disp="{{rel.disp}}">
+                    <span class="cs2-rel-disp-name">{{rel.dispName}}</span>
+                </span>
+                {{/if}}
+            </div>
+        </div>
+        {{/each}}
+    </div>
+
+    {{!-- no-results (JS-toggled; text set with the query) — FR-028 --}}
+    <div class="cs2-rel-noresults is-hidden"></div>
+    {{else}}
+    {{!-- empty state — FR-028 --}}
+    <div class="cs2-rel-empty">
+        <div class="cs2-rel-empty-title">{{localize "CS.sheets.character.relationships.empty.title"}}</div>
+        <div class="cs2-rel-empty-hint">{{localize "CS.sheets.character.relationships.empty.hint"}}</div>
+    </div>
+    {{/if}}
+
+    {{!-- MANDATORY full-array round-trip (W-3): hidden uuid + disp for EVERY entry
+          so a note submit (submitOnChange) reconstructs the dense array — the
+          per-index note is the card's <prose-mirror>. Without these, ArrayField
+          ._cast rebuilds a sparse array and wipes siblings. Index-keyed, so the
+          display sort order is irrelevant. Owner only. --}}
+    {{#if owner}}
+    {{#each relationships as |rel|}}
+    <input type="hidden" name="system.relationships.{{rel.index}}.uuid" value="{{rel.uuid}}"/>
+    <input type="hidden" name="system.relationships.{{rel.index}}.disp" value="{{rel.disp}}" data-dtype="Number"/>
+    {{/each}}
+    {{/if}}
+</div>

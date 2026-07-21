@@ -42,7 +42,7 @@
             <div class="cs2-card-header">Current Disposition</div>
             <div class="cs2-disposition-list">
                 {{#each dispositions}}
-                    <div class="disposition option capitalize {{showIfEquals this.rating ../character.currentDisposition "selected"}}" data-id="{{this.rating}}" data-action="changeDisposition">
+                    <div class="disposition option capitalize {{showIfEquals this.rating ../character.currentDisposition "selected"}}" data-id="{{this.rating}}" data-disp="{{this.rating}}" data-action="changeDisposition">
                         <div class="cs2-disposition-row">
                             <span class="cs2-disposition-name">{{this.rating}} &middot; {{localize this.name}}</span>
                             <span class="cs2-disposition-mods">{{this.persuasionModifier}} / {{this.deceptionModifier}}</span>
@@ -127,7 +127,7 @@
                     {{#each character.injuries as |injury id|}}
                         <div class="cs2-split-item flexrow">
                             <input type="text" name="system.injuries.{{id}}" value="{{injury}}" placeholder="Description" data-dtype="String"/>
-                            <a class="cs2-icon-btn injury-control" data-id="{{id}}" data-action="deleteInjury"><i class="fas fa-trash"></i></a>
+                            <a class="effect-control effect-delete injury-control" data-id="{{id}}" data-action="deleteInjury"><i class="fa-regular fa-trash-can"></i></a>
                         </div>
                     {{else}}
                         <div class="cs2-split-item cs2-split-empty">&mdash;</div>
@@ -142,7 +142,7 @@
                     {{#each character.wounds as |wound id|}}
                         <div class="cs2-split-item flexrow">
                             <input type="text" name="system.wounds.{{id}}" value="{{wound}}" placeholder="Description" data-dtype="String"/>
-                            <a class="cs2-icon-btn wound-control" data-id="{{id}}" data-action="deleteWound"><i class="fas fa-trash"></i></a>
+                            <a class="effect-control effect-delete wound-control" data-id="{{id}}" data-action="deleteWound"><i class="fa-regular fa-trash-can"></i></a>
                         </div>
                     {{else}}
                         <div class="cs2-split-item cs2-split-empty">&mdash;</div>

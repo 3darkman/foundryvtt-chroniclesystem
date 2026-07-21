@@ -2,6 +2,9 @@
     {{!-- spec 012: shared eye-icon sprite, included ONCE per sheet; the header
          (House/Position) and the Description tab reference its symbols by id. --}}
     {{> "systems/chroniclesystem/templates/components/cs-eye-icons.hbs"}}
+    {{!-- spec 022: Relationships-tab icon sprite (ico-grip/chevron/note/search),
+         included ONCE per sheet; the tab references its symbols by id (<use>). --}}
+    {{> "systems/chroniclesystem/templates/actors/partials/cs-sheet-icons.hbs"}}
     {{!-- Sheet Header --}}
     <header class="sheet-header">
         <div class="header-fields">
@@ -31,6 +34,7 @@
         <a class="item" data-tab="sorcery" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.sorcery"}}</a>
         <a  class="item"  data-tab="equipments" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.equipments"}}</a>
         <a  class="item"  data-tab="actor-description" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.description"}}</a>
+        <a  class="item"  data-tab="relationships" data-group="primary" data-action="tab">{{localize "CS.sheets.character.tabs.relationships"}}</a>
         <a  class="item"  data-tab="effects" data-group="primary" data-action="tab">{{localize "CS.effects.tab"}}</a>
     </nav>
 
@@ -42,6 +46,7 @@
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/sorcery-tab.hbs"}}
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/equipments-tab.hbs"}}
         {{> "systems/chroniclesystem/templates/actors/partials/tabs/description-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/relationships-tab.hbs"}}
         {{> "systems/chroniclesystem/templates/components/effects-tab.hbs"}}
     </section>
 </div>
