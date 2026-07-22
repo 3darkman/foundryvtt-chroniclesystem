@@ -104,6 +104,10 @@ export class CSRoll {
     const targetName = cc?.targetName ?? null;
     const difficultyName =
       label || (labelKey ? SystemUtils.localize(labelKey) : "");
+    // spec 023 — when the difficulty IS one of the target's ability/specialty
+    // passives, the card says so beside the name (a defense and a table level
+    // read as themselves and carry no badge).
+    const difficultyIsPassive = Boolean(this.difficulty?.passiveTrait);
     const marginText =
       verdict.margin >= 0 ? `+${verdict.margin}` : `${verdict.margin}`;
     // Margin tone: a hit (margin ≥ 0) reads green, a miss red (spec 011).
@@ -200,6 +204,7 @@ export class CSRoll {
       {
         title: this.title,
         difficultyName,
+        difficultyIsPassive,
         targetName,
         target,
         total: roll.total,
@@ -235,6 +240,14 @@ export class CSRoll {
           margin: verdict.margin,
           success: verdict.success,
           degreeKey: verdict.degreeKey,
+          // spec 023 (US3) — this difficulty came FROM THE TARGET (the passive
+          // picker, or a quick/untouched conflict roll's defense), so a non-GM
+          // viewer may have its target number and margin masked at render time.
+          // Absent on every other path, so a table-difficulty roll, a free roll
+          // and every pre-existing card are never flagged (FR-028).
+          ...(this.difficulty?.targetDerived
+            ? { passiveDifficulty: true }
+            : {}),
           ...(resolution
             ? {
                 apply: {

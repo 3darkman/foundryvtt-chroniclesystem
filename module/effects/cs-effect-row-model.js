@@ -64,6 +64,10 @@ export const CHANNEL_CHOICES = {
   [EFFECT_CHANNELS.BONUS_DICE]: "CS.effects.channels.bonusdice",
   [EFFECT_CHANNELS.REROLL]: "CS.effects.channels.reroll",
   [EFFECT_CHANNELS.PENALTY]: "CS.effects.channels.penalty",
+  // spec 023 — the whole all/ability/specialty cascade, the canonical slug
+  // dropdown, "Custom…" and the fixed/derived value modes are inherited from
+  // `isRollChannel`, so no parse/build branch is needed (FR-030/031/037).
+  [EFFECT_CHANNELS.PASSIVE]: "CS.effects.channels.passive",
   [EFFECT_CHANNELS.DERIVED_STAT]: "CS.effects.channels.derivedstat",
   [EFFECT_CHANNELS.ARMOR_RATING]: "CS.effects.channels.armorrating",
   [EFFECT_CHANNELS.DAMAGE]: "CS.effects.channels.damage",

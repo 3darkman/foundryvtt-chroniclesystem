@@ -39,6 +39,9 @@ CSConstants.Settings = {
   DIFFICULTY_TABLE: "difficultyTable",
   // spec 021 (US5, FR-021) — gates the optional SIFRP weapon Training rule.
   WEAPON_TRAINING_RULE: "weaponTrainingRule",
+  // spec 023 (US3, FR-022) — when off, non-GM users read `?` instead of a
+  // difficulty derived from the target. Presentation only; the math is untouched.
+  PASSIVE_VALUES_VISIBLE: "passiveValuesVisible",
 };
 
 CSConstants.HouseResources = {

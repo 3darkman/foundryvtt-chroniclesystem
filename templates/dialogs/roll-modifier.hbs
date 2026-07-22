@@ -21,13 +21,37 @@
             <span class="cs-rd-target-pill"><i class="fas fa-bullseye"></i>{{targetDifficulty.targetName}}</span>
         </div>
         <div class="cs-rd-diff-a">
-            <div class="cs-rd-diff-value">{{targetDifficulty.value}}</div>
+            {{!-- spec 023 (US3) — same element, same class, same layout: only the
+                  TEXT is the localized placeholder while the selected option is
+                  target-derived. The live handler swaps it back for a public
+                  difficulty level (FR-023a/024a). --}}
+            <div class="cs-rd-diff-value">{{#if targetDifficulty.masked}}{{localize "CS.dialogs.rollModifier.passiveMasked"}}{{else}}{{targetDifficulty.value}}{{/if}}</div>
             <div class="cs-rd-diff-divider"></div>
             <div class="cs-rd-diff-text">
                 <div class="cs-rd-diff-name">{{targetDifficulty.name}}</div>
                 <div class="cs-rd-diff-hint">{{localize "CS.dialogs.rollModifier.passiveDifficulty"}}</div>
             </div>
         </div>
+        {{!-- spec 023 (US2) — the ONE difficulty control when a target resolved:
+              its defenses, its abilities/specialties, the world catalogue's, and
+              (non-conflict rolls only) the difficulty table's own levels. The big
+              number above is display-only and follows this selection (FR-017/019). --}}
+        {{#if targetDifficulty.groups.length}}
+        <div class="cs-rd-diff-pick">
+            <span class="cs-rd-diff-pick-label">{{localize "CS.dialogs.rollModifier.useAsDifficulty"}}</span>
+            <select name="passiveKey">
+                {{#each targetDifficulty.groups}}
+                <optgroup label="{{this.label}}">
+                    {{#each this.options}}
+                    <option value="{{this.key}}" data-passive-value="{{this.value}}"
+                            data-passive-label="{{this.label}}" data-passive-maskable="{{this.maskable}}"
+                            {{#if this.selected}}selected{{/if}}>{{this.optionText}}</option>
+                    {{/each}}
+                </optgroup>
+                {{/each}}
+            </select>
+        </div>
+        {{/if}}
     </section>
     {{else if difficultyOptions.length}}
     {{!-- State B: single inline row — label + selector, no header strip. --}}
@@ -62,8 +86,13 @@
     <section class="csv2-card cs-rd-col">
         <div class="csv2-card-header">{{localize "CS.dialogs.rollModifier.itemizedTitle"}}</div>
         <div class="cs-rd-mod-scroll">
+            {{!-- spec 023 (D9) — a row scoped to ONE passive option (today: the
+                  target's size adjustment, which belongs to Combat Defense) is
+                  hidden live when another passive is picked, so the dialog's
+                  decomposition matches the card's. Emitted only when scoped —
+                  a blank attribute would match the hide selector on every row. --}}
             {{#each itemizedAlwaysOn}}
-            <div class="cs-mod-row cs-origin-{{this.origin}}">
+            <div class="cs-mod-row cs-origin-{{this.origin}}"{{#if this.passiveScope}} data-passive-scope="{{this.passiveScope}}"{{/if}}>
                 <div class="cs-mod-main">
                     <span class="cs-mod-pill">{{this.originLabel}}</span>
                     <span class="cs-mod-source">{{this.sourceLabel}}</span>

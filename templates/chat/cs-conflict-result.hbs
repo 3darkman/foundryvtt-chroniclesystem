@@ -33,11 +33,18 @@
 
         {{!-- 4 · Numbers — optional difficulty name, then Total / Target / Margin. --}}
         <div class="cs-rc-numbers">
-            {{#if difficultyName}}<div class="cs-rc-diffname">{{difficultyName}}</div>{{/if}}
+            {{!-- spec 023 — an ability/specialty difficulty is a PASSIVE value;
+                  the badge names the kind of number beside the trait. A defense
+                  or a difficulty-table level renders the name alone. --}}
+            {{#if difficultyName}}<div class="cs-rc-diffname">{{difficultyName}}{{#if difficultyIsPassive}} <span class="cs-rc-diffkind">{{localize "CS.difficulty.result.passive"}}</span>{{/if}}</div>{{/if}}
             <div class="cs-rc-num-grid">
                 <div class="cs-rc-num-cell"><div class="cs-rc-num-label">{{localize "CS.difficulty.result.total"}}</div><div class="cs-rc-num-value">{{total}}</div></div>
-                <div class="cs-rc-num-cell"><div class="cs-rc-num-label">{{localize "CS.difficulty.result.target"}}</div><div class="cs-rc-num-value">{{target}}</div></div>
-                <div class="cs-rc-num-cell cs-margin-{{marginTone}}"><div class="cs-rc-num-label">{{localize "CS.difficulty.result.margin"}}</div><div class="cs-rc-num-value">{{marginText}}</div></div>
+                {{!-- spec 023 (US3) — ONLY these two figures are maskable. Total,
+                      verdict, degrees, base, itemized rows, dice and the apply
+                      buttons are never touched (FR-024). The true values stay in
+                      the message; the hook replaces the TEXT per viewer. --}}
+                <div class="cs-rc-num-cell"><div class="cs-rc-num-label">{{localize "CS.difficulty.result.target"}}</div><div class="cs-rc-num-value cs-rc-maskable" data-cs-mask="target">{{target}}</div></div>
+                <div class="cs-rc-num-cell cs-margin-{{marginTone}}"><div class="cs-rc-num-label">{{localize "CS.difficulty.result.margin"}}</div><div class="cs-rc-num-value cs-rc-maskable" data-cs-mask="margin">{{marginText}}</div></div>
             </div>
         </div>
 

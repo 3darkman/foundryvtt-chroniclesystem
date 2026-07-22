@@ -689,6 +689,23 @@
   gap: 4px;
 }
 
+/* spec 023 (US1) — a specialty chip and its passive value read as ONE unit, so
+   they wrap together in the tag flow. Layout only: the number's own typography
+   comes from the shared `.csv2-passive` primitive in cs-components.css. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tag-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* The passive belongs to the chip on its LEFT, so the gap inside a pair must
+   read tighter than the gap between pairs (handoff: 5px inside, 8px between).
+   Scoped to the modifier class so the other `.cs2-tags` rows keep their own
+   spacing. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tags.cs2-tags--paired {
+  gap: 8px;
+}
+
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tag {
   background: var(--csv2-bg);
   border: 1px solid var(--csv2-border);

@@ -64,6 +64,9 @@ export class CSActor extends Actor {
   testDice;
   bonusDice;
   reRolls;
+  // spec 023 — the passive channel: a trait-targeted buffer read ONLY by the
+  // passive derivation (getActorPassiveValue), never by a rolled test.
+  passives;
   // Wave 4 non-roll buffers: derived-stat deltas (read by getDerivedStatBonus in
   // calculateDerivedValues), weapon damage (read by getWeaponDamageBonus in
   // updateDamageValue), and granted weapon qualities (applied by
@@ -133,6 +136,7 @@ export class CSActor extends Actor {
       this.testDice = collected.testDice;
       this.bonusDice = collected.bonusDice;
       this.reRolls = collected.reRolls;
+      this.passives = collected.passives;
       this.derivedStats = collected.derivedStats;
       this.weaponDamage = collected.weaponDamage;
       this.weaponQuality = collected.weaponQuality;
@@ -433,6 +437,22 @@ export class CSActor extends Actor {
     if (!this.reRolls) this.reRolls = {};
     return collectFromBuffer(
       this.reRolls,
+      type,
+      includeDetail,
+      includeModifierGlobal,
+      (id) => this.getEmbeddedDocument("Item", id)
+    );
+  }
+
+  /**
+   * spec 023 — the `cs.passive.*` channel total for one trait slug. Same shape as
+   * the dice getters (they share `collectFromBuffer`); read only by the passive
+   * derivation, so it can never reach a rolled test.
+   */
+  getPassive(type, includeDetail = false, includeModifierGlobal = false) {
+    if (!this.passives) this.passives = {};
+    return collectFromBuffer(
+      this.passives,
       type,
       includeDetail,
       includeModifierGlobal,

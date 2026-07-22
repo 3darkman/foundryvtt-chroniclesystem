@@ -1223,6 +1223,27 @@
   color: var(--csv2-muted-2);
 }
 
+/* Read-only derived number (spec 023): a muted mono figure that is neither an
+   input nor a control — the sheet's PASSIVE column and the passive beside each
+   specialty chip. Dual-scoped through the same `:is(.cs-v2, .cs-sheet-v2)`
+   bridge the eyebrow uses, so the character sheet reaches it without a local
+   copy (constitution SSOT). */
+:is(.cs-v2, .cs-sheet-v2) .csv2-passive {
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--csv2-muted-2);
+  /* A fixed, centred box (handoff: `min-width:16px; text-align:center`) so a
+     one-digit and a two-digit passive sit with the SAME margin on either side
+     and the numbers line up down a column. */
+  display: inline-block;
+  min-width: 16px;
+  text-align: center;
+  /* Read-only: no border, no background, no pointer affordance. */
+  cursor: default;
+  user-select: none;
+}
+
 /* Colour swatch button (tincture / palette pickers). */
 .cs-v2 .csv2-swatch {
   aspect-ratio: 1;
@@ -1839,6 +1860,32 @@
   margin-top: 2px;
 }
 
+/* 1 · spec 023 — the target-passive selector row, BELOW the big-number line of
+      state A (the handoff's placement). Shares the state-B eyebrow treatment so
+      the two difficulty controls read as one family; the `select` chrome itself
+      comes from the shared `.cs-v2 select` rule, never re-declared here. */
+.cs-roll-dialog.cs-v2 .cs-rd-diff-pick {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px 12px;
+}
+.cs-roll-dialog.cs-v2 .cs-rd-diff-pick-label {
+  flex: none;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+.cs-roll-dialog.cs-v2 .cs-rd-diff-pick select {
+  flex: 1;
+  /* Long ability/specialty names are never truncated by the builder — let the
+     control scroll its own text rather than widening the dialog. */
+  min-width: 0;
+}
+
 /* 1 · Difficulty state B (selector) — single inline row, no header strip. */
 .cs-roll-dialog.cs-v2 .cs-rd-diff-b {
   display: flex;
@@ -2211,6 +2258,16 @@
   color: var(--csv2-muted);
   margin-bottom: 5px;
 }
+/* spec 023 — the kind badge beside the difficulty name ("PASSIVE"). Inherits the
+   line's mono/uppercase/size; only the outline sets it apart from the name. */
+.cs-roll-card.cs-v2 .cs-rc-diffkind {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 4px;
+  border: 1px solid var(--csv2-border);
+  border-radius: 3px;
+  color: var(--csv2-muted-2);
+}
 .cs-roll-card.cs-v2 .cs-rc-num-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2252,6 +2309,14 @@
 .cs-roll-card.cs-v2 .cs-margin-loss .cs-rc-num-value {
   color: var(--csv2-loss);
 }
+/* 4b · spec 023 (US3) — a masked figure keeps the number field's footprint and
+      alignment, so the card does not reflow between a GM's view and a player's
+      (FR-024a). Only the text differs; the cell, label and tone are untouched. */
+.cs-roll-card.cs-v2 .cs-rc-maskable {
+  min-width: 1.2em;
+  font-variant-numeric: tabular-nums;
+}
+
 /* 5 · Base line. */
 .cs-roll-card.cs-v2 .cs-rc-base {
   display: flex;

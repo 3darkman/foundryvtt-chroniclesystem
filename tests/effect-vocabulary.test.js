@@ -7,6 +7,8 @@ import {
   matchWeaponQuality,
   weaponQualityTakesParam,
   weaponQualitySlug,
+  isRollChannel,
+  ROLL_CHANNEL_TO_FORMULA_FIELD,
 } from "../module/effects/cs-effect-vocabulary.js";
 
 // Spec 008 redesign — the structured key grammar `cs.<channel>.<targetKind>[.<slug>]`
@@ -144,6 +146,58 @@ describe("buildEffectKey ↔ parseEffectKey round-trip", () => {
     expect(
       buildEffectKey({ channel: "quality", targetKind: "weapontype" })
     ).toBe(""); // missing weapon-type slug
+  });
+});
+
+// spec 023 (contract passive-effect-channel.md C1/C5) — the `passive` channel
+// rides the SAME trait grammar as the dice channels, but is deliberately absent
+// from the formula-field map: it moves a passive value and nothing else.
+describe("the passive channel (spec 023)", () => {
+  it.each([
+    [{ channel: "passive", targetKind: "all", target: null }],
+    [{ channel: "passive", targetKind: "ability", target: "awareness" }],
+    [
+      {
+        channel: "passive",
+        targetKind: "specialty",
+        target: "awareness_empathy",
+      },
+    ],
+  ])("round-trips %o", (spec) => {
+    expect(parseEffectKey(buildEffectKey(spec))).toEqual(spec);
+  });
+
+  it("parses the three canonical keys", () => {
+    expect(parseEffectKey("cs.passive.all")).toEqual({
+      channel: "passive",
+      targetKind: "all",
+      target: null,
+    });
+    expect(parseEffectKey("cs.passive.ability.awareness")).toEqual({
+      channel: "passive",
+      targetKind: "ability",
+      target: "awareness",
+    });
+  });
+
+  it.each([
+    ["cs.passive.stat.combat_defense"], // roll channels have no `stat` kind (FR-031a)
+    ["cs.passive.ability."], // empty slug
+    ["cs.passive.ability.awareness.extra"], // extra segment
+    ["cs.passive.all.extra"],
+    ["cs.passive"], // no target kind
+    ["cs.passive.weapon"],
+  ])("rejects %p", (key) => {
+    expect(parseEffectKey(key)).toBeNull();
+  });
+
+  it("has NO formula field — a passive change can never reach a rolled test", () => {
+    expect(ROLL_CHANNEL_TO_FORMULA_FIELD).not.toHaveProperty("passive");
+    expect(ROLL_CHANNEL_TO_FORMULA_FIELD.passive).toBeUndefined();
+  });
+
+  it("IS a trait-targeted channel, so it inherits the authoring cascade", () => {
+    expect(isRollChannel("passive")).toBe(true);
   });
 });
 

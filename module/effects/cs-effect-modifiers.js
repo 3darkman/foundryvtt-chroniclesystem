@@ -235,6 +235,7 @@ const ROLL_CHANNEL_TO_BUFFER = {
   [EFFECT_CHANNELS.TEST_DICE]: "testDice", // +#D → formula.pool
   [EFFECT_CHANNELS.BONUS_DICE]: "bonusDice", // +#B → formula.bonusDice
   [EFFECT_CHANNELS.REROLL]: "reRolls", // reroll Ns → formula.reRoll
+  [EFFECT_CHANNELS.PASSIVE]: "passives", // spec 023: ±N on the passive value ONLY (no formula field)
 };
 
 /** Buffer key a weapon-targeting change feeds: the ALL bucket or the type slug. */
@@ -870,6 +871,7 @@ export function collectEffectModifiers(actor) {
     testDice: {},
     bonusDice: {},
     reRolls: {},
+    passives: {},
     derivedStats: {},
     weaponDamage: {},
     weaponQuality: {},
