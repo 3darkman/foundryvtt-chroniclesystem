@@ -75,6 +75,26 @@ const registerSystemSettings = () => {
     }
   );
 
+  // spec 023 (US3) — passive difficulty values visible to players, default OFF:
+  // a target's passive is the GM's information to give, so a fresh world hides
+  // it until the GM opts in.
+  // World-scoped; re-render open windows so an open dialog/chat log follows.
+  game.settings.register(
+    CSConstants.Settings.SYSTEM_NAME,
+    CSConstants.Settings.PASSIVE_VALUES_VISIBLE,
+    {
+      name: "CS.settings.passiveValuesVisible.name",
+      hint: "CS.settings.passiveValuesVisible.hint",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: false,
+      onChange: () => {
+        for (const app of Object.values(ui.windows)) app.render(false);
+      },
+    }
+  );
+
   game.settings.register(
     CSConstants.Settings.SYSTEM_NAME,
     CSConstants.Settings.CURRENT_VERSION,
@@ -149,5 +169,26 @@ const registerSystemSettings = () => {
     }
   );
 };
+
+/**
+ * spec 023 (US3, contract passive-visibility-masking.md C1) — the single read of
+ * the passive-visibility setting, so no consumer repeats the literal key. Missing
+ * or unregistered (a world opened before this feature, or a Vitest double) reads
+ * as the registered default — `false`, so the value is hidden until the GM opts
+ * in rather than leaking through a path where the setting is unavailable.
+ * @returns {boolean}
+ */
+export function passiveValuesVisible() {
+  try {
+    return (
+      game.settings.get(
+        CSConstants.Settings.SYSTEM_NAME,
+        CSConstants.Settings.PASSIVE_VALUES_VISIBLE
+      ) === true
+    );
+  } catch {
+    return false;
+  }
+}
 
 export default registerSystemSettings;

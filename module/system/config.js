@@ -33,6 +33,9 @@ import {
   applyResourceDelta,
   applyConditionToTarget,
 } from "../combat/cs-conflict-apply.js";
+import { invalidatePassiveCatalog } from "../rolls/cs-passive-catalog.js";
+import { shouldMaskPassive } from "../rolls/cs-passive.js";
+import { passiveValuesVisible } from "./settings.js";
 
 // TypeDataModel classes
 import CharacterData from "../data/actor/character-data.js";
@@ -200,6 +203,28 @@ Hooks.once("init", async function () {
 /* -------------------------------------------- */
 
 Hooks.on("renderChatMessageHTML", (message, html) => {
+  // spec 023 (US3, FR-027) — presentation-only masking, applied PER USER and per
+  // render (so a reload or a re-opened chat log re-applies it, and flipping the
+  // setting changes the next render with no data rewrite). The setting is read
+  // HERE, inside the hook, and `isGM` is the VIEWER's. Messages without the flag
+  // are never touched, so table-difficulty rolls and every pre-existing card
+  // render exactly as before. This runs strictly after the verdict/degrees/
+  // damage were computed and stored — the math never sees a masked value.
+  if (
+    shouldMaskPassive({
+      isGM: game.user.isGM,
+      valuesVisible: passiveValuesVisible(),
+      isPassiveDifficulty: message.getFlag(
+        "chroniclesystem",
+        "passiveDifficulty"
+      ),
+    })
+  ) {
+    const mask = SystemUtils.localize("CS.dialogs.rollModifier.passiveMasked");
+    for (const el of html.querySelectorAll(".cs-rc-maskable"))
+      el.textContent = mask;
+  }
+
   // Apply damage/influence (spec 010).
   const btn = html.querySelector("[data-action='cs-apply-resource']");
   const apply = message.getFlag("chroniclesystem", "apply");
@@ -304,3 +329,17 @@ Hooks.on("createItem", (item) => {
     item.img = `systems/chroniclesystem/assets/icons/${item.type}.png`;
   }
 });
+
+/* -------------------------------------------- */
+/*  spec 023 (FR-014f) — the passive picker's   */
+/*  world ability catalogue is memoized; drop    */
+/*  the memo whenever an ability item changes so */
+/*  the next dialog open sees it (no reload).    */
+/* -------------------------------------------- */
+
+for (const hook of ["createItem", "updateItem", "deleteItem"]) {
+  Hooks.on(hook, (item) => {
+    if (item?.type !== "ability") return;
+    invalidatePassiveCatalog();
+  });
+}

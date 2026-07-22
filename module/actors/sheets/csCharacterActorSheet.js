@@ -186,16 +186,29 @@ export class CSCharacterActorSheet extends CSActorSheet {
     // (getRollChip), so every chip's DISPLAYED formula equals its effective quick
     // roll (paridade chip↔jogada, FR-001/SC-001). The rollId strings match what
     // the abilities template built (`ability:{name}` / `specialty:{spec}:{ability}`).
+    // spec 023 (US1): the PASSIVE value rides the SAME loop — no second
+    // traversal (D3). Transient, read-only, never submitted (no `name`) and
+    // never rollable (no `data-action`); recomputed on every render like the
+    // chips beside it.
     character.owned.abilities.forEach((ability) => {
       ability.abilityChip = ChronicleSystem.getRollChip(
         actor,
         `ability:${ability.name}`
+      );
+      ability.passive = ChronicleSystem.getActorPassiveValue(
+        actor,
+        ability.name
       );
       for (const specialty of Object.values(ability.system.specialties ?? {})) {
         if (!specialty.rating) continue;
         specialty.specialtyChip = ChronicleSystem.getRollChip(
           actor,
           `specialty:${specialty.name}:${ability.name}`
+        );
+        specialty.passive = ChronicleSystem.getActorPassiveValue(
+          actor,
+          ability.name,
+          specialty.name
         );
       }
     });

@@ -166,6 +166,11 @@
         "difficulty": "Difficulty",
         "difficultyLevel": "Difficulty Level",
         "passiveDifficulty": "Passive difficulty from target",
+        "useAsDifficulty": "Use as difficulty",
+        "passiveOverall": "Overall",
+        "passiveGroupDefenses": "Defenses",
+        "passiveGroupDifficulties": "Difficulties",
+        "passiveMasked": "?",
         "confirmRoll": "Confirm Roll",
         "emptyList": "None",
         "targetDifficulty": "Difficulty vs {name}",
@@ -214,6 +219,10 @@
       "asoiafDefenseStyle": {
         "name": "ASoIaF Defense Style",
         "hint": "The armor penalty influences the character's combat defense. This Needs Foundry refresh (F5)."
+      },
+      "passiveValuesVisible": {
+        "name": "Passive Values Visible to Players",
+        "hint": "When off, non-GM users see “?” instead of a difficulty taken from the target (the roll dialog's big number and the chat card's Target and Margin). The roll math, the character sheet's PASSIVE column and difficulties taken from the difficulty table are never affected."
       },
       "weaponTrainingRule": {
         "name": "Weapon Training Rule",
@@ -280,6 +289,7 @@
         "bonusdice": "Bonus dice (+#B)",
         "reroll": "Re-roll 1s",
         "penalty": "Dice penalty (−#D)",
+        "passive": "Passive modifier",
         "derivedstat": "Derived stat",
         "armorrating": "Armor rating",
         "damage": "Weapon damage",
@@ -516,7 +526,8 @@
         "target": "Target",
         "total": "Total",
         "margin": "Margin",
-        "degree": "Degree"
+        "degree": "Degree",
+        "passive": "Passive"
       }
     },
     "conflict": {
@@ -666,6 +677,12 @@
         "wound": "Wound",
         "others": "Others",
         "techniques": "Techniques",
+        "test": "Test",
+        "ability": "Ability",
+        "specialties": "Specialties",
+        "passive": "Passive",
+        "passiveHint": "Passive value: 4 per test die, plus bonus dice and result modifiers (minus 4 per penalty die). Penalties never take the test below one die, and the value floors at 0. Not editable and never rolled.",
+        "passiveSpecialtyHint": "Passive value for this specialty: the ability's passive plus the specialty's rating. Not editable and never rolled.",
         "dispositions": {
           "affectionate": "affectionate",
           "friendly": "friendly",

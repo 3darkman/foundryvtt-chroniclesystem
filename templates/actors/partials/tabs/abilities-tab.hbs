@@ -1,10 +1,11 @@
 <div class="tab" data-group="primary" data-tab="abilities">
     <div class="cs2-card">
         <div class="cs2-card-header">{{localize "CS.sheets.character.tabs.abilities"}}</div>
-        <div class="cs2-grid" style="grid-template-columns: minmax(96px, max-content) 150px 1fr">
-            <span class="cs2-grid-head center">Test</span>
-            <span class="cs2-grid-head">Ability</span>
-            <span class="cs2-grid-head">Specialties</span>
+        <div class="cs2-grid" style="grid-template-columns: minmax(96px, max-content) 150px 64px 1fr">
+            <span class="cs2-grid-head center">{{localize "CS.sheets.character.test"}}</span>
+            <span class="cs2-grid-head">{{localize "CS.sheets.character.ability"}}</span>
+            <span class="cs2-grid-head center">{{localize "CS.sheets.character.passive"}}</span>
+            <span class="cs2-grid-head">{{localize "CS.sheets.character.specialties"}}</span>
             {{#each character.owned.abilities as |ability key|}}
                 <div class="item ability cs2-row" data-item-id="{{ability._id}}" draggable="true" style="display:contents">
                     <div class="cs2-grid-cell center">
@@ -15,12 +16,18 @@
                     <div class="cs2-grid-cell">
                         <label class="ability-label item-edit" data-action="editItem"><a>{{ability.name}}</a></label>
                     </div>
-                    <div class="cs2-grid-cell cs2-tags">
+                    <div class="cs2-grid-cell center">
+                        <span class="csv2-passive" title="{{localize "CS.sheets.character.passiveHint"}}">{{ability.passive}}</span>
+                    </div>
+                    <div class="cs2-grid-cell cs2-tags cs2-tags--paired">
                         {{#each ability.system.specialties as |specialty key|}}
                             {{#if specialty.rating}}
-                            {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                                id=specialty.specialtyChip.id
-                                label=(concat specialty.name " " specialty.specialtyChip.label) }}
+                            <span class="cs2-tag-pair">
+                                {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                                    id=specialty.specialtyChip.id
+                                    label=(concat specialty.name " " specialty.specialtyChip.label) }}
+                                <span class="csv2-passive" title="{{localize "CS.sheets.character.passiveSpecialtyHint"}}">{{specialty.passive}}</span>
+                            </span>
                             {{/if}}
                         {{/each}}
                     </div>

@@ -19,8 +19,10 @@ export { slugify };
 export const EFFECT_KEY_PREFIX = "cs.";
 
 /**
- * Effect channels — WHAT lever the effect pulls. Each maps (in the collector,
- * later wave) to a DiceRollFormula lever, a derived field, or an item mutation.
+ * Effect channels — WHAT lever the effect pulls. Most map (in the collector) to
+ * a DiceRollFormula lever, a derived field, or an item mutation; `passive`
+ * (spec 023) is the exception — it targets a trait like the dice channels but
+ * feeds NO formula lever, only the derived passive value.
  */
 export const EFFECT_CHANNELS = {
   RESULT: "result", // flat ±N on the test result → formula.modifier
@@ -28,6 +30,7 @@ export const EFFECT_CHANNELS = {
   BONUS_DICE: "bonusdice", // +#B rolled extra → formula.bonusDice
   REROLL: "reroll", // reroll up to N dice showing 1 → formula.reRoll (rN=1)
   PENALTY: "penalty", // −#D (negative value = reduction) → formula.dicePenalty
+  PASSIVE: "passive", // spec 023: ±N on the derived PASSIVE value only — no formula lever
   DERIVED_STAT: "derivedstat", // a system.derivedStats.* field
   ARMOR_RATING: "armorrating", // armour AR
   BULK: "bulk", // movement bulk
@@ -46,13 +49,20 @@ export const EFFECT_CHANNELS = {
   RANGE_MULTIPLIER: "rangemultiplier",
 };
 
-/** Channels that target a roll (all / ability / specialty). */
+/**
+ * Channels that target a TRAIT (all / ability / specialty) — i.e. the shared
+ * key grammar and the shared authoring cascade. Membership says nothing about
+ * what a channel feeds: the two maps below decide that. Five of these feed a
+ * `DiceRollFormula` lever (`ROLL_CHANNEL_TO_FORMULA_FIELD`); `passive` feeds
+ * only its own buffer (`ROLL_CHANNEL_TO_BUFFER`), never a rolled test.
+ */
 const ROLL_CHANNELS = new Set([
   EFFECT_CHANNELS.RESULT,
   EFFECT_CHANNELS.TEST_DICE,
   EFFECT_CHANNELS.BONUS_DICE,
   EFFECT_CHANNELS.REROLL,
   EFFECT_CHANNELS.PENALTY,
+  EFFECT_CHANNELS.PASSIVE,
 ]);
 
 /** Channels that target an owned weapon (by type or all). */
@@ -68,7 +78,7 @@ const SELF_SCOPED_QUALITY_CHANNELS = new Set([
   EFFECT_CHANNELS.ARMOR_PENALTY,
 ]);
 
-/** True for the five roll channels (all/ability/specialty targets). */
+/** True for the trait-targeted channels (all/ability/specialty targets). */
 export function isRollChannel(channel) {
   return ROLL_CHANNELS.has(channel);
 }

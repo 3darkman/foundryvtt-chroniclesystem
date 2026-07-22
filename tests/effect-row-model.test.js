@@ -3,6 +3,7 @@ import {
   parseChangeRow,
   buildChangeFromRow,
   isUnrepresentable,
+  CHANNEL_CHOICES,
 } from "../module/effects/cs-effect-row-model.js";
 
 // Wave 5 — the authoring cascade's read/write mapping. The critical property is
@@ -34,6 +35,12 @@ describe("round-trip — every representable cs.* channel + value mode", () => {
     { key: "cs.result.disposition.both", value: "2" },
     { key: "cs.influence", value: "1" },
     { key: "cs.influence.charm", value: "2" },
+    // spec 023 — the passive channel inherits the roll-target cascade whole, so
+    // it round-trips with no new parse/build branch (FR-037, contract C4.3).
+    { key: "cs.passive.all", value: "1" },
+    { key: "cs.passive.ability.awareness", value: "2" },
+    { key: "cs.passive.specialty.awareness_empathy", value: "-1" },
+    { key: "cs.passive.ability.awareness", value: "@rank:awareness" },
   ];
   it.each(cases)("preserves %o", (change) => {
     const out = roundTrip(change);
@@ -66,6 +73,42 @@ describe("US4 authoring rows — disposition + influence cascade fields", () => 
     expect(row.influenceScope).toBe("one");
     expect(row.influenceTechnique).toBe("charm");
     expect(row.showInfluenceTechnique).toBe(true);
+  });
+});
+
+// spec 023 (contract passive-effect-channel.md C4) — the authoring dropdown
+// offers the passive channel, and a passive row parses into the SAME shape a
+// dice-channel row does (the cascade is inherited, not re-implemented).
+describe("the passive channel in the authoring cascade (spec 023)", () => {
+  it("is offered in the channel dropdown", () => {
+    expect(CHANNEL_CHOICES.passive).toBe("CS.effects.channels.passive");
+  });
+
+  it("parses into the all/ability/specialty cascade like any roll channel", () => {
+    const row = parseChangeRow(
+      { key: "cs.passive.ability.awareness", value: "2" },
+      0
+    );
+    expect(row.channel).toBe("passive");
+    expect(row.rollTargetKind).toBe("ability");
+    // A canonical slug preselects the dropdown rather than falling to "Custom…".
+    expect(row.rollSlug).toBe("awareness");
+    expect(row.rollSlugCustom).toBe("");
+    // Inherited value modes, no bespoke branch.
+    expect(row.valueMode).toBe("fixed");
+    expect(row.fixedValue).toBe(2);
+  });
+
+  it("offers the ALL-traits target like any other trait channel", () => {
+    const row = parseChangeRow({ key: "cs.passive.all", value: "1" }, 0);
+    expect(row.rollTargetKind).toBe("all");
+    expect(row.rollSlug).toBe("");
+  });
+
+  it("re-opens an authored row with the same type, target and value", () => {
+    const change = { key: "cs.passive.specialty.awareness_empathy", value: "-1" };
+    const out = roundTrip(change);
+    expect(out).toMatchObject({ ...change, type: "add" });
   });
 });
 

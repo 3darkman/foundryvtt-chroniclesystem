@@ -3,6 +3,13 @@ import { Disposition } from "../disposition.js";
 import LOGGER from "../utils/logger.js";
 import { CSRoll } from "../rolls/cs-roll.js";
 import { applyWeaponTraining } from "../rolls/cs-weapon-training.js";
+import {
+  passiveFromFormula,
+  findPassiveOption,
+  filterPassiveScopedRows,
+  shouldMaskPassive,
+} from "../rolls/cs-passive.js";
+import { passiveValuesVisible } from "./settings.js";
 import { CSConstants } from "./csConstants.js";
 import SystemUtils from "../utils/systemUtils.js";
 import { slugify } from "../effects/cs-slugify.js";
@@ -407,7 +414,42 @@ function handleRoll(rollType, actor) {
   return csRoll.doRoll(actor, false);
 }
 
-async function _showModifierDialog(context) {
+/**
+ * spec 023 (US2, contract C3) — keep the difficulty block in sync with the
+ * passive selector, DISPLAY ONLY: the big number, its name, and the modifier
+ * rows scoped to one passive option. Re-queries fresh nodes on every render, so
+ * it is idempotent (C3.1).
+ * @param {boolean} maskPassive does this client hide target-derived values?
+ */
+function _wirePassiveSelector(dialog, maskPassive) {
+  const root = dialog?.element;
+  const select = root?.querySelector('select[name="passiveKey"]');
+  if (!select) return;
+  const mask = SystemUtils.localize("CS.dialogs.rollModifier.passiveMasked");
+
+  const sync = () => {
+    const option = select.selectedOptions[0];
+    if (!option) return;
+    // Mask only when THIS option is the target's — a difficulty level is public
+    // information and keeps its number even while masking (FR-023a, D16).
+    const hide = maskPassive && option.dataset.passiveMaskable === "true";
+    const value = root.querySelector(".cs-rd-diff-value");
+    const name = root.querySelector(".cs-rd-diff-name");
+    if (value) value.textContent = hide ? mask : option.dataset.passiveValue;
+    if (name) name.textContent = option.dataset.passiveLabel;
+    for (const row of root.querySelectorAll("[data-passive-scope]"))
+      row.hidden = row.dataset.passiveScope !== option.value;
+  };
+
+  // Idempotent across re-renders: bind once, but always re-sync (C3.1).
+  if (!select.dataset.csPassiveBound) {
+    select.dataset.csPassiveBound = "1";
+    select.addEventListener("change", sync);
+  }
+  sync(); // the default pick may already scope rows out (D9)
+}
+
+async function _showModifierDialog(context, maskPassive = false) {
   const template = CSConstants.Templates.Dialogs.ROLL_MODIFIER;
   const html = await foundry.applications.handlebars.renderTemplate(
     template,
@@ -415,6 +457,7 @@ async function _showModifierDialog(context) {
   );
 
   return foundry.applications.api.DialogV2.wait({
+    render: (event, dialog) => _wirePassiveSelector(dialog, maskPassive),
     // Scope the frame to the v2 look (root is a <dialog>); fixed 700px per handoff.
     classes: ["cs-roll-dialog-window", "cs-v2"],
     position: { width: 700 },
@@ -528,6 +571,7 @@ async function _deriveTargetConflict(
       itemized,
       difficulty: null,
       resolution: null,
+      target: null,
       itemizeAbility,
       itemizeSpecialty,
     };
@@ -598,6 +642,11 @@ async function _deriveTargetConflict(
           field: "difficulty",
           value: sizeMod,
           condition: "",
+          // spec 023 (D9) — this is a COMBAT DEFENSE modifier, not a universal
+          // difficulty one. It is already baked into the `def:combat` option's
+          // value, so it is dropped from the dialog AND the card whenever the
+          // player opposes some other passive.
+          passiveScope: "def:combat",
         })
       );
     }
@@ -646,8 +695,21 @@ async function _deriveTargetConflict(
           : "CS.effects.derivedStats.intrigue_defense"
       ),
       labelKey: null,
+      // spec 023 (T032a, FR-028) — this difficulty IS the target's, by
+      // construction. The flag it produces is what masks a QUICK roll's card
+      // too: skipping the dialog must not be a way around the mask.
+      targetDerived: true,
     },
     targetName: target.token.name,
+    // spec 023 (D8) — hand the ALREADY-resolved target context to the caller so
+    // the passive picker never calls `getUserTarget` a second time (which would
+    // re-fire the "multiple targets" warning the player already saw). For a
+    // weapon roll it also carries the Combat Defense difficulty computed above,
+    // so `def:combat` REUSES that number instead of recomputing it (D9/SSOT).
+    target:
+      kind === "weapon"
+        ? { ...target, resolvedCombatDifficulty: difficultyTargetValue }
+        : target,
     resolution: {
       kind,
       targetActor: target.actor,
@@ -688,8 +750,14 @@ async function handleRollAsync(
   const kind = rollContext.kind ?? null;
   const isConflict = kind === "weapon" || kind === "intrigue";
   const conflictItemized = []; // decorated rows: origin "character"/"target"
-  let targetDifficulty = null; // {value, name} pre-fill for the dialog
+  let targetDifficulty = null; // {value, name, targetName, groups, masked} for the dialog
   let resolutionCtx = null; // US4 damage/influence inputs
+  // spec 023 (US2) — the resolved target the passive picker reads from. Filled
+  // by the conflict derivation (which already resolved it) or, for a
+  // non-conflict roll, only when the dialog is actually about to open (C3.4).
+  let passiveTarget = null; // {actor, context, name}
+  let passiveGroups = null; // the option list, snapshotted BEFORE the dialog (D10)
+  let masked = false; // does THIS client hide target-derived values? (US3)
   // The ability/specialty to ITEMIZE against. For weapon/intrigue rolls the
   // formula-string target is null, so `_deriveTargetConflict` resolves the roll's
   // real ability/specialty; ability/specialty rolls keep their own (FR-025).
@@ -715,6 +783,11 @@ async function handleRollAsync(
         value: conflict.difficulty.target,
         name: conflict.difficulty.label,
         targetName: conflict.targetName,
+      };
+      passiveTarget = {
+        actor: conflict.target?.actor ?? null,
+        context: conflict.target,
+        name: conflict.targetName,
       };
     }
     resolutionCtx = conflict.resolution;
@@ -783,24 +856,106 @@ async function handleRollAsync(
       selected: index === difficultyTable.defaultIndex,
     }));
 
-    const formData = await _showModifierDialog({
-      base,
-      itemizedAlwaysOn: displayedItemized,
-      optionalEffects,
-      damageToggles,
-      difficultyOptions,
-      noneSelected: difficultyTable.defaultIndex < 0,
-      targetDifficulty,
-      // Show BOTH modifier lists together whenever either has content, so the
-      // two-column pairing is preserved even when one side is empty.
-      showModifiers:
-        displayedItemized.length > 0 ||
-        optionalEffects.length > 0 ||
-        damageToggles.length > 0,
-      // True when the optional column has ANY entry (effect or damage toggle) —
-      // suppresses the "empty" placeholder when only damage toggles are present.
-      hasOptional: optionalEffects.length > 0 || damageToggles.length > 0,
-    });
+    // spec 023 (US2, D8/D16) — with a target, the difficulty block carries ONE
+    // control: a grouped selector of everything this roll may be resolved
+    // against. A non-conflict roll never had a target read before, so it gets
+    // the only one added on that path — and only here, when the dialog opens.
+    if (!isConflict) {
+      const { getUserTarget } = await import("../combat/cs-targeting.js");
+      const resolved = getUserTarget(actor, "weapon");
+      if (resolved.status === "ok") {
+        passiveTarget = {
+          actor: resolved.actor,
+          context: resolved,
+          name: resolved.token.name,
+        };
+      }
+    }
+
+    if (passiveTarget?.actor) {
+      const { targetPassiveOptions } = await import(
+        "../rolls/cs-passive-catalog.js"
+      );
+      // The difficulty table is folded into the selector as a LEADING group on
+      // a non-conflict roll, so the single control removes nothing (FR-014g). A
+      // conflict roll opposes a real defense and never offered the table.
+      const difficultyEntries = isConflict
+        ? null
+        : [
+            {
+              index: -1,
+              label: SystemUtils.localize("CS.difficulty.none"),
+              value: 0,
+            },
+            ...difficultyTable.entries.map((entry, index) => ({
+              index,
+              label: entryLabel(entry, SystemUtils.localize),
+              value: entry.target,
+            })),
+          ];
+      masked = shouldMaskPassive({
+        isGM: game.user?.isGM,
+        valuesVisible: passiveValuesVisible(),
+        isPassiveDifficulty: true,
+      });
+      const groups = targetPassiveOptions(
+        passiveTarget.actor,
+        passiveTarget.context,
+        {
+          showValues: !masked,
+          difficultyEntries,
+        }
+      );
+      // An EMPTY list must leave `targetDifficulty` undefined (falsy): State A is
+      // gated by `{{#if targetDifficulty}}`, so an empty-groups context would
+      // render a big number with no selector and the State B fallback would be
+      // unreachable (FR-013a, C2.3/C3.2).
+      if (groups.length) {
+        const defaultKey =
+          kind === "weapon"
+            ? "def:combat"
+            : kind === "intrigue"
+            ? "def:intrigue"
+            : `tbl:${difficultyTable.defaultIndex}`;
+        const selected =
+          findPassiveOption(groups, defaultKey) ?? groups[0].options[0];
+        selected.selected = true;
+        passiveGroups = groups;
+        // The DEFAULT option's value/name, so a dialog opened and confirmed
+        // without touching the selector reproduces today's behaviour exactly.
+        targetDifficulty = {
+          value: selected.value,
+          name: selected.label,
+          targetName: passiveTarget.name,
+          groups,
+          // Mask the big number only while the SELECTED option is the target's
+          // (a difficulty level is public information — FR-023a).
+          masked: masked && selected.maskable,
+        };
+      }
+    }
+
+    const formData = await _showModifierDialog(
+      {
+        base,
+        itemizedAlwaysOn: displayedItemized,
+        optionalEffects,
+        damageToggles,
+        difficultyOptions,
+        noneSelected: difficultyTable.defaultIndex < 0,
+        targetDifficulty,
+        // Show BOTH modifier lists together whenever either has content, so the
+        // two-column pairing is preserved even when one side is empty.
+        showModifiers:
+          displayedItemized.length > 0 ||
+          optionalEffects.length > 0 ||
+          damageToggles.length > 0,
+        // True when the optional column has ANY entry (effect or damage toggle) —
+        // suppresses the "empty" placeholder when only damage toggles are present.
+        hasOptional: optionalEffects.length > 0 || damageToggles.length > 0,
+      },
+      masked
+    );
     if (!formData) return null;
 
     // Roll from the EFFECTIVE formula (= base + itemized), then add the checked
@@ -825,20 +980,56 @@ async function handleRollAsync(
     rolled.isUserChanged =
       optionalApplied || extrasApplied || damageToggleRows.length > 0;
 
-    // spec 010: with a target, its defense IS the difficulty (read-only, already
-    // set before the dialog). Only the table selector — shown when there is no
-    // target — can change it here.
+    // spec 010: without a target the difficulty comes from the table selector
+    // (State B). With one, spec 023's grouped selector owns it — including the
+    // table's own levels, folded in as the leading "Difficulties" group.
+    let scopedRows = displayedItemized;
     if (!targetDifficulty) {
       difficulty = _difficultyAt(
         difficultyTable,
         formData.difficultyIndex?.value ?? difficultyTable.defaultIndex
       );
+    } else {
+      const picked = findPassiveOption(
+        passiveGroups,
+        formData.passiveKey?.value
+      );
+      // An unknown/missing key keeps the pre-dialog difficulty, so a token
+      // deleted or untargeted mid-dialog cannot break the roll (D10).
+      if (picked) {
+        if (picked.key.startsWith("tbl:")) {
+          // A difficulty-table level is PUBLIC — resolved exactly as State B
+          // resolved it, and carrying NO `targetDerived` flag, so its card is
+          // never masked (FR-028, D16).
+          difficulty = _difficultyAt(
+            difficultyTable,
+            Number(picked.key.slice(4))
+          );
+        } else {
+          difficulty = {
+            target: picked.value,
+            label: picked.label,
+            labelKey: null,
+            targetDerived: true,
+            // A defense reads as itself; an ability/specialty is a PASSIVE and
+            // says so on the card, so the reader knows which kind of number
+            // the roll was opposed by (`own:*`/`cat:*` are the trait keys).
+            passiveTrait:
+              picked.key.startsWith("own:") || picked.key.startsWith("cat:"),
+          };
+        }
+        // spec 023 (D9) — rows bound to another passive (today: the size
+        // adjustment, which belongs to Combat Defense) leave the card, and
+        // their modifier is not applied. The dialog hid them live (C3.4), so
+        // the decomposition the player read matches the card they get.
+        scopedRows = filterPassiveScopedRows(displayedItemized, picked.key);
+      }
     }
 
     // The card decomposition (FR-025): the displayed always-on/target rows plus
     // the optionals + extras + damage toggles actually applied (parity w/ quick roll).
     dialogItemized = [
-      ...displayedItemized,
+      ...scopedRows,
       ..._checkedOptionalItemized(formData, optionalEffects).map(_decorateItem),
       ...damageToggleRows.map(_decorateItem),
       ..._extrasItemized(formData).map(_decorateItem),
@@ -1062,6 +1253,31 @@ function resolveTraitBase(actor, abilityName, specialtyName = null) {
   };
 }
 
+/**
+ * Sum an effect channel across the targeted ability (including the global ALL
+ * bucket) and the targeted specialty (excluding ALL, to avoid double-counting
+ * it). Buffers are keyed by STABLE SLUG (spec 008) — the same identity the
+ * fixed sources (armour/conditions) and authored effects push by — so the
+ * math survives a rename to any language. The channel getters are
+ * optional-chained so non-character actors (and the doubles) contribute 0.
+ *
+ * Extracted from `getActorTestFormula` (spec 023, contract C2.2) so the passive
+ * derivation reads its own channel by exactly the same merge rule — one rule,
+ * one place (SSOT).
+ * @param {object} actor
+ * @param {string} getter name of the accessor (`"getTestDice"`, `"getPassive"`, …)
+ * @param {string} abilityKey
+ * @param {string|null} specialtyKey
+ * @returns {number}
+ */
+function traitChannelTotal(actor, getter, abilityKey, specialtyKey) {
+  const fromAbility = actor[getter]?.(abilityKey, false, true)?.total ?? 0;
+  const fromSpecialty = specialtyKey
+    ? actor[getter]?.(specialtyKey, false, false)?.total ?? 0
+    : 0;
+  return fromAbility + fromSpecialty;
+}
+
 function getActorTestFormula(actor, abilityName, specialtyName = null) {
   const {
     abilityKey,
@@ -1072,19 +1288,8 @@ function getActorTestFormula(actor, abilityName, specialtyName = null) {
     specModifier,
   } = resolveTraitBase(actor, abilityName, specialtyName);
 
-  // Sum an effect channel across the targeted ability (including the global ALL
-  // bucket) and the targeted specialty (excluding ALL, to avoid double-counting
-  // it). Buffers are keyed by STABLE SLUG (spec 008) — the same identity the
-  // fixed sources (armour/conditions) and authored effects push by — so the
-  // math survives a rename to any language. The new-channel getters are
-  // optional-chained so non-character actors (and the doubles) contribute 0.
-  const channelTotal = (getter) => {
-    const fromAbility = actor[getter]?.(abilityKey, false, true)?.total ?? 0;
-    const fromSpecialty = specialtyKey
-      ? actor[getter]?.(specialtyKey, false, false)?.total ?? 0
-      : 0;
-    return fromAbility + fromSpecialty;
-  };
+  const channelTotal = (getter) =>
+    traitChannelTotal(actor, getter, abilityKey, specialtyKey);
 
   const formula = new DiceRollFormula();
   formula.pool = basePool + channelTotal("getTestDice");
@@ -1118,6 +1323,34 @@ function getActorRawTestFormula(actor, abilityName, specialtyName = null) {
   return formula;
 }
 
+/**
+ * The PASSIVE value of a trait (spec 023, contract passive-derivation.md C2) —
+ * the static score equivalent of the test the actor would roll: the EFFECTIVE
+ * formula converted by the single {@link passiveFromFormula} rule, plus the
+ * `cs.passive.*` channel merged by the same trait rule every other channel uses.
+ *
+ * Reuses `getActorTestFormula` rather than rebuilding a formula, so the sheet,
+ * the difficulty picker and the chat card can never disagree (FR-005). An
+ * ability the actor does not own falls through `resolveTraitBase`'s untrained
+ * baseline (pool 2) → passive 8 (FR-014d). Never writes to the actor (FR-003).
+ * @param {object} actor
+ * @param {string} abilityName
+ * @param {string|null} [specialtyName]
+ * @returns {number} integer ≥ 0
+ */
+function getActorPassiveValue(actor, abilityName, specialtyName = null) {
+  const formula = getActorTestFormula(actor, abilityName, specialtyName);
+  const { abilityKey, specialtyKey } = resolveTraitBase(
+    actor,
+    abilityName,
+    specialtyName
+  );
+  return passiveFromFormula(
+    formula,
+    traitChannelTotal(actor, "getPassive", abilityKey, specialtyKey)
+  );
+}
+
 ChronicleSystem.adjustFormulaByWeapon = adjustFormulaByWeapon;
 ChronicleSystem.eventHandleRoll = eventHandleRoll;
 ChronicleSystem.handleRoll = handleRoll;
@@ -1125,6 +1358,7 @@ ChronicleSystem.handleRollAsync = handleRollAsync;
 ChronicleSystem.getRollChip = getRollChip;
 ChronicleSystem.getActorAbilityFormula = getActorTestFormula;
 ChronicleSystem.getActorRawTestFormula = getActorRawTestFormula;
+ChronicleSystem.getActorPassiveValue = getActorPassiveValue;
 
 ChronicleSystem.dispositions = [
   new Disposition("CS.sheets.character.dispositions.affectionate", 1, -2, 5),
