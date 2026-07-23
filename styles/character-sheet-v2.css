@@ -689,23 +689,6 @@
   gap: 4px;
 }
 
-/* spec 023 (US1) — a specialty chip and its passive value read as ONE unit, so
-   they wrap together in the tag flow. Layout only: the number's own typography
-   comes from the shared `.csv2-passive` primitive in cs-components.css. */
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tag-pair {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-/* The passive belongs to the chip on its LEFT, so the gap inside a pair must
-   read tighter than the gap between pairs (handoff: 5px inside, 8px between).
-   Scoped to the modifier class so the other `.cs2-tags` rows keep their own
-   spacing. */
-.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tags.cs2-tags--paired {
-  gap: 8px;
-}
-
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-tag {
   background: var(--csv2-bg);
   border: 1px solid var(--csv2-border);
@@ -1878,7 +1861,29 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
+}
+
+/* The roll chip INSIDE a specialty pill is the compact variant (handoff: 2px 7px,
+   10.5px mono, 9px die) — the Test-column chip's metrics would burst the pill.
+   It has to live here, in the window sheet: the base `.rollable` rule is itself
+   window-scoped, so a rule in the shared layer could never outrank it. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-spec-pill .rollable {
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10.5px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-spec-pill .rollable::before {
+  width: 9px;
+  height: 9px;
+}
+
+/* The passive closing the pill (handoff: `min-width:14px`, muted). Typography
+   itself stays in the shared `.csv2-passive` primitive. */
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-spec-pill .csv2-passive {
+  min-width: 14px;
 }
 
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-spec-legend {

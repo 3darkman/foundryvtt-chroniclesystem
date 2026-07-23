@@ -11,7 +11,10 @@ import {
   buildSpecialtySeedItemData,
 } from "../module/data/ability-specialty-seeds.js";
 import { CANONICAL_ABILITIES } from "../module/vocabulary/cs-canonical-abilities.js";
-import { specialtiesForAbility } from "../module/vocabulary/cs-specialty-catalog.js";
+import {
+  specialtiesForAbility,
+  abilityOptions,
+} from "../module/vocabulary/cs-specialty-catalog.js";
 
 const originalGame = globalThis.game;
 
@@ -162,6 +165,65 @@ describe("specialtiesForAbility (C4)", () => {
     const items = [worldSpecialty("Charm", "persuasion_charm", "persuasion")];
     withWorldItems(items, () => {
       expect(specialtiesForAbility("fighting")).toHaveLength(9);
+    });
+  });
+});
+
+describe("abilityOptions — the owning-ability picker source", () => {
+  const worldAbility = (name, slug) => ({
+    type: "ability",
+    name,
+    system: { slug },
+  });
+
+  it("yields the 19 canonical abilities with no `game`", () => {
+    globalThis.game = undefined;
+    const rows = abilityOptions();
+    expect(rows).toHaveLength(19);
+    expect(rows.find((r) => r.slug === "fighting")).toEqual({
+      slug: "fighting",
+      name: "Fighting",
+      nameKey: "CS.abilities.fighting",
+    });
+  });
+
+  it("adds the world's own abilities to the canonical set", () => {
+    withWorldItems([worldAbility("Sorcery", "sorcery")], () => {
+      const rows = abilityOptions();
+      expect(rows).toHaveLength(20);
+      expect(rows.find((r) => r.slug === "sorcery")).toEqual({
+        slug: "sorcery",
+        name: "Sorcery",
+        nameKey: null,
+      });
+    });
+  });
+
+  it("lets the WORLD ability win on a slug shared with the catalogue", () => {
+    withWorldItems([worldAbility("Combate", "fighting")], () => {
+      const rows = abilityOptions();
+      expect(rows).toHaveLength(19);
+      // `nameKey: null` is the tell: the entry came from the world item, so the
+      // sheet labels it with the GM's own name instead of localizing.
+      expect(rows.find((r) => r.slug === "fighting")).toEqual({
+        slug: "fighting",
+        name: "Combate",
+        nameKey: null,
+      });
+    });
+  });
+
+  it("falls back to a slugified name when the world item has no slug", () => {
+    const items = [{ type: "ability", name: "Blood Magic", system: {} }];
+    withWorldItems(items, () => {
+      expect(abilityOptions().some((r) => r.slug === "blood_magic")).toBe(true);
+    });
+  });
+
+  it("ignores non-ability world items", () => {
+    const items = [worldSpecialty("Axes", "fighting_axes", "fighting")];
+    withWorldItems(items, () => {
+      expect(abilityOptions()).toHaveLength(19);
     });
   });
 });

@@ -12,10 +12,8 @@ import {
   qualityBySlug,
   slugify,
 } from "../../effects/cs-effect-vocabulary.js";
-import {
-  abilitySpecialtyChoiceMaps,
-  CANONICAL_ABILITIES,
-} from "../../vocabulary/cs-canonical-abilities.js";
+import { abilitySpecialtyChoiceMaps } from "../../vocabulary/cs-canonical-abilities.js";
+import { abilityOptions } from "../../vocabulary/cs-specialty-catalog.js";
 import { clampRating } from "../../data/item/specialty-data.js";
 import {
   decodeTriggerCompound,
@@ -344,9 +342,22 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     // (a `<select>` with an unmatched value auto-selects the first option and
     // SAVES it, which here would silently re-parent the specialty) and the same
     // off-list escape hatch, so a homebrew ability slug is never clobbered (FR-007).
+    // Its options are the WORLD's abilities ∪ the canonical ones, world winning on
+    // a shared slug (`abilityOptions`) — a GM who built "Fighting" in their world
+    // must find it here, and see THEIR copy rather than the catalogue's.
+    // Alphabetical by the LOCALIZED label: the world's own abilities come out of
+    // `abilityOptions` before the canonical ones (that is its precedence rule,
+    // not a display order), and a select that opens with them jumbled at the top
+    // is unscannable.
     const abilitySlugChoices = { "": "" };
-    for (const ability of CANONICAL_ABILITIES) {
-      abilitySlugChoices[ability.slug] = localizeName(ability.nameKey);
+    const abilityLabels = abilityOptions()
+      .map((ability) => ({
+        slug: ability.slug,
+        label: ability.nameKey ? localizeName(ability.nameKey) : ability.name,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+    for (const ability of abilityLabels) {
+      abilitySlugChoices[ability.slug] = ability.label;
     }
     if (item.type === "specialty") {
       injectOffList(abilitySlugChoices, system.abilitySlug);

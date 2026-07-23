@@ -31,6 +31,7 @@ import {
   buildSpecialtySeedItemData,
 } from "../data/ability-specialty-seeds.js";
 
+const ABILITY_PACK_ID = "chroniclesystem.abilities";
 const SPECIALTY_PACK_ID = "chroniclesystem.specialties";
 
 /** Lazily-built slug → canonical ability index. */
@@ -107,6 +108,42 @@ export function specialtiesForAbility(abilitySlug) {
 }
 
 /**
+ * Every ability that can own a specialty: the WORLD's own Ability items ∪ the
+ * canonical vocabulary, deduped by slug with the **world entry winning** — the
+ * same precedence `specialtiesForAbility` applies, and the same one every
+ * slug-keyed listing in the system is expected to follow: a GM who created
+ * "Fighting" in their world sees THEIR item, not the catalogue's copy.
+ *
+ * Synchronous and pack-free, for the identical reason: its consumers (the
+ * Specialty sheet's owning-ability select) build their context without awaiting.
+ * The canonical vocabulary is the synchronous stand-in for the packs, which are
+ * generated from it (C4.5).
+ *
+ * @returns {Array<{slug: string, name: string, nameKey: string|null}>}
+ */
+export function abilityOptions() {
+  const bySlug = new Map();
+
+  for (const item of game?.items ?? []) {
+    if (item?.type !== "ability") continue;
+    const slug = item.system?.slug || slugify(item.name ?? "");
+    if (!slug || bySlug.has(slug)) continue;
+    bySlug.set(slug, { slug, name: item.name ?? slug, nameKey: null });
+  }
+
+  for (const ability of CANONICAL_ABILITIES) {
+    if (bySlug.has(ability.slug)) continue;
+    bySlug.set(ability.slug, {
+      slug: ability.slug,
+      name: ability.name,
+      nameKey: ability.nameKey,
+    });
+  }
+
+  return [...bySlug.values()];
+}
+
+/**
  * Resolve an Ability definition by stable slug (C5) — a world Item first, else a
  * synthetic `{name, system}` built from the canonical vocabulary. Never throws.
  * @param {string} slug
@@ -145,6 +182,48 @@ export function specialtyBySlug(slug) {
     canonical.specialty
   );
   return { name: data.name, system: data.system };
+}
+
+/**
+ * The Item creation data for an ability, by stable slug — **asynchronous**, so
+ * it can reach the abilities compendium and carry that document's description
+ * and Active Effects instead of a bare synthetic copy.
+ *
+ * Same precedence as every other slug-keyed lookup here: the world's own Ability
+ * item first, then the pack, then the canonical seed. `null` when the slug
+ * matches nothing — a specialty pointing at an ability that exists nowhere.
+ *
+ * @param {string} slug
+ * @returns {Promise<object|null>} Item creation data, never a live document
+ */
+export async function abilitySourceForSlug(slug) {
+  if (!slug) return null;
+
+  for (const item of game?.items ?? []) {
+    if (item?.type !== "ability") continue;
+    if ((item.system?.slug || slugify(item.name ?? "")) === slug) {
+      return item.toObject();
+    }
+  }
+
+  const pack = game?.packs?.get?.(ABILITY_PACK_ID);
+  if (pack) {
+    try {
+      const documents = await pack.getDocuments();
+      const found = (documents ?? []).find(
+        (doc) => (doc.system?.slug || slugify(doc.name ?? "")) === slug
+      );
+      if (found) return found.toObject();
+    } catch (err) {
+      console.warn(
+        "chroniclesystem | ability catalogue unavailable, using the canonical seed:",
+        err
+      );
+    }
+  }
+
+  const canonical = canonicalAbilityIndex().get(slug);
+  return canonical ? buildAbilitySeedItemData(canonical) : null;
 }
 
 /** Warn the GM ONCE per session that the specialties compendium is absent

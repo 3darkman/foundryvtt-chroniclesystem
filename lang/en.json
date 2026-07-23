@@ -132,7 +132,8 @@
     "notifications": {
       "dicePoolInvalid": "you cannot roll this test because your dice pool results in less than 1 die being kept.",
       "multipleTargets": "More than one target selected — target-derived difficulty and modifiers are omitted.",
-      "noActiveGM": "No active GM to apply this to the target."
+      "noActiveGM": "No active GM to apply this to the target.",
+      "abilityAddedForSpecialty": "“{specialty}” belongs to {ability}, which this character did not have — {ability} was added with all of its specialties."
     },
     "dialogs": {
       "characterRole": {
@@ -688,7 +689,6 @@
           "off": "Edit specialties",
           "on": "Done",
           "available": "available",
-          "noneActive": "No active specialties.",
           "legendActive": "Valued specialty — rollable.",
           "legendAvailable": "Available specialty at 0 — give it a value to make it rollable.",
           "valueHint": "Specialty ranks (0 or more)."

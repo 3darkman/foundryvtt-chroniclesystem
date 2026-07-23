@@ -214,12 +214,25 @@ function abilitiesOf(items) {
 /**
  * Plan one scope and return the rows to create there. `resolveCatalogue` is the
  * run-wide memoised async source (C4.2).
+ *
+ * `backfill` is what separates the two kinds of scope. On an ACTOR it is on: a
+ * character owning Fighting must end up with all 9 Fighting specialties, so the
+ * Abilities tab can offer them (FR-027a). In the world DIRECTORY it is off: the
+ * canonical set already exists there as a browsable compendium, so backfilling
+ * would clone all 76 of it into the item sidebar — noise the GM then has to
+ * delete by hand. The world scope therefore only CONVERTS legacy embedded rows,
+ * which is the one thing that would otherwise be lost (C3, US1 scenario 3).
  */
-async function planScope(items, resolveCatalogue, skipped) {
+export async function planScope(
+  items,
+  resolveCatalogue,
+  skipped,
+  backfill = true
+) {
   const existing = existingSpecialtySlugs(items);
   const toCreate = [];
   for (const ability of abilitiesOf(items)) {
-    const catalogue = await resolveCatalogue(ability.slug);
+    const catalogue = backfill ? await resolveCatalogue(ability.slug) : [];
     const plan = planSpecialtyConversion(ability, existing, catalogue);
     for (const row of plan.create) {
       // Keep the running scope set in sync so two abilities sharing a slug
@@ -260,9 +273,16 @@ export async function migrateSpecialtyItems() {
     game.i18n.localize("CS.migration.specialties.begin")
   );
 
-  // --- World catalogue (US1 scenario 3).
+  // --- World catalogue (US1 scenario 3) — CONVERSION ONLY, no backfill: the
+  // canonical set lives in the compendium, and duplicating it into the item
+  // sidebar is pollution, not migration.
   try {
-    const toCreate = await planScope(game.items, resolveCatalogue, skipped);
+    const toCreate = await planScope(
+      game.items,
+      resolveCatalogue,
+      skipped,
+      false
+    );
     if (toCreate.length) {
       await CONFIG.Item.documentClass.createDocuments(toCreate);
       created += toCreate.length;

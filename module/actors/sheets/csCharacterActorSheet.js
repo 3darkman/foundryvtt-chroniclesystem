@@ -16,6 +16,7 @@ import {
 } from "../../effects/cs-effect-modifiers.js";
 import { weaponWieldingFlags } from "../../effects/cs-effect-vocabulary.js";
 import { scopedSpecialtySlug } from "../../vocabulary/cs-canonical-abilities.js";
+import { abilitySourceForSlug } from "../../vocabulary/cs-specialty-catalog.js";
 import { slugify } from "../../effects/cs-slugify.js";
 import { clampRating } from "../../data/item/specialty-data.js";
 import { CSPublicCharacterSheet } from "./csPublicCharacterSheet.js";
@@ -137,7 +138,7 @@ export class CSCharacterActorSheet extends CSActorSheet {
 
   static DEFAULT_OPTIONS = {
     classes: ["chroniclesystem", "character", "sheet", "actor"],
-    position: { width: 750, height: 900 },
+    position: { width: 897, height: 900 },
     window: { resizable: true },
     actions: {
       changeDisposition: CSCharacterActorSheet._onDispositionChanged,
@@ -303,11 +304,6 @@ export class CSCharacterActorSheet extends CSActorSheet {
         specialtyItems,
         hasSpecialtyEffect
       );
-      // FR-010 — the muted "none active" hint replaces the chips when read mode
-      // has nothing to show. Same predicate, never a second one (D16).
-      ability.noneActive =
-        !this._specialtyEdit &&
-        !ability.specialtyRows.some((row) => specialtyVisible(row, false));
     });
 
     // spec 017 (US2): each sorcery-work test chip through the SSOT utility. The
@@ -1285,5 +1281,55 @@ export class CSCharacterActorSheet extends CSActorSheet {
   isItemPermitted(type) {
     if (type === "specialty" && this.actor?.type !== "character") return false;
     return this.itemTypesPermitted.includes(type);
+  }
+
+  /**
+   * @override — dropping a Specialty whose owning Ability the character does NOT
+   * have adds **the ability** instead. Provisioning (`CSItem._onCreate`) then
+   * materialises that ability's whole specialty set, the dropped one included,
+   * so the drop is honoured through the supported path rather than by a special
+   * case here.
+   *
+   * The lone specialty is not merely redundant, it is unreachable: every read
+   * path keys a specialty to its ability (the roll formula, the passive, the
+   * Abilities tab groups rows under an owned ability), so a specialty with no
+   * ability behind it is a row that renders nowhere and never rolls.
+   *
+   * An ability slug that resolves to nothing anywhere falls through to the
+   * normal drop — a homebrew link we cannot honour must not silently eat the
+   * item the user dropped.
+   */
+  async _onDropItem(event, item) {
+    const abilitySlug =
+      item?.type === "specialty" ? item.system?.abilitySlug : null;
+    if (
+      !abilitySlug ||
+      !this.actor.isOwner ||
+      !this.isItemPermitted("specialty")
+    )
+      return super._onDropItem(event, item);
+
+    const hasAbility = this.actor.items.some(
+      (i) =>
+        i.type === "ability" &&
+        (i.system?.slug || slugify(i.name)) === abilitySlug
+    );
+    if (hasAbility) return super._onDropItem(event, item);
+
+    const source = await abilitySourceForSlug(abilitySlug);
+    if (!source) return super._onDropItem(event, item);
+
+    const [created] = await this.actor.createEmbeddedDocuments("Item", [
+      source,
+    ]);
+    if (!created) return null;
+    created.onObtained(created.actor);
+    ui.notifications?.info?.(
+      game.i18n.format("CS.notifications.abilityAddedForSpecialty", {
+        ability: created.name,
+        specialty: item.name,
+      })
+    );
+    return created;
   }
 }

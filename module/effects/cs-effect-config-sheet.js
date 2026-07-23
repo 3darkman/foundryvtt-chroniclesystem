@@ -65,6 +65,12 @@ import {
  * @param {string[]} worldSlugs non-canonical ability/specialty slugs in the world
  */
 function buildRollSlugOptionGroups(selectedSlug, worldSlugs = []) {
+  // Alphabetical by the LOCALIZED label, not by the vocabulary's declaration
+  // order: the canonical table is alphabetical in English only, and the
+  // specialties come out of it grouped by ability, which reads as unordered in a
+  // flat 76-entry list. Sorting on the label is what makes the dropdown scannable
+  // in whatever language the client is running.
+  const byLabel = (a, b) => a.label.localeCompare(b.label);
   const groups = [
     {
       label: game.i18n.localize("CS.effects.groups.abilities"),
@@ -72,7 +78,7 @@ function buildRollSlugOptionGroups(selectedSlug, worldSlugs = []) {
         value: a.slug,
         label: game.i18n.localize(a.nameKey),
         selected: a.slug === selectedSlug,
-      })),
+      })).sort(byLabel),
     },
     {
       label: game.i18n.localize("CS.effects.groups.specialties"),
@@ -82,7 +88,7 @@ function buildRollSlugOptionGroups(selectedSlug, worldSlugs = []) {
           label: game.i18n.localize(s.nameKey),
           selected: s.slug === selectedSlug,
         }))
-      ),
+      ).sort(byLabel),
     },
   ];
   if (worldSlugs.length) {

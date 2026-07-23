@@ -2,7 +2,10 @@
 // The whole decision logic of the 0.17.0 task, driven without a Foundry runtime.
 
 import { describe, it, expect } from "vitest";
-import { planSpecialtyConversion } from "../module/migrations/task140-specialty-items.js";
+import {
+  planSpecialtyConversion,
+  planScope,
+} from "../module/migrations/task140-specialty-items.js";
 import { buildProvisionedSpecialtyData } from "../module/data/specialty-create-data.js";
 
 const fighting = (specialties) => ({
@@ -228,5 +231,51 @@ describe("planSpecialtyConversion — backfill (C2.2 / D15)", () => {
       []
     );
     expect(plan.create).toEqual([]);
+  });
+});
+
+describe("planScope — backfill is per-scope", () => {
+  const abilityItem = (specialties) => ({
+    type: "ability",
+    name: "Fighting",
+    system: { slug: "fighting", specialties },
+  });
+  const catalogue = async () => [
+    source({ name: "Axes", slug: "fighting_axes" }),
+    source({ name: "Shields", slug: "fighting_shields" }),
+  ];
+
+  it("backfills the catalogue on an actor scope", async () => {
+    const rows = await planScope([abilityItem([])], catalogue, [], true);
+    expect(rows.map((r) => r.system.slug).sort()).toEqual([
+      "fighting_axes",
+      "fighting_shields",
+    ]);
+  });
+
+  it("converts but NEVER backfills when backfill is off (the world directory)", async () => {
+    const rows = await planScope(
+      [abilityItem([{ name: "Whips", slug: "fighting_whips", rating: 2 }])],
+      catalogue,
+      [],
+      false
+    );
+    // The legacy row survives; the 76-entry catalogue does not get cloned into
+    // the item sidebar, where it already exists as a compendium.
+    expect(rows).toHaveLength(1);
+    expect(rows[0].system).toMatchObject({
+      slug: "fighting_whips",
+      rating: 2,
+    });
+  });
+
+  it("never resolves the catalogue at all when backfill is off", async () => {
+    let calls = 0;
+    const counting = async (slug) => {
+      calls += 1;
+      return catalogue(slug);
+    };
+    await planScope([abilityItem([])], counting, [], false);
+    expect(calls).toBe(0);
   });
 });
