@@ -36,8 +36,13 @@ const localizationTable = flattenLocalization(enJson);
 globalThis.window = globalThis;
 
 // csActor.js: `class CSActor extends Actor`; csItem.js: `class CSItem extends Item`.
-globalThis.Actor = class {};
-globalThis.Item = class {};
+// `_onCreate` exists on the real core Actor/Item; both CS subclasses call `super`.
+globalThis.Actor = class {
+  _onCreate() {}
+};
+globalThis.Item = class {
+  _onCreate() {}
+};
 
 // Data models: `const fields = foundry.data.fields` (top-level) and
 // `class XData extends foundry.abstract.TypeDataModel`. `defineSchema()` is
@@ -60,7 +65,17 @@ globalThis.foundry = {
   // the pure-logic tests).
   applications: {
     api: { HandlebarsApplicationMixin: (Base) => Base },
-    sheets: { ActorSheetV2: class {}, ItemSheetV2: class {} },
+    sheets: {
+      ActorSheetV2: class {},
+      // `_processFormData` is stubbed as a minimal echo (`formData.object`,
+      // mirroring the real `FormDataExtended` shape) so `CSItemSheet`'s own
+      // override can call `super._processFormData(...)` without throwing.
+      ItemSheetV2: class {
+        _processFormData(event, form, formData) {
+          return formData.object ?? {};
+        }
+      },
+    },
     ux: { TextEditor: { implementation: {} } },
   },
   documents: { ActiveEffect: class {}, Item: class {} },

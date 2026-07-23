@@ -112,10 +112,12 @@ function collectSlugSuggestions() {
     if (item.type === "ability") {
       const abilitySlug = item.system?.slug || slugify(item.name);
       if (abilitySlug) abilities.add(abilitySlug);
-      for (const sp of Object.values(item.system?.specialties ?? {})) {
-        const s = sp?.slug || scopedSpecialtySlug(abilitySlug, sp?.name);
-        if (s) specialties.add(s);
-      }
+    } else if (item.type === "specialty") {
+      // spec 024 — a specialty is its own item, carrying its own scoped slug.
+      const s =
+        item.system?.slug ||
+        scopedSpecialtySlug(item.system?.abilitySlug ?? "", item.name);
+      if (s) specialties.add(s);
     } else if (item.type === "weapon") {
       const s = weaponTypeSlug(item.system?.specialty);
       if (s) weaponTypes.add(s);

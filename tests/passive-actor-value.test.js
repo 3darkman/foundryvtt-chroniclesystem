@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { ChronicleSystem } from "../module/system/ChronicleSystem.js";
 import { CSActor } from "../module/actors/csActor.js";
 import { collectEffectModifiers } from "../module/effects/cs-effect-modifiers.js";
+import { makeSpecialtyItem } from "./helpers/doubles.js";
 
 // Spec 023 / contract passive-derivation.md C2. The ACTOR-level passive:
 // getActorTestFormula (the existing SSOT) converted by passiveFromFormula, plus
@@ -41,16 +42,24 @@ function makeActor({
       slug: "awareness",
       rating,
       modifier: 0,
-      specialties: empathy
-        ? { s1: { name: "Empathy", rating: empathy, modifier: 0 } }
-        : {},
     },
     getCSData() {
       return this.system;
     },
   };
+  // spec 024 — the Empathy specialty is its own item, linked by the ability slug.
+  const specialtyItems = empathy
+    ? [
+        makeSpecialtyItem({
+          name: "Empathy",
+          abilitySlug: "awareness",
+          rating: empathy,
+          modifier: 0,
+        }),
+      ]
+    : [];
   const actor = {
-    items: [awareness],
+    items: [awareness, ...specialtyItems],
     appliedEffects: changes.length ? [fakeEffect(changes)] : [],
     getCSData: () => ({
       derivedStats: { fatigue: { current: 0 }, frustration: { current: 0 } },

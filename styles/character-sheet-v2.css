@@ -1865,3 +1865,26 @@
 .chroniclesystem.character.sheet.actor .cs-sheet-v2 .relationships-tab .cs2-rel-noresults.is-hidden {
   display: none;
 }
+
+/* ==========================================================================
+   SPEC 024 — Abilities tab, specialty rows. LAYOUT ONLY.
+   The pill itself, its two states, the inline input and the header toggle
+   button are SHARED components in cs-components.css (reached through the
+   `:is(.cs-v2, .cs-sheet-v2)` bridge). Nothing here re-declares a token, a
+   button, an input or a colour — only how the pills flow in their cell.
+   ========================================================================== */
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-spec-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.chroniclesystem.character.sheet.actor .cs-sheet-v2 .cs2-spec-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+}

@@ -189,10 +189,30 @@ export class CSActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       return this._onSortItem(event, item);
     }
 
-    // Check for duplicate items by name. Weapons are allowed to stack as
-    // separate items, so a second weapon of the same name is not merged
-    // into the existing one.
-    const existingItem = this.actor.items.find((i) => i.name === item.name);
+    // Check for duplicate items by name AND type. Weapons are allowed to stack
+    // as separate items, so a second weapon of the same name is not merged into
+    // the existing one.
+    //
+    // The `type` half is spec 024 (D9): the guard used to match by name ACROSS
+    // types, so dropping the Persuasion "Charm" onto a character who already
+    // owned anything named "Charm" (the Animal Handling specialty, a technique,
+    // a benefit) silently returned that item instead of creating the specialty.
+    // With 76 specialties and deliberate cross-ability name reuse, that stops
+    // being a corner case.
+    //
+    // `type` alone is NOT enough for a specialty: two DIFFERENT specialties can
+    // share both a name AND the type "specialty" — the very "Charm" example
+    // above is itself type-identical on both sides (Animal Handling's Charm vs
+    // Persuasion's Charm). Post-024 a fully-provisioned character owns BOTH, so
+    // this is not a corner case either — it must also match `abilitySlug` when
+    // the dropped item is a specialty.
+    const existingItem = this.actor.items.find((i) => {
+      if (i.name !== item.name || i.type !== item.type) return false;
+      if (item.type === "specialty") {
+        return i.system?.abilitySlug === item.system?.abilitySlug;
+      }
+      return true;
+    });
     if (existingItem && item.type !== "weapon") {
       return existingItem;
     }

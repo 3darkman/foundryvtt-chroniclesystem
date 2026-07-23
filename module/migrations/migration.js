@@ -8,6 +8,11 @@ import {
   migrateReferencedQualities,
   repairEmptyQualityRefs,
 } from "./task120-qualities.js";
+import {
+  ensureAbilityCompendium,
+  ensureSpecialtyCompendium,
+  migrateSpecialtyItems,
+} from "./task140-specialty-items.js";
 
 export async function migrateData() {
   if (!game.user?.isGM) {
@@ -17,6 +22,11 @@ export async function migrateData() {
   // spec 020 — always ensure the Qualities compendium is populated (idempotent,
   // not version-gated: a fresh system install must be seeded too).
   await ensureQualityCompendium();
+  // spec 024 — same contract for the Ability/Specialty catalogues: unversioned
+  // and idempotent, and BEFORE the versioned tasks so the conversion's backfill
+  // can read them.
+  await ensureAbilityCompendium();
+  await ensureSpecialtyCompendium();
   const latest = game.system.version;
   const recentVersion =
     game.settings.get(
@@ -65,3 +75,7 @@ registerTask("0.15.0", migrateReferencedQualities);
 // spec 020 — strip empty-slug quality refs ("(empty) missing item") that a data
 // mishap left on weapons/armour, so the GM isn't stuck with un-clearable chips.
 registerTask("0.16.0", repairEmptyQualityRefs);
+// spec 024 — convert every legacy `ability.system.specialties` row into a real
+// Specialty item and backfill the canonical set. Non-destructive: the legacy
+// array is never written, so an interrupted run can be re-run.
+registerTask("0.17.0", migrateSpecialtyItems);

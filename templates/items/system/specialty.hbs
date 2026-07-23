@@ -1,0 +1,18 @@
+{{!-- Especialidade (specialty) Sistema body (spec 024). The owning Ability is a
+      SLUG-valued select (D5); Rating/Modifier are the owner's ranks and render only
+      when the specialty is embedded in a CHARACTER — `field-cell`'s own `owned` flag
+      means "embedded in any actor", which is not the same test (the conversion also
+      writes specialties onto legacy house/unit actors, where ranks are meaningless).
+      Header, Details and Effects come free from CSItemSheet. --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
+        <div class="csv2-field-grid">
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="select" name="system.abilitySlug" label="CS.sheets.item.fields.abilitySlug" value=item.system.abilitySlug options=@root.typeDescriptor.abilitySlugChoices}}
+            {{#if @root.ownedByCharacter}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.rating" label="CS.sheets.item.fields.rating" value=item.system.rating}}
+            {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.modifier" label="CS.sheets.item.fields.modifier" value=item.system.modifier}}
+            {{/if}}
+        </div>
+    </div>
+</section>

@@ -1,7 +1,7 @@
 {
     "title": "Chronicle System (Unofficial)",
     "description": "An implementation for Green Ronin's Chronicle System, used by SIFRP and Sword Chronicles.",
-    "version": "0.16.0",
+    "version": "0.17.0",
     "esmodules": ["module/system/config.js"],
     "styles": [
         "styles/global.css",
@@ -44,6 +44,7 @@
             "armor": {},
             "weapon": {},
             "ability": {},
+            "specialty": {},
             "equipment": {},
             "benefit": {},
             "drawback": {},
@@ -67,6 +68,37 @@
                 "ASSISTANT": "OWNER"
             },
             "flags": {}
+        },
+        {
+            "name": "abilities",
+            "label": "Chronicle Abilities",
+            "path": "packs/abilities",
+            "type": "Item",
+            "system": "chroniclesystem",
+            "ownership": {
+                "PLAYER": "OBSERVER",
+                "ASSISTANT": "OWNER"
+            },
+            "flags": {}
+        },
+        {
+            "name": "specialties",
+            "label": "Chronicle Specialties",
+            "path": "packs/specialties",
+            "type": "Item",
+            "system": "chroniclesystem",
+            "ownership": {
+                "PLAYER": "OBSERVER",
+                "ASSISTANT": "OWNER"
+            },
+            "flags": {}
+        }
+    ],
+    "packFolders": [
+        {
+            "name": "Core (EN-US)",
+            "sorting": "m",
+            "packs": ["qualities", "abilities", "specialties"]
         }
     ],
     "grid": {

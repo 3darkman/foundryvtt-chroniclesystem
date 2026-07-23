@@ -12,8 +12,12 @@ import { INTRIGUE_TECHNIQUES } from "../../vocabulary/cs-intrigue-techniques.js"
 import {
   influenceFor,
   weaponHasQualityLever,
+  hasSpecialtyEffect,
 } from "../../effects/cs-effect-modifiers.js";
 import { weaponWieldingFlags } from "../../effects/cs-effect-vocabulary.js";
+import { scopedSpecialtySlug } from "../../vocabulary/cs-canonical-abilities.js";
+import { slugify } from "../../effects/cs-slugify.js";
+import { clampRating } from "../../data/item/specialty-data.js";
 import { CSPublicCharacterSheet } from "./csPublicCharacterSheet.js";
 import {
   PUBLIC_VISIBILITY_FIELDS,
@@ -24,9 +28,89 @@ import {
 // characters. A named constant, not a magic number (Clean Code §I).
 const NOTE_PREVIEW_MAX = 82;
 
+/**
+ * spec 024 (D16) — the ONE rule that decides whether a specialty row matters:
+ * it has ranks, or an enabled non-suppressed effect targets it. It gates BOTH
+ * read-mode visibility AND the chip/passive computation. Two separate conditions
+ * is exactly the defect D16 removed — it left a row visible with nothing in it.
+ * @param {{rating: number, hasEffect: boolean}} row
+ * @returns {boolean}
+ */
+export function specialtyRelevant(row) {
+  return row.rating > 0 || row.hasEffect;
+}
+
+/**
+ * spec 024 — read mode shows only the relevant rows; edit mode shows them all
+ * (FR-009/FR-012).
+ * @param {{rating: number, hasEffect: boolean}} row
+ * @param {boolean} editMode
+ * @returns {boolean}
+ */
+export function specialtyVisible(row, editMode) {
+  return !!editMode || specialtyRelevant(row);
+}
+
+/**
+ * Build one ability's specialty rows (contract abilities-tab-modes.md C2) —
+ * PLAIN objects, so no Item document is mutated by a render.
+ *
+ * A row exists only for a Specialty the character owns whose `abilitySlug`
+ * matches this ability; an orphan produces no row anywhere. The chip id string
+ * is byte-identical to the pre-024 one (`specialty:<name>:<ability>`), so the
+ * roll is unchanged (FR-018), and chip + passive are computed ONLY when the row
+ * is `relevant` — strictly less work than the old loop, not more.
+ *
+ * @param {object} actor the owning actor
+ * @param {object} ability the ability item
+ * @param {string} abilitySlug its effective slug
+ * @param {object[]} specialtyItems every `type === "specialty"` item of the actor
+ * @param {(actor: object, slug: string) => boolean} hasEffect the D10 predicate
+ * @returns {object[]} alphabetical by name
+ */
+export function buildSpecialtyRows(
+  actor,
+  ability,
+  abilitySlug,
+  specialtyItems,
+  hasEffect
+) {
+  const rows = [];
+  for (const item of specialtyItems ?? []) {
+    if (item.system?.abilitySlug !== abilitySlug) continue;
+    const slug =
+      item.system?.slug || scopedSpecialtySlug(abilitySlug, item.name);
+    const row = {
+      id: item.id ?? item._id,
+      name: item.name,
+      slug,
+      rating: Number(item.system?.rating) || 0,
+      hasEffect: !!hasEffect?.(actor, slug),
+      chip: null,
+      passive: null,
+    };
+    row.active = row.rating > 0;
+    row.relevant = specialtyRelevant(row);
+    if (row.relevant) {
+      row.chip = ChronicleSystem.getRollChip(
+        actor,
+        `specialty:${item.name}:${ability.name}`
+      );
+      row.passive = ChronicleSystem.getActorPassiveValue(
+        actor,
+        ability.name,
+        item.name
+      );
+    }
+    rows.push(row);
+  }
+  return rows.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export class CSCharacterActorSheet extends CSActorSheet {
   itemTypesPermitted = [
     "ability",
+    "specialty", // spec 024 (US4) — a homebrew Specialty is droppable on a character
     "weapon",
     "armor",
     "equipment",
@@ -39,6 +123,11 @@ export class CSCharacterActorSheet extends CSActorSheet {
   // spec 012 (US2): transient "configure public sheet" mode — UI-only, never
   // persisted, off on each open (FR-018). Flipped by the togglePubMode action.
   _pubMode = false;
+
+  // spec 024 (US2, FR-016): transient "edit specialties" mode on the Abilities
+  // tab — UI-only, never persisted, off on each open (a reopened sheet is a new
+  // instance). The `_pubMode` pattern verbatim.
+  _specialtyEdit = false;
 
   // spec 022 (US3, L-2): MutationObserver enforcing one open relationship-note
   // editor at a time. The <prose-mirror> `open` event does NOT bubble (core
@@ -62,6 +151,8 @@ export class CSCharacterActorSheet extends CSActorSheet {
       openHouse: CSCharacterActorSheet._onOpenHouse,
       viewPublicSheet: CSCharacterActorSheet._onViewPublicSheet,
       togglePubMode: CSCharacterActorSheet._onTogglePubMode,
+      toggleSpecialtyEdit: CSCharacterActorSheet._onToggleSpecialtyEdit, // spec 024
+
       toggleFieldVisibility: CSCharacterActorSheet._onToggleFieldVisibility,
       // spec 022 — Relationships tab (US1/US2)
       openRelationshipSheet: CSCharacterActorSheet._onOpenRelationshipSheet,
@@ -190,6 +281,11 @@ export class CSCharacterActorSheet extends CSActorSheet {
     // traversal (D3). Transient, read-only, never submitted (no `name`) and
     // never rollable (no `data-action`); recomputed on every render like the
     // chips beside it.
+    // spec 024 (US2): the specialty rows come from the character's OWN Specialty
+    // items, grouped by `abilitySlug`. Still ONE pass over the abilities — the
+    // rows ride the same loop as the chips and passives (spec 023 D3).
+    context.specialtyEdit = this._specialtyEdit;
+    const specialtyItems = this._checkNull(context.itemsByType["specialty"]);
     character.owned.abilities.forEach((ability) => {
       ability.abilityChip = ChronicleSystem.getRollChip(
         actor,
@@ -199,18 +295,19 @@ export class CSCharacterActorSheet extends CSActorSheet {
         actor,
         ability.name
       );
-      for (const specialty of Object.values(ability.system.specialties ?? {})) {
-        if (!specialty.rating) continue;
-        specialty.specialtyChip = ChronicleSystem.getRollChip(
-          actor,
-          `specialty:${specialty.name}:${ability.name}`
-        );
-        specialty.passive = ChronicleSystem.getActorPassiveValue(
-          actor,
-          ability.name,
-          specialty.name
-        );
-      }
+      const abilitySlug = ability.system?.slug || slugify(ability.name);
+      ability.specialtyRows = buildSpecialtyRows(
+        actor,
+        ability,
+        abilitySlug,
+        specialtyItems,
+        hasSpecialtyEffect
+      );
+      // FR-010 — the muted "none active" hint replaces the chips when read mode
+      // has nothing to show. Same predicate, never a second one (D16).
+      ability.noneActive =
+        !this._specialtyEdit &&
+        !ability.specialtyRows.some((row) => specialtyVisible(row, false));
     });
 
     // spec 017 (US2): each sorcery-work test chip through the SSOT utility. The
@@ -726,7 +823,27 @@ export class CSCharacterActorSheet extends CSActorSheet {
     // deleteInjury, createWound, deleteWound, clickSquare) are registered
     // in DEFAULT_OPTIONS.actions and dispatched automatically by the
     // framework for elements with data-action attributes.
-    // No manual event listeners needed here.
+
+    // spec 024 (US2, D8 / contract C5) — the ONE exception: the edit-mode rating
+    // inputs carry NO `name` attribute, so `FormDataExtended` skips them and the
+    // ACTOR's submit never sees them (`DocumentSheetV2._processSubmitData` always
+    // writes to `this.document`; V2 has no native way to route a field to an
+    // embedded document). One delegated `change` listener routes each edit to its
+    // own Specialty item.
+    //
+    // `stopPropagation` is mandatory: `change` bubbles and the form's own
+    // listener sits on the `<form>`, so without it every edit would also fire a
+    // redundant `update({})` + re-render on the actor. No manual `render()` —
+    // updating an embedded item re-renders the sheet, exactly as the existing
+    // effect toggle/delete actions already rely on.
+    htmlElement.addEventListener("change", (event) => {
+      const input = event.target?.closest?.(".cs2-spec-input[data-item-id]");
+      if (!input) return;
+      event.stopPropagation();
+      const item = this.actor.items.get(input.dataset.itemId);
+      if (!item) return;
+      item.update({ "system.rating": clampRating(input.value) });
+    });
   }
 
   // The dynamic conditions only update their COUNTER; the modifier collector
@@ -1060,6 +1177,21 @@ export class CSCharacterActorSheet extends CSActorSheet {
   }
 
   /**
+   * spec 024 (US2, FR-011/FR-016): flip the Abilities tab between read mode
+   * (chips for the specialties that matter) and edit mode (every specialty of
+   * every owned ability, each with an inline rating input). Transient sheet
+   * state — never persisted, never flagged on the actor.
+   * @param {Event} event    The originating click event
+   * @param {HTMLElement} target  The element that was clicked
+   */
+  // eslint-disable-next-line no-unused-vars
+  static async _onToggleSpecialtyEdit(event, target) {
+    event.preventDefault();
+    this._specialtyEdit = !this._specialtyEdit;
+    this.render();
+  }
+
+  /**
    * spec 012 (US2): flip one field's public/hidden flag, persisted immediately
    * and in isolation — only this key changes, the field's content is untouched
    * (FR-017/FR-019). The document update re-renders every open app, so a watching
@@ -1140,7 +1272,18 @@ export class CSCharacterActorSheet extends CSActorSheet {
 
   /* -------------------------------------------- */
 
+  /**
+   * @override — spec 024 (contract specialty-provisioning.md C4.2/C4.3). This
+   * SAME class is the registered sheet for BOTH `character` and `unit` actors
+   * (`config.js`), and `itemTypesPermitted` is one shared list — so simply
+   * adding `"specialty"` to it (C4.2) would also make specialties droppable on
+   * units, contradicting C4.3's "the house/unit sheets' itemTypesPermitted are
+   * not changed". FR-021 already excludes units from provisioning; a unit is
+   * not a valid owner of a specialty at all, so the drop itself must be
+   * refused here rather than merely left unprovisioned.
+   */
   isItemPermitted(type) {
+    if (type === "specialty" && this.actor?.type !== "character") return false;
     return this.itemTypesPermitted.includes(type);
   }
 }

@@ -6,7 +6,11 @@ import {
   collectOptionalRollEffects,
   collectItemizedAlwaysOn,
 } from "../module/effects/cs-effect-modifiers.js";
-import { makeFakeActor, makeAbilityItem } from "./helpers/doubles.js";
+import {
+  makeFakeActor,
+  makeAbilityItem,
+  makeSpecialtyItem,
+} from "./helpers/doubles.js";
 
 // Spec 023 US4 / contract passive-effect-channel.md C2/C3/C5. The read side of
 // the `passive` channel: the collector routes it into its OWN buffer, the actor
@@ -35,17 +39,28 @@ function makeActor(changes, effectOptions = {}) {
       slug: "awareness",
       rating: 4,
       modifier: 0,
-      specialties: {
-        s1: { name: "Empathy", rating: 3, modifier: 0 },
-        s2: { name: "Notice", rating: 1, modifier: 0 },
-      },
     },
     getCSData() {
       return this.system;
     },
   };
+  // spec 024 — Empathy and Notice are their own items now.
+  const specialtyItems = [
+    makeSpecialtyItem({
+      name: "Empathy",
+      abilitySlug: "awareness",
+      rating: 3,
+      modifier: 0,
+    }),
+    makeSpecialtyItem({
+      name: "Notice",
+      abilitySlug: "awareness",
+      rating: 1,
+      modifier: 0,
+    }),
+  ];
   const actor = {
-    items: [awareness],
+    items: [awareness, ...specialtyItems],
     appliedEffects: [fakeEffect(changes, effectOptions)],
     getCSData: () => ({
       derivedStats: { fatigue: { current: 0 }, frustration: { current: 0 } },

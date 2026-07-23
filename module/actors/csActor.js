@@ -161,6 +161,46 @@ export class CSActor extends Actor {
     return super._getSheetClass();
   }
 
+  /**
+   * @override — spec 024 (post-implement fix). `CSItem#_onCreate` provisions a
+   * gained Ability's specialties, but it fires ONLY when the Item goes through
+   * its OWN creation pipeline (`actor.createEmbeddedDocuments("Item", …)`).
+   * When an Actor is instead created with its `items` supplied INLINE in the
+   * actor's own creation payload — a compendium Actor drag-in, the sidebar's
+   * "Duplicate", a JSON actor import, any `Actor.create({..., items: […]})` —
+   * those embedded items are constructed as part of the ACTOR's own data model
+   * and never run their individual `_preCreate`/`_onCreate` (verified against
+   * the installed v14 bundle: `ClientDatabaseBackend#preCreateDocumentArray` /
+   * `#handleCreateDocuments`, `foundry.mjs:80359-80479` — that pipeline, and the
+   * `_dispatchDescendantDocumentEvents("onCreate", …)` cascade it feeds, only
+   * run for documents created through their OWN class's `createDocuments`, not
+   * for embedded data nested in a PARENT's create payload). Without this, an
+   * actor arriving via any of those bulk paths keeps abilities with zero
+   * specialties, permanently — there is no other trigger that would ever
+   * provision them.
+   *
+   * Same guards as `CSItem#_onCreate`: `userId`-gated (this fires on every
+   * connected client), character-only (FR-021). Idempotent per ability
+   * (`provisionSpecialties` skips owned slugs), so this is a safe no-op for the
+   * common case where the items DID arrive through the per-item hook already.
+   */
+  _onCreate(data, options, userId) {
+    super._onCreate(data, options, userId);
+    if (this.type !== "character") return;
+    if (game.user?.id !== userId) return;
+    for (const item of this.items) {
+      if (item.type !== "ability") continue;
+      import("./cs-specialty-provisioning.js")
+        .then(({ provisionSpecialties }) => provisionSpecialties(this, item))
+        .catch((err) =>
+          console.warn(
+            "chroniclesystem | specialty provisioning (actor create) skipped:",
+            err
+          )
+        );
+    }
+  }
+
   // House only: keep the resource-total recompute when an `event` embedded item
   // changes. Character/unit fall through to base after `super` (they had no
   // override before). The inner `type === "event"` guard is preserved as-is.
@@ -307,36 +347,66 @@ export class CSActor extends Actor {
     return [ability, undefined];
   }
 
+  /**
+   * The read-side view of a Specialty item (spec 024, D2 / contract C2) — a
+   * PLAIN object carrying exactly the four keys `resolveTraitBase` reads, never
+   * the document itself (so nothing downstream can mutate a persisted item, and
+   * `item.rating` — which lives under `item.system` — is never read as undefined).
+   * One helper for both resolvers, so they can never disagree.
+   * @param {object} item        a `type === "specialty"` item
+   * @param {string} abilitySlug the owning ability's slug, for the slug fallback
+   * @returns {{name: string, rating: number, modifier: number, slug: string}}
+   */
+  static specialtyAdapter(item, abilitySlug) {
+    const data = item.getCSData?.() ?? item.system ?? {};
+    return {
+      name: item.name,
+      rating: Number(data.rating) || 0,
+      modifier: Number(data.modifier) || 0,
+      slug: data.slug || scopedSpecialtySlug(abilitySlug, item.name),
+    };
+  }
+
+  /**
+   * Resolve `[ability, specialtyAdapter]` from an ability DISPLAY NAME and a
+   * specialty display name — the pair the name-based roll chips carry
+   * (`specialty:<specialty>:<ability>`), which is why name matching must survive.
+   *
+   * The `abilitySlug` scope is mandatory: "Charm" is both an Animal Handling and
+   * a Persuasion specialty, and an unscoped name match would return the wrong one.
+   *
+   * When the specialty does NOT resolve, this returns `[undefined, undefined]`
+   * even if the ability itself is owned — the pre-024 behaviour, kept verbatim
+   * because `resolveTraitBase` only falls through to `getAbilityBySpecialtySlug`
+   * while `ability === undefined` (`ChronicleSystem.js:1205`). Returning the
+   * ability here would swallow that fallback and, for instance, stop
+   * `calculateMovementData`'s `"athletics_run"` from resolving — a silent SC-002
+   * parity break. The ability is re-resolved by the caller's own
+   * `getAbility(abilityName)` step, so nothing is lost (contract C1 over C3.4).
+   * @param {string} abilityName
+   * @param {string} specialtyName
+   */
   getAbilityBySpecialty(abilityName, specialtyName) {
-    let items = this.items;
-    let specialty = null;
-    const ability = items
-      .filter(
-        (item) =>
-          item.type === "ability" &&
-          item.name.toLowerCase() === abilityName.toString().toLowerCase()
-      )
-      .find(function (ability) {
-        let data = ability.getCSData();
-        if (data.specialties === undefined) return false;
+    const wantedAbility = abilityName?.toString().toLowerCase();
+    const ability = this.items.find(
+      (item) =>
+        item.type === "ability" && item.name.toLowerCase() === wantedAbility
+    );
+    if (!ability) return [undefined, undefined];
 
-        // convert specialties list to array
-        let specialties = data.specialties;
-        let specialtiesArray = Object.keys(specialties).map(
-          (key) => specialties[key]
-        );
+    const abilityData = ability.getCSData?.() ?? ability.system ?? {};
+    const abilitySlug = abilityData.slug || slugify(ability.name);
+    const wantedSpecialty = specialtyName?.toString().toLowerCase();
+    const item = this.items.find(
+      (candidate) =>
+        candidate.type === "specialty" &&
+        (candidate.getCSData?.() ?? candidate.system ?? {}).abilitySlug ===
+          abilitySlug &&
+        candidate.name?.toLowerCase() === wantedSpecialty
+    );
 
-        specialty = specialtiesArray.find(
-          (specialty) =>
-            specialty.name.toLowerCase() ===
-            specialtyName.toString().toLowerCase()
-        );
-        if (specialty !== null && specialty !== undefined) {
-          return true;
-        }
-      });
-
-    return [ability, specialty];
+    if (!item) return [undefined, undefined];
+    return [ability, CSActor.specialtyAdapter(item, abilitySlug)];
   }
 
   /**
@@ -367,26 +437,30 @@ export class CSActor extends Actor {
   }
 
   /**
-   * Resolve a specialty by its SCOPED slug (`<abilitySlug>_<spec>`) inside any
-   * ability the actor owns. Slug variant of {@link getAbilityBySpecialty}.
-   * Returns `[ability|undefined, specialty|undefined]`.
+   * Resolve a specialty by its SCOPED slug (`<abilitySlug>_<spec>`) — a FLAT scan
+   * over the actor's Specialty items (spec 024, C4). The owning ability is
+   * resolved AFTER, from the found item's own `abilitySlug`, so an ORPHAN (a
+   * specialty whose ability the actor no longer owns) still resolves its value
+   * and `resolveTraitBase` falls back to its untrained baseline, exactly as it
+   * does today for an unowned ability.
    * @param {string} specialtySlug
+   * @returns {[object|undefined, object|undefined]}
    */
   getAbilityBySpecialtySlug(specialtySlug) {
-    let foundSpecialty;
-    const ability = this.items.find((item) => {
-      if (item.type !== "ability") return false;
-      const data = item.getCSData?.() ?? {};
-      const abilitySlug = data.slug || slugify(item.name);
-      const specialties = data.specialties ?? {};
-      foundSpecialty = Object.values(specialties).find(
-        (sp) =>
-          (sp?.slug || scopedSpecialtySlug(abilitySlug, sp?.name)) ===
-          specialtySlug
-      );
-      return foundSpecialty !== undefined;
+    const item = this.items.find((candidate) => {
+      if (candidate.type !== "specialty") return false;
+      const data = candidate.getCSData?.() ?? candidate.system ?? {};
+      const slug =
+        data.slug ||
+        scopedSpecialtySlug(data.abilitySlug ?? "", candidate.name);
+      return slug === specialtySlug;
     });
-    return [ability, foundSpecialty];
+    if (!item) return [undefined, undefined];
+
+    const abilitySlug =
+      (item.getCSData?.() ?? item.system ?? {}).abilitySlug ?? "";
+    const [ability] = this.getAbilityBySlug(abilitySlug);
+    return [ability, CSActor.specialtyAdapter(item, abilitySlug)];
   }
 
   getModifier(type, includeDetail = false, includeModifierGlobal = false) {

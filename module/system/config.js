@@ -44,6 +44,7 @@ import UnitData from "../data/actor/unit-data.js";
 import WeaponData from "../data/item/weapon-data.js";
 import ArmorData from "../data/item/armor-data.js";
 import AbilityData from "../data/item/ability-data.js";
+import SpecialtyData from "../data/item/specialty-data.js";
 import BenefitData from "../data/item/benefit-data.js";
 import DrawbackData from "../data/item/drawback-data.js";
 import EquipmentData from "../data/item/equipment-data.js";
@@ -94,6 +95,7 @@ Hooks.once("init", async function () {
     weapon: WeaponData,
     armor: ArmorData,
     ability: AbilityData,
+    specialty: SpecialtyData,
     benefit: BenefitData,
     drawback: DrawbackData,
     equipment: EquipmentData,
@@ -177,6 +179,7 @@ Hooks.once("init", async function () {
         "holding",
         "technique",
         "quality",
+        "specialty",
       ],
       makeDefault: true,
     }
@@ -339,7 +342,9 @@ Hooks.on("createItem", (item) => {
 
 for (const hook of ["createItem", "updateItem", "deleteItem"]) {
   Hooks.on(hook, (item) => {
-    if (item?.type !== "ability") return;
+    // spec 024 — a specialty is its own item now, so its CRUD must invalidate
+    // the memoized catalogue too, or a newly added/renamed one stays stale.
+    if (item?.type !== "ability" && item?.type !== "specialty") return;
     invalidatePassiveCatalog();
   });
 }

@@ -2,8 +2,14 @@ import { describe, it, expect, afterEach } from "vitest";
 import {
   worldAbilityCatalog,
   invalidatePassiveCatalog,
+  targetPassiveOptions,
 } from "../module/rolls/cs-passive-catalog.js";
 import { CANONICAL_ABILITIES } from "../module/vocabulary/cs-canonical-abilities.js";
+import {
+  makeFakeActor,
+  makeAbilityItem,
+  makeSpecialtyItem,
+} from "./helpers/doubles.js";
 
 // Spec 023 / contract passive-options.md C2. The world ability catalogue: the
 // Item directory ∪ the canonical vocabulary, deduped by slug with the WORLD
@@ -17,10 +23,18 @@ function withWorldItems(items) {
   invalidatePassiveCatalog();
 }
 
-const worldAbility = (name, { slug, specialties = {} } = {}) => ({
+const worldAbility = (name, { slug } = {}) => ({
   type: "ability",
   name,
-  system: { slug, specialties },
+  system: { slug },
+});
+
+// spec 024 — an ability's specialties are their OWN world items now, linked by
+// the ability's slug (the catalogue unions them with the canonical set).
+const worldSpecialty = (name, abilitySlug, { slug } = {}) => ({
+  type: "specialty",
+  name,
+  system: { slug, abilitySlug },
 });
 
 afterEach(() => {
@@ -54,16 +68,17 @@ describe("worldAbilityCatalog — no Foundry world (C2.7)", () => {
 describe("worldAbilityCatalog — world items (C2.1/C2.2/C2.3)", () => {
   it("a world item OVERRIDES the canonical entry of the same slug", () => {
     withWorldItems([
-      worldAbility("Vigilance", {
-        slug: "awareness",
-        specialties: { s1: { name: "Sixth Sense", rating: 3 } },
-      }),
+      worldAbility("Vigilance", { slug: "awareness" }),
+      worldSpecialty("Sixth Sense", "awareness"),
     ]);
     const awareness = worldAbilityCatalog().find((a) => a.slug === "awareness");
     expect(awareness.name).toBe("Vigilance");
     expect(awareness.nameKey).toBeNull();
+    // World entries first, then the canonical ones the world does not override.
     expect(awareness.specialties.map((s) => s.slug)).toEqual([
       "awareness_sixth_sense",
+      "awareness_empathy",
+      "awareness_notice",
     ]);
     // The rest of the vocabulary is untouched.
     expect(worldAbilityCatalog()).toHaveLength(CANONICAL_ABILITIES.length);
@@ -86,15 +101,16 @@ describe("worldAbilityCatalog — world items (C2.1/C2.2/C2.3)", () => {
 
   it("dedupes an ability's specialties by scoped slug", () => {
     withWorldItems([
-      worldAbility("Awareness", {
-        specialties: {
-          s1: { name: "Empathy", rating: 2 },
-          s2: { name: "empathy", rating: 4 },
-        },
-      }),
+      worldAbility("Awareness"),
+      worldSpecialty("Empathy", "awareness"),
+      worldSpecialty("empathy", "awareness"),
     ]);
     const awareness = worldAbilityCatalog().find((a) => a.slug === "awareness");
-    expect(awareness.specialties).toHaveLength(1);
+    // The two collapse into one; the canonical "Notice" still rides along.
+    expect(
+      awareness.specialties.filter((s) => s.slug === "awareness_empathy")
+    ).toHaveLength(1);
+    expect(awareness.specialties).toHaveLength(2);
   });
 
   it("ignores non-ability items in the directory", () => {
@@ -103,6 +119,80 @@ describe("worldAbilityCatalog — world items (C2.1/C2.2/C2.3)", () => {
       worldAbility("Sorcery"),
     ]);
     expect(worldAbilityCatalog()).toHaveLength(CANONICAL_ABILITIES.length + 1);
+  });
+});
+
+// spec 024 — targetPassiveOptions section 2 ("the TARGET's own abilities") reads the
+// target's Specialty ITEMS, not the deprecated embedded array. This was the gap the
+// original task list missed: with the legacy reader, a post-024 character's own rated
+// specialties silently stopped being offered as "from the target".
+describe("targetPassiveOptions — the target's OWN specialties (spec 024)", () => {
+  /** A target character owning Awareness, with Empathy at 3 and Notice at 0. */
+  function targetActor({ ratings = { Empathy: 3, Notice: 0 } } = {}) {
+    const ability = makeAbilityItem("Awareness", 4, { slug: "awareness" });
+    ability._id = "ab-aware";
+    ability.id = "ab-aware";
+    const specialties = Object.entries(ratings).map(([name, rating]) =>
+      makeSpecialtyItem({ name, abilitySlug: "awareness", rating })
+    );
+    const actor = makeFakeActor({ abilities: [ability], specialties });
+    actor.type = "character";
+    return actor;
+  }
+
+  /** The option keys of the "Awareness" group. */
+  function awarenessKeys(actor) {
+    const groups = targetPassiveOptions(actor, {}, { showValues: true });
+    const group = groups.find((g) => g.label === "Awareness");
+    return group ? group.options.map((o) => o.key) : [];
+  }
+
+  it("offers a RATED specialty as the target's own", () => {
+    const keys = awarenessKeys(targetActor());
+    expect(keys).toContain("own:ab-aware:awareness_empathy");
+  });
+
+  it("does NOT offer a rating-0 specialty as the target's own", () => {
+    // Post-024 a character owns EVERY specialty of every ability they have, so
+    // without the rated-only rule the picker would list all 76 as "from target".
+    const keys = awarenessKeys(targetActor());
+    expect(keys).not.toContain("own:ab-aware:awareness_notice");
+  });
+
+  it("still offers the unrated one through the catalogue extension", () => {
+    const keys = awarenessKeys(targetActor());
+    expect(keys).toContain("cat:awareness:awareness_notice");
+  });
+
+  it("never lists a specialty twice across the two sections", () => {
+    const keys = awarenessKeys(targetActor());
+    expect(keys.filter((k) => k.endsWith("awareness_empathy"))).toHaveLength(1);
+  });
+
+  it("groups a homebrew specialty of the target under its ability", () => {
+    const actor = targetActor({ ratings: {} });
+    actor.items.push(
+      makeSpecialtyItem({
+        name: "Sixth Sense",
+        abilitySlug: "awareness",
+        rating: 2,
+      })
+    );
+    expect(awarenessKeys(actor)).toContain("own:ab-aware:awareness_sixth_sense");
+  });
+
+  it("ignores a specialty linked to an ability the target does not own", () => {
+    const actor = targetActor({ ratings: {} });
+    actor.items.push(
+      makeSpecialtyItem({ name: "Charm", abilitySlug: "persuasion", rating: 3 })
+    );
+    const groups = targetPassiveOptions(actor, {}, { showValues: true });
+    const persuasion = groups.find((g) => g.label === "Persuasion");
+    // It reaches the picker only through the catalogue extension, never as "own".
+    const ownKeys = (persuasion?.options ?? []).filter((o) =>
+      o.key.startsWith("own:")
+    );
+    expect(ownKeys).toHaveLength(0);
   });
 });
 

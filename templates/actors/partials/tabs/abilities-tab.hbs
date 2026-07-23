@@ -1,6 +1,23 @@
+{{!-- Abilities tab (spec 024, US2). Two modes driven by the transient
+      `specialtyEdit` sheet flag: READ mode shows only the specialties that matter
+      (ranked, or targeted by an enabled effect) as rollable chips + passives;
+      EDIT mode shows every specialty of every owned ability with an inline rating
+      input that writes to its OWN Specialty item.
+
+      The read branch takes NO `rating > 0` test of its own — it reuses the single
+      `relevant` predicate the context already computed, which is also what gated
+      the chip and the passive (D16). A second condition here is how the "visible
+      row with nothing in it" defect comes back. --}}
 <div class="tab" data-group="primary" data-tab="abilities">
     <div class="cs2-card">
-        <div class="cs2-card-header">{{localize "CS.sheets.character.tabs.abilities"}}</div>
+        <div class="cs2-card-header">
+            <span>{{localize "CS.sheets.character.tabs.abilities"}}</span>
+            {{#if editable}}
+            <button type="button" class="csv2-btn csv2-btn--sm" data-action="toggleSpecialtyEdit">
+                {{#if specialtyEdit}}{{localize "CS.sheets.character.specialtyEdit.on"}}{{else}}{{localize "CS.sheets.character.specialtyEdit.off"}}{{/if}}
+            </button>
+            {{/if}}
+        </div>
         <div class="cs2-grid" style="grid-template-columns: minmax(96px, max-content) 150px 64px 1fr">
             <span class="cs2-grid-head center">{{localize "CS.sheets.character.test"}}</span>
             <span class="cs2-grid-head">{{localize "CS.sheets.character.ability"}}</span>
@@ -19,20 +36,41 @@
                     <div class="cs2-grid-cell center">
                         <span class="csv2-passive" title="{{localize "CS.sheets.character.passiveHint"}}">{{ability.passive}}</span>
                     </div>
-                    <div class="cs2-grid-cell cs2-tags cs2-tags--paired">
-                        {{#each ability.system.specialties as |specialty key|}}
-                            {{#if specialty.rating}}
-                            <span class="cs2-tag-pair">
-                                {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
-                                    id=specialty.specialtyChip.id
-                                    label=(concat specialty.name " " specialty.specialtyChip.label) }}
-                                <span class="csv2-passive" title="{{localize "CS.sheets.character.passiveSpecialtyHint"}}">{{specialty.passive}}</span>
+                    <div class="cs2-grid-cell cs2-tags cs2-tags--paired cs2-spec-cell">
+                        {{#if ability.noneActive}}
+                        <span class="cs2-spec-none">{{localize "CS.sheets.character.specialtyEdit.noneActive"}}</span>
+                        {{/if}}
+                        {{#each ability.specialtyRows as |row|}}
+                            {{#if @root.specialtyEdit}}
+                            <span class="cs2-spec-pill {{#if row.active}}is-valued{{else}}is-available{{/if}}">
+                                <span class="cs2-spec-name">{{row.name}}</span>
+                                {{#unless row.active}}
+                                <span class="cs2-spec-tag">{{localize "CS.sheets.character.specialtyEdit.available"}}</span>
+                                {{/unless}}
+                                <input type="number" min="0" step="1" class="cs2-spec-input is-mono"
+                                       data-item-id="{{row.id}}" value="{{row.rating}}"
+                                       title="{{localize "CS.sheets.character.specialtyEdit.valueHint"}}" />
                             </span>
+                            {{else}}
+                                {{#if row.relevant}}
+                                <span class="cs2-tag-pair">
+                                    {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs"
+                                        id=row.chip.id
+                                        label=(concat row.name " " row.chip.label) }}
+                                    <span class="csv2-passive" title="{{localize "CS.sheets.character.passiveSpecialtyHint"}}">{{row.passive}}</span>
+                                </span>
+                                {{/if}}
                             {{/if}}
                         {{/each}}
                     </div>
                 </div>
             {{/each}}
         </div>
+        {{#if specialtyEdit}}
+        <div class="cs2-spec-legend">
+            <span class="cs2-spec-pill is-valued"><span class="cs2-spec-name">{{localize "CS.sheets.character.specialtyEdit.legendActive"}}</span></span>
+            <span class="cs2-spec-pill is-available"><span class="cs2-spec-name">{{localize "CS.sheets.character.specialtyEdit.legendAvailable"}}</span></span>
+        </div>
+        {{/if}}
     </div>
 </div>

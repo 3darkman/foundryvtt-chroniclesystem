@@ -7,7 +7,6 @@ import {
   isCanonicalSpecialtySlug,
   scopedSpecialtySlug,
   deriveSlugUpdate,
-  deriveSpecialtySlugs,
   findSlugCollision,
 } from "../module/vocabulary/cs-canonical-abilities.js";
 
@@ -95,29 +94,9 @@ describe("deriveSlugUpdate (derive-when-empty, keep editable — FR-012)", () =>
   });
 });
 
-describe("deriveSpecialtySlugs (idempotent scoped fill)", () => {
-  it("fills blank slugs and preserves set ones", () => {
-    const out = deriveSpecialtySlugs("persuasion", [
-      { name: "Charm", rating: 3 },
-      { name: "Bargain", rating: 2, slug: "persuasion_custom" },
-    ]);
-    expect(out[0].slug).toBe("persuasion_charm");
-    expect(out[1].slug).toBe("persuasion_custom"); // untouched
-  });
-
-  it("is idempotent — a 2nd pass equals the 1st", () => {
-    const once = deriveSpecialtySlugs("agility", [{ name: "Quickness" }]);
-    const twice = deriveSpecialtySlugs("agility", once);
-    expect(twice).toEqual(once);
-    expect(twice[0].slug).toBe("agility_quickness");
-  });
-
-  it("does not mutate the input array/objects", () => {
-    const input = [{ name: "Charm" }];
-    deriveSpecialtySlugs("persuasion", input);
-    expect(input[0].slug).toBeUndefined();
-  });
-});
+// `deriveSpecialtySlugs` was removed in spec 024 — a specialty is its own item
+// now and derives its scoped slug through the item lifecycle
+// (`tests/specialty-slug-lifecycle.test.js` covers it).
 
 describe("findSlugCollision (FR-013 base)", () => {
   it("G1 — true when the slug is already present in the scope", () => {

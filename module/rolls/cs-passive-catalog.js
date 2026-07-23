@@ -18,6 +18,7 @@ import {
   CANONICAL_ABILITIES,
   scopedSpecialtySlug,
 } from "../vocabulary/cs-canonical-abilities.js";
+import { specialtiesForAbility } from "../vocabulary/cs-specialty-catalog.js";
 import { combatDefenseSizeModifier } from "../combat/cs-conflict.js";
 import { buildPassiveGroups } from "./cs-passive.js";
 
@@ -33,18 +34,15 @@ export function invalidatePassiveCatalog() {
   catalogCache = null;
 }
 
-/** The specialties of a world ability item, deduped by scoped slug (C2.3). */
-function worldSpecialties(abilitySlug, system) {
-  const seen = new Set();
-  const specialties = [];
-  for (const specialty of Object.values(system?.specialties ?? {})) {
-    const slug =
-      specialty?.slug || scopedSpecialtySlug(abilitySlug, specialty?.name);
-    if (!slug || slug === abilitySlug || seen.has(slug)) continue;
-    seen.add(slug);
-    specialties.push({ slug, name: specialty?.name ?? slug, nameKey: null });
-  }
-  return specialties;
+/**
+ * The specialties an ability offers (C2.3). Spec 024: a specialty is its own
+ * item, so the source moved to the catalogue module — world Specialty items ∪
+ * the canonical set, deduped by slug with the world winning. The dedupe, the
+ * blank/bare-slug guard and the ordering rules are unchanged; only the source
+ * moved (FR-025).
+ */
+function worldSpecialties(abilitySlug) {
+  return specialtiesForAbility(abilitySlug);
 }
 
 /**
@@ -72,7 +70,7 @@ export function worldAbilityCatalog() {
       slug,
       name: item.name ?? slug,
       nameKey: null,
-      specialties: worldSpecialties(slug, item.system),
+      specialties: worldSpecialties(slug),
     });
   }
   for (const ability of CANONICAL_ABILITIES) {
@@ -99,6 +97,31 @@ function displayName(entry) {
   if (!entry.nameKey) return entry.name;
   const localized = game?.i18n?.localize?.(entry.nameKey);
   return localized && localized !== entry.nameKey ? localized : entry.name;
+}
+
+/**
+ * An actor's own Specialty items, grouped by the ability slug they link to
+ * (spec 024). One pass over `actor.items`, so the caller can look a group up by
+ * slug instead of re-scanning the collection per ability.
+ * @param {object} actor
+ * @returns {Map<string, Array<{slug: string, name: string, rating: number}>>}
+ */
+function ownedSpecialtiesByAbility(actor) {
+  const bySlug = new Map();
+  for (const item of actor?.items ?? []) {
+    if (item?.type !== "specialty") continue;
+    const abilitySlug = item.system?.abilitySlug ?? "";
+    if (!abilitySlug) continue;
+    const slug =
+      item.system?.slug || scopedSpecialtySlug(abilitySlug, item.name);
+    if (!bySlug.has(abilitySlug)) bySlug.set(abilitySlug, []);
+    bySlug.get(abilitySlug).push({
+      slug,
+      name: item.name,
+      rating: Number(item.system?.rating) || 0,
+    });
+  }
+  return bySlug;
 }
 
 /** A finite derived-stat total read from the ACTOR — never from the target
@@ -201,7 +224,14 @@ export function targetPassiveOptions(
 
   // 2 · The target's OWN abilities — keyed by item id, so two abilities sharing
   // a name survive as distinct groups (D6). Their slugs seed the dedupe.
+  //
+  // spec 024: the target's specialties are its own `specialty` ITEMS, grouped by
+  // `abilitySlug`. Grouped ONCE up front (O(items)) rather than re-filtered inside
+  // the ability loop — a post-024 character owns every specialty of every ability
+  // they have, so the nested form would be O(abilities × items) over a collection
+  // that just grew by ~76 per actor.
   const overall = localize("CS.dialogs.rollModifier.passiveOverall");
+  const ownSpecialtiesBySlug = ownedSpecialtiesByAbility(targetActor);
   const ownGroupBySlug = new Map(); // abilitySlug → {groupId, name, specSlugs}
   for (const item of targetActor.items ?? []) {
     if (item?.type !== "ability") continue;
@@ -218,15 +248,18 @@ export function targetPassiveOptions(
       maskable: true,
     });
     const specSlugs = new Set();
-    for (const specialty of Object.values(item.system?.specialties ?? {})) {
-      if (!specialty?.rating) continue;
-      const slug =
-        specialty.slug || scopedSpecialtySlug(abilitySlug, specialty.name);
-      if (!slug || specSlugs.has(slug)) continue;
-      specSlugs.add(slug);
+    for (const specialty of ownSpecialtiesBySlug.get(abilitySlug) ?? []) {
+      // RATED only — unchanged rule. Post-024 an actor owns every specialty of
+      // every ability they have (provisioning + the conversion's backfill), so
+      // without this the picker would list all 76 as "the target's own" instead
+      // of the handful they actually have ranks in. The unrated ones still reach
+      // the picker through the catalogue extension below, as `fromTarget: false`.
+      if (!specialty.rating) continue;
+      if (!specialty.slug || specSlugs.has(specialty.slug)) continue;
+      specSlugs.add(specialty.slug);
       entries.push({
         kind: "specialty",
-        key: `${groupId}:${slug}`,
+        key: `${groupId}:${specialty.slug}`,
         shortLabel: specialty.name,
         groupLabel,
         value: passiveOf(item.name, specialty.name),

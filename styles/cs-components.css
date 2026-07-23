@@ -1462,10 +1462,16 @@
   background: var(--csv2-danger);
   color: var(--csv2-on-primary);
 }
-/* Compact "Add" button in any list/panel card-header bar (was oversized as a full
-   pill). One rule for EVERY listAdd button (repeatable lists + Técnica works panel)
-   so they stay identical — keyed on the action, not the wrapper. */
-.cs-v2 .csv2-card-header .csv2-btn[data-action="listAdd"] {
+/* Compact action button in any list/panel/section card-header bar (was oversized
+   as a full pill). ONE rule for every header action — the repeatable-list "+ add",
+   the Técnica works panel, and (spec 024) the character sheet's "Edit specialties"
+   toggle — so they stay identical. Keyed on the action, not the wrapper.
+   Dual-scoped through the established `:is(.cs-v2, .cs-sheet-v2)` bridge and both
+   header class names, so the character sheet reaches it WITHOUT a local copy
+   (constitution SSOT — this rule is promoted, never re-declared per window). */
+:is(.cs-v2, .cs-sheet-v2)
+  :is(.csv2-card-header, .cs2-card-header)
+  .csv2-btn:is([data-action="listAdd"], [data-action="toggleSpecialtyEdit"]) {
   box-sizing: border-box;
   height: 19px;
   min-height: 0;
@@ -1479,6 +1485,57 @@
   color: var(--csv2-primary);
   border-color: transparent;
 }
+/* ---------- Specialty pill (spec 024, US2) ----------
+   The two states of an editable specialty on the character sheet's Abilities tab:
+   VALUED (it has ranks) and AVAILABLE (rating 0 — dashed and muted, visually
+   distinct so "you could train this" never reads as "you have this"). Shared
+   component, not window-scoped: the legend swatches reuse the very same classes. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border: 1px solid var(--csv2-chip-border);
+  border-radius: 20px;
+  background: var(--csv2-chip-bg);
+  font-size: 11px;
+  color: var(--csv2-text);
+}
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-pill.is-available {
+  border-style: dashed;
+  border-color: var(--csv2-track-border);
+  background: transparent;
+  color: var(--csv2-muted);
+}
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-tag {
+  font-family: var(--csv2-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+/* The inline rating input. It deliberately carries NO `name` attribute (the
+   actor's submit must never see it); a delegated `change` listener routes it to
+   its own Specialty item. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-input {
+  width: 42px;
+  height: 20px;
+  padding: 0 4px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 4px;
+  background: var(--csv2-bg);
+  font-family: var(--csv2-font-mono);
+  font-size: 11px;
+  text-align: center;
+  color: var(--csv2-text);
+}
+/* The muted "no active specialties" hint that replaces the chips in read mode. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-none {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--csv2-muted);
+}
+
 /* Same "+ add", but on the LIGHT `.cs-opt-head` (Parâmetro Opções): transparent,
    borderless, blue text (handoff §Parâmetro). */
 .cs-v2 .cs-opt-head .csv2-btn[data-action="listAdd"] {
