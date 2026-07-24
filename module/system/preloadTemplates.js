@@ -23,6 +23,12 @@ export const preloadHandlebarsTemplates = async function () {
     "systems/chroniclesystem/templates/actors/partials/cs-sheet-icons.hbs",
     "systems/chroniclesystem/templates/actors/partials/pub-eye.hbs",
     "systems/chroniclesystem/templates/actors/partials/pub-eye-inline.hbs",
+    "systems/chroniclesystem/templates/actors/units/unit-sheet.hbs",
+    "systems/chroniclesystem/templates/actors/partials/tabs/unit-overview-tab.hbs",
+    "systems/chroniclesystem/templates/actors/partials/tabs/unit-composition-tab.hbs",
+    "systems/chroniclesystem/templates/actors/partials/tabs/unit-command-tab.hbs",
+    "systems/chroniclesystem/templates/actors/partials/tabs/unit-description-tab.hbs",
+
     "systems/chroniclesystem/templates/actors/partials/tabs/resources-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/events-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/members-tab.hbs",

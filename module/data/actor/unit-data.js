@@ -1,133 +1,162 @@
+import { TRAINING_LEVELS, LEADER_ROLES } from "../../vocabulary/cs-warfare.js";
+
 const fields = foundry.data.fields;
 
-// Every `unit` schema leaf is an `integer` NumberField, so a legacy value of
-// null/NaN/string would fail v13/v14 validation. Coerce each numeric leaf to a
-// finite integer before validation runs. `Number(null)===0`, `Number("")===0`;
-// anything non-finite (NaN, "abc") floors to 0; `Math.trunc` guarantees integer.
-const toInt = (v) => (Number.isFinite(Number(v)) ? Math.trunc(Number(v)) : 0);
+const DEFAULT_TRAINING_LEVEL = TRAINING_LEVELS[0];
 
-// Recurse (≤2 levels) through a numeric sub-tree, coercing every leaf in place.
-const coerceLeaves = (node) => {
+const integerField = () =>
+  new fields.NumberField({ required: true, initial: 0, integer: true });
+
+const blankStringField = () =>
+  new fields.StringField({ required: false, blank: true, initial: "" });
+
+const NUMERIC_TREES = ["derivedStats", "movement", "health"];
+
+function coercedIntegerLeaves(node) {
   for (const key of Object.keys(node)) {
     const value = node[key];
-    if (value && typeof value === "object") coerceLeaves(value);
-    else node[key] = toInt(value);
+    if (value && typeof value === "object") coercedIntegerLeaves(value);
+    else node[key] = Number.isFinite(Number(value)) ? Math.trunc(value) : 0;
   }
-};
+}
 
-// The fully-numeric sub-trees and the two top-level numeric scalars of the
-// schema. Non-numeric branches (owned, modifiers, penalties, description,
-// types, isEquipmentUpgraded) are deliberately left untouched.
-const NUMERIC_TREES = ["derivedStats", "xp", "trainingLevel", "status"];
-const NUMERIC_SCALARS = ["currentEquipmentIndex", "disorganizedPenalties"];
+function migratedNumericTrees(source) {
+  for (const tree of NUMERIC_TREES) {
+    if (source[tree] && typeof source[tree] === "object")
+      coercedIntegerLeaves(source[tree]);
+  }
+}
+
+function migratedTrainingLevel(source) {
+  const legacy = source.trainingLevel;
+  if (typeof legacy === "string") {
+    source.trainingLevel = TRAINING_LEVELS.includes(legacy)
+      ? legacy
+      : DEFAULT_TRAINING_LEVEL;
+    return;
+  }
+  if (legacy && typeof legacy === "object") {
+    const band = TRAINING_LEVELS[Math.trunc(Number(legacy.base))];
+    source.trainingLevel = band ?? DEFAULT_TRAINING_LEVEL;
+    return;
+  }
+  if (legacy !== undefined) source.trainingLevel = DEFAULT_TRAINING_LEVEL;
+}
+
+function migratedHealth(source) {
+  if (source.health !== undefined) return;
+  const legacy = source.derivedStats?.health;
+  if (!legacy || typeof legacy !== "object") return;
+  const current = Number(legacy.current);
+  const max = Number(legacy.total ?? legacy.value);
+  source.health = {
+    value: Number.isFinite(current) ? Math.trunc(current) : 0,
+    max: Number.isFinite(max) ? Math.trunc(max) : 0,
+  };
+}
+
+function migratedEvolvedEquipment(source) {
+  if (source.evolvedEquipment !== undefined) return;
+  if (source.isEquipmentUpgraded !== true) return;
+  source.evolvedEquipment = {
+    armor: true,
+    fighting: true,
+    marksmanship: true,
+  };
+}
+
+function migratedAttachedHeroes(source) {
+  if (source.attachedHeroes === undefined) return;
+  if (!Array.isArray(source.attachedHeroes)) {
+    delete source.attachedHeroes;
+    return;
+  }
+  source.attachedHeroes = source.attachedHeroes
+    .filter((entry) => entry && typeof entry === "object")
+    .map((entry) => ({
+      uuid: typeof entry.uuid === "string" ? entry.uuid : "",
+    }));
+}
+
+function blankCoercedReferences(source) {
+  for (const key of ["primaryTypeSlug", "houseUuid"]) {
+    if (source[key] !== undefined && typeof source[key] !== "string")
+      source[key] = "";
+  }
+  if (source.leader && typeof source.leader === "object") {
+    if (typeof source.leader.uuid !== "string") source.leader.uuid = "";
+    if (!LEADER_ROLES.includes(source.leader.role))
+      source.leader.role = LEADER_ROLES[0];
+  } else if (source.leader !== undefined) {
+    delete source.leader;
+  }
+}
 
 export default class UnitData extends foundry.abstract.TypeDataModel {
   /** @override */
   static migrateData(source) {
-    for (const tree of NUMERIC_TREES) {
-      if (source[tree] && typeof source[tree] === "object")
-        coerceLeaves(source[tree]);
-    }
-    for (const key of NUMERIC_SCALARS) {
-      if (source[key] !== undefined) source[key] = toInt(source[key]);
-    }
+    migratedTrainingLevel(source);
+    migratedHealth(source);
+    migratedNumericTrees(source);
+    migratedEvolvedEquipment(source);
+    migratedAttachedHeroes(source);
+    blankCoercedReferences(source);
+    delete source.xp;
+    delete source.types;
+    delete source.owned;
+    delete source.status;
+    delete source.currentEquipmentIndex;
+    delete source.isEquipmentUpgraded;
+    delete source.disorganizedPenalties;
+    if (source.derivedStats && typeof source.derivedStats === "object")
+      delete source.derivedStats.health;
     return super.migrateData(source);
   }
 
   static defineSchema() {
     return {
-      owned: new fields.SchemaField({
-        equipments: new fields.ArrayField(new fields.ObjectField()),
-        weapons: new fields.ArrayField(new fields.ObjectField()),
-        armors: new fields.ArrayField(new fields.ObjectField()),
-        qualities: new fields.ArrayField(new fields.ObjectField()),
-        drawbacks: new fields.ArrayField(new fields.ObjectField()),
-        abilities: new fields.ArrayField(new fields.ObjectField()),
-        powers: new fields.ArrayField(new fields.ObjectField()),
-        benefits: new fields.ArrayField(new fields.ObjectField()),
+      trainingLevel: new fields.StringField({
+        required: true,
+        choices: TRAINING_LEVELS,
+        initial: DEFAULT_TRAINING_LEVEL,
       }),
-      modifiers: new fields.ObjectField({ initial: {} }),
-      penalties: new fields.ObjectField({ initial: {} }),
+      primaryTypeSlug: blankStringField(),
+      health: new fields.SchemaField({
+        value: integerField(),
+        max: integerField(),
+      }),
       derivedStats: new fields.SchemaField({
         combatDefense: new fields.SchemaField({
-          value: new fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true,
-          }),
-          modifier: new fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true,
-          }),
-        }),
-        health: new fields.SchemaField({
-          total: new fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true,
-          }),
-          modifier: new fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true,
-          }),
-          value: new fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true,
-          }),
-          current: new fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true,
-          }),
+          value: integerField(),
+          modifier: integerField(),
         }),
       }),
+      movement: new fields.SchemaField({
+        modifier: integerField(),
+        base: integerField(),
+        bulk: integerField(),
+        total: integerField(),
+      }),
+      evolvedEquipment: new fields.SchemaField({
+        armor: new fields.BooleanField({ initial: false }),
+        fighting: new fields.BooleanField({ initial: false }),
+        marksmanship: new fields.BooleanField({ initial: false }),
+      }),
+      leader: new fields.SchemaField({
+        uuid: blankStringField(),
+        role: new fields.StringField({
+          required: true,
+          choices: LEADER_ROLES,
+          initial: LEADER_ROLES[0],
+        }),
+      }),
+      attachedHeroes: new fields.ArrayField(
+        new fields.SchemaField({ uuid: blankStringField() })
+      ),
+      houseUuid: blankStringField(),
       description: new fields.StringField({ required: true, initial: "" }),
-      types: new fields.ArrayField(new fields.ObjectField()),
-      currentEquipmentIndex: new fields.NumberField({
-        required: true,
-        initial: 0,
-        integer: true,
-      }),
-      isEquipmentUpgraded: new fields.BooleanField({ initial: false }),
-      xp: new fields.SchemaField({
-        value: new fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true,
-        }),
-        max: new fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true,
-        }),
-      }),
-      trainingLevel: new fields.SchemaField({
-        base: new fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true,
-        }),
-        modifier: new fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true,
-        }),
-      }),
-      status: new fields.SchemaField({
-        current: new fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true,
-        }),
-      }),
-      disorganizedPenalties: new fields.NumberField({
-        required: true,
-        initial: 0,
-        integer: true,
-      }),
+      modifiers: new fields.ObjectField({ initial: {} }),
+      penalties: new fields.ObjectField({ initial: {} }),
     };
   }
 }

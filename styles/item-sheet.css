@@ -331,39 +331,13 @@
   align-items: center;
   gap: 8px;
 }
-.cs-item-v2 .cs-qref-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
+/* The chip primitive itself moved to cs-components.css (spec 025) so the Unit
+   sheet renders the SAME chip — only the row-layout rule stays window-local. */
+.cs-item-v2 .cs-qref-row .cs-qref-chip {
   margin-right: auto; /* push parameter + delete to the right edge */
-  padding: 3px 10px;
-  border-radius: 20px;
-  background: #dfe5f3;
-  color: var(--csv2-text);
-  font-weight: 600;
-  font-size: 12px;
 }
 .cs-item-v2 .cs-qref-param {
   flex: 0 0 96px;
-}
-/* Graceful degradation — no item with this slug (world or compendium): amber chip
-   showing the raw slug + a "missing item" tag; the row stays removable. */
-.cs-item-v2 .cs-qref-chip.is-missing {
-  background: #f7f0dd;
-  border: 1px solid #e3d3a0;
-  color: #8a6d1f;
-}
-.cs-item-v2 .cs-qref-slug {
-  font-family: var(--csv2-font-mono);
-}
-.cs-item-v2 .cs-qref-tag {
-  font-family: var(--csv2-font-mono);
-  font-weight: 700;
-  font-size: 8px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #a8894a;
 }
 .cs-item-v2 .cs-qref-empty {
   display: flex;
@@ -380,4 +354,36 @@
   font-size: 10px;
   font-style: italic;
   opacity: 0.6;
+}
+
+/* --------------------------------------------------- Unit Type (spec 025) ---
+   Window-local layout only: the two equipment blocks side by side, and the
+   granted-ability row. Every primitive (card, field grid, list row, chip,
+   delete button) comes from the shared layer. */
+.cs-item-v2 .cs-unittype-equipment {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.cs-item-v2 .cs-unittype-equipment-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cs-item-v2 .csv2-list-row.cs-granted-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cs-item-v2 .cs-granted-row .cs-qref-chip {
+  margin-right: auto;
+}
+
+.cs-item-v2 .cs-granted-rank {
+  flex: 0 0 auto;
 }

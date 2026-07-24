@@ -125,12 +125,19 @@ export function qualityRefField() {
  * + the quality compendium (found → real name, else → missing). Never throws
  * (a thrown migrateData is swallowed by migrateDataSafe → un-migrated source →
  * would re-fail; foundry.mjs:14318). Mutates and returns `source`.
- * @param {object} source the item's `system` source object
+ *
+ * spec 025 (FR-004a): the list key is a parameter because a Unit Type keeps FOUR
+ * quality lists (`(starting|upgraded)Equipment.(fighting|marksmanship)Qualities`)
+ * instead of the weapon/armour single `qualities` — same rows, same rules, one
+ * normaliser (constitution §III).
+ * @param {object} source the object holding the list (an item `system`, or one of
+ *   the Unit Type's equipment blocks)
+ * @param {string} key the list property to normalise
  * @returns {object} the same source
  */
-export function migrateQualityRefs(source) {
-  if (!source || !Array.isArray(source.qualities)) return source;
-  source.qualities = source.qualities.map((q) => {
+export function migrateQualityRefs(source, key = "qualities") {
+  if (!source || !Array.isArray(source[key])) return source;
+  source[key] = source[key].map((q) => {
     if (!q || typeof q !== "object") return q; // leave (schema coerces; never drop)
     // Legacy free-text {name} with no slug yet → derive it (keep even if blank).
     if (q.slug == null || q.slug === "") {

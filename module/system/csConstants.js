@@ -42,6 +42,9 @@ CSConstants.Settings = {
   // spec 023 (US3, FR-022) — when off, non-GM users read `?` instead of a
   // difficulty derived from the target. Presentation only; the math is untouched.
   PASSIVE_VALUES_VISIBLE: "passiveValuesVisible",
+  // spec 025 (FR-008a) — off (default) = Chronicle, every unit moves 40 yd;
+  // on = the SIFRP variant, where the primary type's category drives the base.
+  WARFARE_MOVEMENT_STYLE: "warfareMovementStyle",
 };
 
 CSConstants.HouseResources = {

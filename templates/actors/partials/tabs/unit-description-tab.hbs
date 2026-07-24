@@ -1,0 +1,15 @@
+{{!-- spec 025 (US1) — Descrição. Portrait + rich text. `<prose-mirror>` is used
+      directly (the legacy {{editor}} helper is NOT form-associated in v13/v14, so
+      it would never auto-save); the template root is a <div>, never a <form>. --}}
+<div class="tab unit-description-tab" data-group="primary" data-tab="description">
+    <section class="cs-unit-portrait">
+        <img class="profile-img" src="{{actor.img}}" data-edit="img" data-action="editImage"
+             title="{{actor.name}}" alt="{{actor.name}}" />
+    </section>
+    <section class="cs-unit-description-body">
+        <h2 class="cs-unit-section-title">{{localize "CS.sheets.unit.description"}}</h2>
+        <prose-mirror name="system.description" button="true" toggled="true" value="{{unit.description}}">
+            {{{enrichedDescription}}}
+        </prose-mirror>
+    </section>
+</div>

@@ -39,6 +39,9 @@ globalThis.window = globalThis;
 // `_onCreate` exists on the real core Actor/Item; both CS subclasses call `super`.
 globalThis.Actor = class {
   _onCreate() {}
+  // spec 025: CSActor overrides this and calls `super` first; the descendant
+  // hooks exist on the real core Actor.
+  _onDeleteDescendantDocuments() {}
 };
 globalThis.Item = class {
   _onCreate() {}

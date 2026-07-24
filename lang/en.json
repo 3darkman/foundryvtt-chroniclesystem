@@ -196,6 +196,27 @@
         "save": "Save",
         "cancel": "Cancel",
         "confirm": "Confirm"
+      },
+      "wildcardAbilities": {
+        "title": "Choose Wildcard Abilities",
+        "hint": "This Unit Type lets you pick its wildcard abilities. Each one is granted at rank 2.",
+        "add": "Add",
+        "counter": "{chosen} of {count} chosen",
+        "empty": "Nothing chosen yet."
+      },
+      "qualityTarget": {
+        "title": "Apply Quality To",
+        "hint": "Choose which of this Unit Type's weapons the quality applies to.",
+        "startingFighting": "Starting Equipment — Fighting",
+        "startingMarksmanship": "Starting Equipment — Marksmanship",
+        "upgradedFighting": "Equipment Upgrades — Fighting",
+        "upgradedMarksmanship": "Equipment Upgrades — Marksmanship"
+      },
+      "attachCharacter": {
+        "title": "Attach {name} to the Unit",
+        "hint": "Choose how this character joins the unit.",
+        "leader": "Leader",
+        "hero": "Attached Hero"
       }
     },
     "messages": {
@@ -220,6 +241,10 @@
       "asoiafDefenseStyle": {
         "name": "ASoIaF Defense Style",
         "hint": "The armor penalty influences the character's combat defense. This Needs Foundry refresh (F5)."
+      },
+      "warfareMovementStyle": {
+        "name": "Warfare Movement Style (SIFRP)",
+        "hint": "When off (Chronicle), every unit moves 40 yards regardless of its type. When on, the primary Unit Type's category sets the base movement (Infantry 40, Cavalry 80, Naval 60)."
       },
       "passiveValuesVisible": {
         "name": "Passive Values Visible to Players",
@@ -659,7 +684,9 @@
           "wealth": "Wealth",
           "title": "Resources",
           "invested": "Invested",
-          "cost": "Cost"
+          "cost": "Cost",
+          "unitsAllocated": "Units",
+          "remaining": "Remaining"
         },
         "labels": {
           "members": "Members",
@@ -809,6 +836,90 @@
           "alignment": "Alignment",
           "unleashing": "Unleashing"
         }
+      },
+      "unitSheet": "Unit Sheet",
+      "unit": {
+        "tabs": {
+          "overview": "Overview",
+          "composition": "Composition",
+          "command": "Command",
+          "description": "Description"
+        },
+        "configureToken": "Configure Token",
+        "training": "Training",
+        "trainingLevel": "Training Level",
+        "trainingLevels": {
+          "green": "Green",
+          "trained": "Trained",
+          "veteran": "Veteran",
+          "elite": "Elite"
+        },
+        "house": "House",
+        "noHouse": "No House",
+        "calculatedValues": "Calculated Values",
+        "health": "Health",
+        "combatDefense": "Combat Defense",
+        "discipline": "Discipline",
+        "movement": "Movement",
+        "noMovement": "—",
+        "powerCost": "Power Cost",
+        "equipment": "Equipment",
+        "noEquipment": "Assign a Unit Type to give this unit its equipment.",
+        "armor": "Armor",
+        "fightingDamage": "Fighting Damage",
+        "marksmanshipDamage": "Marksmanship Damage",
+        "evolve": "Evolve",
+        "evolveHint": "Marks this equipment aspect as evolved. The upgrade itself arrives with the combat phase.",
+        "unitTypes": "Unit Types",
+        "noUnitTypes": "Drag a Unit Type item here to give this unit its cost, equipment and abilities.",
+        "setPrimaryType": "Make this the primary type",
+        "typeGrantsNothing": "Grants no abilities",
+        "abilities": "Abilities",
+        "noAbilities": "No abilities yet — assigning a Unit Type grants its own.",
+        "experience": "Experience",
+        "xpSpent": "Spent",
+        "xpTotal": "Total",
+        "xpFree": "Free",
+        "description": "Description",
+        "leader": "Leader",
+        "leaderRoles": {
+          "commander": "Commander",
+          "subcommander": "Sub-commander"
+        },
+        "noLeader": "No leader linked",
+        "clearLeader": "Unlink leader",
+        "attachedHeroes": "Attached Heroes",
+        "noHeroes": "No attached heroes",
+        "removeHero": "Detach hero",
+        "clearHouse": "Unlink House",
+        "warnings": {
+          "alreadyHero": "That character is already an attached hero of this unit — a character cannot be both.",
+          "alreadyLeader": "That character already leads this unit — a character cannot be both."
+        }
+      },
+      "unitTypeItem": {
+        "parameters": "Parameters",
+        "powerCost": "Power Cost",
+        "disciplineModifier": "Discipline Modifier",
+        "category": "Movement Category",
+        "categories": {
+          "infantry": "Infantry",
+          "cavalry": "Cavalry",
+          "naval": "Naval"
+        },
+        "wildcardAbilityCount": "Wildcard Abilities",
+        "grantedAbilities": "Granted Abilities",
+        "grantedRank": "Rank 2",
+        "grantedEmpty": "No granted abilities.",
+        "grantedDragHint": "Drag an Ability item here to grant it to every unit of this type.",
+        "startingEquipment": "Starting Equipment",
+        "upgradedEquipment": "Equipment Upgrades",
+        "fightingDamage": "Fighting Damage",
+        "marksmanshipDamage": "Marksmanship Damage",
+        "closeRange": "Close Range",
+        "longRange": "Long Range",
+        "fightingQualities": "Fighting Qualities",
+        "marksmanshipQualities": "Marksmanship Qualities"
       }
     },
     "constants": {

@@ -1,0 +1,11 @@
+<div class="cs-quality-target-body">
+    <p class="csv2-help">{{localize "CS.dialogs.qualityTarget.hint"}}</p>
+    <div class="cs-quality-target-options">
+        {{#each targets as |target|}}
+        <label class="cs-quality-target-option">
+            <input type="radio" name="qualityTarget" value="{{target.path}}" {{#if target.checked}}checked{{/if}} />
+            <span>{{localize target.label}}</span>
+        </label>
+        {{/each}}
+    </div>
+</div>

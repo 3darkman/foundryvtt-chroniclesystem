@@ -1,0 +1,63 @@
+{{!-- spec 025 (US1) — Composição. The Unit Types list is filled by dragging a
+      Unit Type item onto the sheet; the star designates the one whose equipment
+      and movement the unit uses. Ability ratings carry NO `name` attribute: the
+      actor's own submit cannot write to an embedded item, so each edit is routed
+      to its Ability item by the delegated listener in the sheet class. --}}
+<div class="tab unit-composition-tab" data-group="primary" data-tab="composition">
+    <section class="csv2-card csv2-list cs-unit-types">
+        <div class="csv2-card-header">{{localize "CS.sheets.unit.unitTypes"}}</div>
+        {{#if unitTypes.length}}
+        {{#each unitTypes as |unitType|}}
+        <div class="csv2-list-row cs-unit-type-row item" data-item-id="{{unitType.id}}">
+            <button type="button" class="cs-unit-primary-star {{#if unitType.isPrimary}}is-primary{{/if}}"
+                    data-action="setPrimaryType" data-type-slug="{{unitType.slug}}"
+                    data-tooltip="{{localize 'CS.sheets.unit.setPrimaryType'}}">
+                <i class="{{#if unitType.isPrimary}}fas{{else}}far{{/if}} fa-star"></i>
+            </button>
+            <a class="cs-unit-type-name" data-action="editItem">{{unitType.name}}</a>
+            <span class="cs-unit-type-grants">
+                {{#if unitType.grantedNames.length}}
+                {{#each unitType.grantedNames as |granted|}}<span class="cs-qref-chip">{{granted}}</span>{{/each}}
+                {{else}}
+                <span class="cs-unit-empty">{{localize "CS.sheets.unit.typeGrantsNothing"}}</span>
+                {{/if}}
+            </span>
+        </div>
+        {{/each}}
+        {{else}}
+        <div class="csv2-list-empty">{{localize "CS.sheets.unit.noUnitTypes"}}</div>
+        {{/if}}
+    </section>
+
+    <section class="csv2-card csv2-list cs-unit-abilities">
+        <div class="csv2-card-header">{{localize "CS.sheets.unit.abilities"}}</div>
+        {{#if unitAbilities.length}}
+        {{#each unitAbilities as |ability|}}
+        <div class="csv2-list-row cs-unit-ability-row item" data-item-id="{{ability.id}}">
+            <a class="cs-unit-ability-name" data-action="editItem">{{ability.name}}</a>
+            {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs" id=ability.chip.id label=ability.chip.label}}
+            <input class="is-mono cs-unit-ability-rating" type="text" value="{{ability.rating}}"
+                   data-item-id="{{ability.id}}" data-dtype="Number" {{#unless @root.editable}}disabled{{/unless}} />
+        </div>
+        {{/each}}
+        {{else}}
+        <div class="csv2-list-empty">{{localize "CS.sheets.unit.noAbilities"}}</div>
+        {{/if}}
+    </section>
+
+    <section class="csv2-card cs-unit-xp">
+        <div class="csv2-card-header">{{localize "CS.sheets.unit.experience"}}</div>
+        <div class="cs-unit-stat">
+            <span class="csv2-label">{{localize "CS.sheets.unit.xpSpent"}}</span>
+            <span class="cs-unit-derived">{{xp.spent}}</span>
+        </div>
+        <div class="cs-unit-stat">
+            <span class="csv2-label">{{localize "CS.sheets.unit.xpTotal"}}</span>
+            <span class="cs-unit-derived">{{xp.total}}</span>
+        </div>
+        <div class="cs-unit-stat">
+            <span class="csv2-label">{{localize "CS.sheets.unit.xpFree"}}</span>
+            <span class="cs-unit-derived cs-unit-total {{#if xpOverSpent}}is-over{{/if}}">{{xp.free}}</span>
+        </div>
+    </section>
+</div>

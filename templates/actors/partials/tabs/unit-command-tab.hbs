@@ -1,0 +1,62 @@
+{{!-- spec 025 (US2/US3) — Comando. NO visible drop zones (handoff §11): dropping
+      a character anywhere on the sheet opens the attach dialog, and the House is
+      a single slot resolved by actor type. Empty states are neutral text — a Unit
+      with no leader, no heroes or no House is in a valid state, not a pending
+      task. Every link resolves live from a stored uuid. --}}
+<div class="tab unit-command-tab" data-group="primary" data-tab="command">
+    <section class="csv2-card cs-unit-leader">
+        <div class="csv2-card-header">{{localize "CS.sheets.unit.leader"}}</div>
+        {{#if leader}}
+        <div class="cs-unit-command-slot">
+            <img src="{{leader.img}}" alt="{{leader.name}}" />
+            <a class="cs-unit-command-name" data-action="openLinkedActor" data-uuid="{{leader.uuid}}">{{leader.name}}</a>
+            <span class="cs-unit-role-toggle">
+                {{#each leaderRoles as |role|}}
+                <button type="button" class="csv2-btn csv2-btn--sm {{#if role.selected}}csv2-btn--primary{{else}}csv2-btn--secondary{{/if}}"
+                        data-action="setLeaderRole" data-role="{{role.role}}">{{localize role.label}}</button>
+                {{/each}}
+            </span>
+            <button type="button" class="csv2-list-del-btn" data-action="clearLeader"
+                    data-tooltip="{{localize 'CS.sheets.unit.clearLeader'}}">
+                <i class="fa-regular fa-trash-can"></i>
+            </button>
+        </div>
+        {{else}}
+        <div class="csv2-list-empty">{{localize "CS.sheets.unit.noLeader"}}</div>
+        {{/if}}
+    </section>
+
+    <section class="csv2-card csv2-list cs-unit-heroes">
+        <div class="csv2-card-header">{{localize "CS.sheets.unit.attachedHeroes"}}</div>
+        {{#if attachedHeroes.length}}
+        {{#each attachedHeroes as |hero|}}
+        <div class="cs-unit-command-slot csv2-list-row">
+            <img src="{{hero.img}}" alt="{{hero.name}}" />
+            <a class="cs-unit-command-name" data-action="openLinkedActor" data-uuid="{{hero.uuid}}">{{hero.name}}</a>
+            <button type="button" class="csv2-list-del-btn" data-action="removeHero" data-uuid="{{hero.uuid}}"
+                    data-tooltip="{{localize 'CS.sheets.unit.removeHero'}}">
+                <i class="fa-regular fa-trash-can"></i>
+            </button>
+        </div>
+        {{/each}}
+        {{else}}
+        <div class="csv2-list-empty">{{localize "CS.sheets.unit.noHeroes"}}</div>
+        {{/if}}
+    </section>
+
+    <section class="csv2-card cs-unit-house">
+        <div class="csv2-card-header">{{localize "CS.sheets.unit.house"}}</div>
+        {{#if house}}
+        <div class="cs-unit-command-slot">
+            <img src="{{house.img}}" alt="{{house.name}}" />
+            <a class="cs-unit-command-name" data-action="openLinkedActor" data-uuid="{{house.uuid}}">{{house.name}}</a>
+            <button type="button" class="csv2-list-del-btn" data-action="clearHouse"
+                    data-tooltip="{{localize 'CS.sheets.unit.clearHouse'}}">
+                <i class="fa-regular fa-trash-can"></i>
+            </button>
+        </div>
+        {{else}}
+        <div class="csv2-list-empty">{{localize "CS.sheets.unit.noHouse"}}</div>
+        {{/if}}
+    </section>
+</div>
