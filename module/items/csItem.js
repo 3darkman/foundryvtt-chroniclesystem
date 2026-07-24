@@ -52,6 +52,36 @@ export class CSItem extends Item {
     super.prepareData();
   }
 
+  /**
+   * @override — spec 024 (US3, D6 / contract specialty-provisioning.md C1).
+   * Gaining an Ability provisions its specialties. This hangs off the document
+   * lifecycle, NOT the sheet's `_onDropItem`, because it must fire on EVERY
+   * creation path: a drag, "Create Item" on the actor, a compendium import, a
+   * migration's `createEmbeddedDocuments`.
+   *
+   * The `userId` guard is NOT optional: `_onCreate` runs on every connected
+   * client that receives the socket broadcast, so without it N clients would
+   * each race to create the same specialty set. `game.users.activeGM` is the
+   * wrong guard — a player raising an ability on their own PC with no GM online
+   * must still be provisioned.
+   *
+   * Fire-and-forget with a `catch`: `_onCreate` is synchronous in core, and a
+   * rejected promise must never surface as an unhandled rejection nor block the
+   * ability from being added.
+   */
+  _onCreate(data, options, userId) {
+    super._onCreate(data, options, userId);
+    if (this.type !== "ability") return;
+    if (game.user?.id !== userId) return;
+    const actor = this.actor;
+    if (actor?.type !== "character") return; // FR-021 — houses/units provision nothing
+    import("../actors/cs-specialty-provisioning.js")
+      .then(({ provisionSpecialties }) => provisionSpecialties(actor, this))
+      .catch((err) =>
+        console.warn("chroniclesystem | specialty provisioning skipped:", err)
+      );
+  }
+
   // Item lifecycle hooks. No-ops since the AE-unification (spec 007): the
   // collector (`cs-effect-modifiers.js`) reads item data + equipped state live
   // on every prepareData, so obtain/equip/discard need no imperative callback.

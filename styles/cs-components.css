@@ -108,6 +108,14 @@
   /* Target chip (card target line). */
   --csv2-chip-bg: #f4f6fb;
   --csv2-chip-border: #e2e8f4;
+  /* Specialty pill (spec 024) — the two states, straight from the handoff
+     §"Estados visuais da pílula": VALUED (has ranks) and AVAILABLE (rating 0). */
+  --csv2-spec-bg: #eef4fb;
+  --csv2-spec-border: #a9c6e2;
+  --csv2-spec-zero-bg: #f6f7f9;
+  --csv2-spec-zero-border: #cdd2da;
+  --csv2-spec-zero-fg: #9a9698;
+  --csv2-spec-zero-tag: #a5a2a4;
   /* Die faces (pips + 3 states). */
   --csv2-die-kept-bg: #e7eef7;
   --csv2-die-discarded-pip: #b6bcc6;
@@ -1122,8 +1130,18 @@
   cursor: default;
 }
 
-/* Buttons — base + primary/secondary variants + a compact size. */
-.cs-v2 .csv2-btn {
+/* Buttons — base + primary/secondary variants + a compact size. Bridged
+   through `:is(.cs-v2, .cs-sheet-v2)` (not `.cs-v2` alone): every OTHER window
+   carries `cs-v2` on its root, but the character sheet's root carries the
+   older `cs-sheet-v2` token instead (`csCharacterActorSheet.js` DEFAULT_OPTIONS
+   has no `cs-v2`; the template root adds `cs-sheet-v2` — see
+   character-sheet.hbs:1). A `.cs-v2`-only rule silently does not match there,
+   which is exactly the spec-024 bug: `.csv2-btn--secondary` on the Abilities-
+   tab header button matched nothing, so the button fell back to Foundry core's
+   default `<button>` chrome (its own blue/white look) instead of the white
+   pill the handoff specifies. Every window this component reaches needs the
+   bridge, not just the ones built after it. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1140,42 +1158,42 @@
   cursor: pointer;
   box-shadow: none;
 }
-.cs-v2 .csv2-btn--primary {
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--primary {
   background: var(--csv2-primary);
   border-color: var(--csv2-primary);
   color: var(--csv2-on-primary);
 }
-.cs-v2 .csv2-btn--primary:hover {
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--primary:hover {
   background: var(--csv2-primary-dark);
   border-color: var(--csv2-primary-dark);
   box-shadow: none;
 }
-.cs-v2 .csv2-btn--primary:disabled {
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--primary:disabled {
   background: var(--csv2-op-muted);
   border-color: var(--csv2-op-muted);
   cursor: not-allowed;
 }
-.cs-v2 .csv2-btn--secondary {
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--secondary {
   background: var(--csv2-bg);
   border-color: var(--csv2-input-border);
   color: var(--csv2-muted-2);
 }
-.cs-v2 .csv2-btn--secondary:hover {
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--secondary:hover {
   border-color: var(--csv2-muted);
   color: var(--csv2-text);
   box-shadow: none;
 }
-.cs-v2 .csv2-btn--danger {
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--danger {
   background: var(--csv2-bg);
   border-color: var(--csv2-input-border);
   color: var(--csv2-danger);
 }
-.cs-v2 .csv2-btn--danger:hover {
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--danger:hover {
   border-color: var(--csv2-danger);
   color: var(--csv2-danger);
   box-shadow: none;
 }
-.cs-v2 .csv2-btn--sm {
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--sm {
   padding: 7px 14px;
   font-size: 11.5px;
   border-radius: 6px;
@@ -1462,10 +1480,16 @@
   background: var(--csv2-danger);
   color: var(--csv2-on-primary);
 }
-/* Compact "Add" button in any list/panel card-header bar (was oversized as a full
-   pill). One rule for EVERY listAdd button (repeatable lists + Técnica works panel)
-   so they stay identical — keyed on the action, not the wrapper. */
-.cs-v2 .csv2-card-header .csv2-btn[data-action="listAdd"] {
+/* Compact action button in any list/panel/section card-header bar (was oversized
+   as a full pill). ONE rule for every header action — the repeatable-list "+ add",
+   the Técnica works panel, and (spec 024) the character sheet's "Edit specialties"
+   toggle — so they stay identical. Keyed on the action, not the wrapper.
+   Dual-scoped through the established `:is(.cs-v2, .cs-sheet-v2)` bridge and both
+   header class names, so the character sheet reaches it WITHOUT a local copy
+   (constitution SSOT — this rule is promoted, never re-declared per window). */
+:is(.cs-v2, .cs-sheet-v2)
+  :is(.csv2-card-header, .cs2-card-header)
+  .csv2-btn:is([data-action="listAdd"], [data-action="toggleSpecialtyEdit"]) {
   box-sizing: border-box;
   height: 19px;
   min-height: 0;
@@ -1479,6 +1503,56 @@
   color: var(--csv2-primary);
   border-color: transparent;
 }
+/* ---------- Specialty pill (spec 024, US2) ----------
+   The two states of a specialty on the character sheet's Abilities tab: VALUED
+   (it has ranks) and AVAILABLE (rating 0 — dashed and muted, visually distinct
+   so "you could train this" never reads as "you have this"). Metrics/colours are
+   the handoff's §"Estados visuais da pílula" verbatim. Shared component, not
+   window-scoped: BOTH modes and the legend swatches reuse these very classes. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* Asymmetric on purpose (handoff): the name needs breathing room on the left,
+     the chip/input carries its own box on the right. */
+  padding: 3px 6px 3px 9px;
+  border: 1px solid var(--csv2-spec-border);
+  border-radius: 6px;
+  background: var(--csv2-spec-bg);
+}
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-name {
+  font: 600 11.5px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+  white-space: nowrap;
+}
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-pill.is-available {
+  border: 1px dashed var(--csv2-spec-zero-border);
+  background: var(--csv2-spec-zero-bg);
+}
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-pill.is-available .cs2-spec-name {
+  color: var(--csv2-spec-zero-fg);
+}
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-tag {
+  font: 600 8px var(--csv2-font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--csv2-spec-zero-tag);
+}
+/* The inline rating input. It deliberately carries NO `name` attribute (the
+   actor's submit must never see it); a delegated `change` listener routes it to
+   its own Specialty item. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-spec-input {
+  width: 34px;
+  height: auto;
+  padding: 2px;
+  border: 1px solid var(--csv2-input-border);
+  border-radius: 3px;
+  background: var(--csv2-bg);
+  font: 700 11px var(--csv2-font-mono);
+  text-align: center;
+  color: var(--csv2-text);
+}
+
 /* Same "+ add", but on the LIGHT `.cs-opt-head` (Parâmetro Opções): transparent,
    borderless, blue text (handoff §Parâmetro). */
 .cs-v2 .cs-opt-head .csv2-btn[data-action="listAdd"] {

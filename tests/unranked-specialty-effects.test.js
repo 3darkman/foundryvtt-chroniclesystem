@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { ChronicleSystem } from "../module/system/ChronicleSystem.js";
 import { CSActor } from "../module/actors/csActor.js";
 import { collectEffectModifiers } from "../module/effects/cs-effect-modifiers.js";
+import { makeSpecialtyItem } from "./helpers/doubles.js";
 
 // Regression (bug 2026-07): a roll of a specialty the character has NO ranks in
 // must still receive effects/modifiers that TARGET that specialty. Real case: a
@@ -30,13 +31,22 @@ function actorWithEffect(changes, { specialties = {} } = {}) {
     type: "ability",
     name: "Fighting",
     _id: "ab-fight",
-    system: { slug: "fighting", rating: 2, modifier: 0, specialties },
+    system: { slug: "fighting", rating: 2, modifier: 0 },
     getCSData() {
       return this.system;
     },
   };
+  // spec 024 — a registered specialty is its own item, linked by `fighting`.
+  const specialtyItems = Object.values(specialties).map((sp) =>
+    makeSpecialtyItem({
+      name: sp.name,
+      abilitySlug: "fighting",
+      rating: sp.rating,
+      modifier: sp.modifier,
+    })
+  );
   const actor = {
-    items: [fighting],
+    items: [fighting, ...specialtyItems],
     appliedEffects: [fakeEffect(changes)],
     getCSData: () => ({
       derivedStats: { fatigue: { current: 0 }, frustration: { current: 0 } },

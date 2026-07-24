@@ -13,6 +13,8 @@ import {
   slugify,
 } from "../../effects/cs-effect-vocabulary.js";
 import { abilitySpecialtyChoiceMaps } from "../../vocabulary/cs-canonical-abilities.js";
+import { abilityOptions } from "../../vocabulary/cs-specialty-catalog.js";
+import { clampRating } from "../../data/item/specialty-data.js";
 import {
   decodeTriggerCompound,
   TRIGGER_COMPOUND_DEGREES_PREFIX,
@@ -140,7 +142,6 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
       target: "",
     }),
     "system.parameter.options": () => "",
-    "system.specialties": () => ({ name: "", rating: 0, modifier: 0 }),
     "system.features": () => ({ name: "", rating: 0, modifier: 0 }),
     "system.arts": () => ({ name: "" }),
     "system.works": () => ({
@@ -214,9 +215,9 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
   // The repeatable object-lists that are `ArrayField(ObjectField())` — each element
   // is a free-form blob REPLACED wholesale on submit, so any field NOT in the form
   // (a collapsed Works card, a ritual's `test.spellcasting` while the ritual layout
-  // shows alignment/invocation/unleashing, owner-gated Specialty rating/modifier
-  // columns) would be DROPPED. Listed here so the submit merges them field-by-field.
-  static OBJECT_LIST_FIELDS = ["works", "specialties", "features", "arts"];
+  // shows alignment/invocation/unleashing) would be DROPPED. Listed here so the
+  // submit merges them field-by-field.
+  static OBJECT_LIST_FIELDS = ["works", "features", "arts"];
 
   /**
    * @override — spec 021 data-loss fix. `_processFormData` runs BEFORE validation
@@ -246,6 +247,20 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     }
     if (this.document.type === "quality") {
       CSItemSheet._decomposeConditionTriggers(submitData);
+    }
+    // spec 024 (FR-013) — the Specialty sheet's Rating field is a bare NumberField
+    // with no `min` (a `min` would throw and REJECT the submit instead of
+    // clamping it, per D4/data-model.md §1). `clampRating` is the schema's own
+    // load-time coercion (`SpecialtyData.migrateData`); this belt-and-suspenders
+    // clamp additionally guarantees a negative or malformed value typed directly
+    // into THIS sheet is never even submitted, matching the inline rating input
+    // on the character sheet (`csCharacterActorSheet.js`), which clamps the same
+    // field the same way at the same layer (the write path), not just at load.
+    if (
+      this.document.type === "specialty" &&
+      "rating" in (submitData.system ?? {})
+    ) {
+      submitData.system.rating = clampRating(submitData.system.rating);
     }
     return submitData;
   }
@@ -320,6 +335,39 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
       injectOffList(specialtyComboChoices, system.specialty);
     if (item.type === "drawback")
       injectOffList(abilityChoices, system.flawAttribute);
+
+    // spec 024 (D5) — the Specialty's owning-ability control stores a SLUG, so it
+    // needs its own slug-keyed map: reusing the name-keyed `abilityChoices` above
+    // would force a lossy name→slug hop on every submit. Same blank-first rule
+    // (a `<select>` with an unmatched value auto-selects the first option and
+    // SAVES it, which here would silently re-parent the specialty) and the same
+    // off-list escape hatch, so a homebrew ability slug is never clobbered (FR-007).
+    // Its options are the WORLD's abilities ∪ the canonical ones, world winning on
+    // a shared slug (`abilityOptions`) — a GM who built "Fighting" in their world
+    // must find it here, and see THEIR copy rather than the catalogue's.
+    // Alphabetical by the LOCALIZED label: the world's own abilities come out of
+    // `abilityOptions` before the canonical ones (that is its precedence rule,
+    // not a display order), and a select that opens with them jumbled at the top
+    // is unscannable.
+    const abilitySlugChoices = { "": "" };
+    const abilityLabels = abilityOptions()
+      .map((ability) => ({
+        slug: ability.slug,
+        label: ability.nameKey ? localizeName(ability.nameKey) : ability.name,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+    for (const ability of abilityLabels) {
+      abilitySlugChoices[ability.slug] = ability.label;
+    }
+    if (item.type === "specialty") {
+      injectOffList(abilitySlugChoices, system.abilitySlug);
+    }
+    context.typeDescriptor.abilitySlugChoices = abilitySlugChoices;
+    // Rating/Modifier are the OWNER's ranks, meaningless on a catalogue copy and
+    // on the legacy house/unit actors the conversion also writes to — hence a
+    // character-only gate, NOT `isEmbedded` (contract abilities-tab-modes C6.1.3).
+    context.ownedByCharacter = item.parent?.type === "character";
+
     context.typeDescriptor.abilityChoices = abilityChoices;
     context.typeDescriptor.specialtyComboChoices = specialtyComboChoices;
     context.typeDescriptor.sorceryTestChoices = {
@@ -336,35 +384,6 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     context.canEditLists = context.editable;
     context.featuresLocked = item.type === "holding" && !isEmbedded;
     context.canAddFeatures = context.editable && isEmbedded;
-
-    // Habilidade Specialties columns — the owned-only Rating/Modifier columns drop
-    // out entirely when unowned (no sparse holes; the whole cell is omitted).
-    context.specialtyColumns = [
-      {
-        key: "name",
-        label: "CS.sheets.item.fields.name",
-        inputType: "text",
-        dtype: "String",
-      },
-      ...(isEmbedded
-        ? [
-            {
-              key: "rating",
-              label: "CS.sheets.item.fields.rating",
-              inputType: "text",
-              dtype: "Number",
-              cssClass: "is-mono",
-            },
-            {
-              key: "modifier",
-              label: "CS.sheets.item.fields.modifier",
-              inputType: "text",
-              dtype: "Number",
-              cssClass: "is-mono",
-            },
-          ]
-        : []),
-    ];
 
     // spec 020 — weapon/armour Qualities are slug references added by DRAG-DROP
     // (no picker): resolve each reference against the world + the compendium.

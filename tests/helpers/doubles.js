@@ -4,6 +4,7 @@
 // logic (FR-014: module/** stays untouched), not a reimplementation.
 
 import { CSActor } from "../../module/actors/csActor.js";
+import { scopedSpecialtySlug } from "../../module/vocabulary/cs-canonical-abilities.js";
 
 const proto = CSActor.prototype;
 
@@ -72,15 +73,52 @@ export function makeAbilityItem(
 }
 
 /**
+ * A fake Specialty ITEM (spec 024) — the new shape the rewritten resolvers scan
+ * for. `slug` defaults to the scoped derivation, exactly as production does.
+ * The old-shape `makeAbilityItem({specialties})` builder is deliberately kept so
+ * the parity harness can construct the same character both ways.
+ */
+export function makeSpecialtyItem({
+  name,
+  slug,
+  abilitySlug = "",
+  rating = 0,
+  modifier = 0,
+} = {}) {
+  const data = {
+    slug: slug ?? scopedSpecialtySlug(abilitySlug, name),
+    abilitySlug,
+    rating,
+    modifier,
+    description: "",
+    type: "",
+  };
+  return {
+    name,
+    type: "specialty",
+    system: data,
+    getCSData: () => data,
+  };
+}
+
+/**
  * A fake character actor wired to the REAL prototype lookups (getAbility,
  * getAbilityValue, getAbilityBySpecialty) so name/specialty resolution and the
  * i18n key→label wiring are genuinely exercised. getModifier honours the
  * `modifiers` map (type → total); getPenalty is neutral.
+ *
+ * `specialties` (spec 024) are Specialty ITEMS and simply join the same `items`
+ * collection the abilities live in — which is what the actor really holds.
  */
-export function makeFakeActor({ abilities = [], data, modifiers = {} } = {}) {
+export function makeFakeActor({
+  abilities = [],
+  specialties = [],
+  data,
+  modifiers = {},
+} = {}) {
   const system = deepMerge(defaultActorData(), data);
   return {
-    items: abilities,
+    items: [...abilities, ...specialties],
     getCSData: () => system,
     getAbility: proto.getAbility,
     getAbilityValue: proto.getAbilityValue,

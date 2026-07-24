@@ -1,6 +1,6 @@
-{{!-- Habilidade (ability) Sistema body (spec 019). Owned-only Rating/Modifier +
-      Specialties list (owner-aware Rating/Modifier columns via specialtyColumns). The
-      handoff's Specialty Identidade/slug column is omitted — no backing key (D5). --}}
+{{!-- Habilidade (ability) Sistema body (spec 019). Owned-only Rating/Modifier.
+      The embedded Specialties list was removed in spec 024 — a specialty is its own
+      item type now, edited on the character sheet's Abilities tab. --}}
 <section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
     <div class="csv2-card">
         <div class="csv2-card-header">{{localize (concat "TYPES.Item." item.type)}}</div>
@@ -9,7 +9,4 @@
             {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs" kind="number" name="system.modifier" label="CS.sheets.item.fields.modifier" value=item.system.modifier owned=true}}
         </div>
     </div>
-    {{> "systems/chroniclesystem/templates/items/components/repeatable-list.hbs"
-          title="CS.sheets.item.specialties" addLabel="CS.sheets.item.add" path="system.specialties"
-          rows=item.system.specialties columns=specialtyColumns showAdd=canEditLists}}
 </section>

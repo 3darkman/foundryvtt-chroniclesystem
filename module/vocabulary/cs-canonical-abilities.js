@@ -240,28 +240,6 @@ export function deriveSlugUpdate(name, currentSlug) {
 }
 
 /**
- * Fill the scoped slug of each specialty whose slug is blank; preserve set ones.
- * Idempotent (a 2nd pass is a no-op). Returns a NEW array of NEW objects (never
- * mutates the input). Accepts an array or a `{key: specialty}` map.
- * @param {string} abilitySlug the parent ability's slug
- * @param {object[]|object} specialties
- * @returns {object[]}
- */
-export function deriveSpecialtySlugs(abilitySlug, specialties) {
-  const list = Array.isArray(specialties)
-    ? specialties
-    : Object.values(specialties ?? {});
-  return list.map((specialty) => {
-    if (!specialty || typeof specialty !== "object") return specialty;
-    if (!isBlankSlug(specialty.slug)) return { ...specialty };
-    return {
-      ...specialty,
-      slug: scopedSpecialtySlug(abilitySlug, specialty.name),
-    };
-  });
-}
-
-/**
  * Pure collision check (FR-013, testable base): true when `slug` already exists
  * among `existingSlugs` (an Array or Set of slugs in the SAME scope). The caller
  * (lifecycle) supplies the scope and decides on the non-blocking `warn` — this

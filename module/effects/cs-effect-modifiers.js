@@ -110,27 +110,17 @@ function resolveAbility(actor, slug) {
 }
 
 /**
- * Resolve a specialty by stable slug to `{ name, rating }`. **Single resolver**:
- * specialties live in `ability.system.specialties` today and will become their
- * own item type later (design §5 forward-compat) — only this function changes then.
+ * Resolve a specialty by stable slug to `{ name, rating }`. **Single resolver**
+ * (spec 024, C6): a specialty IS an item now, and the actor already owns the one
+ * lookup that finds it — this delegates instead of duplicating the scan. The
+ * call is optional-chained so the pure-logic doubles that omit the resolver keep
+ * working, exactly as `resolveTraitBase` already does.
  * @returns {{name: string, rating: number}|null}
  */
 function resolveSpecialty(actor, slug) {
-  for (const item of actor?.items ?? []) {
-    if (item.type !== "ability") continue;
-    const data = itemData(item);
-    const abilitySlug = data.slug || slugify(item.name);
-    for (const specialty of Object.values(data.specialties ?? {})) {
-      // Read the persisted SCOPED slug (fallback to the derived scoped slug) —
-      // mirrors resolveAbility's `slug || slugify(name)` (fixes the asymmetry).
-      const spSlug =
-        specialty?.slug || scopedSpecialtySlug(abilitySlug, specialty?.name);
-      if (spSlug === slug) {
-        return { name: specialty.name, rating: Number(specialty.rating) || 0 };
-      }
-    }
-  }
-  return null;
+  const [, specialty] = actor?.getAbilityBySpecialtySlug?.(slug) ?? [];
+  if (!specialty) return null;
+  return { name: specialty.name, rating: Number(specialty.rating) || 0 };
 }
 
 /** Build the value accessors (fixed/derived resolution) from a live actor. */
@@ -214,15 +204,29 @@ function specialtySlugForRef(actor, abilitySlug, ref) {
   const refStr = String(ref);
   const refLower = refStr.toLowerCase();
   for (const item of actor?.items ?? []) {
-    if (item.type !== "ability") continue;
+    if (item.type !== "specialty") continue;
     const data = itemData(item);
-    const aSlug = data.slug || slugify(item.name);
-    for (const sp of Object.values(data.specialties ?? {})) {
-      const spSlug = sp?.slug || scopedSpecialtySlug(aSlug, sp?.name);
-      if (spSlug === refStr || sp?.name?.toLowerCase() === refLower)
-        return spSlug;
+    const spSlug =
+      data.slug || scopedSpecialtySlug(data.abilitySlug ?? "", item.name);
+    if (spSlug === refStr) return spSlug;
+    // The NAME match must also respect the caller's ability scope when one is
+    // known (spec 024 regression): specialty names are NOT globally unique
+    // ("Charm" is both Animal Handling's and Persuasion's), and post-024 a
+    // fully-provisioned character owns every specialty of every ability they
+    // have — so an unscoped name match would resolve to whichever of the two
+    // items happens to come first in `actor.items`, not the one the roll or
+    // effect actually targets. The scoped-SLUG match above is already
+    // unambiguous and needs no such guard; only the free-text name fallback does.
+    if (
+      item.name?.toLowerCase() === refLower &&
+      (!abilitySlug || (data.abilitySlug ?? "") === abilitySlug)
+    ) {
+      return spSlug;
     }
   }
+  // MANDATORY fallback (FR-024): a specialty the actor does NOT own still keys
+  // by its scoped slug, so an effect can target it (a weapon declaring
+  // "Fighting:Axes" on a character with no Axes ranks).
   return abilitySlug
     ? scopedSpecialtySlug(abilitySlug, refStr)
     : slugify(refStr);
@@ -883,6 +887,40 @@ export function collectEffectModifiers(actor) {
   collectReferencedQualityModifiers(actor, buffers); // spec 020 — referenced qualities
   collectConditionModifiers(actor, buffers.modifiers, buffers.penalties);
   return buffers;
+}
+
+/**
+ * spec 024 (US5, D10 / contract specialty-resolution.md C7) — is an enabled,
+ * non-suppressed effect acting on THIS specialty?
+ *
+ * `actor.appliedEffects` is the right collection: it includes item-transferred
+ * effects (`actor.effects` does not, and `legacyTransferral` is gone in v14) and
+ * it already yields only `effect.active`, which IS `!disabled && !isSuppressed`
+ * — precisely FR-009's "enabled, non-suppressed". No manual filtering needed.
+ *
+ * Deliberately narrow: the global **ALL** bucket does NOT count (it would make
+ * every specialty of every character permanently visible, contradicting SC-006),
+ * while OPTIONAL effects DO — the player must see that the option exists. Never
+ * throws: a malformed key parses to null and is skipped.
+ * @param {object} actor
+ * @param {string} specialtySlug the SCOPED slug
+ * @returns {boolean}
+ */
+export function hasSpecialtyEffect(actor, specialtySlug) {
+  if (!actor || !specialtySlug) return false;
+  for (const effect of actor.appliedEffects ?? []) {
+    for (const change of effect?.system?.changes ?? []) {
+      const parsed = parseEffectKey(change?.key);
+      if (!parsed) continue;
+      if (
+        parsed.targetKind === TARGET_KINDS.SPECIALTY &&
+        parsed.target === specialtySlug
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 /**

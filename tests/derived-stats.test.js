@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { CSActor } from "../module/actors/csActor.js";
-import { makeFakeActor, makeAbilityItem } from "./helpers/doubles.js";
+import {
+  makeFakeActor,
+  makeAbilityItem,
+  makeSpecialtyItem,
+} from "./helpers/doubles.js";
 
 // Group 3 — US3 / Contract 3.1-3.11. Pins the rule-derived stats (Health =
 // Endurance×3, Composure = Will×3, Defenses as sums, Frustration/Fatigue,
@@ -104,12 +108,13 @@ describe("derived stats — slug parity across mixed languages (E1, spec 008)", 
   it("3.13 a renamed Athletics keeps its Run specialty movement bonus", () => {
     // Movement runBonus reads Athletics:Run by scoped slug (athletics_run).
     const actor = makeFakeActor({
-      abilities: [
-        makeAbilityItem("Atletismo", 3, {
-          slug: "athletics",
-          specialties: {
-            run: { name: "Corrida", slug: "athletics_run", rating: 4 },
-          },
+      abilities: [makeAbilityItem("Atletismo", 3, { slug: "athletics" })],
+      specialties: [
+        makeSpecialtyItem({
+          name: "Corrida",
+          slug: "athletics_run",
+          abilitySlug: "athletics",
+          rating: 4,
         }),
       ],
       data: { movement: { sprintMultiplier: 4, modifier: 0 } },
@@ -124,9 +129,13 @@ describe("derived stats — movement (runBonus & bulk are DERIVED)", () => {
     // Athletics with a `run` specialty rating 4 → runBonus = floor(4/2) = 2.
     // modifiers.bulk total 2 → bulk = floor(2/2) = 1. base overridden to 4.
     const actor = makeFakeActor({
-      abilities: [
-        makeAbilityItem("athletics", 3, {
-          specialties: { run: { name: "run", rating: 4, modifier: 0 } },
+      abilities: [makeAbilityItem("athletics", 3)],
+      specialties: [
+        makeSpecialtyItem({
+          name: "run",
+          abilitySlug: "athletics",
+          rating: 4,
+          modifier: 0,
         }),
       ],
       modifiers: { bulk: 2 },

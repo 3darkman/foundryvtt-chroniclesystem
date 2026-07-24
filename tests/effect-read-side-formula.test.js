@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { ChronicleSystem } from "../module/system/ChronicleSystem.js";
 import { CSActor } from "../module/actors/csActor.js";
+import { makeSpecialtyItem } from "./helpers/doubles.js";
 
 // Wave 2 — the integration the parity hinges on: getActorTestFormula
 // (exposed as ChronicleSystem.getActorAbilityFormula). It must (a) stay
@@ -29,12 +30,25 @@ function probeActor({
   const fighting = {
     name: "Fighting",
     type: "ability",
-    getCSData: () => ({ rating, modifier, specialties }),
+    getCSData: () => ({ rating, modifier }),
   };
+  // spec 024 — specialties are their OWN items now; the fixture keeps taking a
+  // `{key: {name, rating, modifier}}` map and materialises it as items.
+  const specialtyItems = Object.values(specialties).map((sp) =>
+    makeSpecialtyItem({
+      name: sp.name,
+      slug: sp.slug,
+      abilitySlug: "fighting",
+      rating: sp.rating,
+      modifier: sp.modifier,
+    })
+  );
   return {
-    items: [fighting],
+    items: [fighting, ...specialtyItems],
     getAbility: proto.getAbility,
     getAbilityBySpecialty: proto.getAbilityBySpecialty,
+    getAbilityBySlug: proto.getAbilityBySlug,
+    getAbilityBySpecialtySlug: proto.getAbilityBySpecialtySlug,
     getModifier,
     getPenalty,
     getTestDice,

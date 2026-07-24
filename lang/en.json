@@ -132,7 +132,8 @@
     "notifications": {
       "dicePoolInvalid": "you cannot roll this test because your dice pool results in less than 1 die being kept.",
       "multipleTargets": "More than one target selected — target-derived difficulty and modifiers are omitted.",
-      "noActiveGM": "No active GM to apply this to the target."
+      "noActiveGM": "No active GM to apply this to the target.",
+      "abilityAddedForSpecialty": "“{specialty}” belongs to {ability}, which this character did not have — {ability} was added with all of its specialties."
     },
     "dialogs": {
       "characterRole": {
@@ -599,6 +600,7 @@
           "isAFlaw": "Is a Flaw",
           "flawAttribute": "Flaw Attribute",
           "ability": "Ability",
+          "abilitySlug": "Owning Ability",
           "delivery": "Delivery",
           "virulence": "Virulence",
           "frequency": "Frequency",
@@ -683,6 +685,14 @@
         "passive": "Passive",
         "passiveHint": "Passive value: 4 per test die, plus bonus dice and result modifiers (minus 4 per penalty die). Penalties never take the test below one die, and the value floors at 0. Not editable and never rolled.",
         "passiveSpecialtyHint": "Passive value for this specialty: the ability's passive plus the specialty's rating. Not editable and never rolled.",
+        "specialtyEdit": {
+          "off": "Edit specialties",
+          "on": "Done",
+          "available": "available",
+          "legendActive": "Valued specialty — rollable.",
+          "legendAvailable": "Available specialty at 0 — give it a value to make it rollable.",
+          "valueHint": "Specialty ranks (0 or more)."
+        },
         "dispositions": {
           "affectionate": "affectionate",
           "friendly": "friendly",
@@ -979,9 +989,15 @@
       "hint": "Stable identity, independent of the display name. Lowercase, words joined by _ , no accents (e.g. agility). Leave blank to derive it automatically from the name."
     },
     "warnings": {
-      "slugCollision": "The slug \"{slug}\" is already used by another entry in the same scope. It was saved anyway — rename it to keep each identity unique."
+      "slugCollision": "The slug \"{slug}\" is already used by another entry in the same scope. It was saved anyway — rename it to keep each identity unique.",
+      "specialtyCatalogMissing": "Chronicle System: the Specialties compendium was not found, so only this world's own specialties can be provisioned. Return to Setup and relaunch the world so the new packs are registered."
     },
     "migration": {
+      "specialties": {
+        "begin": "Chronicle System: converting embedded specialties into Specialty items…",
+        "done": "Chronicle System: {created} Specialty items created across {scopes} scopes.",
+        "skipped": "Chronicle System: {count} legacy specialty rows were skipped — see the console for details."
+      },
       "slugReview": "Chronicle System: one or more core abilities appear to have been renamed and no longer match their canonical identity, so armour/condition/effect routing may miss them. Open the review to correct their slug (nothing was changed automatically).",
       "slugReviewTitle": "Slug review — core abilities to check",
       "slugReviewIntro": "Some canonical core abilities are missing — their slug drifted off-canon, most likely from a rename. The abilities below are the candidates: click a row to open its sheet and set the correct canonical slug (e.g. agility). Nothing was rewritten automatically.",
@@ -1000,6 +1016,7 @@
       "armor": "Armor",
       "weapon": "Weapon",
       "ability": "Ability",
+      "specialty": "Specialty",
       "equipment": "Equipment",
       "benefit": "Benefit",
       "drawback": "Drawback",
