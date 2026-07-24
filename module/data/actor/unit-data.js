@@ -10,7 +10,13 @@ const integerField = () =>
 const blankStringField = () =>
   new fields.StringField({ required: false, blank: true, initial: "" });
 
-const NUMERIC_TREES = ["derivedStats", "movement", "health"];
+const NUMERIC_TREES = [
+  "derivedStats",
+  "movement",
+  "health",
+  "discipline",
+  "powerCost",
+];
 
 function coercedIntegerLeaves(node) {
   for (const key of Object.keys(node)) {
@@ -22,8 +28,14 @@ function coercedIntegerLeaves(node) {
 
 function migratedNumericTrees(source) {
   for (const tree of NUMERIC_TREES) {
-    if (source[tree] && typeof source[tree] === "object")
-      coercedIntegerLeaves(source[tree]);
+    if (source[tree] === undefined) continue;
+    // A scalar where the schema now wants an adjustment block (a world that
+    // somehow persisted the old derived number) is dropped so `initial` applies.
+    if (!source[tree] || typeof source[tree] !== "object") {
+      delete source[tree];
+      continue;
+    }
+    coercedIntegerLeaves(source[tree]);
   }
 }
 
@@ -137,6 +149,12 @@ export default class UnitData extends foundry.abstract.TypeDataModel {
         bulk: integerField(),
         total: integerField(),
       }),
+      // The layout gives Discipline and Power Cost the same
+      // `base + owner adjustment = total` treatment as Defence and Movement, so
+      // each one needs a persisted adjustment of its own. Owner-editable — the
+      // adjustment belongs to whoever owns the unit, GM or player alike.
+      discipline: new fields.SchemaField({ modifier: integerField() }),
+      powerCost: new fields.SchemaField({ modifier: integerField() }),
       evolvedEquipment: new fields.SchemaField({
         armor: new fields.BooleanField({ initial: false }),
         fighting: new fields.BooleanField({ initial: false }),

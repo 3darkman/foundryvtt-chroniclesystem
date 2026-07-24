@@ -98,7 +98,7 @@ export async function pickWildcardAbilities(count) {
   );
 
   const result = await foundry.applications.api.DialogV2.wait({
-    classes: ["chroniclesystem", "cs-v2", "cs-wildcard-dialog"],
+    classes: ["chroniclesystem", "cs-v2", "csv2-dialog", "cs-wildcard-dialog"],
     window: {
       title: SystemUtils.localize("CS.dialogs.wildcardAbilities.title"),
     },
@@ -110,11 +110,13 @@ export async function pickWildcardAbilities(count) {
         action: "cancel",
         label: SystemUtils.localize("CS.dialogs.actions.cancel"),
         icon: "fas fa-times",
+        class: "csv2-btn csv2-btn--secondary",
       },
       {
         action: "confirm",
         label: SystemUtils.localize("CS.dialogs.actions.confirm"),
         icon: "fas fa-check",
+        class: "csv2-btn csv2-btn--primary",
         default: true,
         callback: () => [...chosen],
       },

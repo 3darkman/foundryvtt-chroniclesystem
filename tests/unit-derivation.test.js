@@ -44,15 +44,14 @@ describe("unit derivation — a bare Unit (Acceptance 1, C1/C4/C4b/C8)", () => {
     expect(data.health.max).toBe(6);
     expect(data.derivedStats.combatDefense.value).toBe(6);
     expect(data.derivedStats.combatDefense.total).toBe(6);
-    expect(data.powerCost).toBe(1);
-    expect(data.discipline).toBe(9);
+    expect(data.powerCost.total).toBe(1);
+    expect(data.discipline.total).toBe(9);
     expect(data.xp).toEqual({ total: 20, spent: 0, free: 20 });
   });
 
-  it("leaves Movement uncomputed while no Unit Type is assigned (C5)", () => {
+  it("still moves 40 with no Unit Type assigned — movement is fixed", () => {
     const actor = makeFakeUnitActor();
-    expect(proto.movementProfile.call(actor)).toBeNull();
-    expect(deriveAll(actor).movement.total).toBe(0);
+    expect(deriveAll(actor).movement.total).toBe(40);
   });
 
   it("reads Health from Endurance, not from the Training Level (C1)", () => {
@@ -90,8 +89,8 @@ describe("unit derivation — training level and types recompute (Acceptance 2, 
       data: { trainingLevel: "trained", primaryTypeSlug: "infantry" },
     });
     const data = deriveAll(actor);
-    expect(data.powerCost).toBe(10);
-    expect(data.discipline).toBe(9);
+    expect(data.powerCost.total).toBe(10);
+    expect(data.discipline.total).toBe(9);
   });
 
   it("recomputes on the next derivation when the training level changes", () => {
@@ -102,8 +101,8 @@ describe("unit derivation — training level and types recompute (Acceptance 2, 
     deriveAll(actor);
     actor.getCSData().trainingLevel = "veteran";
     const data = deriveAll(actor);
-    expect(data.powerCost).toBe(12);
-    expect(data.discipline).toBe(6);
+    expect(data.powerCost.total).toBe(12);
+    expect(data.discipline.total).toBe(6);
     expect(data.xp.total).toBe(100);
   });
 });
@@ -163,11 +162,10 @@ describe("unit derivation — movement and the edition toggle (Acceptance 5, C5)
       id: "cavalry",
       name: "Cavalry",
       slug: "cavalry",
-      category: "cavalry",
       startingEquipment: { armor: { rating: 0, penalty: 0, bulk } },
     });
 
-  it("moves 40 regardless of category in the Chronicle default", () => {
+  it("moves a flat 40 — there is no movement category", () => {
     const actor = makeFakeUnitActor({ types: [cavalry()] });
     const data = deriveAll(actor);
     expect(data.movement.base).toBe(40);
@@ -182,17 +180,6 @@ describe("unit derivation — movement and the edition toggle (Acceptance 5, C5)
     const data = deriveAll(actor);
     expect(data.movement.bulk).toBe(20);
     expect(data.movement.total).toBe(20);
-  });
-
-  it("uses the category base once the SIFRP style is on", () => {
-    restoreSettings = settingsOn(CSConstants.Settings.WARFARE_MOVEMENT_STYLE);
-    const actor = makeFakeUnitActor({
-      types: [cavalry(2)],
-      modifiers: { bulk: 2 },
-    });
-    const data = deriveAll(actor);
-    expect(data.movement.base).toBe(80);
-    expect(data.movement.total).toBe(60);
   });
 
   it("never writes a sprint total for a unit (Sprint is out of Phase 1)", () => {

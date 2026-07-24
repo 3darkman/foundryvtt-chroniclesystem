@@ -4,11 +4,21 @@
       Only Health's current value and the two GM modifiers (Defence, Movement)
       are editable — they are the only persisted fields in this tab. --}}
 <div class="tab unit-overview-tab" data-group="primary" data-tab="overview">
+    {{!-- The four Training bands as a single-select chip group — the shared
+          `.csv2-chip-group` radio primitive, NOT the item sheet's field-cell:
+          that cell is a GRID cell (its left hairline is only cancelled by
+          `.csv2-field-grid > :nth-child(3n+1)`), so standalone it draws a stray
+          rule and takes a third of the row. --}}
     <section class="cs-unit-section">
         <h2 class="cs-unit-section-title">{{localize "CS.sheets.unit.training"}}</h2>
-        {{> "systems/chroniclesystem/templates/items/components/field-cell.hbs"
-            kind="chips" name="system.trainingLevel"
-            label="CS.sheets.unit.trainingLevel" value=unit.trainingLevel options=trainingChoices}}
+        <div class="csv2-chip-group cs-unit-training">
+            {{#each trainingChoices as |label level|}}
+            <label class="csv2-chip {{#ifEquals level @root.unit.trainingLevel}}is-selected{{/ifEquals}}">
+                <input type="radio" name="system.trainingLevel" value="{{level}}" {{#ifEquals level @root.unit.trainingLevel}}checked{{/ifEquals}} />
+                {{localize label}}
+            </label>
+            {{/each}}
+        </div>
     </section>
 
     <div class="cs-unit-columns">
@@ -98,7 +108,7 @@
                 {{#if weapon.qualities.length}}
                 <span class="cs-unit-quality-chips">
                     {{#each weapon.qualities as |quality|}}
-                    <span class="cs-qref-chip {{#if quality.missing}}is-missing{{/if}}" {{#if quality.description}}data-tooltip="{{quality.description}}"{{/if}}>{{quality.name}}{{#if quality.parameter}} {{quality.parameter}}{{/if}}</span>
+                    <span class="cs2-tag {{#if quality.missing}}is-missing{{/if}}" {{#if quality.description}}data-tooltip="{{quality.description}}"{{/if}}>{{quality.name}}{{#if quality.parameter}} {{quality.parameter}}{{/if}}</span>
                     {{/each}}
                 </span>
                 {{/if}}

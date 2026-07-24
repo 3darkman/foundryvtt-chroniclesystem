@@ -20,7 +20,6 @@ import {
   TRIGGER_COMPOUND_DEGREES_PREFIX,
 } from "../../combat/cs-quality-triggers.js";
 import { pickQualityTarget } from "../../dialogs/cs-quality-target-dialog.js";
-import { UNIT_CATEGORIES } from "../../vocabulary/cs-warfare.js";
 import {
   qualityDefinitionResolver,
   qualityRefRows,
@@ -552,10 +551,7 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
 
   /**
    * spec 025 (contract unit-type-assignment.md C6) — the Unit Type's System tab
-   * context: the four resolved weapon-quality lists, the granted-ability rows,
-   * and the category select, which is offered only while the SIFRP warfare
-   * movement rule is on (in the Chronicle default every unit moves the same, so
-   * the field would be inert — the stored value is never touched either way).
+   * context: the four resolved weapon-quality lists and the granted-ability rows.
    */
   async _prepareUnitTypeContext(context, item, system) {
     const resolve = await qualityDefinitionResolver();
@@ -584,17 +580,6 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
         name: entry.name || entry.slug || "",
       })
     );
-    context.unitCategoryChoices = Object.fromEntries(
-      UNIT_CATEGORIES.map((category) => [
-        category,
-        `CS.sheets.unitTypeItem.categories.${category}`,
-      ])
-    );
-    context.warfareMovementEnabled =
-      game.settings?.get?.(
-        CSConstants.Settings.SYSTEM_NAME,
-        CSConstants.Settings.WARFARE_MOVEMENT_STYLE
-      ) ?? false;
   }
 
   /** @override — the core convention: hand each tab-body part its own tab state so
@@ -696,7 +681,7 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     if (document.type === "quality") {
       if (!this.isEditable) return null;
       if (!qualityAppliesTo(document, "weapon")) return null;
-      const path = await pickQualityTarget();
+      const path = await pickQualityTarget(document.name);
       if (!path) return null;
       const slug = document.system?.slug || slugify(document.name);
       const refs = foundry.utils.deepClone(

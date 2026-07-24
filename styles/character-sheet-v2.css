@@ -695,35 +695,11 @@
   margin-right: 6px;
 }
 
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-tag {
-  background: var(--csv2-bg);
-  border: 1px solid var(--csv2-border);
-  color: var(--csv2-muted-2);
-  font: 500 10px var(--csv2-font-sans);
-  padding: 2px 7px;
-  border-radius: 4px;
-}
-/* spec 020 — narrative-reminder quality chip (amber warning) + Defensive-stance
-   toggle active state (reuses the equip toggle chrome via .checkButton). */
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-tag-reminder {
-  background: #f7f0dd;
-  border-color: #e3d3a0;
-  color: #8a6d1f;
-}
-/* spec 020 — unresolved quality reference (no world Quality with this slug): a
-   red "<slug> missing item" chip (mono slug) so the GM sees exactly what to fix. */
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-tag-missing {
-  background: #fbeaea;
-  border-color: #e6b3b3;
-  color: #a23b3b;
-  font-family: var(--csv2-font-mono);
-}
+/* The quality-tag family (`.cs2-tags`, `.cs2-tag`, `-reminder`, `-missing`) moved
+   to cs-components.css (spec 025): the Unit Type item sheet lists the same
+   weapon qualities, so the chip is a shared primitive, declared once. */
+/* spec 020 — Defensive-stance toggle active state (reuses the equip toggle
+   chrome via .checkButton). */
 .chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs-defensive.activated {
   color: var(--csv2-primary);
 }

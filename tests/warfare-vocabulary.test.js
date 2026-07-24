@@ -6,9 +6,7 @@ import {
   TRAINING_XP_TOTAL,
   XP_PER_RANK_STEP,
   ABILITY_BASE_RANK,
-  UNIT_CATEGORIES,
   UNIT_BASE_MOVEMENT,
-  MOVEMENT_BY_CATEGORY_SIFRP,
   BULK_YARDS_PER_POINT,
   LEADER_ROLES,
   powerCostFor,
@@ -56,13 +54,7 @@ describe("warfare rulebook constants", () => {
   });
 
   it("exposes the movement and leader vocabulary", () => {
-    expect(UNIT_CATEGORIES).toEqual(["infantry", "cavalry", "naval"]);
     expect(UNIT_BASE_MOVEMENT).toBe(40);
-    expect(MOVEMENT_BY_CATEGORY_SIFRP).toEqual({
-      infantry: 40,
-      cavalry: 80,
-      naval: 60,
-    });
     expect(BULK_YARDS_PER_POINT).toBe(10);
     expect(LEADER_ROLES).toEqual(["commander", "subcommander"]);
   });
@@ -177,29 +169,20 @@ describe("pickEffectivePrimaryType", () => {
 });
 
 describe("movementProfileFor", () => {
-  it("uses the flat 40 base for every category in the Chronicle edition", () => {
-    expect(movementProfileFor("infantry", 0, false)).toEqual({
+  it("is a flat 40 for every unit — there is no movement category", () => {
+    expect(movementProfileFor(0)).toEqual({
       base: 40,
       runBonus: 0,
       bulkPenalty: 0,
     });
-    expect(movementProfileFor("cavalry", 0, false).base).toBe(40);
-    expect(movementProfileFor("naval", 0, false).base).toBe(40);
   });
 
-  it("uses the per-category base in the SIFRP edition", () => {
-    expect(movementProfileFor("infantry", 0, true).base).toBe(40);
-    expect(movementProfileFor("cavalry", 0, true).base).toBe(80);
-    expect(movementProfileFor("naval", 0, true).base).toBe(60);
+  it("charges 10 yards per Bulk point", () => {
+    expect(movementProfileFor(2).bulkPenalty).toBe(20);
   });
 
-  it("charges 10 yards per Bulk point in both editions", () => {
-    expect(movementProfileFor("cavalry", 2, false).bulkPenalty).toBe(20);
-    expect(movementProfileFor("cavalry", 2, true).bulkPenalty).toBe(20);
-  });
-
-  it("floors an unknown category to infantry and a garbage bulk to zero", () => {
-    expect(movementProfileFor("siege", 0, true).base).toBe(40);
-    expect(movementProfileFor("naval", "x", true).bulkPenalty).toBe(0);
+  it("floors a garbage bulk to zero", () => {
+    expect(movementProfileFor("x").bulkPenalty).toBe(0);
+    expect(movementProfileFor().bulkPenalty).toBe(0);
   });
 });

@@ -1,11 +1,24 @@
+{{!-- Which of the Unit Type's four weapon lists a dropped Quality joins (spec
+      025, handoff "Aplicar qualidade"): the dropped quality named as a chip, the
+      question, then the four destinations as two labelled pairs of buttons —
+      one click IS the answer. The frame's footer holds only Cancel.
+      All four wear the outline variant: the prototype's filled button was
+      showing the hover state, not a default one. --}}
 <div class="cs-quality-target-body">
-    <p class="csv2-help">{{localize "CS.dialogs.qualityTarget.hint"}}</p>
-    <div class="cs-quality-target-options">
-        {{#each targets as |target|}}
-        <label class="cs-quality-target-option">
-            <input type="radio" name="qualityTarget" value="{{target.path}}" {{#if target.checked}}checked{{/if}} />
-            <span>{{localize target.label}}</span>
-        </label>
-        {{/each}}
+    {{#if qualityName}}
+    <div class="cs-quality-target-head">
+        <span class="cs2-tag">{{qualityName}}</span>
     </div>
+    {{/if}}
+    <p class="cs-quality-target-question">{{localize "CS.dialogs.qualityTarget.question"}}</p>
+    {{#each groups as |group|}}
+    <div class="cs-quality-target-group">
+        <div class="csv2-label">{{localize group.label}}</div>
+        <div class="cs-quality-target-choices">
+            {{#each group.targets as |target|}}
+            <button type="button" data-target="{{target.path}}" class="csv2-btn csv2-btn--outline">{{localize target.label}}</button>
+            {{/each}}
+        </div>
+    </div>
+    {{/each}}
 </div>

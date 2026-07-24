@@ -18,7 +18,6 @@ import {
   powerCostFor,
   unitTypeSlug,
 } from "../vocabulary/cs-warfare.js";
-import { warfareMovementStyle } from "../system/settings.js";
 
 /**
  * Read-side aggregation of one buffer — the inverse of the collector. Sums the
@@ -436,13 +435,21 @@ export class CSActor extends Actor {
       this.calcHealthBase() + this.getDerivedStatBonus(DERIVED_STATS.HEALTH),
       0
     );
-    data.powerCost = powerCostFor(
+    // Same shape as Combat Defence: a derived base, the owner's persisted
+    // adjustment, and the total the sheet shows as the final number.
+    data.powerCost.value = powerCostFor(
       data.trainingLevel,
       assignedTypes.map((type) => type.getCSData().powerCost)
     );
-    data.discipline = disciplineFor(
+    data.powerCost.total =
+      data.powerCost.value + (Number(data.powerCost.modifier) || 0);
+    data.discipline.value = disciplineFor(
       data.trainingLevel,
       assignedTypes.map((type) => type.getCSData().disciplineModifier)
+    );
+    data.discipline.total = Math.max(
+      data.discipline.value + (Number(data.discipline.modifier) || 0),
+      0
     );
     data.xp = computeXp(
       data.trainingLevel,
@@ -791,15 +798,9 @@ export class CSActor extends Actor {
       ChronicleSystem.modifiersConstants.BULK
     ).total;
 
-    if (this.type === "unit") {
-      const primaryType = this.effectivePrimaryType();
-      if (!primaryType) return null;
-      return movementProfileFor(
-        primaryType.getCSData().category,
-        bulkTotal,
-        warfareMovementStyle()
-      );
-    }
+    // Every unit moves the same 40 yards — there is no movement category
+    // (design handoff §6.1/§6.2). Bulk is the only thing that slows it down.
+    if (this.type === "unit") return movementProfileFor(bulkTotal);
 
     // Resolve Athletics:Run by canonical slug (scoped specialty) so movement
     // survives a rename; getActorAbilityFormula accepts a slug or a display name.
@@ -1179,7 +1180,7 @@ export class CSActor extends Actor {
     for (const actor of game.actors ?? []) {
       if (actor.type !== "unit") continue;
       if (actor.system?.houseUuid !== this.uuid) continue;
-      const powerCost = Number(actor.system.powerCost) || 0;
+      const powerCost = Number(actor.system.powerCost?.total) || 0;
       allocated += powerCost;
       units.push({ id: actor.id, name: actor.name, powerCost });
     }

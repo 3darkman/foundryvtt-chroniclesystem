@@ -1,21 +1,28 @@
 {{!-- Shared Qualities reference list (spec 020, C10a) — reused by weapon.hbs,
       armor.hbs and (spec 025) each of the Unit Type's FOUR per-weapon lists (DRY).
       Parameters: `rows` (projected by CSItemSheet._qualityRefRows, each row
-      carrying its own `listPath`) and `title` (the card header i18n key).
+      carrying its own `listPath`), `title` (the card header i18n key) and
+      `compact` — the Unit Type variant, where the list is a sub-block nested
+      inside its weapon rather than a top-level card (quieter header, one-line
+      empty state, no footer hint).
       Qualities are added ONLY by dragging a Quality item (from the "Chronicle
       Qualities" compendium or the world) onto this sheet — there is NO picker.
       Each row: the resolved name chip (an amber "<slug> missing item" chip when no
       item with that slug exists in world or compendium — the reference is kept,
       never discarded, FR-012) + the per-instance parameter control (only when the
       definition declares one) + an always-visible remove button. --}}
-<div class="csv2-card csv2-list cs-qref-card">
+<div class="csv2-card csv2-list cs-qref-card {{#if compact}}cs-qref-card--compact{{/if}}">
+    {{#if compact}}
+    <div class="cs-qref-subheader">{{localize title}}</div>
+    {{else}}
     <div class="csv2-card-header">{{localize title}}</div>
+    {{/if}}
 
     {{#if rows.length}}
     {{#each rows as |row|}}
     <div class="csv2-list-row cs-qref-row">
         <input type="hidden" name="{{row.listPath}}.{{row.index}}.slug" value="{{row.slug}}" />
-        <span class="cs-qref-chip {{#if row.missing}}is-missing{{/if}}" {{#if row.description}}data-tooltip="{{row.description}}"{{/if}}>
+        <span class="{{#if ../compact}}cs2-tag{{else}}cs-qref-chip{{/if}} {{#if row.missing}}is-missing{{/if}}" {{#if row.description}}data-tooltip="{{row.description}}"{{/if}}>
             {{#if row.missing}}
                 <span class="cs-qref-slug">{{#if row.slug}}{{row.slug}}{{else}}(empty){{/if}}</span>
                 <span class="cs-qref-tag">{{localize "CS.quality.picker.missingItem"}}</span>
@@ -46,14 +53,20 @@
     {{/each}}
     {{else}}
     <div class="csv2-list-empty cs-qref-empty">
+        {{#if compact}}
+        <div>{{localize "CS.quality.picker.dragHere"}}</div>
+        {{else}}
         <div>{{localize "CS.quality.picker.empty"}}</div>
         <div class="cs-qref-hint">{{localize "CS.quality.picker.dragHint"}}</div>
+        {{/if}}
     </div>
     {{/if}}
 
     {{#if rows.length}}
+    {{#unless compact}}
     <div class="csv2-card-hint cs-qref-drag">
         <i class="fa-solid fa-hand-pointer"></i> {{localize "CS.quality.picker.dragHint"}}
     </div>
+    {{/unless}}
     {{/if}}
 </div>

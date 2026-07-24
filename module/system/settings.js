@@ -95,25 +95,6 @@ const registerSystemSettings = () => {
     }
   );
 
-  // spec 025 (US1, FR-008a) — the optional SIFRP warfare movement rule, default
-  // OFF (Chronicle: every unit moves 40 yd regardless of category).
-  // World-scoped; re-render open windows so unit sheets re-derive immediately.
-  game.settings.register(
-    CSConstants.Settings.SYSTEM_NAME,
-    CSConstants.Settings.WARFARE_MOVEMENT_STYLE,
-    {
-      name: "CS.settings.warfareMovementStyle.name",
-      hint: "CS.settings.warfareMovementStyle.hint",
-      scope: "world",
-      config: true,
-      type: Boolean,
-      default: false,
-      onChange: () => {
-        for (const app of Object.values(ui.windows)) app.render(false);
-      },
-    }
-  );
-
   game.settings.register(
     CSConstants.Settings.SYSTEM_NAME,
     CSConstants.Settings.CURRENT_VERSION,
@@ -203,26 +184,6 @@ export function passiveValuesVisible() {
       game.settings.get(
         CSConstants.Settings.SYSTEM_NAME,
         CSConstants.Settings.PASSIVE_VALUES_VISIBLE
-      ) === true
-    );
-  } catch {
-    return false;
-  }
-}
-
-/**
- * spec 025 (US1, FR-008a / contract unit-derivation.md C5) — the single read of
- * the warfare movement-edition setting, so no consumer repeats the literal key.
- * Missing or unregistered (a world opened before this feature, or a Vitest
- * double) reads as the registered default `false` — the Chronicle edition.
- * @returns {boolean}
- */
-export function warfareMovementStyle() {
-  try {
-    return (
-      game.settings.get(
-        CSConstants.Settings.SYSTEM_NAME,
-        CSConstants.Settings.WARFARE_MOVEMENT_STYLE
       ) === true
     );
   } catch {

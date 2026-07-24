@@ -27,15 +27,7 @@ export const XP_PER_RANK_STEP = 20;
 
 export const ABILITY_BASE_RANK = 2;
 
-export const UNIT_CATEGORIES = ["infantry", "cavalry", "naval"];
-
 export const UNIT_BASE_MOVEMENT = 40;
-
-export const MOVEMENT_BY_CATEGORY_SIFRP = {
-  infantry: 40,
-  cavalry: 80,
-  naval: 60,
-};
 
 export const BULK_YARDS_PER_POINT = 10;
 
@@ -43,16 +35,10 @@ export const LEADER_ROLES = ["commander", "subcommander"];
 
 const DEFAULT_TRAINING_LEVEL = TRAINING_LEVELS[0];
 
-const DEFAULT_UNIT_CATEGORY = UNIT_CATEGORIES[0];
-
 function normalizedTrainingLevel(trainingLevel) {
   return TRAINING_LEVELS.includes(trainingLevel)
     ? trainingLevel
     : DEFAULT_TRAINING_LEVEL;
-}
-
-function normalizedCategory(category) {
-  return UNIT_CATEGORIES.includes(category) ? category : DEFAULT_UNIT_CATEGORY;
 }
 
 function sumOfNumbers(values) {
@@ -101,16 +87,9 @@ export function pickEffectivePrimaryType(types = [], primarySlug = "") {
   return oldest;
 }
 
-export function movementProfileFor(
-  category,
-  bulkTotal = 0,
-  sifrpStyle = false
-) {
-  const base = sifrpStyle
-    ? MOVEMENT_BY_CATEGORY_SIFRP[normalizedCategory(category)]
-    : UNIT_BASE_MOVEMENT;
+export function movementProfileFor(bulkTotal = 0) {
   return {
-    base,
+    base: UNIT_BASE_MOVEMENT,
     runBonus: 0,
     bulkPenalty: BULK_YARDS_PER_POINT * (Number(bulkTotal) || 0),
   };

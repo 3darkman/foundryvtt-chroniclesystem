@@ -202,13 +202,15 @@ describe("granted abilities — provenance union (FR-003b, C3a)", () => {
 
     await grantTypeAbilities(actor, "infantry", [
       { slug: "fighting", name: "Fighting" },
+      { slug: "athletics", name: "Athletics" },
     ]);
 
-    expect(created).toHaveLength(1);
+    expect(created).toHaveLength(2);
     expect(created[0].system.slug).toBe("fighting");
     expect(created[0].flags.chroniclesystem.grantedBy).toEqual(["infantry"]);
-    // The base rank has ONE home — the AbilityData schema initial, not this call.
-    expect(created[0].system.rating).toBeUndefined();
+    // A Unit Type does NOT author a rank: the payload carries the slug alone, so
+    // the base rank has exactly one home — `AbilityData.rating`'s initial.
+    expect(created[0].system).toEqual({ slug: "fighting" });
   });
 
   it("unions the slug into an ability the unit already owns, never resetting it", async () => {

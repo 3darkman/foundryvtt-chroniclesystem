@@ -20,7 +20,7 @@ export async function pickAttachRole(actor) {
   );
 
   const result = await foundry.applications.api.DialogV2.wait({
-    classes: ["chroniclesystem", "cs-v2", "cs-attach-dialog"],
+    classes: ["chroniclesystem", "cs-v2", "csv2-dialog", "cs-attach-dialog"],
     window: {
       title: SystemUtils.format("CS.dialogs.attachCharacter.title", {
         name: actor?.name ?? "",
@@ -32,11 +32,13 @@ export async function pickAttachRole(actor) {
         action: "cancel",
         label: SystemUtils.localize("CS.dialogs.actions.cancel"),
         icon: "fas fa-times",
+        class: "csv2-btn csv2-btn--secondary",
       },
       {
         action: "confirm",
         label: SystemUtils.localize("CS.dialogs.actions.confirm"),
         icon: "fas fa-check",
+        class: "csv2-btn csv2-btn--primary",
         default: true,
         callback: (event, button) => button.form?.attachRole?.value ?? null,
       },

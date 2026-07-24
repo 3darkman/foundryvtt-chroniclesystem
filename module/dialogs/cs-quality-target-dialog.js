@@ -6,56 +6,78 @@ const TEMPLATE =
 export const QUALITY_TARGETS = [
   {
     path: "system.startingEquipment.fightingQualities",
-    label: "CS.dialogs.qualityTarget.startingFighting",
+    group: "CS.sheets.unitTypeItem.startingEquipment",
+    label: "CS.dialogs.qualityTarget.fighting",
   },
   {
     path: "system.startingEquipment.marksmanshipQualities",
-    label: "CS.dialogs.qualityTarget.startingMarksmanship",
+    group: "CS.sheets.unitTypeItem.startingEquipment",
+    label: "CS.dialogs.qualityTarget.marksmanship",
   },
   {
     path: "system.upgradedEquipment.fightingQualities",
-    label: "CS.dialogs.qualityTarget.upgradedFighting",
+    group: "CS.sheets.unitTypeItem.upgradedEquipment",
+    label: "CS.dialogs.qualityTarget.fighting",
   },
   {
     path: "system.upgradedEquipment.marksmanshipQualities",
-    label: "CS.dialogs.qualityTarget.upgradedMarksmanship",
+    group: "CS.sheets.unitTypeItem.upgradedEquipment",
+    label: "CS.dialogs.qualityTarget.marksmanship",
   },
 ];
 
+/** The four targets folded into the design's two labelled groups of two. */
+function targetGroups() {
+  const groups = [];
+  for (const target of QUALITY_TARGETS) {
+    let group = groups.find((entry) => entry.label === target.group);
+    if (!group) groups.push((group = { label: target.group, targets: [] }));
+    group.targets.push(target);
+  }
+  return groups;
+}
+
 /**
  * spec 025 (contract unit-type-assignment.md C6a branch B, FR-004a) — ask which
- * of a Unit Type's four weapon-quality lists a dropped Quality belongs to.
- * Cancelling (or closing) resolves `null` and nothing is written.
+ * of a Unit Type's four weapon-quality lists a dropped Quality belongs to. The
+ * four choices ARE the dialog's buttons (design: one click, no confirm step);
+ * cancelling — or closing — resolves `null` and nothing is written.
+ * @param {string} qualityName the dropped quality, named in the question
  * @returns {Promise<string|null>} the chosen list's system path
  */
-export async function pickQualityTarget() {
-  const targets = QUALITY_TARGETS.map((target, index) => ({
-    ...target,
-    checked: index === 0,
-  }));
+export async function pickQualityTarget(qualityName = "") {
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE,
-    { targets }
+    { groups: targetGroups(), qualityName }
   );
 
+  let picked = null;
   const result = await foundry.applications.api.DialogV2.wait({
-    classes: ["chroniclesystem", "cs-v2", "cs-quality-target-dialog"],
+    classes: [
+      "chroniclesystem",
+      "cs-v2",
+      "csv2-dialog",
+      "cs-quality-target-dialog",
+    ],
     window: { title: SystemUtils.localize("CS.dialogs.qualityTarget.title") },
+    position: { width: 420 },
     content,
     buttons: [
       {
         action: "cancel",
         label: SystemUtils.localize("CS.dialogs.actions.cancel"),
-        icon: "fas fa-times",
-      },
-      {
-        action: "confirm",
-        label: SystemUtils.localize("CS.dialogs.actions.confirm"),
-        icon: "fas fa-check",
-        default: true,
-        callback: (event, button) => button.form?.qualityTarget?.value ?? null,
+        class: "csv2-btn csv2-btn--secondary",
       },
     ],
+    render: (event, dialog) => {
+      for (const button of dialog.element.querySelectorAll("[data-target]")) {
+        button.addEventListener("click", () => {
+          picked = button.dataset.target;
+          dialog.close();
+        });
+      }
+    },
+    close: () => picked,
     rejectClose: false,
   });
 

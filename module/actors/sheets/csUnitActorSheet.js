@@ -38,7 +38,13 @@ export class CSUnitActorSheet extends CSActorSheet {
   itemTypesPermitted = ["unitType", "ability"];
 
   static DEFAULT_OPTIONS = {
-    classes: ["chroniclesystem", "unit", "sheet", "actor"],
+    // `cs-v2` is what unlocks the SHARED component layer (cs-components.css:
+    // cards, list rows, field grids, switches, chips, segmented controls — all
+    // scoped `.cs-v2 …`). Without it only the tokens and the `.cs-sheet-v2`
+    // shell resolve, and every card/list on this sheet renders unstyled.
+    // CLAUDE.md, "Design System (v2)": give the window root
+    // ["chroniclesystem", "cs-v2", "<window-name>"].
+    classes: ["chroniclesystem", "unit", "sheet", "actor", "cs-v2"],
     position: { width: 897, height: 900 },
     window: { resizable: true },
     form: { submitOnChange: true },

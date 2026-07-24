@@ -12,7 +12,7 @@ const makeUnit = (id, powerCost, houseUuid = HOUSE_UUID) => ({
   id,
   name: `Unit ${id}`,
   type: "unit",
-  system: { houseUuid, powerCost },
+  system: { houseUuid, powerCost: { total: powerCost } },
 });
 
 const makeHouse = () => ({

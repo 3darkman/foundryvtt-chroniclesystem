@@ -205,12 +205,10 @@
         "empty": "Nothing chosen yet."
       },
       "qualityTarget": {
-        "title": "Apply Quality To",
-        "hint": "Choose which of this Unit Type's weapons the quality applies to.",
-        "startingFighting": "Starting Equipment — Fighting",
-        "startingMarksmanship": "Starting Equipment — Marksmanship",
-        "upgradedFighting": "Equipment Upgrades — Fighting",
-        "upgradedMarksmanship": "Equipment Upgrades — Marksmanship"
+        "title": "Apply Quality",
+        "question": "Which weapon does this quality apply to?",
+        "fighting": "Fighting",
+        "marksmanship": "Marksmanship"
       },
       "attachCharacter": {
         "title": "Attach {name} to the Unit",
@@ -241,10 +239,6 @@
       "asoiafDefenseStyle": {
         "name": "ASoIaF Defense Style",
         "hint": "The armor penalty influences the character's combat defense. This Needs Foundry refresh (F5)."
-      },
-      "warfareMovementStyle": {
-        "name": "Warfare Movement Style (SIFRP)",
-        "hint": "When off (Chronicle), every unit moves 40 yards regardless of its type. When on, the primary Unit Type's category sets the base movement (Infantry 40, Cavalry 80, Naval 60)."
       },
       "passiveValuesVisible": {
         "name": "Passive Values Visible to Players",
@@ -501,6 +495,7 @@
         "empty": "No qualities yet",
         "emptyHint": "Drag a Quality onto this sheet to add it.",
         "dragHint": "Drag a Quality from the Chronicle Qualities compendium onto this sheet.",
+        "dragHere": "Drag a quality here.",
         "missing": "MISSING DEFINITION",
         "missingItem": "missing item"
       },
@@ -901,25 +896,23 @@
         "parameters": "Parameters",
         "powerCost": "Power Cost",
         "disciplineModifier": "Discipline Modifier",
-        "category": "Movement Category",
-        "categories": {
-          "infantry": "Infantry",
-          "cavalry": "Cavalry",
-          "naval": "Naval"
-        },
-        "wildcardAbilityCount": "Wildcard Abilities",
         "grantedAbilities": "Granted Abilities",
-        "grantedRank": "Rank 2",
         "grantedEmpty": "No granted abilities.",
-        "grantedDragHint": "Drag an Ability item here to grant it to every unit of this type.",
+        "grantedDragHint": "Drag Abilities here — they are granted to the unit when this type is added to it.",
         "startingEquipment": "Starting Equipment",
         "upgradedEquipment": "Equipment Upgrades",
         "fightingDamage": "Fighting Damage",
         "marksmanshipDamage": "Marksmanship Damage",
-        "closeRange": "Close Range",
-        "longRange": "Long Range",
         "fightingQualities": "Fighting Qualities",
-        "marksmanshipQualities": "Marksmanship Qualities"
+        "marksmanshipQualities": "Marksmanship Qualities",
+        "wildcardAbilities": "Wildcard Abilities",
+        "wildcardCount": "Quantity",
+        "wildcardNote": "Not chosen here. When this type is added to a unit, a dialog asks which wildcard abilities it grants.",
+        "armor": "Armor",
+        "ar": "AR",
+        "penalty": "Pen.",
+        "bulk": "Bulk",
+        "qualities": "Qualities"
       }
     },
     "constants": {
