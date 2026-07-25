@@ -10,6 +10,14 @@ import {
 import { DERIVED_STATS, slugify } from "../effects/cs-effect-vocabulary.js";
 import { scopedSpecialtySlug } from "../vocabulary/cs-canonical-abilities.js";
 import { renderAndSave, canUpload } from "../coat-of-arms/cs-coa-render.js";
+import {
+  computeXp,
+  disciplineFor,
+  movementProfileFor,
+  pickEffectivePrimaryType,
+  powerCostFor,
+  unitTypeSlug,
+} from "../vocabulary/cs-warfare.js";
 
 /**
  * Read-side aggregation of one buffer — the inverse of the collector. Sums the
@@ -113,6 +121,8 @@ export class CSActor extends Actor {
       // at this point; the writes are transient and reset next cycle.
       applyOwnedItemEffects(this);
     }
+    // spec 025 (US1) — the Unit's rule-derived Health/Power Cost/Discipline/XP.
+    if (this.type === "unit") this.calculateUnitDerivedValues();
   }
 
   /**
@@ -269,11 +279,58 @@ export class CSActor extends Actor {
       userId
     );
 
+    // spec 025 (contract unit-type-assignment.md C5) — removing a Unit Type
+    // withdraws the abilities IT granted. Runs on one client only (`_onDelete*`
+    // fires on every client that receives the broadcast).
+    if (this.type === "unit") {
+      if (game.user?.id === userId) this._removeGrantedAbilities(documents);
+      return;
+    }
+
     if (this.type !== "house") return;
 
     let isToUpdate = documents.find((doc) => doc.type === "event");
 
     if (isToUpdate) this._updateAllResourcesTotal();
+  }
+
+  /**
+   * spec 025 (FR-003b) — drop the removed Unit Types' slugs from every granted
+   * ability's provenance flag; delete the ability only once NO surviving type
+   * grants it. An ability the GM dropped by hand carries no flag and is
+   * therefore never touched. Freed XP re-derives on the next preparation.
+   * @param {object[]} deletedDocuments the documents `_onDelete*` reported
+   */
+  async _removeGrantedAbilities(deletedDocuments) {
+    const removedSlugs = deletedDocuments
+      .filter((doc) => doc.type === "unitType")
+      .map((doc) => unitTypeSlug(doc));
+    if (!removedSlugs.length) return;
+
+    const survivingSlugs = new Set(
+      this.items
+        .filter((item) => item.type === "unitType")
+        .map((item) => unitTypeSlug(item))
+    );
+
+    const toUpdate = [];
+    const toDelete = [];
+    for (const ability of this.items.filter((i) => i.type === "ability")) {
+      const grantedBy = ability.getFlag("chroniclesystem", "grantedBy") ?? [];
+      if (!grantedBy.some((slug) => removedSlugs.includes(slug))) continue;
+      const kept = grantedBy.filter((slug) => survivingSlugs.has(slug));
+      if (kept.length) {
+        toUpdate.push({
+          _id: ability.id,
+          "flags.chroniclesystem.grantedBy": kept,
+        });
+      } else {
+        toDelete.push(ability.id);
+      }
+    }
+
+    if (toUpdate.length) await this.updateEmbeddedDocuments("Item", toUpdate);
+    if (toDelete.length) await this.deleteEmbeddedDocuments("Item", toDelete);
   }
 
   /* -------------------------------------------------------------- */
@@ -292,8 +349,7 @@ export class CSActor extends Actor {
         this.getDerivedStatBonus(DERIVED_STATS.COMBAT_DEFENSE);
     }
     if (data.derivedStats?.health) {
-      data.derivedStats.health.value =
-        (this.getAbilityValueBySlug("endurance") || 0) * 3;
+      data.derivedStats.health.value = this.calcHealthBase();
       data.derivedStats.health.total =
         data.derivedStats.health.value +
         (Number(data.derivedStats.health.modifier) || 0) +
@@ -330,6 +386,75 @@ export class CSActor extends Actor {
         data.derivedStats.fatigue.value +
         (Number(data.derivedStats.fatigue.modifier) || 0);
     }
+  }
+
+  /**
+   * spec 025 (contract unit-derivation.md C1) — the rulebook Health base,
+   * `Endurance × 3`. One home for the formula: the character writes it into
+   * `derivedStats.health.value`, the unit into `system.health.max`.
+   * @returns {number}
+   */
+  calcHealthBase() {
+    return (this.getAbilityValueBySlug("endurance") || 0) * 3;
+  }
+
+  /**
+   * spec 025 (contract unit-type-assignment.md C2) — the Unit Type whose
+   * equipment the unit actually uses: the designated `primaryTypeSlug` while it
+   * still matches an assigned type, else the oldest assigned type. A pure
+   * derivation — nothing is persisted from a preparation path.
+   * @returns {object|undefined} the embedded `unitType` item
+   */
+  effectivePrimaryType() {
+    const entries = [];
+    for (const item of this.items) {
+      if (item.type !== "unitType") continue;
+      entries.push({
+        item,
+        slug: unitTypeSlug(item),
+        createdTime: item._stats?.createdTime,
+      });
+    }
+    return pickEffectivePrimaryType(entries, this.getCSData().primaryTypeSlug)
+      ?.item;
+  }
+
+  /**
+   * spec 025 (contract unit-derivation.md C4/C4b/C8) — the Unit's rule-derived
+   * values. Every one of them is computed, never stored: Health max from
+   * Endurance, Power Cost and Discipline from the Training Level plus EVERY
+   * assigned type, XP from the Training Level minus the ranks bought above the
+   * base on the unit's own ability items.
+   */
+  calculateUnitDerivedValues() {
+    const data = this.getCSData();
+    const assignedTypes = this.items.filter((item) => item.type === "unitType");
+    const abilities = this.items.filter((item) => item.type === "ability");
+
+    data.health.max = Math.max(
+      this.calcHealthBase() + this.getDerivedStatBonus(DERIVED_STATS.HEALTH),
+      0
+    );
+    // Same shape as Combat Defence: a derived base, the owner's persisted
+    // adjustment, and the total the sheet shows as the final number.
+    data.powerCost.value = powerCostFor(
+      data.trainingLevel,
+      assignedTypes.map((type) => type.getCSData().powerCost)
+    );
+    data.powerCost.total =
+      data.powerCost.value + (Number(data.powerCost.modifier) || 0);
+    data.discipline.value = disciplineFor(
+      data.trainingLevel,
+      assignedTypes.map((type) => type.getCSData().disciplineModifier)
+    );
+    data.discipline.total = Math.max(
+      data.discipline.value + (Number(data.discipline.modifier) || 0),
+      0
+    );
+    data.xp = computeXp(
+      data.trainingLevel,
+      abilities.map((ability) => ability.getCSData().rating)
+    );
   }
 
   getAbilities() {
@@ -657,29 +782,58 @@ export class CSActor extends Actor {
     return value;
   }
 
-  calculateMovementData() {
-    let data = this.getCSData();
-    // Movement only exists on the character data model, not on units
-    if (!data.movement) return;
-    data.movement.base = ChronicleSystem.defaultMovement;
+  /**
+   * spec 025 (contract unit-derivation.md C5) — the per-type movement profile
+   * the single arithmetic body below consumes. The character keeps its own base
+   * + Athletics:Run bonus + halved bulk; a unit reads the edition setting and
+   * delegates to the pure `movementProfileFor`. `null` means "no movement to
+   * compute": a house has no movement block, a unit with no assigned type has no
+   * equipment to move with.
+   * @returns {{base: number, runBonus: number, bulkPenalty: number}|null}
+   */
+  movementProfile() {
+    const data = this.getCSData();
+    if (!data.movement) return null;
+    const bulkTotal = this.getModifier(
+      ChronicleSystem.modifiersConstants.BULK
+    ).total;
+
+    // Every unit moves the same 40 yards — there is no movement category
+    // (design handoff §6.1/§6.2). Bulk is the only thing that slows it down.
+    if (this.type === "unit") return movementProfileFor(bulkTotal);
+
     // Resolve Athletics:Run by canonical slug (scoped specialty) so movement
     // survives a rename; getActorAbilityFormula accepts a slug or a display name.
-    let runFormula = ChronicleSystem.getActorAbilityFormula(
+    const runFormula = ChronicleSystem.getActorAbilityFormula(
       this,
       "athletics",
       "athletics_run"
     );
-    data.movement.runBonus = Math.floor(runFormula.bonusDice / 2);
-    let bulkMod = this.getModifier(ChronicleSystem.modifiersConstants.BULK);
-    data.movement.bulk = Math.floor(bulkMod.total / 2);
+    return {
+      base: ChronicleSystem.defaultMovement,
+      runBonus: Math.floor(runFormula.bonusDice / 2),
+      bulkPenalty: Math.floor(bulkTotal / 2),
+    };
+  }
+
+  calculateMovementData() {
+    let data = this.getCSData();
+    const profile = this.movementProfile();
+    if (!profile) return;
+    data.movement.base = profile.base;
+    data.movement.runBonus = profile.runBonus;
+    data.movement.bulk = profile.bulkPenalty;
     data.movement.total = Math.max(
-      data.movement.base +
-        data.movement.runBonus -
-        data.movement.bulk +
+      profile.base +
+        profile.runBonus -
+        profile.bulkPenalty +
         (parseInt(data.movement.modifier) || 0) +
         this.getDerivedStatBonus(DERIVED_STATS.MOVEMENT),
       1
     );
+    // Sprint is a character concept; the unit's Sprint is an order action left to
+    // the combat phase (spec 025 FR-008, Out of Scope).
+    if (this.type === "unit") return;
     data.movement.sprintTotal =
       data.movement.total * (Number(data.movement.sprintMultiplier) || 4) -
       data.movement.bulk;
@@ -1008,6 +1162,29 @@ export class CSActor extends Actor {
         modifier += +holding.system.fortuneDice.split(/[d|D]/)[0];
       });
     return modifier;
+  }
+
+  /**
+   * spec 025 (contract house-power-allocation.md C1, FR-016) — the Power this
+   * House's Units consume. A reverse scan over `game.actors` (the `getHouseRole`
+   * precedent): the affiliation lives on the Unit alone, so the House stores no
+   * back-reference (constitution §II). EVERY linked Unit counts — Phase 1 has no
+   * active/inactive state — and a deleted Unit leaves the sum by simply not
+   * being there. `Number(...) || 0` keeps a not-yet-derived Unit from poisoning
+   * the total with NaN.
+   * @returns {{allocated: number, units: Array<{id: string, name: string, powerCost: number}>}}
+   */
+  getUnitsPowerAllocated() {
+    const units = [];
+    let allocated = 0;
+    for (const actor of game.actors ?? []) {
+      if (actor.type !== "unit") continue;
+      if (actor.system?.houseUuid !== this.uuid) continue;
+      const powerCost = Number(actor.system.powerCost?.total) || 0;
+      allocated += powerCost;
+      units.push({ id: actor.id, name: actor.name, powerCost });
+    }
+    return { allocated, units };
   }
 
   getHoldingsModifier() {

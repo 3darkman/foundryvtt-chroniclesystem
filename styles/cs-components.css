@@ -59,7 +59,17 @@
   --csv2-secondary: #e6e6e8;
   --csv2-text: #242021;
   --csv2-bg: #ffffff;
+  /* The quiet surface a plain white block sits on: empty states, the row that
+     names a source, the highlighted (primary) row of a list. */
+  --csv2-bg-soft: #f5f7fb;
   --csv2-area: #dfe5f3;
+  /* The tint of a row the design singles out (the Unit's primary type) — a
+     shade deeper than `bg-soft`, still quieter than the `area` band. */
+  --csv2-row-accent: #eef4fb;
+  /* Figures inside an `area` band: the number and the unit word under it. Their
+     own tones, because the band's blue would drown the muted greys. */
+  --csv2-figure: #0a4a7a;
+  --csv2-figure-sub: #5f7fa0;
   --csv2-border: #d3d7e0;
   --csv2-border-soft: #eef0f4;
   --csv2-muted: #8a8688;
@@ -419,8 +429,11 @@
 .cs-effect-config.cs-v2 input[list]::-webkit-calendar-picker-indicator {
   display: none;
 }
-.cs-effect-config.cs-v2 .hint,
-.cs-effect-config.cs-v2 .csv2-help {
+/* `.csv2-help` is a SHARED primitive (spec 025: the three Warfare dialogs use it
+   too), so it is bridged like the other components; `.hint` stays scoped to the
+   effect window, where it retargets a core class. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-help,
+.cs-effect-config.cs-v2 .hint {
   font-family: var(--csv2-font-sans);
   font-weight: 400;
   font-size: 11px;
@@ -1064,6 +1077,13 @@
   text-transform: uppercase;
   color: var(--csv2-muted);
 }
+/* The design uses a second, tighter eyebrow INSIDE a card, where the 8.5px one
+   competes with the value it labels: AR / PENALTY / BULK, GRANTS, COST. Same
+   eyebrow, one size down — a modifier, never a second declaration. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-label--sm {
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
 
 /* ===========================================================================
    Shared v2 form controls + buttons — the SINGLE source for these primitives
@@ -1157,6 +1177,17 @@
   line-height: 1.1;
   cursor: pointer;
   box-shadow: none;
+  transition: none;
+}
+/* Core paints `button:focus` with an amber outline + glow (elements layer). Keep
+   the keyboard affordance, in the v2 palette; drop it for pointer focus. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn:focus-visible {
+  outline: 2px solid var(--csv2-primary);
+  outline-offset: 1px;
 }
 :is(.cs-v2, .cs-sheet-v2) .csv2-btn--primary {
   background: var(--csv2-primary);
@@ -1178,8 +1209,68 @@
   border-color: var(--csv2-input-border);
   color: var(--csv2-muted-2);
 }
+/* `background` is restated on hover ON PURPOSE: core's `button:hover` sets its
+   own warm background, so a variant that only changes border/colour inherits it. */
 :is(.cs-v2, .cs-sheet-v2) .csv2-btn--secondary:hover {
+  background: var(--csv2-bg);
   border-color: var(--csv2-muted);
+  color: var(--csv2-text);
+  box-shadow: none;
+}
+/* Outline variant (handoff: the quality dialog's second choice) — the primary
+   colour as border + text, filling on hover. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--outline {
+  background: var(--csv2-bg);
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--outline:hover {
+  background: var(--csv2-primary);
+  border-color: var(--csv2-primary);
+  color: var(--csv2-on-primary);
+  box-shadow: none;
+}
+/* Soft variant — the tinted "this is the current value, click to change it"
+   button (handoff: the unit leader's role toggle). Reads as a state, not as a
+   call to action, which is why it is neither the filled primary nor the plain
+   white secondary. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--soft {
+  background: var(--csv2-area);
+  border-color: var(--csv2-callout-border);
+  color: var(--csv2-primary);
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--soft:hover {
+  background: var(--csv2-area);
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+  box-shadow: none;
+}
+/* Accent variant — a NEUTRAL bordered button whose glyph is the primary colour.
+   The design's "open this / edit this" icon button: it must not read as a call
+   to action (that is `--outline`, blue border and all), only as a live link to
+   another document. Used by every open-sheet button on the Unit sheet. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--accent {
+  background: var(--csv2-bg);
+  border-color: var(--csv2-border);
+  color: var(--csv2-primary);
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--accent:hover {
+  background: var(--csv2-bg);
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+  box-shadow: none;
+}
+/* Quiet variant — a bare text button (the dialog's "Cancel"), which the design
+   deliberately strips of every frame so it cannot compete with the choices. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--quiet {
+  background: none;
+  border-color: transparent;
+  color: var(--csv2-muted);
+  font-size: 12px;
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--quiet:hover {
+  background: none;
+  border-color: transparent;
   color: var(--csv2-text);
   box-shadow: none;
 }
@@ -1197,6 +1288,27 @@
   padding: 7px 14px;
   font-size: 11.5px;
   border-radius: 6px;
+}
+/* One size below `--sm`: the button that lives INSIDE a value row (the Unit's
+   Evolve control), where `--sm` is as tall as the number beside it. Its glyph
+   follows the font-size, so no separate icon rule is needed. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--xs {
+  padding: 3px 9px;
+  font-size: 10px;
+  border-radius: 5px;
+}
+/* Icon-only square button (open sheet, revert an evolution): the same variants
+   above supply the colours; this only tightens the box so a lone glyph is not
+   padded like a labelled button. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--icon {
+  padding: 5px;
+  border-radius: 5px;
+  line-height: 1;
+}
+/* Declared after both so the combination wins whichever order they are written
+   in the markup. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--icon.csv2-btn--xs {
+  padding: 3px 6px;
 }
 
 /* Segmented toggle (e.g. SVG|PNG, Tintura|Padrão|Semy). */
@@ -1398,6 +1510,21 @@
   background: var(--csv2-primary);
   color: var(--csv2-on-primary);
   border-color: var(--csv2-primary);
+}
+/* Band variant (spec 025, handoff "Nível de Treino"): the same single-select
+   group laid out as equal-width option CARDS instead of inline pills — for a
+   short, fixed set of bands where each option deserves the same weight.
+   `--csv2-band-columns` sets how many sit on a row. */
+.cs-v2 .csv2-chip-group--band {
+  display: grid;
+  grid-template-columns: repeat(var(--csv2-band-columns, 4), minmax(0, 1fr));
+  gap: 8px;
+}
+.cs-v2 .csv2-chip-group--band .csv2-chip {
+  justify-content: center;
+  padding: 11px 8px;
+  border-radius: 7px;
+  font-size: 13.5px;
 }
 
 /* ---------- Repeatable-list card internals (T035) ---------- */
@@ -2844,3 +2971,410 @@
   font-style: italic;
 }
 
+
+/* -----------------------------------------------------------------------------
+   Quality reference chip (spec 020, promoted here by spec 025). It was scoped to
+   `.cs-item-v2` while the item sheet was its only consumer; the Unit sheet shows
+   the same chip for its primary type's weapon qualities, so the primitive lives
+   in the shared layer and no window re-declares it (CLAUDE.md, "Design System
+   (v2) — SSOT, NOT per-window"). Only the item sheet's row layout
+   (`margin-right:auto` inside `.cs-qref-row`) stays local to that window.
+   -------------------------------------------------------------------------- */
+:is(.cs-v2, .cs-sheet-v2) .cs-qref-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 5px 11px;
+  border: 1px solid #c7d0e8;
+  border-radius: 5px;
+  background: #dfe5f3;
+  color: var(--csv2-text);
+  font-weight: 600;
+  font-size: 12.5px;
+}
+
+/* Graceful degradation — no item with this slug (world or compendium): amber chip
+   showing the raw slug + a "missing item" tag; the row stays removable. */
+:is(.cs-v2, .cs-sheet-v2) .cs-qref-chip.is-missing {
+  background: #f7f0dd;
+  border: 1px solid #e3d3a0;
+  color: #8a6d1f;
+}
+:is(.cs-v2, .cs-sheet-v2) .cs-qref-slug {
+  font-family: var(--csv2-font-mono);
+}
+:is(.cs-v2, .cs-sheet-v2) .cs-qref-tag {
+  font-family: var(--csv2-font-mono);
+  font-weight: 700;
+  font-size: 8px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #a8894a;
+}
+
+/* -----------------------------------------------------------------------------
+   Quality tag (`cs2-tag`, spec 020, promoted here by spec 025). The small white
+   chip the design uses wherever a WEAPON's qualities are listed: the character
+   sheet's Equipment rows, the Unit sheet's weapon block and the Unit Type's four
+   per-weapon lists. It was scoped to the actor sheet while that was its only
+   consumer; the item sheet needs the same chip, so the primitive lives in the
+   shared layer and no window re-declares it. `.is-missing` is accepted next to
+   `.cs2-tag-missing` so the shared quality-refs partial keeps ONE modifier name.
+   -------------------------------------------------------------------------- */
+:is(.cs-v2, .cs-sheet-v2) .cs2-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+:is(.cs-v2, .cs-sheet-v2) .cs2-tag {
+  background: var(--csv2-bg);
+  border: 1px solid var(--csv2-border);
+  color: var(--csv2-muted-2);
+  font: 500 10px var(--csv2-font-sans);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+/* spec 020 — narrative-reminder quality chip (amber warning). */
+:is(.cs-v2, .cs-sheet-v2) .cs2-tag-reminder {
+  background: #f7f0dd;
+  border-color: #e3d3a0;
+  color: #8a6d1f;
+}
+/* spec 020 — unresolved quality reference (no Quality with this slug in world or
+   compendium): a red "<slug> missing item" chip (mono slug) so the owner sees
+   exactly what to fix; the reference itself is kept, never discarded. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-tag-missing,
+:is(.cs-v2, .cs-sheet-v2) .cs2-tag.is-missing {
+  background: #fbeaea;
+  border-color: #e6b3b3;
+  color: #a23b3b;
+  font-family: var(--csv2-font-mono);
+}
+/* The shared partial's "missing item" tag reads as part of the red chip. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-tag .cs-qref-tag {
+  color: inherit;
+}
+/* Accent variant of the SAME chip — white body, blue hairline, blue label. The
+   design uses it where the chip names something the row GRANTS (a Unit Type's
+   abilities) rather than something it merely has. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-tag--accent {
+  border-color: var(--csv2-callout-border);
+  color: var(--csv2-primary);
+  font: 600 11px var(--csv2-font-sans);
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+/* -----------------------------------------------------------------------------
+   Accent badge (`csv2-badge`, spec 025). The filled blue-tinted pill the design
+   uses for a STATE the sheet derives and the reader cannot type: the Unit's
+   training band in its header, an evolved aspect's level in the equipment card.
+   Distinct from `.cs2-tag` (a white chip naming a thing) and from `.rollable`
+   (a chip that DOES something when clicked) — this one only reports.
+   -------------------------------------------------------------------------- */
+:is(.cs-v2, .cs-sheet-v2) .csv2-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--csv2-area);
+  border: 1px solid var(--csv2-callout-border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font: 600 11px var(--csv2-font-mono);
+  letter-spacing: 0.04em;
+  color: var(--csv2-primary);
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-badge--sm {
+  padding: 2px 6px;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+/* -----------------------------------------------------------------------------
+   Compact variant of the SAME quality-refs partial (spec 025). A Unit Type shows
+   four of these nested INSIDE their weapon block, where a full card — blue
+   header, boxed empty state, footer hint — would drown the field it belongs to.
+   The design turns it into a quiet sub-block: hairline frame, grey eyebrow strip
+   instead of the header, tighter rows and a one-line empty state. Its rows wear
+   the `.cs2-tag` chip above — the same one the character sheet's weapon rows
+   use, which is what the design asks for; the delete button and the parameter
+   control are the shared primitives, unchanged.
+   -------------------------------------------------------------------------- */
+:is(.cs-v2, .cs-sheet-v2) .cs-qref-card--compact {
+  border-color: var(--csv2-border-soft);
+  border-radius: 6px;
+}
+:is(.cs-v2, .cs-sheet-v2) .cs-qref-card--compact .cs-qref-subheader {
+  background: var(--csv2-secondary);
+  padding: 5px 9px;
+  font-family: var(--csv2-font-mono);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--csv2-muted);
+}
+:is(.cs-v2, .cs-sheet-v2) .cs-qref-card--compact .csv2-list-row {
+  padding: 6px 9px;
+  background: none;
+}
+:is(.cs-v2, .cs-sheet-v2) .cs-qref-card--compact .cs-qref-param {
+  flex: 0 0 52px;
+  text-align: center;
+}
+:is(.cs-v2, .cs-sheet-v2) .cs-qref-card--compact .csv2-list-empty {
+  padding: 8px 9px;
+  border-top: 1px solid var(--csv2-border-soft);
+  background: none;
+  font-size: 10.5px;
+  text-align: left;
+}
+
+/* -----------------------------------------------------------------------------
+   Resource allocation line (spec 025, US3). Shown under a House resource whose
+   budget something else consumes — today only Power, spent by the House's Units.
+   Scoped to `.chroniclesystem` (not the `:is(.cs-v2, .cs-sheet-v2)` bridge): the
+   House sheet is still the legacy layout, and that class is where the file
+   already exposes the tokens to EVERY system window. Over-allocation is a visual
+   signal only — nothing consults it, nothing is ever blocked (FR-018/SC-006).
+   -------------------------------------------------------------------------- */
+.chroniclesystem .resource-allocation {
+  margin-top: 2px;
+  color: var(--csv2-muted-2);
+  font-size: 11px;
+}
+
+.chroniclesystem .resource-allocation.over-allocated {
+  color: var(--csv2-danger);
+  font-weight: 600;
+}
+
+/* -----------------------------------------------------------------------------
+   Dialog frame (spec 025) — a `DialogV2` window carrying `csv2-dialog` wears the
+   design's panel instead of Foundry core's: white body, hairline border, dark
+   title bar, and no core spacing on the `.dialog-form` / `.standard-form`
+   wrappers. Without this the frame keeps core's own colours around a v2 body.
+   Footer buttons are NOT restyled here — each dialog passes `class: "csv2-btn
+   csv2-btn--…"` in its button config, so they are the shared button primitive.
+   (The roll dialog predates this and still carries its own copy of the frame
+   under `.cs-roll-dialog-window`; folding it in is a separate, visual step.)
+   -------------------------------------------------------------------------- */
+.csv2-dialog.cs-v2 {
+  padding: 0;
+  border: 1px solid var(--csv2-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--csv2-bg);
+  color: var(--csv2-text);
+  box-shadow: 0 20px 50px rgba(10, 4, 5, 0.35);
+}
+.csv2-dialog.cs-v2::backdrop {
+  background: rgba(10, 4, 5, 0.42);
+}
+.csv2-dialog .window-header {
+  background: var(--csv2-dark);
+  color: var(--csv2-grid-head-text);
+  border-bottom: none;
+  padding: 10px 14px;
+}
+.csv2-dialog .window-title {
+  font-family: var(--csv2-font-sans);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--csv2-grid-head-text);
+}
+.csv2-dialog .window-header button {
+  color: #7f8794;
+}
+.csv2-dialog .window-header button:hover {
+  color: var(--csv2-on-primary);
+}
+.csv2-dialog .window-content {
+  padding: 0;
+  background: var(--csv2-bg);
+}
+.csv2-dialog .dialog-form {
+  gap: 0;
+  padding: 0;
+  background: transparent;
+}
+.csv2-dialog .dialog-content {
+  padding: 16px;
+}
+.csv2-dialog .form-footer {
+  gap: 8px;
+  margin: 0;
+  padding: 0 16px 14px;
+  border-top: none;
+  background: transparent;
+}
+
+/* -----------------------------------------------------------------------------
+   Warfare dialogs (spec 025) — the wildcard-ability picker, the quality
+   destination picker and the character attach picker. Window-local layout for
+   three DialogV2 bodies; the controls themselves (select, button, list row,
+   delete button) are the shared primitives above, unchanged. All three carry
+   `cs-v2`, so they inherit the tokens and the form-control layer.
+   -------------------------------------------------------------------------- */
+.cs-v2 .cs-wildcard-dialog-body,
+.cs-v2 .cs-quality-target-body,
+.cs-v2 .cs-attach-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 320px;
+}
+
+.cs-v2 .cs-wildcard-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cs-v2 .cs-wildcard-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cs-v2 .cs-wildcard-counter {
+  font-family: var(--csv2-font-mono);
+  font-size: 11px;
+  color: var(--csv2-muted-2);
+}
+
+.cs-v2 .cs-wildcard-chosen {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cs-v2 .cs-wildcard-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--csv2-border-soft);
+  border-radius: 4px;
+}
+
+.cs-v2 .cs-wildcard-row > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cs-v2 .cs-wildcard-empty {
+  color: var(--csv2-muted);
+  font-style: italic;
+  font-size: 11px;
+}
+
+/* The attach picker answers in one click too (design "Anexar personagem"): the
+   dropped character is named at the top and the two roles ARE the buttons —
+   filled for Leader, outlined for Attached Hero — each stating what the role
+   means under its label. The radio list this replaced asked the same question
+   in two steps and looked nothing like the design. */
+.cs-v2 .cs-attach-subject {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cs-v2 .cs-attach-avatar {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.cs-v2 .cs-attach-name {
+  font: 700 15px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+}
+
+.cs-v2 .cs-attach-question {
+  font: 400 12px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+
+.cs-v2 .cs-attach-choices {
+  display: flex;
+  gap: 10px;
+}
+
+.cs-v2 .cs-attach-choices .csv2-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 10px;
+  border-radius: 8px;
+}
+
+.cs-v2 .cs-attach-choices .csv2-btn i {
+  font-size: 18px;
+}
+
+.cs-v2 .cs-attach-choice-label {
+  font: 600 13px var(--csv2-font-sans);
+}
+
+.cs-v2 .cs-attach-choice-hint {
+  font: 400 9.5px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  text-wrap: pretty;
+}
+
+/* On the filled choice the hint has to read against the primary, not against
+   the page. */
+.cs-v2 .cs-attach-choices .csv2-btn--primary .cs-attach-choice-hint {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* The quality destination picker answers in one click: the four lists are the
+   buttons, grouped in pairs under their equipment's eyebrow (design "Aplicar
+   qualidade"). Only Cancel remains in the frame's footer, shown as the quiet
+   full-width text button the design asks for. */
+.cs-v2 .cs-quality-target-head {
+  display: flex;
+}
+
+.cs-v2 .cs-quality-target-question {
+  margin: 0;
+  color: var(--csv2-text);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.cs-v2 .cs-quality-target-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cs-v2 .cs-quality-target-choices {
+  display: flex;
+  gap: 8px;
+}
+
+.cs-v2 .cs-quality-target-choices .csv2-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+  padding: 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* In both one-click pickers the only framed actions are the choices, so Cancel
+   spans the footer as the quiet text button — the LOOK comes from the shared
+   `csv2-btn--quiet` variant each dialog asks for; only the width is layout. */
+.cs-quality-target-dialog .form-footer .csv2-btn,
+.cs-attach-dialog .form-footer .csv2-btn {
+  width: 100%;
+  padding: 6px;
+}

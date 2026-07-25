@@ -1,6 +1,15 @@
-import { identityField, normalizeSlugSource } from "../fields.js";
+import {
+  identityField,
+  normalizeSlugSource,
+  qualityRefField,
+  migrateQualityRefs,
+} from "../fields.js";
+import { slugify } from "../../effects/cs-slugify.js";
 
 const fields = foundry.data.fields;
+
+const EQUIPMENT_KEYS = ["startingEquipment", "upgradedEquipment"];
+const WEAPON_QUALITY_KEYS = ["fightingQualities", "marksmanshipQualities"];
 
 export default class UnitTypeData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -30,6 +39,8 @@ export default class UnitTypeData extends foundry.abstract.TypeDataModel {
         }),
         isCloseRange: new fields.BooleanField({ initial: false }),
         isLongRange: new fields.BooleanField({ initial: false }),
+        fightingQualities: qualityRefField().qualities,
+        marksmanshipQualities: qualityRefField().qualities,
       });
 
     return {
@@ -66,9 +77,25 @@ export default class UnitTypeData extends foundry.abstract.TypeDataModel {
         integer: true,
       }),
       allowAnyAbility: new fields.BooleanField({ initial: false }),
-      keyAbilities: new fields.ArrayField(
-        new fields.StringField({ required: true, initial: "" })
+      grantedAbilities: new fields.ArrayField(
+        new fields.SchemaField({
+          slug: new fields.StringField({
+            required: false,
+            blank: true,
+            initial: "",
+          }),
+          name: new fields.StringField({
+            required: false,
+            blank: true,
+            initial: "",
+          }),
+        })
       ),
+      wildcardAbilityCount: new fields.NumberField({
+        required: true,
+        initial: 0,
+        integer: true,
+      }),
       startingEquipment: equipmentField(),
       upgradedEquipment: equipmentField(),
     };
@@ -76,6 +103,52 @@ export default class UnitTypeData extends foundry.abstract.TypeDataModel {
 
   static migrateData(source) {
     normalizeSlugSource(source);
+    delete source.category;
+    migratedGrantedAbilities(source);
+    migratedWildcardCount(source);
+    migratedEquipmentQualities(source);
     return super.migrateData(source);
+  }
+}
+
+function migratedGrantedAbilities(source) {
+  const legacy = Array.isArray(source.keyAbilities) ? source.keyAbilities : [];
+  delete source.keyAbilities;
+  const existing = Array.isArray(source.grantedAbilities)
+    ? source.grantedAbilities
+    : [];
+  const bySlug = new Map();
+  for (const entry of existing) {
+    if (!entry || typeof entry !== "object") continue;
+    const slug = slugify(String(entry.slug ?? "")) || slugify(entry.name ?? "");
+    bySlug.set(slug, {
+      slug,
+      name: typeof entry.name === "string" ? entry.name : "",
+    });
+  }
+  for (const entry of legacy) {
+    if (typeof entry !== "string") continue;
+    const slug = slugify(entry);
+    if (bySlug.has(slug)) continue;
+    bySlug.set(slug, { slug, name: "" });
+  }
+  if (!existing.length && !legacy.length) return;
+  source.grantedAbilities = [...bySlug.values()];
+}
+
+function migratedWildcardCount(source) {
+  if (source.wildcardAbilityCount === undefined) return;
+  const count = Number(source.wildcardAbilityCount);
+  source.wildcardAbilityCount = Number.isFinite(count) ? Math.trunc(count) : 0;
+}
+
+function migratedEquipmentQualities(source) {
+  for (const equipmentKey of EQUIPMENT_KEYS) {
+    const equipment = source[equipmentKey];
+    if (!equipment || typeof equipment !== "object") continue;
+    for (const listKey of WEAPON_QUALITY_KEYS) {
+      if (!Array.isArray(equipment[listKey])) continue;
+      migrateQualityRefs(equipment, listKey);
+    }
   }
 }

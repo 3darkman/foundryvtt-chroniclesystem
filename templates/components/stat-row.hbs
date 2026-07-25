@@ -1,16 +1,29 @@
-{{!-- Shared "value + modifier = total [current]" derived-stat row (spec: character
-      sheet redesign). Single source of markup for Intrigue/Combat Defense,
-      Composure and Health so all four render identically. --}}
+{{!-- Shared derived-stat row: `base (calculated, grey) + modifier (editable,
+      white) = total (grey)` — the design handoff's §1 "cálculo com modificador"
+      pattern, used by every window that shows a derived number (character
+      Defences and Movement, unit Defence/Discipline/Movement/Power Cost).
+
+      `note` carries the REAL formula under the label: the prototype printed the
+      marker `[código: informar fórmula do cálculo]` there precisely so the code
+      would replace it (handoff §1, "Notas de fórmula — AÇÃO DO CÓDIGO").
+
+      A resource with a current value does NOT belong here — it uses
+      resource-row.hbs (`CURRENT / max`), which is what replaced the old trailing
+      blue "current" chip (handoff §4).
+
+      The base and the total carry NO `name`: since v13 a readonly input IS
+      submitted, and a derived value with a name would be written straight back
+      into the document. The one editable field is the owner's adjustment. --}}
 <div class="cs2-stat-row">
-    <span class="cs2-stat-label">{{label}}</span>
+    <div class="cs2-stat-head">
+        <span class="cs2-stat-label">{{label}}</span>
+        {{#if note}}<span class="cs2-stat-note">{{note}}</span>{{/if}}
+    </div>
     <div class="cs2-stat-fields">
-        <input type="text" value="{{value}}" placeholder="Value" readonly="readonly"/>
+        <input type="text" value="{{value}}" title="{{localize 'CS.sheets.generalLabels.base'}}" readonly="readonly"/>
         <span class="cs2-op">+</span>
-        <input name="{{modifierName}}" type="text" value="{{modifierValue}}" placeholder="Modifier" data-dtype="Number"/>
+        <input name="{{modifierName}}" type="text" value="{{modifierValue}}" title="{{localize 'CS.sheets.generalLabels.ownerAdjustment'}}" data-dtype="Number"/>
         <span class="cs2-op">=</span>
         <span class="cs2-total">{{total}}</span>
-        {{#if currentName}}
-        <input class="cs2-current" name="{{currentName}}" type="text" value="{{current}}" placeholder="Current" data-dtype="Number" title="current"/>
-        {{/if}}
     </div>
 </div>

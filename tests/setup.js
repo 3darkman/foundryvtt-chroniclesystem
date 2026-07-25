@@ -39,9 +39,17 @@ globalThis.window = globalThis;
 // `_onCreate` exists on the real core Actor/Item; both CS subclasses call `super`.
 globalThis.Actor = class {
   _onCreate() {}
+  // spec 025: CSActor overrides this and calls `super` first; the descendant
+  // hooks exist on the real core Actor.
+  _onDeleteDescendantDocuments() {}
 };
 globalThis.Item = class {
   _onCreate() {}
+  // CSItem overrides this and falls back to `super` for a typeless item; core's
+  // BaseItem answers with its own DEFAULT_ICON.
+  static getDefaultArtwork() {
+    return { img: "icons/svg/item-bag.svg" };
+  }
 };
 
 // Data models: `const fields = foundry.data.fields` (top-level) and
@@ -84,6 +92,7 @@ globalThis.foundry = {
 // CONST globals some sheet modules read at eval/prepare time.
 globalThis.CONST = globalThis.CONST ?? {
   DEFAULT_TOKEN: "icons/svg/mystery-man.svg",
+  BASE_DOCUMENT_TYPE: "base",
 };
 
 // --- Runtime globals (exercised by the pure-logic paths under test) ---

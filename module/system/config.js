@@ -13,6 +13,7 @@ import registerSystemSettings from "./settings.js";
 import { CSCharacterActorSheet } from "../actors/sheets/csCharacterActorSheet.js";
 import { CSPublicCharacterSheet } from "../actors/sheets/csPublicCharacterSheet.js";
 import { CSHouseActorSheet } from "../actors/sheets/csHouseActorSheet.js";
+import { CSUnitActorSheet } from "../actors/sheets/csUnitActorSheet.js";
 import SystemUtils from "../utils/systemUtils.js";
 import LOGGER from "../utils/logger.js";
 import { CSItem } from "../items/csItem.js";
@@ -145,9 +146,11 @@ Hooks.once("init", async function () {
       makeDefault: true,
     }
   );
+  // spec 025: the Unit gets its own sheet (it stood on the character sheet as a
+  // placeholder until the Warfare layout handoff landed).
   foundry.documents.collections.Actors.registerSheet(
     "chroniclesystem",
-    CSCharacterActorSheet,
+    CSUnitActorSheet,
     {
       label: SystemUtils.localize("CS.sheets.unitSheet"),
       types: ["unit"],
@@ -159,9 +162,9 @@ Hooks.once("init", async function () {
     "core",
     foundry.appv1.sheets.ItemSheet
   );
-  // spec 019: one unified sheet for all 10 handoff types (the 4 per-type subclasses
-  // are folded into CSItemSheet). `unitType` is intentionally omitted (out of scope,
-  // FR-018 — its latent open-crash is deferred to the Warfare epic).
+  // spec 019: one unified sheet for all handoff types (the 4 per-type subclasses
+  // are folded into CSItemSheet). spec 025 adds `unitType` — the Warfare epic the
+  // spec 019 deferral pointed at.
   foundry.documents.collections.Items.registerSheet(
     "chroniclesystem",
     CSItemSheet,
@@ -180,6 +183,7 @@ Hooks.once("init", async function () {
         "technique",
         "quality",
         "specialty",
+        "unitType",
       ],
       makeDefault: true,
     }
@@ -327,11 +331,10 @@ Hooks.on("deleteCombat", async (combat) => {
   }
 });
 
-Hooks.on("createItem", (item) => {
-  if (!item.isEmbedded) {
-    item.img = `systems/chroniclesystem/assets/icons/${item.type}.png`;
-  }
-});
+/* The per-type item icon used to be assigned here, in a `createItem` hook. It
+   now lives where core asks for it — `CSItem.getDefaultArtwork` — so it is part
+   of the created source (saved), applies only when no image was supplied, and
+   is the same answer the sidebar and the sheet's image control already read. */
 
 /* -------------------------------------------- */
 /*  spec 023 (FR-014f) — the passive picker's   */

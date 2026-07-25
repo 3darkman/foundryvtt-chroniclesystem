@@ -1,0 +1,103 @@
+{{!-- spec 025 (US2/US3) — Comando, rebuilt against the layout handoff.
+
+      NO visible drop zones (handoff §11): dropping a character anywhere on the
+      sheet opens the attach dialog, and the House is a single slot resolved by
+      actor type. Empty states are neutral text — a Unit with no leader, no
+      heroes or no House is in a VALID state, not a pending task. Every link
+      resolves live from a stored uuid, so a rename shows immediately and a
+      deleted actor simply stops resolving. --}}
+<div class="tab unit-command-tab" data-group="primary" data-tab="command">
+    <div class="cs2-section-title">
+        <span class="cs2-rail"></span>
+        <span>{{localize "CS.sheets.unit.links"}}</span>
+    </div>
+
+    <div class="cs2-columns">
+        <div class="cs2-card">
+            <div class="cs2-card-header">{{localize "CS.sheets.unit.leader"}}</div>
+            {{#if leader}}
+            <div class="cs-unit-command-slot">
+                <img src="{{leader.img}}" alt="{{leader.name}}" />
+                <div class="cs-unit-command-text">
+                    <span class="cs-unit-command-name">{{leader.name}}</span>
+                    <button type="button" class="csv2-btn csv2-btn--soft csv2-btn--sm cs-unit-role-toggle"
+                            data-action="setLeaderRole" data-role="{{leader.nextRole}}"
+                            data-tooltip="{{localize 'CS.sheets.unit.leaderRoleHint'}}">
+                        {{localize leader.roleLabel}}<i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <button type="button" class="csv2-btn csv2-btn--accent csv2-btn--icon"
+                        data-action="openLinkedActor" data-uuid="{{leader.uuid}}"
+                        data-tooltip="{{localize 'CS.sheets.unit.openSheet'}}">
+                    <i class="far fa-user"></i>
+                </button>
+                <button type="button" class="csv2-list-del-btn" data-action="clearLeader"
+                        data-tooltip="{{localize 'CS.sheets.unit.clearLeader'}}">
+                    <i class="fa-regular fa-trash-can"></i>
+                </button>
+            </div>
+            {{else}}
+            <div class="cs-unit-empty-block">
+                <div class="cs-unit-empty-title">{{localize "CS.sheets.unit.noLeader"}}</div>
+                <div class="cs-unit-empty-hint">{{localize "CS.sheets.unit.noLeaderHint"}}</div>
+            </div>
+            {{/if}}
+        </div>
+
+        <div class="cs2-card">
+            <div class="cs2-card-header">{{localize "CS.sheets.unit.house"}}</div>
+            {{#if house}}
+            <div class="cs-unit-command-slot">
+                <img src="{{house.img}}" alt="{{house.name}}" />
+                <div class="cs-unit-command-text">
+                    <span class="cs-unit-command-name">{{house.name}}</span>
+                    <span class="cs-unit-command-sub">{{localize "CS.sheets.unit.houseNote"}}</span>
+                </div>
+                <button type="button" class="csv2-btn csv2-btn--accent csv2-btn--icon"
+                        data-action="openLinkedActor" data-uuid="{{house.uuid}}"
+                        data-tooltip="{{localize 'CS.sheets.unit.openSheet'}}">
+                    <i class="far fa-pen-to-square"></i>
+                </button>
+                <button type="button" class="csv2-list-del-btn" data-action="clearHouse"
+                        data-tooltip="{{localize 'CS.sheets.unit.clearHouse'}}">
+                    <i class="fa-regular fa-trash-can"></i>
+                </button>
+            </div>
+            {{else}}
+            <div class="cs-unit-empty-block">
+                <div class="cs-unit-empty-title">{{localize "CS.sheets.unit.noHouse"}}</div>
+                <div class="cs-unit-empty-hint">{{localize "CS.sheets.unit.noHouseHint"}}</div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="cs2-card">
+        <div class="cs2-card-header">
+            <span>{{localize "CS.sheets.unit.attachedHeroes"}}</span>
+            <span class="cs2-count">{{attachedHeroes.length}}</span>
+        </div>
+        {{#each attachedHeroes as |hero|}}
+        <div class="cs-unit-command-slot is-hero">
+            <img src="{{hero.img}}" alt="{{hero.name}}" />
+            <div class="cs-unit-command-text">
+                <span class="cs-unit-command-name">{{hero.name}}</span>
+            </div>
+            <button type="button" class="csv2-btn csv2-btn--accent csv2-btn--icon"
+                    data-action="openLinkedActor" data-uuid="{{hero.uuid}}"
+                    data-tooltip="{{localize 'CS.sheets.unit.openSheet'}}">
+                <i class="far fa-user"></i>
+            </button>
+            <button type="button" class="csv2-list-del-btn" data-action="removeHero" data-uuid="{{hero.uuid}}"
+                    data-tooltip="{{localize 'CS.sheets.unit.removeHero'}}">
+                <i class="fa-regular fa-trash-can"></i>
+            </button>
+        </div>
+        {{else}}
+        <div class="cs-unit-empty-block">
+            <div class="cs-unit-empty-title">{{localize "CS.sheets.unit.noHeroes"}}</div>
+            <div class="cs-unit-empty-hint">{{localize "CS.sheets.unit.noHeroesHint"}}</div>
+        </div>
+        {{/each}}
+    </div>
+</div>

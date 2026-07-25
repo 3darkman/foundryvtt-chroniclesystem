@@ -196,6 +196,27 @@
         "save": "Save",
         "cancel": "Cancel",
         "confirm": "Confirm"
+      },
+      "wildcardAbilities": {
+        "title": "Choose Wildcard Abilities",
+        "hint": "This Unit Type lets you pick its wildcard abilities. Each one is granted at rank 2.",
+        "add": "Add",
+        "counter": "{chosen} of {count} chosen",
+        "empty": "Nothing chosen yet."
+      },
+      "qualityTarget": {
+        "title": "Apply Quality",
+        "question": "Which weapon does this quality apply to?",
+        "fighting": "Fighting",
+        "marksmanship": "Marksmanship"
+      },
+      "attachCharacter": {
+        "title": "Attach {name} to the Unit",
+        "hint": "How does this character join this unit?",
+        "leader": "Leader",
+        "leaderHint": "Commands the unit",
+        "hero": "Attached Hero",
+        "heroHint": "Serves in the ranks"
       }
     },
     "messages": {
@@ -476,6 +497,7 @@
         "empty": "No qualities yet",
         "emptyHint": "Drag a Quality onto this sheet to add it.",
         "dragHint": "Drag a Quality from the Chronicle Qualities compendium onto this sheet.",
+        "dragHere": "Drag a quality here.",
         "missing": "MISSING DEFINITION",
         "missingItem": "missing item"
       },
@@ -622,7 +644,22 @@
         "details": "Details",
         "name": "Name",
         "total": "Total",
-        "others": "Others"
+        "others": "Others",
+        "current": "Current",
+        "max": "Calculated maximum",
+        "base": "Calculated base",
+        "ownerAdjustment": "Owner adjustment"
+      },
+      "formulas": {
+        "combatDefense": "Awareness + Agility + Athletics",
+        "combatDefenseAsoiaf": "Awareness + Agility + Athletics + armor penalty",
+        "intrigueDefense": "Awareness + Cunning + Status",
+        "health": "Endurance × 3",
+        "composure": "Will × 3",
+        "characterMovement": "Base + Athletics (Run) ÷ 2 − Bulk ÷ 2",
+        "unitMovement": "40 − 10 per Bulk point",
+        "unitDiscipline": "Training level + every assigned Unit Type",
+        "unitPowerCost": "Training level + every assigned Unit Type"
       },
       "house": {
         "character": {
@@ -659,7 +696,9 @@
           "wealth": "Wealth",
           "title": "Resources",
           "invested": "Invested",
-          "cost": "Cost"
+          "cost": "Cost",
+          "unitsAllocated": "Units",
+          "remaining": "Remaining"
         },
         "labels": {
           "members": "Members",
@@ -809,6 +848,128 @@
           "alignment": "Alignment",
           "unleashing": "Unleashing"
         }
+      },
+      "unitSheet": "Unit Sheet",
+      "unit": {
+        "tabs": {
+          "overview": "Overview",
+          "composition": "Composition",
+          "command": "Command",
+          "description": "Description"
+        },
+        "configureToken": "Configure Token",
+        "training": "Training",
+        "trainingLevel": "Training Level",
+        "trainingLevels": {
+          "green": "Green",
+          "trained": "Trained",
+          "veteran": "Veteran",
+          "elite": "Elite"
+        },
+        "house": "House",
+        "noHouse": "No House",
+        "statistics": "Statistics",
+        "calculatedValues": "Calculated Values",
+        "health": "Health",
+        "healthStates": {
+          "unhurt": "Unhurt",
+          "wounded": "Wounded",
+          "broken": "Broken"
+        },
+        "combatDefense": "Combat Defense",
+        "discipline": "Discipline",
+        "movement": "Movement",
+        "powerCost": "Power Cost",
+        "equipment": "Equipment",
+        "primaryTypeLabel": "primary type",
+        "noEquipment": "No equipment",
+        "noEquipmentHint": "Set a primary type (Composition tab) to see and evolve armor and damage.",
+        "armor": "Armor",
+        "fightingDamage": "Fighting Damage",
+        "marksmanshipDamage": "Marksmanship Damage",
+        "noFightingDamage": "no fighting damage",
+        "noMarksmanshipDamage": "no marksmanship damage",
+        "typesInUnit": "Types in the Unit",
+        "evolve": "Evolve",
+        "evolveHint": "Evolve this equipment: it switches to the primary type's Equipment Upgrades.",
+        "evolveRevert": "Revert this evolution",
+        "evolveLevel": "Lv 1",
+        "evolveSource": "Equipment evolution is defined by the primary type ({name}).",
+        "unitTypes": "Unit Types",
+        "noUnitTypes": "No unit type",
+        "noUnitTypesHint": "Without a type the unit has no equipment — Health, Defense, Discipline and Cost stay calculated. Drag a Unit Type item here.",
+        "setPrimaryType": "Make this the primary type",
+        "isPrimaryType": "Primary type — defines equipment and Movement",
+        "primaryBadge": "Primary",
+        "secondaryBadge": "Secondary",
+        "primaryLegend": "Primary — defines Defense and Movement",
+        "secondaryLegend": "Secondary — click the star to promote",
+        "typeCost": "Cost",
+        "typeGrants": "Grants",
+        "typeGrantsNothing": "Grants no abilities",
+        "openTypeSheet": "Open the type sheet",
+        "removeType": "Remove from the unit",
+        "abilities": "Abilities",
+        "abilityTest": "Test",
+        "abilityName": "Ability",
+        "abilityRank": "Rank",
+        "abilityPassive": "Passive",
+        "abilityPassiveHint": "Passive value — the static equivalent of the test",
+        "abilityRankHint": "Adjustable rank",
+        "noAbilities": "No adjusted ability",
+        "noAbilitiesHint": "The unit already tests everything at the default rank 2. Drag an Ability here to adjust a rank.",
+        "defaultRankNote": "Abilities not listed use the default rank 2 automatically.",
+        "experience": "Experience",
+        "xpSpent": "spent",
+        "xpTotal": "total",
+        "xpFree": "free",
+        "xpNote": "Total comes from the Training Level; spent on evolving the abilities.",
+        "description": "Description",
+        "identity": "Identity & Description",
+        "links": "Links",
+        "leader": "Leader",
+        "leaderRoles": {
+          "commander": "Commander",
+          "subcommander": "Sub-commander"
+        },
+        "leaderRoleHint": "Switch the leader's role",
+        "noLeader": "No leader",
+        "noLeaderHint": "A valid state. Drag a character here to set one.",
+        "clearLeader": "Unlink leader",
+        "attachedHeroes": "Attached Heroes",
+        "noHeroes": "No attached hero",
+        "noHeroesHint": "A common state. Drag a character to attach it to the ranks.",
+        "removeHero": "Detach hero",
+        "openSheet": "Open sheet",
+        "houseNote": "The Power cost is counted on the House sheet.",
+        "noHouseHint": "A valid state — not a pending task. Drag a House to link it.",
+        "clearHouse": "Unlink House",
+        "warnings": {
+          "alreadyHero": "That character is already an attached hero of this unit — a character cannot be both.",
+          "alreadyLeader": "That character already leads this unit — a character cannot be both."
+        }
+      },
+      "unitTypeItem": {
+        "parameters": "Parameters",
+        "powerCost": "Power Cost",
+        "disciplineModifier": "Discipline Modifier",
+        "grantedAbilities": "Granted Abilities",
+        "grantedEmpty": "No granted abilities.",
+        "grantedDragHint": "Drag Abilities here — they are granted to the unit when this type is added to it.",
+        "startingEquipment": "Starting Equipment",
+        "upgradedEquipment": "Equipment Upgrades",
+        "fightingDamage": "Fighting Damage",
+        "marksmanshipDamage": "Marksmanship Damage",
+        "fightingQualities": "Fighting Qualities",
+        "marksmanshipQualities": "Marksmanship Qualities",
+        "wildcardAbilities": "Wildcard Abilities",
+        "wildcardCount": "Quantity",
+        "wildcardNote": "Not chosen here. When this type is added to a unit, a dialog asks which wildcard abilities it grants.",
+        "armor": "Armor",
+        "ar": "AR",
+        "penalty": "Pen.",
+        "bulk": "Bulk",
+        "qualities": "Qualities"
       }
     },
     "constants": {

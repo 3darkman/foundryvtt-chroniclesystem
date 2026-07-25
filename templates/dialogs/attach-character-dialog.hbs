@@ -1,0 +1,29 @@
+{{!-- spec 025 (handoff "Anexar personagem") — the dropped character is named at
+      the top, and the two roles ARE the buttons: one click answers, there is no
+      confirm step. Each choice states what the role means, because "Leader" and
+      "Attached Hero" alone do not say which one commands.
+
+      The buttons live in the CONTENT (not in the frame's footer) so they can
+      carry an icon, a label and a caption; the sheet binds them in the dialog's
+      `render` hook — the same pattern the quality picker uses. --}}
+<div class="cs-attach-dialog-body">
+    <div class="cs-attach-subject">
+        <img class="cs-attach-avatar" src="{{img}}" alt="{{name}}" />
+        <div>
+            <div class="cs-attach-name">{{name}}</div>
+            <div class="cs-attach-question">{{localize "CS.dialogs.attachCharacter.hint"}}</div>
+        </div>
+    </div>
+    <div class="cs-attach-choices">
+        <button type="button" class="csv2-btn csv2-btn--primary" data-role="leader">
+            <i class="fas fa-star"></i>
+            <span class="cs-attach-choice-label">{{localize "CS.dialogs.attachCharacter.leader"}}</span>
+            <span class="cs-attach-choice-hint">{{localize "CS.dialogs.attachCharacter.leaderHint"}}</span>
+        </button>
+        <button type="button" class="csv2-btn csv2-btn--outline" data-role="hero">
+            <i class="far fa-user"></i>
+            <span class="cs-attach-choice-label">{{localize "CS.dialogs.attachCharacter.hero"}}</span>
+            <span class="cs-attach-choice-hint">{{localize "CS.dialogs.attachCharacter.heroHint"}}</span>
+        </button>
+    </div>
+</div>

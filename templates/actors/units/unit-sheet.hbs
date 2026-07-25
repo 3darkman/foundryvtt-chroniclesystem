@@ -1,0 +1,40 @@
+<div class="{{cssClass}} cs-sheet-v2 cs-unit-v2" autocomplete="off">
+    <header class="sheet-header">
+        <div class="header-fields">
+            <img class="cs2-avatar" src="{{tokenImg}}" alt="{{actor.name}}" data-action="configurePrototypeToken" title="{{localize 'CS.sheets.unit.configureToken'}}"/>
+            <div class="cs2-header-text">
+                <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="{{localize 'CS.sheets.item.fields.name'}}"/></h1>
+                <div class="cs2-header-meta">
+                    <span class="cs2-header-meta-item">
+                        <span class="cs2-header-meta-label">{{localize "CS.sheets.unit.training"}}</span>
+                        <span class="csv2-badge">{{localize trainingLabel}}</span>
+                    </span>
+                    <span class="cs2-header-meta-item">
+                        <span class="cs2-header-meta-label">{{localize "CS.sheets.unit.house"}}</span>
+                        {{#if house}}<span class="cs2-header-meta-value">{{house.name}}</span>{{else}}<span class="cs2-header-meta-value cs-unit-empty">{{localize "CS.sheets.unit.noHouse"}}</span>{{/if}}
+                    </span>
+                    <span class="cs2-header-meta-item">
+                        <span class="cs2-header-meta-label">{{localize "CS.sheets.unit.powerCost"}}</span>
+                        <span class="cs2-header-meta-value cs2-header-meta-accent">{{powerCost.total}}</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="sheet-tabs flexrow tabs" data-group="primary">
+        <a class="item" data-tab="overview" data-group="primary" data-action="tab">{{localize "CS.sheets.unit.tabs.overview"}}</a>
+        <a class="item" data-tab="composition" data-group="primary" data-action="tab">{{localize "CS.sheets.unit.tabs.composition"}}</a>
+        <a class="item" data-tab="command" data-group="primary" data-action="tab">{{localize "CS.sheets.unit.tabs.command"}}</a>
+        <a class="item" data-tab="description" data-group="primary" data-action="tab">{{localize "CS.sheets.unit.tabs.description"}}</a>
+        <a class="item" data-tab="effects" data-group="primary" data-action="tab">{{localize "CS.effects.tab"}}</a>
+    </nav>
+
+    <section class="sheet-body">
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/unit-overview-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/unit-composition-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/unit-command-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/actors/partials/tabs/unit-description-tab.hbs"}}
+        {{> "systems/chroniclesystem/templates/components/effects-tab.hbs"}}
+    </section>
+</div>

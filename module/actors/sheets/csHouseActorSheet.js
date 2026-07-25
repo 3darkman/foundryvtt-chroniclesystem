@@ -68,6 +68,20 @@ export class CSHouseActorSheet extends CSActorSheet {
 
     this.prepareFortuneData(house, context);
 
+    // spec 025 (US3, contract house-power-allocation.md C2) — the Power its Units
+    // consume. Written on the RENDER CONTEXT only, never back onto
+    // `actor.system.power`: a sheet must not mutate the document's system data.
+    const { allocated, units } = actor.getUnitsPowerAllocated();
+    const powerTotal = Number(house.power?.total) || 0;
+    context.house = {
+      power: {
+        allocated,
+        remaining: powerTotal - allocated,
+        overAllocated: allocated > powerTotal,
+        hasUnits: units.length > 0,
+      },
+    };
+
     // Pre-enrich HTML descriptions for events and holdings (FR-015)
     const rollData = this.document.getRollData();
     for (const event of house.historicalEvents) {

@@ -26,6 +26,27 @@ function applyDamageOperator(base, operator, operand) {
 }
 
 /**
+ * spec 025 (contract unit-derivation.md C9) — the ONE parser for the
+ * `@Ability` damage grammar (an optional operator plus a number), extracted from
+ * `updateDamageValue` so the
+ * Unit's equipment damage total and the weapon item's own total read the same
+ * formula the same way (constitution §III). Returns `null` when the string
+ * carries no `@Ability` token at all, which is how `updateDamageValue` keeps its
+ * legacy "leave the previous value untouched" behaviour.
+ * @param {object} actor  resolves the `@Ability` token by stable slug (spec 008)
+ * @param {string} formulaStr
+ * @returns {number|null}
+ */
+export function damageTotalFromFormula(actor, formulaStr) {
+  const matches = String(formulaStr ?? "").match(
+    "@([a-zsA-Z]*)([-+/*]*)([0-9]*)"
+  );
+  if (!matches || matches.length !== 4) return null;
+  const ability = actor?.getAbilityValueBySlug?.(slugify(matches[1])) ?? 0;
+  return applyDamageOperator(ability, matches[2], matches[3]);
+}
+
+/**
  * The single registered Item document class (spec 016). Every item `type`
  * (`armor`, `weapon`, `ability`, `equipment`, `benefit`, `drawback`, `event`,
  * `holding`, `technique`, `unitType`, `poison`) instantiates as `CSItem`; the
@@ -43,6 +64,34 @@ export class CSItem extends Item {
   /* ---------------------------------------------- */
   /*  Shared / base                                 */
   /* ---------------------------------------------- */
+
+  /**
+   * @override — the per-type icon under `assets/icons/<type>.png`, named after
+   * the type KEY exactly (so `unitType.png`, not "unit type.png").
+   *
+   * This is core's own extension point, not a hook: `img` is a FilePathField
+   * whose `initial` calls `CONFIG.Item.documentClass.getDefaultArtwork(data)`
+   * (common/documents/item.mjs:48-51). Three things follow, and all three are
+   * why the `createItem` hook this replaced could not work:
+   *  - the icon lands in `_source`, so it is SAVED — the hook assigned
+   *    `item.img` after creation, which only overwrites the initialized
+   *    property and is lost the next time the document is initialized;
+   *  - it applies ONLY when no image was supplied, so importing or duplicating
+   *    an item keeps its own art — the hook clobbered it unconditionally;
+   *  - the sidebar directory and the sheet's "reset image" control read the
+   *    same method, so all three agree on what this item should look like.
+   *
+   * Anything without a real type (core asks with the generic `base` in a few
+   * places) keeps core's own default icon.
+   * @param {object} itemData the source data being created
+   * @returns {{img: string}}
+   */
+  static getDefaultArtwork(itemData) {
+    const type = itemData?.type;
+    if (!type || type === CONST.BASE_DOCUMENT_TYPE)
+      return super.getDefaultArtwork(itemData);
+    return { img: `systems/chroniclesystem/assets/icons/${type}.png` };
+  }
 
   getCSData() {
     return this.system;
@@ -107,32 +156,28 @@ export class CSItem extends Item {
    * Effects for this weapon's type (Wave 4).
    */
   updateDamageValue(actor) {
-    let matches = this.getCSData().damage.match(
-      "@([a-zsA-Z]*)([-+/*]*)([0-9]*)"
-    );
-    if (matches && matches.length === 4) {
-      // Resolve the `@Ability` token by stable slug (spec 008) so the damage
-      // formula survives a rename to any language.
-      let ability = actor.getAbilityValueBySlug(slugify(matches[1]));
-      this.damageValue = applyDamageOperator(ability, matches[2], matches[3]);
-      // Adaptable: +1 damage when wielded two-handed. Resolve the referenced
-      // quality's definition by slug (spec 020, FR-022 SSOT — was a name match) and
-      // read the SAME `equipped` wielding state the hand-slot logic uses.
-      if (
-        weaponWieldingFlags(this).adaptable &&
-        this.getCSData().equipped ===
-          ChronicleSystem.equippedConstants.BOTH_HANDS
-      ) {
-        this.damageValue += 1;
-      }
-      // Wave 4: authored `damage` effects targeting this weapon's type (its
-      // combat specialty) or all weapons. Optional-chained so the unit tests'
-      // bare actor double (no getWeaponDamageBonus) simply contributes 0.
-      this.damageValue +=
-        actor.getWeaponDamageBonus?.(
-          weaponTypeSlug(this.getCSData().specialty)
-        ) ?? 0;
+    // spec 025 — the `@Ability±n` parse lives in `damageTotalFromFormula` now
+    // (one home, shared with the Unit's equipment damage). `null` = no token,
+    // which keeps the legacy "leave damageValue untouched" behaviour.
+    const base = damageTotalFromFormula(actor, this.getCSData().damage);
+    if (base === null) return;
+    this.damageValue = base;
+    // Adaptable: +1 damage when wielded two-handed. Resolve the referenced
+    // quality's definition by slug (spec 020, FR-022 SSOT — was a name match) and
+    // read the SAME `equipped` wielding state the hand-slot logic uses.
+    if (
+      weaponWieldingFlags(this).adaptable &&
+      this.getCSData().equipped === ChronicleSystem.equippedConstants.BOTH_HANDS
+    ) {
+      this.damageValue += 1;
     }
+    // Wave 4: authored `damage` effects targeting this weapon's type (its
+    // combat specialty) or all weapons. Optional-chained so the unit tests'
+    // bare actor double (no getWeaponDamageBonus) simply contributes 0.
+    this.damageValue +=
+      actor.getWeaponDamageBonus?.(
+        weaponTypeSlug(this.getCSData().specialty)
+      ) ?? 0;
   }
 
   /* ---------------------------------------------- */

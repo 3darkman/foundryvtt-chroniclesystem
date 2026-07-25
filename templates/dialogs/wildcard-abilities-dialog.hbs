@@ -1,0 +1,16 @@
+<div class="cs-wildcard-dialog-body">
+    <p class="csv2-help">{{localize "CS.dialogs.wildcardAbilities.hint"}}</p>
+    <div class="cs-wildcard-picker">
+        <select class="cs-wildcard-select">
+            {{#each options as |option|}}
+            <option value="{{option.slug}}">{{option.label}}</option>
+            {{/each}}
+        </select>
+        <button type="button" class="csv2-btn csv2-btn--secondary cs-wildcard-add">
+            <i class="fas fa-plus"></i> {{localize "CS.dialogs.wildcardAbilities.add"}}
+        </button>
+    </div>
+    <div class="cs-wildcard-counter" data-count="0">{{counterLabel}}</div>
+    <ol class="cs-wildcard-chosen"></ol>
+    <div class="cs-wildcard-empty">{{localize "CS.dialogs.wildcardAbilities.empty"}}</div>
+</div>

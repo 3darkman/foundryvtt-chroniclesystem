@@ -9,5 +9,15 @@
     </div>
     <div class="resource-description size150">
         {{description}}
+        {{!-- spec 025 (US3, FR-017) — the optional Unit allocation line. Only the
+              Power row passes these; every other resource renders exactly as
+              before. Guarded on `hasUnits`, NOT on `allocated`: Handlebars treats
+              0 as falsy, and a House whose Units happen to total 0 Power must
+              still show the line — only "no linked Unit at all" suppresses it. --}}
+        {{#if hasUnits}}
+        <div class="resource-allocation{{#if overAllocated}} over-allocated{{/if}}">
+            {{localize "CS.sheets.house.resources.unitsAllocated"}}: {{allocated}} · {{localize "CS.sheets.house.resources.remaining"}}: {{remaining}}
+        </div>
+        {{/if}}
     </div>
 </div>

@@ -108,6 +108,10 @@
                         resourceNameKeyword="CS.sheets.house.resources.power"
                         startingValue=actor.system.power.total
                         description=actor.system.power.description
+                        hasUnits=house.power.hasUnits
+                        allocated=house.power.allocated
+                        remaining=house.power.remaining
+                        overAllocated=house.power.overAllocated
                 }}
                 {{> (houseResourceItem)
                         owner=owner

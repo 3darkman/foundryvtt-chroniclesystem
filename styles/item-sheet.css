@@ -331,39 +331,15 @@
   align-items: center;
   gap: 8px;
 }
-.cs-item-v2 .cs-qref-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
+/* The chip primitives themselves moved to cs-components.css (spec 025) so the
+   Unit sheet renders the SAME chips — only the row-layout rule stays
+   window-local. Two chips can fill the slot: the picker's `.cs-qref-chip` and,
+   in the Unit Type's compact lists, the weapon-quality `.cs2-tag`. */
+.cs-item-v2 .cs-qref-row > :is(.cs-qref-chip, .cs2-tag) {
   margin-right: auto; /* push parameter + delete to the right edge */
-  padding: 3px 10px;
-  border-radius: 20px;
-  background: #dfe5f3;
-  color: var(--csv2-text);
-  font-weight: 600;
-  font-size: 12px;
 }
 .cs-item-v2 .cs-qref-param {
   flex: 0 0 96px;
-}
-/* Graceful degradation — no item with this slug (world or compendium): amber chip
-   showing the raw slug + a "missing item" tag; the row stays removable. */
-.cs-item-v2 .cs-qref-chip.is-missing {
-  background: #f7f0dd;
-  border: 1px solid #e3d3a0;
-  color: #8a6d1f;
-}
-.cs-item-v2 .cs-qref-slug {
-  font-family: var(--csv2-font-mono);
-}
-.cs-item-v2 .cs-qref-tag {
-  font-family: var(--csv2-font-mono);
-  font-weight: 700;
-  font-size: 8px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #a8894a;
 }
 .cs-item-v2 .cs-qref-empty {
   display: flex;
@@ -380,4 +356,103 @@
   font-size: 10px;
   font-style: italic;
   opacity: 0.6;
+}
+
+/* --------------------------------------------------- Unit Type (spec 025) ---
+   Window-local layout only, matching the handoff prototype: a parameters row,
+   two side-by-side ability cards and the two equipment columns. Every primitive
+   (card, list row, chip, label, delete button) is shared. */
+.cs-item-v2 .cs-ut-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.cs-item-v2 .cs-ut-params {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 10px 12px;
+}
+
+.cs-item-v2 .cs-ut-param {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cs-item-v2 .cs-ut-param input {
+  width: 80px;
+  text-align: center;
+}
+
+.cs-item-v2 .cs-ut-hint {
+  padding: 9px 12px 5px;
+  font-style: italic;
+}
+
+.cs-item-v2 .csv2-list-row.cs-ut-granted-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cs-item-v2 .cs-ut-granted-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.cs-item-v2 .cs-ut-wildcard-body {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px 12px;
+}
+
+/* Label and control share ONE line (design: QUANTIDADE ······ [ 1 ]). */
+.cs-item-v2 .cs-ut-inline-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cs-item-v2 .cs-ut-inline-field input {
+  flex: 0 0 64px;
+  width: 64px;
+  text-align: center;
+}
+
+.cs-item-v2 .cs-ut-equip-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cs-item-v2 .cs-ut-armor,
+.cs-item-v2 .cs-ut-weapon {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+.cs-item-v2 .cs-ut-armor-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cs-item-v2 .cs-ut-armor-fields input {
+  width: 100%;
+}
+
+/* The nested QUALIDADES list is a sub-block of its weapon, not a top-level card
+   — the look itself is the shared `cs-qref-card--compact` variant. */
+.cs-item-v2 .cs-ut-weapon .cs-qref-card {
+  margin: 2px 0 0;
 }

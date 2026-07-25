@@ -19,6 +19,11 @@ import {
   decodeTriggerCompound,
   TRIGGER_COMPOUND_DEGREES_PREFIX,
 } from "../../combat/cs-quality-triggers.js";
+import { pickQualityTarget } from "../../dialogs/cs-quality-target-dialog.js";
+import {
+  qualityDefinitionResolver,
+  qualityRefRows,
+} from "../cs-quality-ref-rows.js";
 
 // The 7 House resources, in handoff order — the Evento "Recursos da Casa" table
 // rows and the Propriedade Resource select choices (spec 019, D6).
@@ -390,6 +395,11 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
     if (item.type === "weapon" || item.type === "armor") {
       await this._prepareQualityReferences(context, item, system);
     }
+    // spec 025 — the Unit Type's own System tab (four quality lists, granted
+    // abilities, the edition-gated category).
+    if (item.type === "unitType") {
+      await this._prepareUnitTypeContext(context, item, system);
+    }
     context.artColumns = [
       {
         key: "name",
@@ -531,75 +541,45 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
    * stays removable; the reference is NEVER discarded (FR-012).
    */
   async _prepareQualityReferences(context, item, system) {
-    const refs = Array.isArray(system?.qualities) ? system.qualities : [];
+    const resolve = await qualityDefinitionResolver();
+    context.qualityRefs = qualityRefRows(
+      system?.qualities,
+      resolve,
+      "system.qualities"
+    );
+  }
 
-    // Compendium fallback: slug → {name, parameter} from each Item pack's index
-    // (world items are resolved directly via qualityBySlug, below).
-    const packDefs = new Map();
-    for (const pack of game.packs ?? []) {
-      if (pack.metadata?.type !== "Item") continue;
-      let index;
-      try {
-        index = await pack.getIndex({
-          fields: [
-            "system.slug",
-            "system.description",
-            "system.parameter.kind",
-            "system.parameter.label",
-            "system.parameter.options",
-          ],
-        });
-      } catch {
-        continue;
-      }
-      for (const entry of index) {
-        if (entry.type !== "quality") continue;
-        const slug = entry.system?.slug || slugify(entry.name);
-        if (slug && !packDefs.has(slug)) {
-          packDefs.set(slug, {
-            name: entry.name,
-            description: entry.system?.description ?? "",
-            parameter: entry.system?.parameter ?? { kind: "none" },
-          });
-        }
-      }
-    }
-
-    // World first (full item), then the compendium fallback; null when unresolved.
-    const resolve = (slug) => {
-      const world = qualityBySlug(slug);
-      if (world) {
-        return {
-          name: world.name,
-          description: world.system?.description ?? "",
-          parameter: world.system?.parameter ?? { kind: "none" },
-        };
-      }
-      return packDefs.get(slug) ?? null;
+  /**
+   * spec 025 (contract unit-type-assignment.md C6) — the Unit Type's System tab
+   * context: the four resolved weapon-quality lists and the granted-ability rows.
+   */
+  async _prepareUnitTypeContext(context, item, system) {
+    const resolve = await qualityDefinitionResolver();
+    const listRows = (equipmentKey, weaponKey) =>
+      qualityRefRows(
+        system?.[equipmentKey]?.[weaponKey],
+        resolve,
+        `system.${equipmentKey}.${weaponKey}`
+      );
+    context.unitTypeQualities = {
+      startingFighting: listRows("startingEquipment", "fightingQualities"),
+      startingMarksmanship: listRows(
+        "startingEquipment",
+        "marksmanshipQualities"
+      ),
+      upgradedFighting: listRows("upgradedEquipment", "fightingQualities"),
+      upgradedMarksmanship: listRows(
+        "upgradedEquipment",
+        "marksmanshipQualities"
+      ),
     };
-
-    context.qualityRefs = refs.map((ref, index) => {
-      const slug = ref.slug ?? "";
-      const def = slug ? resolve(slug) : null;
-      const paramKind = def?.parameter?.kind ?? "none";
-      return {
+    context.grantedAbilities = (system?.grantedAbilities ?? []).map(
+      (entry, index) => ({
         index,
-        slug,
-        parameter: ref.parameter ?? "",
-        name: def?.name ?? slug,
-        description: def?.description ?? "",
-        missing: !def,
-        showParam: paramKind === "number" || paramKind === "choice",
-        isChoice: paramKind === "choice",
-        paramLabel: def?.parameter?.label ?? "",
-        paramOptions:
-          paramKind === "choice"
-            ? Object.fromEntries(
-                (def.parameter.options ?? []).filter(Boolean).map((o) => [o, o])
-              )
-            : {},
-      };
-    });
+        slug: entry.slug ?? "",
+        name: entry.name || entry.slug || "",
+      })
+    );
   }
 
   /** @override — the core convention: hand each tab-body part its own tab state so
@@ -651,6 +631,10 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
    * preserves the inherited ActiveEffect drop).
    */
   async _onDropDocument(event, document) {
+    if (this.item.type === "unitType" && document?.documentName === "Item") {
+      const handled = await this._onDropOnUnitType(document);
+      if (handled !== undefined) return handled;
+    }
     if (document?.documentName === "Item" && document.type === "quality") {
       if (!this.isEditable) return null;
       if (!["weapon", "armor"].includes(this.item.type)) return null;
@@ -666,6 +650,53 @@ export class CSItemSheet extends foundry.applications.api.HandlebarsApplicationM
       return document;
     }
     return super._onDropDocument(event, document);
+  }
+
+  /**
+   * spec 025 (contract unit-type-assignment.md C6a) — the two drops a Unit Type
+   * accepts. Returns `undefined` when the dropped document is neither, so the
+   * caller falls through to the shared quality/ActiveEffect handling.
+   *
+   * (a) an `ability` (world OR the `chroniclesystem.abilities` pack) becomes a
+   *     `{slug, name}` row of `system.grantedAbilities` — the slug is the
+   *     identity, the name is display only.
+   * (b) a `quality` opens the destination dialog and lands in ONE of the four
+   *     per-weapon lists, never the legacy single `qualities` list.
+   * @param {object} document the dropped Item
+   * @returns {Promise<object|null|undefined>}
+   */
+  async _onDropOnUnitType(document) {
+    if (document.type === "ability") {
+      if (!this.isEditable) return null;
+      const slug = document.system?.slug || slugify(document.name);
+      const granted = foundry.utils.deepClone(
+        this.item.system.grantedAbilities ?? []
+      );
+      if (granted.some((entry) => entry.slug === slug)) return null;
+      granted.push({ slug, name: document.name });
+      await this.item.update({ "system.grantedAbilities": granted });
+      return document;
+    }
+
+    if (document.type === "quality") {
+      if (!this.isEditable) return null;
+      if (!qualityAppliesTo(document, "weapon")) return null;
+      const path = await pickQualityTarget(document.name);
+      if (!path) return null;
+      const slug = document.system?.slug || slugify(document.name);
+      const refs = foundry.utils.deepClone(
+        foundry.utils.getProperty(this.item, path) ?? []
+      );
+      if (refs.some((ref) => ref.slug === slug)) return null;
+      if (document.pack && !qualityBySlug(slug)) {
+        await CONFIG.Item.documentClass.create(document.toObject());
+      }
+      refs.push({ slug, parameter: "" });
+      await this.item.update({ [path]: refs });
+      return document;
+    }
+
+    return undefined;
   }
 
   /** Action: toggle a Técnica Work card open/closed (ephemeral UI state). */

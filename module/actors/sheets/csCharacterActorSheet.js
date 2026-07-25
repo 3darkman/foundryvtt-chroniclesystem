@@ -24,6 +24,7 @@ import {
   PUBLIC_VISIBILITY_FIELDS,
   PUBLIC_VISIBILITY_KEYS,
 } from "../../system/public-visibility.js";
+import { asoiafDefenseStyle } from "../../system/settings.js";
 
 // spec 022 (FR-022) — the one-line relationship-note preview budget, in
 // characters. A named constant, not a magic number (Clean Code §I).
@@ -240,6 +241,20 @@ export class CSCharacterActorSheet extends CSActorSheet {
     context.dispositions = ChronicleSystem.dispositions;
 
     context.notEquipped = ChronicleSystem.equippedConstants.IS_NOT_EQUIPPED;
+
+    // spec 025 (handoff §4) — Combat & Intrigue speaks the same value language as
+    // the Unit sheet: Movement collapses its derivation into ONE calculated base
+    // (the note states the formula), and Combat Defence names the rule actually
+    // in force, since the ASoIaF edition setting folds the armour penalty in.
+    context.movementValue =
+      (Number(character.movement.base) || 0) +
+      (Number(character.movement.runBonus) || 0) -
+      (Number(character.movement.bulk) || 0);
+    context.combatDefenseNote = SystemUtils.localize(
+      asoiafDefenseStyle()
+        ? "CS.sheets.formulas.combatDefenseAsoiaf"
+        : "CS.sheets.formulas.combatDefense"
+    );
 
     context.techniquesTypes = CSConstants.TechniqueType;
     context.techniquesCosts = CSConstants.TechniqueCost;

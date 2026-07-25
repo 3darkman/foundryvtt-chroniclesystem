@@ -1,0 +1,124 @@
+{{!-- Tipo de Unidade (unitType) Sistema body — rebuilt against the layout handoff
+      prototype (docs/design_handoff_unit_sheet/Fichas de Item.dc.html, "Tipo de
+      Unidade"), which is the source of truth for structure and order. Reading
+      order: PARÂMETROS · HABILIDADES (concedidas | coringa) · EQUIPAMENTO INICIAL
+      | MELHORIAS lado a lado, cada coluna com Armadura → Dano em Luta
+      (+qualidades) → Dano em Pontaria (+qualidades).
+      Built only from shared components — no new primitives (CLAUDE.md v2 SSOT). --}}
+<section class="tab {{#if tab.active}}active{{/if}}" data-group="primary" data-tab="system">
+    <div class="csv2-card">
+        <div class="csv2-card-header">{{localize "CS.sheets.unitTypeItem.parameters"}}</div>
+        <div class="cs-ut-params">
+            <div class="cs-ut-param">
+                <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.powerCost"}}</div>
+                <input class="is-mono" type="text" name="system.powerCost" value="{{item.system.powerCost}}" data-dtype="Number" />
+            </div>
+            <div class="cs-ut-param">
+                <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.disciplineModifier"}}</div>
+                <input class="is-mono" type="text" name="system.disciplineModifier" value="{{item.system.disciplineModifier}}" data-dtype="Number" />
+            </div>
+        </div>
+    </div>
+
+    <div class="cs-ut-two-col">
+        <div class="csv2-card csv2-list cs-ut-granted">
+            <div class="csv2-card-header">{{localize "CS.sheets.unitTypeItem.grantedAbilities"}}</div>
+            <p class="csv2-help cs-ut-hint">{{localize "CS.sheets.unitTypeItem.grantedDragHint"}}</p>
+            {{#each grantedAbilities as |granted|}}
+            <div class="csv2-list-row cs-ut-granted-row">
+                <input type="hidden" name="system.grantedAbilities.{{granted.index}}.slug" value="{{granted.slug}}" />
+                <input type="hidden" name="system.grantedAbilities.{{granted.index}}.name" value="{{granted.name}}" />
+                <span class="cs-ut-granted-name">{{granted.name}}</span>
+                {{#if @root.canEditLists}}
+                <button type="button" class="csv2-list-del-btn" data-action="listDelete"
+                        data-list="system.grantedAbilities" data-index="{{granted.index}}"
+                        data-tooltip="{{localize "CS.sheets.item.delete"}}">
+                    <i class="fa-regular fa-trash-can"></i>
+                </button>
+                {{/if}}
+            </div>
+            {{else}}
+            <div class="csv2-list-empty">{{localize "CS.sheets.unitTypeItem.grantedEmpty"}}</div>
+            {{/each}}
+        </div>
+
+        <div class="csv2-card cs-ut-wildcards">
+            <div class="csv2-card-header">{{localize "CS.sheets.unitTypeItem.wildcardAbilities"}}</div>
+            <div class="cs-ut-wildcard-body">
+                <div class="cs-ut-inline-field">
+                    <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.wildcardCount"}}</div>
+                    <input class="is-mono" type="text" name="system.wildcardAbilityCount" value="{{item.system.wildcardAbilityCount}}" data-dtype="Number" />
+                </div>
+                <p class="csv2-help">{{localize "CS.sheets.unitTypeItem.wildcardNote"}}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="cs-ut-two-col">
+        <div class="cs-ut-equip-col">
+            <div class="csv2-card">
+                <div class="csv2-card-header">{{localize "CS.sheets.unitTypeItem.startingEquipment"}}</div>
+                <div class="cs-ut-armor">
+                    <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.armor"}}</div>
+                    <div class="cs-ut-armor-fields">
+                        <div class="cs-ut-param">
+                            <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.ar"}}</div>
+                            <input class="is-mono" type="text" name="system.startingEquipment.armor.rating" value="{{item.system.startingEquipment.armor.rating}}" data-dtype="Number" />
+                        </div>
+                        <div class="cs-ut-param">
+                            <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.penalty"}}</div>
+                            <input class="is-mono" type="text" name="system.startingEquipment.armor.penalty" value="{{item.system.startingEquipment.armor.penalty}}" data-dtype="Number" />
+                        </div>
+                        <div class="cs-ut-param">
+                            <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.bulk"}}</div>
+                            <input class="is-mono" type="text" name="system.startingEquipment.armor.bulk" value="{{item.system.startingEquipment.armor.bulk}}" data-dtype="Number" />
+                        </div>
+                    </div>
+                </div>
+                <div class="cs-ut-weapon">
+                    <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.fightingDamage"}}</div>
+                    <input type="text" name="system.startingEquipment.fightingDamage" value="{{item.system.startingEquipment.fightingDamage}}" />
+                    {{> "systems/chroniclesystem/templates/items/components/quality-refs.hbs" rows=unitTypeQualities.startingFighting title="CS.sheets.unitTypeItem.qualities" compact=true}}
+                </div>
+                <div class="cs-ut-weapon">
+                    <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.marksmanshipDamage"}}</div>
+                    <input type="text" name="system.startingEquipment.marksmanshipDamage" value="{{item.system.startingEquipment.marksmanshipDamage}}" />
+                    {{> "systems/chroniclesystem/templates/items/components/quality-refs.hbs" rows=unitTypeQualities.startingMarksmanship title="CS.sheets.unitTypeItem.qualities" compact=true}}
+                </div>
+            </div>
+        </div>
+
+        <div class="cs-ut-equip-col">
+            <div class="csv2-card">
+                <div class="csv2-card-header">{{localize "CS.sheets.unitTypeItem.upgradedEquipment"}}</div>
+                <div class="cs-ut-armor">
+                    <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.armor"}}</div>
+                    <div class="cs-ut-armor-fields">
+                        <div class="cs-ut-param">
+                            <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.ar"}}</div>
+                            <input class="is-mono" type="text" name="system.upgradedEquipment.armor.rating" value="{{item.system.upgradedEquipment.armor.rating}}" data-dtype="Number" />
+                        </div>
+                        <div class="cs-ut-param">
+                            <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.penalty"}}</div>
+                            <input class="is-mono" type="text" name="system.upgradedEquipment.armor.penalty" value="{{item.system.upgradedEquipment.armor.penalty}}" data-dtype="Number" />
+                        </div>
+                        <div class="cs-ut-param">
+                            <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.bulk"}}</div>
+                            <input class="is-mono" type="text" name="system.upgradedEquipment.armor.bulk" value="{{item.system.upgradedEquipment.armor.bulk}}" data-dtype="Number" />
+                        </div>
+                    </div>
+                </div>
+                <div class="cs-ut-weapon">
+                    <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.fightingDamage"}}</div>
+                    <input type="text" name="system.upgradedEquipment.fightingDamage" value="{{item.system.upgradedEquipment.fightingDamage}}" />
+                    {{> "systems/chroniclesystem/templates/items/components/quality-refs.hbs" rows=unitTypeQualities.upgradedFighting title="CS.sheets.unitTypeItem.qualities" compact=true}}
+                </div>
+                <div class="cs-ut-weapon">
+                    <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.marksmanshipDamage"}}</div>
+                    <input type="text" name="system.upgradedEquipment.marksmanshipDamage" value="{{item.system.upgradedEquipment.marksmanshipDamage}}" />
+                    {{> "systems/chroniclesystem/templates/items/components/quality-refs.hbs" rows=unitTypeQualities.upgradedMarksmanship title="CS.sheets.unitTypeItem.qualities" compact=true}}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

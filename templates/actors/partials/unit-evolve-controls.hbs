@@ -1,0 +1,21 @@
+{{!-- spec 025 — the evolve control of ONE equipment aspect (armor, fighting,
+      marksmanship), rendered three times on the Overview tab.
+
+      The handoff draws an unbounded ladder ("Nv N" + evolve + revert); the data
+      model has exactly TWO states — the type's Starting Equipment and its
+      Equipment Upgrades — so the ladder collapses to one step: evolve while at
+      the starting set, revert while evolved. Never both at once, so the button
+      always tells the truth about what it will do. --}}
+{{#if evolved}}
+<button type="button" class="csv2-btn csv2-btn--secondary csv2-btn--icon csv2-btn--xs"
+        data-action="setEvolved" data-aspect="{{aspect}}" data-evolved="false"
+        data-tooltip="{{localize 'CS.sheets.unit.evolveRevert'}}">
+    <i class="fas fa-minus"></i>
+</button>
+{{else}}
+<button type="button" class="csv2-btn csv2-btn--outline csv2-btn--xs"
+        data-action="setEvolved" data-aspect="{{aspect}}" data-evolved="true"
+        data-tooltip="{{localize 'CS.sheets.unit.evolveHint'}}">
+    <i class="fas fa-arrow-up"></i>{{localize "CS.sheets.unit.evolve"}}
+</button>
+{{/if}}

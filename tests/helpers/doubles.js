@@ -130,10 +130,115 @@ export function makeFakeActor({
     // calculateDerivedValues computes combat/intrigue defense too, calling these:
     calcCombatDefense: proto.calcCombatDefense,
     calcIntrigueDefense: proto.calcIntrigueDefense,
+    // spec 025: Health's `Endurance × 3` and the movement profile are extracted
+    // methods now (shared with the unit branch), so the double must expose them.
+    calcHealthBase: proto.calcHealthBase,
+    movementProfile: proto.movementProfile,
     getModifier: (type) => ({ total: modifiers[type] ?? 0, detail: [] }),
     getPenalty: () => ({ total: 0, detail: [] }),
     // Wave 4: neutral AE contributions keep the characterized totals unchanged.
     getDerivedStatBonus: () => 0,
+    getWeaponDamageBonus: () => 0,
+  };
+}
+
+// spec 025 — the `unit` actor skeleton (data-model §1). Only the keys the
+// derivations read; every value here is what the schema `initial` would produce.
+const defaultUnitData = () => ({
+  trainingLevel: "green",
+  primaryTypeSlug: "",
+  health: { value: 0, max: 0 },
+  derivedStats: { combatDefense: { value: 0, modifier: 0 } },
+  movement: { modifier: 0, base: 0, bulk: 0, total: 0 },
+  discipline: { modifier: 0 },
+  powerCost: { modifier: 0 },
+  evolvedEquipment: { armor: false, fighting: false, marksmanship: false },
+  leader: { uuid: "", role: "commander" },
+  attachedHeroes: [],
+  houseUuid: "",
+  description: "",
+});
+
+/**
+ * A fake `unitType` ITEM (spec 025). `createdTime` feeds the oldest-wins
+ * fallback of `pickEffectivePrimaryType`; `flags` is absent by design.
+ */
+export function makeUnitTypeItem({
+  id = "type",
+  name = "Infantry",
+  slug,
+  powerCost = 0,
+  disciplineModifier = 0,
+  createdTime,
+  grantedAbilities = [],
+  wildcardAbilityCount = 0,
+  startingEquipment = {},
+  upgradedEquipment = {},
+} = {}) {
+  const equipment = (overrides) => ({
+    armor: { rating: 0, penalty: 0, bulk: 0 },
+    fightingDamage: "",
+    marksmanshipDamage: "",
+    fightingQualities: [],
+    marksmanshipQualities: [],
+    ...overrides,
+  });
+  const data = {
+    slug: slug ?? "",
+    powerCost,
+    disciplineModifier,
+    grantedAbilities,
+    wildcardAbilityCount,
+    startingEquipment: equipment(startingEquipment),
+    upgradedEquipment: equipment(upgradedEquipment),
+  };
+  const item = {
+    id,
+    _id: id,
+    name,
+    type: "unitType",
+    system: data,
+    getCSData: () => data,
+    _stats: { createdTime },
+    onObtained() {},
+  };
+  item.toObject = () => item;
+  return item;
+}
+
+/**
+ * A fake `unit` actor wired to the REAL prototype derivations, so the tests
+ * exercise production logic rather than a reimplementation. `flags` on abilities
+ * is honoured through `getFlag`/`setFlag` doubles so provenance can be asserted.
+ */
+export function makeFakeUnitActor({
+  types = [],
+  abilities = [],
+  data,
+  modifiers = {},
+  derivedStatBonus = {},
+} = {}) {
+  const system = deepMerge(defaultUnitData(), data);
+  return {
+    type: "unit",
+    items: [...types, ...abilities],
+    system,
+    getCSData: () => system,
+    getAbility: proto.getAbility,
+    getAbilityValue: proto.getAbilityValue,
+    getAbilityBySlug: proto.getAbilityBySlug,
+    getAbilityValueBySlug: proto.getAbilityValueBySlug,
+    getAbilityBySpecialty: proto.getAbilityBySpecialty,
+    getAbilityBySpecialtySlug: proto.getAbilityBySpecialtySlug,
+    calcHealthBase: proto.calcHealthBase,
+    calcCombatDefense: proto.calcCombatDefense,
+    calcIntrigueDefense: proto.calcIntrigueDefense,
+    effectivePrimaryType: proto.effectivePrimaryType,
+    calculateUnitDerivedValues: proto.calculateUnitDerivedValues,
+    movementProfile: proto.movementProfile,
+    getModifier: (type) => ({ total: modifiers[type] ?? 0, detail: [] }),
+    getPenalty: () => ({ total: 0, detail: [] }),
+    getDerivedStatBonus: (stat) => derivedStatBonus[stat] ?? 0,
     getWeaponDamageBonus: () => 0,
   };
 }

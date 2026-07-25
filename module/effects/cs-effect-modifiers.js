@@ -33,6 +33,7 @@ import {
   effectiveWeaponQualityRefs,
 } from "./cs-effect-vocabulary.js";
 import { scopedSpecialtySlug } from "../vocabulary/cs-canonical-abilities.js";
+import { effectiveEquipment } from "../vocabulary/cs-warfare.js";
 import { resolveEffectValue } from "./cs-effect-value.js";
 import {
   readChanges,
@@ -411,6 +412,33 @@ function collectArmorModifiers(item, modifiers) {
 }
 
 /**
+ * spec 025 (contract unit-derivation.md C3) — a Unit's equipment contribution:
+ * the EFFECTIVE PRIMARY Unit Type's armour pushes its penalty into the
+ * combat-defence bucket and its bulk into the bulk bucket, exactly as an armour
+ * item does (same shape, same `isDocument` flag, so itemized tooltips name the
+ * Unit Type). AGILITY is deliberately NOT pushed — no warfare rule reduces a
+ * unit's Agility from its equipment.
+ *
+ * WHICH armour is read — the starting set or the type's Upgrades — is decided by
+ * the shared `effectiveEquipment`, the same call the sheet renders from, so an
+ * evolved armour changes the Defence and the Movement it displays (handoff §2).
+ * @param {object} actor a `unit` actor
+ * @param {object} modifiers
+ */
+function collectUnitTypeModifiers(actor, modifiers) {
+  const primaryType = actor?.effectivePrimaryType?.();
+  if (!primaryType) return;
+  const armor = effectiveEquipment(
+    itemData(primaryType),
+    itemData(actor).evolvedEquipment
+  ).armor;
+  if (!armor) return;
+  const M = ChronicleSystem.modifiersConstants;
+  pushEntry(modifiers, M.COMBAT_DEFENSE, primaryType._id, armor.penalty, true);
+  pushEntry(modifiers, M.BULK, primaryType._id, armor.bulk, true);
+}
+
+/**
  * Source 2 — owned equipment, read live from item data. Dispatches to the
  * per-type collectors (keeping nesting ≤ 3, constitution §I). Weapon Bulk is NOT
  * handled here anymore: it is a data-driven quality rule (`lever:"bulk"`) routed by
@@ -423,6 +451,7 @@ function collectItemModifiers(actor, modifiers) {
   for (const item of actor?.items ?? []) {
     if (item.type === "armor") collectArmorModifiers(item, modifiers);
   }
+  if (actor?.type === "unit") collectUnitTypeModifiers(actor, modifiers);
 }
 
 /* ------------------- referenced qualities (spec 020) --------------------- */
