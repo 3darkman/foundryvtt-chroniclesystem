@@ -65,6 +65,34 @@ export class CSItem extends Item {
   /*  Shared / base                                 */
   /* ---------------------------------------------- */
 
+  /**
+   * @override — the per-type icon under `assets/icons/<type>.png`, named after
+   * the type KEY exactly (so `unitType.png`, not "unit type.png").
+   *
+   * This is core's own extension point, not a hook: `img` is a FilePathField
+   * whose `initial` calls `CONFIG.Item.documentClass.getDefaultArtwork(data)`
+   * (common/documents/item.mjs:48-51). Three things follow, and all three are
+   * why the `createItem` hook this replaced could not work:
+   *  - the icon lands in `_source`, so it is SAVED — the hook assigned
+   *    `item.img` after creation, which only overwrites the initialized
+   *    property and is lost the next time the document is initialized;
+   *  - it applies ONLY when no image was supplied, so importing or duplicating
+   *    an item keeps its own art — the hook clobbered it unconditionally;
+   *  - the sidebar directory and the sheet's "reset image" control read the
+   *    same method, so all three agree on what this item should look like.
+   *
+   * Anything without a real type (core asks with the generic `base` in a few
+   * places) keeps core's own default icon.
+   * @param {object} itemData the source data being created
+   * @returns {{img: string}}
+   */
+  static getDefaultArtwork(itemData) {
+    const type = itemData?.type;
+    if (!type || type === CONST.BASE_DOCUMENT_TYPE)
+      return super.getDefaultArtwork(itemData);
+    return { img: `systems/chroniclesystem/assets/icons/${type}.png` };
+  }
+
   getCSData() {
     return this.system;
   }

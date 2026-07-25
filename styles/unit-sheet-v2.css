@@ -39,8 +39,10 @@
   color: var(--csv2-muted);
 }
 
+/* The one note that closes a tab: it states the rule the table above obeys, so
+   it hangs off the table rather than opening a gap before the next block. */
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-footnote {
-  margin: 8px 2px 16px;
+  padding: 8px 2px 0;
   font: 400 10.5px/1.5 var(--csv2-font-sans);
   font-style: italic;
   color: var(--csv2-muted);
@@ -111,6 +113,21 @@
   gap: 8px;
 }
 
+/* The name of an equipment field. Deliberately NOT `.cs2-stat-label` (12.5px):
+   these sit above their own group of values instead of beside one, and the
+   design gives them a step less weight — with the armour, which heads three
+   values at once, one step more. */
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 12px var(--csv2-font-sans);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-label.is-strong {
+  font-weight: 600;
+}
+
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-fields {
   display: inline-flex;
   align-items: center;
@@ -142,8 +159,17 @@
   border-top: 1px solid var(--csv2-border-soft);
 }
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-row.is-primary {
-  background: var(--csv2-bg-soft);
+/* Zebra, like every other list in the system. `nth-child(odd)` (not `even`, and
+   not `nth-of-type`): the card's blue header is child 1 and is a <div> too, so
+   the first type row is child 2 — this keeps it white and greys the second. */
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs2-card > .cs-unit-type-row:nth-child(odd) {
+  background: var(--csv2-secondary);
+}
+
+/* The one row that breaks the zebra is the primary type. Declared AFTER it and
+   with the same weight, so the tint wins wherever the primary lands. */
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs2-card > .cs-unit-type-row.is-primary {
+  background: var(--csv2-row-accent);
 }
 
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-line {
@@ -153,6 +179,10 @@
 }
 
 /* The star IS the primary switch — one click promotes a type (contract C4). */
+/* The badge is an 8px eyebrow, so the BUTTON is sized at 8px too — the star is
+   the one thing inside it that keeps its own size (the design draws it at 12).
+   Sizing only the inner <span> left the button at the sheet's 14px, which is
+   what the icon inherits. */
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-primary-star {
   display: flex;
   flex: none;
@@ -164,13 +194,14 @@
   background: var(--csv2-bg);
   color: var(--csv2-muted);
   cursor: pointer;
-  line-height: 1;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-primary-star span {
   font: 700 8px var(--csv2-font-mono);
   letter-spacing: 0.05em;
+  line-height: 1;
   text-transform: uppercase;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-primary-star .fa-star {
+  font-size: 12px;
 }
 
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-primary-star.is-primary {
@@ -179,12 +210,13 @@
   color: var(--csv2-primary);
 }
 
+/* Plain text, not a link: the row already carries a button that opens the type's
+   sheet, and two ways to do the same thing in one row is one too many. */
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-name {
   flex: 1 1 auto;
   min-width: 0;
   font: 600 13.5px var(--csv2-font-sans);
   color: var(--csv2-dark);
-  cursor: pointer;
 }
 
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-cost {
@@ -224,14 +256,27 @@
 
 /* ----------------------------------------------- composition: abilities --- */
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-ability-name {
-  font-weight: 600;
-  cursor: pointer;
+/* The Experience band and the line under it are one unit — the note explains the
+   three figures above it, so it sits close to them and the table follows. */
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs2-callout.cs-unit-xp {
+  margin-bottom: 6px;
 }
 
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-xp-note {
+  margin: 0 0 11px;
+  font: 400 10px/1.5 var(--csv2-font-sans);
+  font-style: italic;
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-ability-name {
+  font: 600 13.5px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+}
+
+/* Width only — the box itself is the shared `.cs2-num` control. */
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-ability-rating {
   width: 42px;
-  text-align: center;
 }
 
 /* -------------------------------------------------------- command slots --- */
@@ -273,7 +318,6 @@
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-name {
   font: 700 13.5px var(--csv2-font-sans);
   color: var(--csv2-dark);
-  cursor: pointer;
 }
 
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-sub {

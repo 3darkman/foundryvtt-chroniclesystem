@@ -16,9 +16,14 @@ const ROLES = ["leader", "hero"];
 export async function pickAttachRole(actor) {
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE,
-    {}
+    { name: actor?.name ?? "", img: actor?.img ?? "" }
   );
 
+  // The two roles are the dialog's CONTENT buttons — one click answers, with no
+  // confirm step (design). Only Cancel stays in the frame's footer, so the
+  // chosen role travels in a closure and `close` hands it back; the same shape
+  // the quality-destination picker uses.
+  let picked = null;
   const result = await foundry.applications.api.DialogV2.wait({
     classes: ["chroniclesystem", "cs-v2", "csv2-dialog", "cs-attach-dialog"],
     window: {
@@ -26,23 +31,24 @@ export async function pickAttachRole(actor) {
         name: actor?.name ?? "",
       }),
     },
+    position: { width: 390 },
     content,
     buttons: [
       {
         action: "cancel",
         label: SystemUtils.localize("CS.dialogs.actions.cancel"),
-        icon: "fas fa-times",
-        class: "csv2-btn csv2-btn--secondary",
-      },
-      {
-        action: "confirm",
-        label: SystemUtils.localize("CS.dialogs.actions.confirm"),
-        icon: "fas fa-check",
-        class: "csv2-btn csv2-btn--primary",
-        default: true,
-        callback: (event, button) => button.form?.attachRole?.value ?? null,
+        class: "csv2-btn csv2-btn--quiet",
       },
     ],
+    render: (event, dialog) => {
+      for (const button of dialog.element.querySelectorAll("[data-role]")) {
+        button.addEventListener("click", () => {
+          picked = button.dataset.role;
+          dialog.close();
+        });
+      }
+    },
+    close: () => picked,
     rejectClose: false,
   });
 

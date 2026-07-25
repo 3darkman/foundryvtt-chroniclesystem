@@ -16,7 +16,6 @@
     <div class="cs2-section-title">
         <span class="cs2-rail"></span>
         <span>{{localize "CS.sheets.unit.trainingLevel"}}</span>
-        <em class="cs2-section-hint">{{localize "CS.sheets.unit.trainingHint"}}</em>
     </div>
     <div class="csv2-chip-group csv2-chip-group--band">
         {{#each trainingChoices as |label level|}}
@@ -89,23 +88,23 @@
 
             <div class="cs-unit-equipment-block">
                 <div class="cs-unit-equipment-head">
-                    <span class="cs2-stat-label">
+                    <span class="cs-unit-equipment-label is-strong">
                         {{localize "CS.sheets.unit.armor"}}
-                        {{#if equipment.armor.evolved}}<span class="cs2-tag">{{localize "CS.sheets.unit.evolveLevel"}}</span>{{/if}}
+                        {{#if equipment.armor.evolved}}<span class="csv2-badge csv2-badge--sm">{{localize "CS.sheets.unit.evolveLevel"}}</span>{{/if}}
                     </span>
                     {{> "systems/chroniclesystem/templates/actors/partials/unit-evolve-controls.hbs" aspect="armor" evolved=equipment.armor.evolved }}
                 </div>
                 <div class="cs-unit-armor-grid">
                     <div>
-                        <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.ar"}}</div>
+                        <div class="csv2-label csv2-label--sm">{{localize "CS.sheets.unitTypeItem.ar"}}</div>
                         <span class="cs2-total">{{equipment.armor.rating}}</span>
                     </div>
                     <div>
-                        <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.penalty"}}</div>
+                        <div class="csv2-label csv2-label--sm">{{localize "CS.sheets.unitTypeItem.penalty"}}</div>
                         <span class="cs2-total">{{equipment.armor.penalty}}</span>
                     </div>
                     <div>
-                        <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.bulk"}}</div>
+                        <div class="csv2-label csv2-label--sm">{{localize "CS.sheets.unitTypeItem.bulk"}}</div>
                         <span class="cs2-total">{{equipment.armor.bulk}}</span>
                     </div>
                 </div>
@@ -114,9 +113,9 @@
             {{#each equipment.weapons as |weapon|}}
             <div class="cs-unit-equipment-block">
                 <div class="cs-unit-equipment-head">
-                    <span class="cs2-stat-label">
+                    <span class="cs-unit-equipment-label">
                         {{localize weapon.label}}
-                        {{#if weapon.evolved}}<span class="cs2-tag">{{localize "CS.sheets.unit.evolveLevel"}}</span>{{/if}}
+                        {{#if weapon.evolved}}<span class="csv2-badge csv2-badge--sm">{{localize "CS.sheets.unit.evolveLevel"}}</span>{{/if}}
                     </span>
                     {{#if weapon.chip}}
                     <span class="cs-unit-equipment-fields">
@@ -147,6 +146,4 @@
             {{/if}}
         </div>
     </div>
-
-    <div class="cs-unit-footnote">{{localize "CS.sheets.unit.statsNote"}}</div>
 </div>

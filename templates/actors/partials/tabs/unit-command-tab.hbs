@@ -10,7 +10,6 @@
     <div class="cs2-section-title">
         <span class="cs2-rail"></span>
         <span>{{localize "CS.sheets.unit.links"}}</span>
-        <em class="cs2-section-hint">{{localize "CS.sheets.unit.linksHint"}}</em>
     </div>
 
     <div class="cs2-columns">
@@ -20,17 +19,17 @@
             <div class="cs-unit-command-slot">
                 <img src="{{leader.img}}" alt="{{leader.name}}" />
                 <div class="cs-unit-command-text">
-                    <a class="cs-unit-command-name" data-action="openLinkedActor" data-uuid="{{leader.uuid}}">{{leader.name}}</a>
+                    <span class="cs-unit-command-name">{{leader.name}}</span>
                     <button type="button" class="csv2-btn csv2-btn--soft csv2-btn--sm cs-unit-role-toggle"
                             data-action="setLeaderRole" data-role="{{leader.nextRole}}"
                             data-tooltip="{{localize 'CS.sheets.unit.leaderRoleHint'}}">
                         {{localize leader.roleLabel}}<i class="fas fa-chevron-down"></i>
                     </button>
                 </div>
-                <button type="button" class="csv2-btn csv2-btn--secondary csv2-btn--icon"
+                <button type="button" class="csv2-btn csv2-btn--accent csv2-btn--icon"
                         data-action="openLinkedActor" data-uuid="{{leader.uuid}}"
                         data-tooltip="{{localize 'CS.sheets.unit.openSheet'}}">
-                    <i class="fas fa-user"></i>
+                    <i class="far fa-user"></i>
                 </button>
                 <button type="button" class="csv2-list-del-btn" data-action="clearLeader"
                         data-tooltip="{{localize 'CS.sheets.unit.clearLeader'}}">
@@ -51,13 +50,13 @@
             <div class="cs-unit-command-slot">
                 <img src="{{house.img}}" alt="{{house.name}}" />
                 <div class="cs-unit-command-text">
-                    <a class="cs-unit-command-name" data-action="openLinkedActor" data-uuid="{{house.uuid}}">{{house.name}}</a>
+                    <span class="cs-unit-command-name">{{house.name}}</span>
                     <span class="cs-unit-command-sub">{{localize "CS.sheets.unit.houseNote"}}</span>
                 </div>
-                <button type="button" class="csv2-btn csv2-btn--secondary csv2-btn--icon"
+                <button type="button" class="csv2-btn csv2-btn--accent csv2-btn--icon"
                         data-action="openLinkedActor" data-uuid="{{house.uuid}}"
                         data-tooltip="{{localize 'CS.sheets.unit.openSheet'}}">
-                    <i class="fas fa-pencil"></i>
+                    <i class="far fa-pen-to-square"></i>
                 </button>
                 <button type="button" class="csv2-list-del-btn" data-action="clearHouse"
                         data-tooltip="{{localize 'CS.sheets.unit.clearHouse'}}">
@@ -82,13 +81,12 @@
         <div class="cs-unit-command-slot is-hero">
             <img src="{{hero.img}}" alt="{{hero.name}}" />
             <div class="cs-unit-command-text">
-                <a class="cs-unit-command-name" data-action="openLinkedActor" data-uuid="{{hero.uuid}}">{{hero.name}}</a>
-                <span class="cs-unit-command-sub">{{localize "CS.sheets.unit.heroSubtitle"}}</span>
+                <span class="cs-unit-command-name">{{hero.name}}</span>
             </div>
-            <button type="button" class="csv2-btn csv2-btn--secondary csv2-btn--icon"
+            <button type="button" class="csv2-btn csv2-btn--accent csv2-btn--icon"
                     data-action="openLinkedActor" data-uuid="{{hero.uuid}}"
                     data-tooltip="{{localize 'CS.sheets.unit.openSheet'}}">
-                <i class="fas fa-user"></i>
+                <i class="far fa-user"></i>
             </button>
             <button type="button" class="csv2-list-del-btn" data-action="removeHero" data-uuid="{{hero.uuid}}"
                     data-tooltip="{{localize 'CS.sheets.unit.removeHero'}}">

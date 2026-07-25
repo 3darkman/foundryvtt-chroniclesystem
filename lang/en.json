@@ -212,9 +212,11 @@
       },
       "attachCharacter": {
         "title": "Attach {name} to the Unit",
-        "hint": "Choose how this character joins the unit.",
+        "hint": "How does this character join this unit?",
         "leader": "Leader",
-        "hero": "Attached Hero"
+        "leaderHint": "Commands the unit",
+        "hero": "Attached Hero",
+        "heroHint": "Serves in the ranks"
       }
     },
     "messages": {
@@ -864,7 +866,6 @@
           "veteran": "Veteran",
           "elite": "Elite"
         },
-        "trainingHint": "recalculates everything instantly",
         "house": "House",
         "noHouse": "No House",
         "statistics": "Statistics",
@@ -879,7 +880,6 @@
         "discipline": "Discipline",
         "movement": "Movement",
         "powerCost": "Power Cost",
-        "statsNote": "The grey total is the final derived number; the base comes from the training level and the assigned types, and the middle field is the owner's manual adjustment.",
         "equipment": "Equipment",
         "primaryTypeLabel": "primary type",
         "noEquipment": "No equipment",
@@ -910,13 +910,11 @@
         "openTypeSheet": "Open the type sheet",
         "removeType": "Remove from the unit",
         "abilities": "Abilities",
-        "abilitiesHint": "default rank 2",
         "abilityTest": "Test",
         "abilityName": "Ability",
         "abilityRank": "Rank",
         "abilityPassive": "Passive",
         "abilityPassiveHint": "Passive value — the static equivalent of the test",
-        "abilityDefault": "Default",
         "abilityRankHint": "Adjustable rank",
         "noAbilities": "No adjusted ability",
         "noAbilitiesHint": "The unit already tests everything at the default rank 2. Drag an Ability here to adjust a rank.",
@@ -929,7 +927,6 @@
         "description": "Description",
         "identity": "Identity & Description",
         "links": "Links",
-        "linksHint": "relationship record — they do not change any number",
         "leader": "Leader",
         "leaderRoles": {
           "commander": "Commander",
@@ -942,7 +939,6 @@
         "attachedHeroes": "Attached Heroes",
         "noHeroes": "No attached hero",
         "noHeroesHint": "A common state. Drag a character to attach it to the ranks.",
-        "heroSubtitle": "Attached hero",
         "removeHero": "Detach hero",
         "openSheet": "Open sheet",
         "houseNote": "The Power cost is counted on the House sheet.",

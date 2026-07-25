@@ -221,7 +221,10 @@
   border-bottom-color: var(--csv2-border);
 }
 
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-header-meta-glory {
+/* The ONE header figure the design paints in the primary colour: the
+   character's Glory, the unit's Power Cost. Named for what it is (an accented
+   value) rather than for either sheet's field, so both use the same rule. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-header-meta-accent {
   color: var(--csv2-primary);
   font-weight: 700;
 }
@@ -245,9 +248,17 @@
   gap: 0;
   margin: 0;
   padding: 0;
+  /* A tab bar that runs out of room wraps to a second line, as the design draws
+     it — the legacy `nowrap` would squeeze or clip labels instead. */
+  flex-wrap: wrap;
 }
 
+/* `flex: none` is the point of this rule: the legacy tab block (global.css)
+   gives every tab `flex: 1 1 auto`, so a sheet with few tabs stretches them
+   across the whole width. The design packs them LEFT at their natural label
+   width — the same thing the item sheet already does. */
 .chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .sheet-tabs .item {
+  flex: none;
   padding: 10px 15px;
   margin: 0;
   font: 600 13px var(--csv2-font-sans);
@@ -296,13 +307,9 @@
   color: var(--csv2-dark);
 }
 
-/* Section-title trailers: an italic aside and a count badge. */
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-section-hint {
-  font: 400 12px var(--csv2-font-sans);
-  font-style: italic;
-  color: var(--csv2-muted);
-}
-
+/* Section-title trailer: a count badge. (The italic aside beside a title went
+   with the notes it belonged to — the owner reads the numbers, not a caption
+   restating them.) */
 .chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-section-count {
   font: 600 11px var(--csv2-font-mono);
   color: var(--csv2-muted-2);
@@ -381,6 +388,17 @@
 .chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-fraction small {
   font: 600 10px var(--csv2-font-mono);
   color: var(--csv2-muted);
+}
+
+/* Tinted variant — for a fraction that reads over the blue `area` band as text
+   rather than through white input boxes (the unit's Experience). The muted
+   greys above are tuned for the white card and go flat on the band. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-callout .cs2-fraction--tinted {
+  color: var(--csv2-figure);
+}
+
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-callout .cs2-fraction--tinted small {
+  color: var(--csv2-figure-sub);
 }
 
 .chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-fraction .is-over {
@@ -470,8 +488,14 @@
   color: var(--csv2-op-muted);
 }
 
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-fields input {
-  width: 32px;
+/* The compact numeric box of the value language — one control shape for every
+   hand-typed number, whether it sits in a field group (the owner adjustment,
+   a resource's current value) or on its own in a table cell (the unit's ability
+   rank). `.cs2-num` exists so the loose ones do NOT fall back to the shared
+   form control, which is sized for a labelled form field and stands a head
+   taller than the row it lives in. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-fields input,
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 input.cs2-num {
   text-align: center;
   background: var(--csv2-bg);
   border: 1px solid var(--csv2-input-border);
@@ -480,6 +504,10 @@
   font: 600 13px var(--csv2-font-mono);
   color: var(--csv2-text);
   box-sizing: border-box;
+}
+
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-fields input {
+  width: 32px;
 }
 
 .chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-fields input[readonly] {

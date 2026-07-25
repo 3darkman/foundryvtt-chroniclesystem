@@ -45,6 +45,11 @@ globalThis.Actor = class {
 };
 globalThis.Item = class {
   _onCreate() {}
+  // CSItem overrides this and falls back to `super` for a typeless item; core's
+  // BaseItem answers with its own DEFAULT_ICON.
+  static getDefaultArtwork() {
+    return { img: "icons/svg/item-bag.svg" };
+  }
 };
 
 // Data models: `const fields = foundry.data.fields` (top-level) and
@@ -87,6 +92,7 @@ globalThis.foundry = {
 // CONST globals some sheet modules read at eval/prepare time.
 globalThis.CONST = globalThis.CONST ?? {
   DEFAULT_TOKEN: "icons/svg/mystery-man.svg",
+  BASE_DOCUMENT_TYPE: "base",
 };
 
 // --- Runtime globals (exercised by the pure-logic paths under test) ---

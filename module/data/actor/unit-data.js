@@ -96,8 +96,15 @@ function blankCoercedReferences(source) {
       source[key] = "";
   }
   if (source.leader && typeof source.leader === "object") {
-    if (typeof source.leader.uuid !== "string") source.leader.uuid = "";
-    if (!LEADER_ROLES.includes(source.leader.role))
+    // Each key is coerced ONLY when it is actually present. `migrateData` also
+    // runs over the CHANGES of an update (DataModel#updateSource cleans with
+    // `migrate: true, partial: true`), so writing a key the caller did not send
+    // silently widens that update: `{"system.leader.role": "subcommander"}`
+    // arrives here as `{leader: {role}}`, and adding `uuid: ""` to it unlinked
+    // the leader every time the owner switched Commander ⇄ Sub-commander.
+    if ("uuid" in source.leader && typeof source.leader.uuid !== "string")
+      source.leader.uuid = "";
+    if ("role" in source.leader && !LEADER_ROLES.includes(source.leader.role))
       source.leader.role = LEADER_ROLES[0];
   } else if (source.leader !== undefined) {
     delete source.leader;

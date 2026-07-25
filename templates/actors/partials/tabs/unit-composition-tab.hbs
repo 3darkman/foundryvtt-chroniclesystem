@@ -29,12 +29,12 @@
                     <i class="{{#if unitType.isPrimary}}fas{{else}}far{{/if}} fa-star"></i>
                     <span>{{#if unitType.isPrimary}}{{localize "CS.sheets.unit.primaryBadge"}}{{else}}{{localize "CS.sheets.unit.secondaryBadge"}}{{/if}}</span>
                 </button>
-                <a class="cs-unit-type-name" data-action="editItem">{{unitType.name}}</a>
-                <span class="csv2-label">{{localize "CS.sheets.unit.typeCost"}}</span>
+                <span class="cs-unit-type-name">{{unitType.name}}</span>
+                <span class="csv2-label csv2-label--sm">{{localize "CS.sheets.unit.typeCost"}}</span>
                 <span class="cs-unit-type-cost">{{unitType.powerCost}}</span>
-                <button type="button" class="csv2-btn csv2-btn--secondary csv2-btn--icon" data-action="editItem"
+                <button type="button" class="csv2-btn csv2-btn--accent csv2-btn--icon" data-action="editItem"
                         data-tooltip="{{localize 'CS.sheets.unit.openTypeSheet'}}">
-                    <i class="fas fa-pencil"></i>
+                    <i class="far fa-pen-to-square"></i>
                 </button>
                 <button type="button" class="csv2-list-del-btn" data-action="removeUnitType" data-item-id="{{unitType.id}}"
                         data-tooltip="{{localize 'CS.sheets.unit.removeType'}}">
@@ -42,9 +42,9 @@
                 </button>
             </div>
             <div class="cs-unit-type-grants">
-                <span class="csv2-label">{{localize "CS.sheets.unit.typeGrants"}}</span>
+                <span class="csv2-label csv2-label--sm">{{localize "CS.sheets.unit.typeGrants"}}</span>
                 {{#each unitType.grantedNames as |granted|}}
-                <span class="cs2-tag">{{granted}}</span>
+                <span class="cs2-tag cs2-tag--accent">{{granted}}</span>
                 {{else}}
                 <em class="cs2-empty-inline">{{localize "CS.sheets.unit.typeGrantsNothing"}}</em>
                 {{/each}}
@@ -66,19 +66,18 @@
     <div class="cs2-section-title">
         <span class="cs2-rail"></span>
         <span>{{localize "CS.sheets.unit.abilities"}}</span>
-        <em class="cs2-section-hint">{{localize "CS.sheets.unit.abilitiesHint"}}</em>
     </div>
 
-    <div class="cs2-callout">
+    <div class="cs2-callout cs-unit-xp">
         <span class="cs2-callout-label">{{localize "CS.sheets.unit.experience"}}</span>
-        <div class="cs2-fraction">
+        <div class="cs2-fraction cs2-fraction--tinted">
             <span>{{xp.spent}} <small>{{localize "CS.sheets.unit.xpSpent"}}</small></span>
             <span class="cs2-op">/</span>
             <span>{{xp.total}} <small>{{localize "CS.sheets.unit.xpTotal"}}</small></span>
             <span class="{{#if xpOverSpent}}is-over{{/if}}">{{xp.free}} <small>{{localize "CS.sheets.unit.xpFree"}}</small></span>
         </div>
     </div>
-    <div class="cs-unit-footnote">{{localize "CS.sheets.unit.xpNote"}}</div>
+    <div class="cs-unit-xp-note">{{localize "CS.sheets.unit.xpNote"}}</div>
 
     {{#if unitAbilities.length}}
     <div class="cs2-card">
@@ -93,11 +92,10 @@
                     {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs" id=ability.chip.id label=ability.chip.label}}
                 </div>
                 <div class="cs2-grid-cell">
-                    <a class="cs-unit-ability-name" data-action="editItem">{{ability.name}}</a>
-                    {{#if ability.isDefault}}<span class="cs2-tag-reminder">{{localize "CS.sheets.unit.abilityDefault"}}</span>{{/if}}
+                    <span class="cs-unit-ability-name">{{ability.name}}</span>
                 </div>
                 <div class="cs2-grid-cell center">
-                    <input class="is-mono cs-unit-ability-rating" type="text" value="{{ability.rating}}"
+                    <input class="cs2-num cs-unit-ability-rating" type="text" value="{{ability.rating}}"
                            data-item-id="{{ability.id}}" data-dtype="Number" {{#unless @root.editable}}disabled{{/unless}} />
                 </div>
                 <div class="cs2-grid-cell center">

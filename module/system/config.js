@@ -331,11 +331,10 @@ Hooks.on("deleteCombat", async (combat) => {
   }
 });
 
-Hooks.on("createItem", (item) => {
-  if (!item.isEmbedded) {
-    item.img = `systems/chroniclesystem/assets/icons/${item.type}.png`;
-  }
-});
+/* The per-type item icon used to be assigned here, in a `createItem` hook. It
+   now lives where core asks for it — `CSItem.getDefaultArtwork` — so it is part
+   of the created source (saved), applies only when no image was supplied, and
+   is the same answer the sidebar and the sheet's image control already read. */
 
 /* -------------------------------------------- */
 /*  spec 023 (FR-014f) — the passive picker's   */

@@ -66,7 +66,7 @@ export async function pickQualityTarget(qualityName = "") {
       {
         action: "cancel",
         label: SystemUtils.localize("CS.dialogs.actions.cancel"),
-        class: "csv2-btn csv2-btn--secondary",
+        class: "csv2-btn csv2-btn--quiet",
       },
     ],
     render: (event, dialog) => {

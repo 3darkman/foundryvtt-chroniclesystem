@@ -63,6 +63,13 @@
      names a source, the highlighted (primary) row of a list. */
   --csv2-bg-soft: #f5f7fb;
   --csv2-area: #dfe5f3;
+  /* The tint of a row the design singles out (the Unit's primary type) — a
+     shade deeper than `bg-soft`, still quieter than the `area` band. */
+  --csv2-row-accent: #eef4fb;
+  /* Figures inside an `area` band: the number and the unit word under it. Their
+     own tones, because the band's blue would drown the muted greys. */
+  --csv2-figure: #0a4a7a;
+  --csv2-figure-sub: #5f7fa0;
   --csv2-border: #d3d7e0;
   --csv2-border-soft: #eef0f4;
   --csv2-muted: #8a8688;
@@ -1070,6 +1077,13 @@
   text-transform: uppercase;
   color: var(--csv2-muted);
 }
+/* The design uses a second, tighter eyebrow INSIDE a card, where the 8.5px one
+   competes with the value it labels: AR / PENALTY / BULK, GRANTS, COST. Same
+   eyebrow, one size down — a modifier, never a second declaration. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-label--sm {
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
 
 /* ===========================================================================
    Shared v2 form controls + buttons — the SINGLE source for these primitives
@@ -1231,6 +1245,35 @@
   color: var(--csv2-primary);
   box-shadow: none;
 }
+/* Accent variant — a NEUTRAL bordered button whose glyph is the primary colour.
+   The design's "open this / edit this" icon button: it must not read as a call
+   to action (that is `--outline`, blue border and all), only as a live link to
+   another document. Used by every open-sheet button on the Unit sheet. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--accent {
+  background: var(--csv2-bg);
+  border-color: var(--csv2-border);
+  color: var(--csv2-primary);
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--accent:hover {
+  background: var(--csv2-bg);
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+  box-shadow: none;
+}
+/* Quiet variant — a bare text button (the dialog's "Cancel"), which the design
+   deliberately strips of every frame so it cannot compete with the choices. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--quiet {
+  background: none;
+  border-color: transparent;
+  color: var(--csv2-muted);
+  font-size: 12px;
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--quiet:hover {
+  background: none;
+  border-color: transparent;
+  color: var(--csv2-text);
+  box-shadow: none;
+}
 :is(.cs-v2, .cs-sheet-v2) .csv2-btn--danger {
   background: var(--csv2-bg);
   border-color: var(--csv2-input-border);
@@ -1246,6 +1289,14 @@
   font-size: 11.5px;
   border-radius: 6px;
 }
+/* One size below `--sm`: the button that lives INSIDE a value row (the Unit's
+   Evolve control), where `--sm` is as tall as the number beside it. Its glyph
+   follows the font-size, so no separate icon rule is needed. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--xs {
+  padding: 3px 9px;
+  font-size: 10px;
+  border-radius: 5px;
+}
 /* Icon-only square button (open sheet, revert an evolution): the same variants
    above supply the colours; this only tightens the box so a lone glyph is not
    padded like a labelled button. */
@@ -1253,6 +1304,11 @@
   padding: 5px;
   border-radius: 5px;
   line-height: 1;
+}
+/* Declared after both so the combination wins whichever order they are written
+   in the markup. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--icon.csv2-btn--xs {
+  padding: 3px 6px;
 }
 
 /* Segmented toggle (e.g. SVG|PNG, Tintura|Padrão|Semy). */
@@ -2999,6 +3055,40 @@
 :is(.cs-v2, .cs-sheet-v2) .cs2-tag .cs-qref-tag {
   color: inherit;
 }
+/* Accent variant of the SAME chip — white body, blue hairline, blue label. The
+   design uses it where the chip names something the row GRANTS (a Unit Type's
+   abilities) rather than something it merely has. */
+:is(.cs-v2, .cs-sheet-v2) .cs2-tag--accent {
+  border-color: var(--csv2-callout-border);
+  color: var(--csv2-primary);
+  font: 600 11px var(--csv2-font-sans);
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+/* -----------------------------------------------------------------------------
+   Accent badge (`csv2-badge`, spec 025). The filled blue-tinted pill the design
+   uses for a STATE the sheet derives and the reader cannot type: the Unit's
+   training band in its header, an evolved aspect's level in the equipment card.
+   Distinct from `.cs2-tag` (a white chip naming a thing) and from `.rollable`
+   (a chip that DOES something when clicked) — this one only reports.
+   -------------------------------------------------------------------------- */
+:is(.cs-v2, .cs-sheet-v2) .csv2-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--csv2-area);
+  border: 1px solid var(--csv2-callout-border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font: 600 11px var(--csv2-font-mono);
+  letter-spacing: 0.04em;
+  color: var(--csv2-primary);
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-badge--sm {
+  padding: 2px 6px;
+  font-size: 8px;
+  font-weight: 700;
+}
 
 /* -----------------------------------------------------------------------------
    Compact variant of the SAME quality-refs partial (spec 025). A Unit Type shows
@@ -3181,26 +3271,68 @@
   font-size: 11px;
 }
 
-.cs-v2 .cs-attach-options {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.cs-v2 .cs-attach-option {
+/* The attach picker answers in one click too (design "Anexar personagem"): the
+   dropped character is named at the top and the two roles ARE the buttons —
+   filled for Leader, outlined for Attached Hero — each stating what the role
+   means under its label. The radio list this replaced asked the same question
+   in two steps and looked nothing like the design. */
+.cs-v2 .cs-attach-subject {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border: 1px solid var(--csv2-border);
-  border-radius: 4px;
-  cursor: pointer;
+  gap: 12px;
 }
 
-.cs-v2 .cs-attach-option input {
-  flex: 0 0 auto;
-  width: auto;
-  margin: 0;
+.cs-v2 .cs-attach-avatar {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.cs-v2 .cs-attach-name {
+  font: 700 15px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+}
+
+.cs-v2 .cs-attach-question {
+  font: 400 12px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+
+.cs-v2 .cs-attach-choices {
+  display: flex;
+  gap: 10px;
+}
+
+.cs-v2 .cs-attach-choices .csv2-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 10px;
+  border-radius: 8px;
+}
+
+.cs-v2 .cs-attach-choices .csv2-btn i {
+  font-size: 18px;
+}
+
+.cs-v2 .cs-attach-choice-label {
+  font: 600 13px var(--csv2-font-sans);
+}
+
+.cs-v2 .cs-attach-choice-hint {
+  font: 400 9.5px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+  text-wrap: pretty;
+}
+
+/* On the filled choice the hint has to read against the primary, not against
+   the page. */
+.cs-v2 .cs-attach-choices .csv2-btn--primary .cs-attach-choice-hint {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* The quality destination picker answers in one click: the four lists are the
@@ -3238,17 +3370,11 @@
   white-space: nowrap;
 }
 
-/* Cancel is a quiet full-width text button here, not a framed one (design). */
-.cs-quality-target-dialog .form-footer .csv2-btn {
+/* In both one-click pickers the only framed actions are the choices, so Cancel
+   spans the footer as the quiet text button — the LOOK comes from the shared
+   `csv2-btn--quiet` variant each dialog asks for; only the width is layout. */
+.cs-quality-target-dialog .form-footer .csv2-btn,
+.cs-attach-dialog .form-footer .csv2-btn {
   width: 100%;
   padding: 6px;
-  background: none;
-  border-color: transparent;
-  color: var(--csv2-muted);
-  font-size: 12px;
-}
-.cs-quality-target-dialog .form-footer .csv2-btn:hover {
-  background: none;
-  border-color: transparent;
-  color: var(--csv2-text);
 }

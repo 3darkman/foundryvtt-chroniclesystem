@@ -2,7 +2,6 @@ import { CSActorSheet } from "./csActorSheet.js";
 import { ChronicleSystem } from "../../system/ChronicleSystem.js";
 import SystemUtils from "../../utils/systemUtils.js";
 import {
-  ABILITY_BASE_RANK,
   LEADER_ROLES,
   TRAINING_LEVELS,
   effectiveEquipment,
@@ -253,8 +252,6 @@ export class CSUnitActorSheet extends CSActorSheet {
         id: item.id,
         name: item.name,
         rating: item.getCSData().rating,
-        // Marks a rank the unit never paid for — the design's "PADRÃO" badge.
-        isDefault: Number(item.getCSData().rating) === ABILITY_BASE_RANK,
         chip: ChronicleSystem.getRollChip(actor, `ability:${item.name}`),
         // The SAME passive the character sheet shows (spec 023): one rule for
         // the static equivalent of a test, so unit and character agree.

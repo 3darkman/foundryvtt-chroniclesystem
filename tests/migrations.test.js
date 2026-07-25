@@ -333,6 +333,18 @@ describe("UnitData.migrateData — removed and coerced keys", () => {
     expect(out.leader).toEqual({ uuid: "", role: "commander" });
   });
 
+  it("U9b leaves a partial leader change alone — it must not add the other key", () => {
+    // `migrateData` also runs over the CHANGES of an update (updateSource cleans
+    // with migrate+partial), so touching an absent key widens the write. Adding
+    // `uuid: ""` here unlinked the leader on every role switch.
+    const out = UnitData.migrateData({ leader: { role: "subcommander" } });
+    expect(out.leader).toEqual({ role: "subcommander" });
+    expect("uuid" in out.leader).toBe(false);
+    expect("role" in UnitData.migrateData({ leader: { uuid: "Actor.a" } }).leader).toBe(
+      false
+    );
+  });
+
   it("U10 sanitises attachedHeroes without ever discarding a reference", () => {
     expect(UnitData.migrateData({ attachedHeroes: "nope" }).attachedHeroes).toBeUndefined();
     expect(
