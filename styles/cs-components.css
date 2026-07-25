@@ -59,6 +59,9 @@
   --csv2-secondary: #e6e6e8;
   --csv2-text: #242021;
   --csv2-bg: #ffffff;
+  /* The quiet surface a plain white block sits on: empty states, the row that
+     names a source, the highlighted (primary) row of a list. */
+  --csv2-bg-soft: #f5f7fb;
   --csv2-area: #dfe5f3;
   --csv2-border: #d3d7e0;
   --csv2-border-soft: #eef0f4;
@@ -1213,6 +1216,21 @@
   color: var(--csv2-on-primary);
   box-shadow: none;
 }
+/* Soft variant — the tinted "this is the current value, click to change it"
+   button (handoff: the unit leader's role toggle). Reads as a state, not as a
+   call to action, which is why it is neither the filled primary nor the plain
+   white secondary. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--soft {
+  background: var(--csv2-area);
+  border-color: var(--csv2-callout-border);
+  color: var(--csv2-primary);
+}
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--soft:hover {
+  background: var(--csv2-area);
+  border-color: var(--csv2-primary);
+  color: var(--csv2-primary);
+  box-shadow: none;
+}
 :is(.cs-v2, .cs-sheet-v2) .csv2-btn--danger {
   background: var(--csv2-bg);
   border-color: var(--csv2-input-border);
@@ -1227,6 +1245,14 @@
   padding: 7px 14px;
   font-size: 11.5px;
   border-radius: 6px;
+}
+/* Icon-only square button (open sheet, revert an evolution): the same variants
+   above supply the colours; this only tightens the box so a lone glyph is not
+   padded like a labelled button. */
+:is(.cs-v2, .cs-sheet-v2) .csv2-btn--icon {
+  padding: 5px;
+  border-radius: 5px;
+  line-height: 1;
 }
 
 /* Segmented toggle (e.g. SVG|PNG, Tintura|Padrão|Semy). */
@@ -1428,6 +1454,21 @@
   background: var(--csv2-primary);
   color: var(--csv2-on-primary);
   border-color: var(--csv2-primary);
+}
+/* Band variant (spec 025, handoff "Nível de Treino"): the same single-select
+   group laid out as equal-width option CARDS instead of inline pills — for a
+   short, fixed set of bands where each option deserves the same weight.
+   `--csv2-band-columns` sets how many sit on a row. */
+.cs-v2 .csv2-chip-group--band {
+  display: grid;
+  grid-template-columns: repeat(var(--csv2-band-columns, 4), minmax(0, 1fr));
+  gap: 8px;
+}
+.cs-v2 .csv2-chip-group--band .csv2-chip {
+  justify-content: center;
+  padding: 11px 8px;
+  border-radius: 7px;
+  font-size: 13.5px;
 }
 
 /* ---------- Repeatable-list card internals (T035) ---------- */

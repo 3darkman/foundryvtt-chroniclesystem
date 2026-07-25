@@ -3,6 +3,7 @@ import { CSActor } from "../module/actors/csActor.js";
 import { damageTotalFromFormula } from "../module/items/csItem.js";
 import { collectEffectModifiers } from "../module/effects/cs-effect-modifiers.js";
 import { CSConstants } from "../module/system/csConstants.js";
+import { effectiveEquipment } from "../module/vocabulary/cs-warfare.js";
 import {
   makeAbilityItem,
   makeFakeUnitActor,
@@ -153,6 +154,66 @@ describe("unit derivation — armour penalty and asoiafDefenseStyle (Acceptance 
     const { modifiers } = collectEffectModifiers(actor);
     expect(modifiers.combat_defense).toBeUndefined();
     expect(modifiers.bulk).toBeUndefined();
+  });
+});
+
+describe("unit equipment — which set each aspect fields (handoff §2)", () => {
+  const typeData = () => ({
+    startingEquipment: {
+      armor: { rating: 1, penalty: 0, bulk: 0 },
+      fightingDamage: "@Fighting",
+      marksmanshipDamage: "",
+      fightingQualities: [{ slug: "start" }],
+      marksmanshipQualities: [],
+    },
+    upgradedEquipment: {
+      armor: { rating: 5, penalty: -2, bulk: 2 },
+      fightingDamage: "@Fighting+3",
+      marksmanshipDamage: "@Marksmanship+1",
+      fightingQualities: [{ slug: "upgraded" }],
+      marksmanshipQualities: [{ slug: "long" }],
+    },
+  });
+
+  it("reads the starting set while nothing is evolved", () => {
+    const equipment = effectiveEquipment(typeData(), {});
+    expect(equipment.armor.rating).toBe(1);
+    expect(equipment.fighting.damage).toBe("@Fighting");
+    expect(equipment.marksmanship.damage).toBe("");
+  });
+
+  it("switches ONLY the evolved aspect to the type's upgrades", () => {
+    const equipment = effectiveEquipment(typeData(), { fighting: true });
+    expect(equipment.fighting.damage).toBe("@Fighting+3");
+    expect(equipment.fighting.qualities).toEqual([{ slug: "upgraded" }]);
+    // Armour and marksmanship were not evolved — they stay where they were.
+    expect(equipment.armor.rating).toBe(1);
+    expect(equipment.marksmanship.qualities).toEqual([]);
+  });
+
+  it("survives a type that has no equipment at all", () => {
+    const equipment = effectiveEquipment(undefined, { armor: true });
+    expect(equipment.armor).toEqual({});
+    expect(equipment.fighting).toEqual({ damage: "", qualities: [] });
+  });
+
+  it("pushes the EVOLVED armour through the collector, not the starting one", () => {
+    const armored = makeUnitTypeItem({
+      id: "infantry",
+      name: "Infantry",
+      slug: "infantry",
+      startingEquipment: { armor: { rating: 1, penalty: 0, bulk: 0 } },
+      upgradedEquipment: { armor: { rating: 5, penalty: -3, bulk: 2 } },
+    });
+    const actor = makeFakeUnitActor({
+      types: [armored],
+      data: { evolvedEquipment: { armor: true } },
+    });
+    actor.appliedEffects = [];
+
+    const { modifiers } = collectEffectModifiers(actor);
+    expect(modifiers.combat_defense[0].mod).toBe(-3);
+    expect(modifiers.bulk[0].mod).toBe(2);
   });
 });
 

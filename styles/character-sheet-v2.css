@@ -296,6 +296,28 @@
   color: var(--csv2-dark);
 }
 
+/* Section-title trailers: an italic aside and a count badge. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-section-hint {
+  font: 400 12px var(--csv2-font-sans);
+  font-style: italic;
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-section-count {
+  font: 600 11px var(--csv2-font-mono);
+  color: var(--csv2-muted-2);
+  background: var(--csv2-secondary);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+/* Inline "nothing here" text — a valid state stated in words, never a slot. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-empty-inline {
+  font: 400 11px var(--csv2-font-sans);
+  font-style: italic;
+  color: var(--csv2-muted);
+}
+
 /* ------------------------------------------------------------------- card -- */
 
 .chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-card {
@@ -354,6 +376,17 @@
   color: var(--csv2-muted-2);
 }
 
+/* A fraction may carry unit words under its numbers (XP: spent / total / free)
+   and mark an overspent figure. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-fraction small {
+  font: 600 10px var(--csv2-font-mono);
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-fraction .is-over {
+  color: var(--csv2-danger);
+}
+
 .chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-callout .cs2-fraction input {
   width: 40px;
   text-align: center;
@@ -380,13 +413,51 @@
   border-top: none;
 }
 
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-row .cs2-stat-label {
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-label {
   font: 500 12.5px var(--csv2-font-sans);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Label + formula note, stacked (handoff §1: "abaixo do nome do campo, uma nota
+   curta descreve a fórmula"). The note is the ONE place the derivation is
+   spelled out, which is why every derived row carries one. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-note {
+  font: 400 9.5px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+
+/* Resource state word (unhurt / wounded / broken) beside the fraction. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-status {
+  font: 600 8.5px var(--csv2-font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-status.is-unhurt {
+  color: var(--csv2-primary);
+}
+
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-status.is-wounded {
+  color: #a06a15;
+}
+
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-status.is-broken {
+  color: var(--csv2-danger);
 }
 
 /* .cs2-stat-fields is deliberately NOT scoped to .cs2-stat-row — it is the
-   generic "value (+/-) value = total" field group, reused as-is by the
-   Movement row (which lives in a .cs2-track-block, not a .cs2-stat-row). */
+   generic "value (+/-) value = total" field group, also used on its own by
+   blocks that are not stat rows. */
 .chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-fields {
   display: flex;
   align-items: center;
@@ -416,26 +487,32 @@
   border-color: transparent;
 }
 
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-fields .cs2-total {
-  width: 32px;
+/* The derived-value box — handoff §1's third state: "read-only é sempre cinza,
+   nunca branco e nunca azul". Declared on its own (not only inside a stat row)
+   because every calculated number wears it: the totals of a stat row, the unit's
+   AR/Penalty/Bulk cells and its damage totals. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-total {
+  display: inline-block;
   box-sizing: border-box;
   text-align: center;
   background: var(--csv2-secondary);
   border: 1px solid transparent;
   border-radius: 3px;
+  padding: 4px 8px;
+  font: 700 13px var(--csv2-font-mono);
+  color: var(--csv2-dark);
+}
+
+/* Inside a field group the boxes share one fixed width, so the `=` signs and
+   the numbers line up down the card. */
+.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-fields .cs2-total {
+  width: 32px;
   padding: 4px 2px;
 }
 
-.chroniclesystem:is(.character, .unit).sheet.actor .cs-sheet-v2 .cs2-stat-fields .cs2-current {
-  width: 32px;
-  box-sizing: border-box;
-  text-align: center;
-  background: var(--csv2-area);
-  border: 1px solid var(--csv2-primary);
-  color: var(--csv2-primary);
-  border-radius: 3px;
-  padding: 4px 2px;
-}
+/* The blue "current" chip that used to trail a stat row is GONE: a resource now
+   reads `CURRENT [white input] / [grey maximum]` through resource-row.hbs
+   (handoff §4). Nothing else styled it, so the rule went with it. */
 
 /* --------------------------------------------------------------- rollable -- */
 

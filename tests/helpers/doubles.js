@@ -173,21 +173,24 @@ export function makeUnitTypeItem({
   grantedAbilities = [],
   wildcardAbilityCount = 0,
   startingEquipment = {},
+  upgradedEquipment = {},
 } = {}) {
+  const equipment = (overrides) => ({
+    armor: { rating: 0, penalty: 0, bulk: 0 },
+    fightingDamage: "",
+    marksmanshipDamage: "",
+    fightingQualities: [],
+    marksmanshipQualities: [],
+    ...overrides,
+  });
   const data = {
     slug: slug ?? "",
     powerCost,
     disciplineModifier,
     grantedAbilities,
     wildcardAbilityCount,
-    startingEquipment: {
-      armor: { rating: 0, penalty: 0, bulk: 0 },
-      fightingDamage: "",
-      marksmanshipDamage: "",
-      fightingQualities: [],
-      marksmanshipQualities: [],
-      ...startingEquipment,
-    },
+    startingEquipment: equipment(startingEquipment),
+    upgradedEquipment: equipment(upgradedEquipment),
   };
   const item = {
     id,

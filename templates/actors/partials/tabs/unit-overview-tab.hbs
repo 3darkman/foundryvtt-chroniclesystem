@@ -1,122 +1,152 @@
-{{!-- spec 025 (US1) — Visão Geral. Derived values are read-only SPANS, never
-      `readonly` inputs: since v13 a readonly input IS submitted, and a derived
-      stat carrying a `name` would be written straight back into the document.
-      Only Health's current value and the two GM modifiers (Defence, Movement)
-      are editable — they are the only persisted fields in this tab. --}}
+{{!-- spec 025 (US1) — Visão Geral, rebuilt against the layout handoff.
+
+      Every derived number goes through the SHARED stat-row/resource-row
+      components (handoff §1: one visual language for values in every window), so
+      the unit and the character can never drift apart. Derived values are
+      read-only SPANS or `readonly` inputs with NO `name`: since v13 a readonly
+      input IS submitted, and a derived stat carrying a name would be written
+      straight back into the document. The only persisted fields here are the
+      training level, Health's current value and the four owner adjustments. --}}
 <div class="tab unit-overview-tab" data-group="primary" data-tab="overview">
     {{!-- The four Training bands as a single-select chip group — the shared
           `.csv2-chip-group` radio primitive, NOT the item sheet's field-cell:
           that cell is a GRID cell (its left hairline is only cancelled by
           `.csv2-field-grid > :nth-child(3n+1)`), so standalone it draws a stray
           rule and takes a third of the row. --}}
-    <section class="cs-unit-section">
-        <h2 class="cs-unit-section-title">{{localize "CS.sheets.unit.training"}}</h2>
-        <div class="csv2-chip-group cs-unit-training">
-            {{#each trainingChoices as |label level|}}
-            <label class="csv2-chip {{#ifEquals level @root.unit.trainingLevel}}is-selected{{/ifEquals}}">
-                <input type="radio" name="system.trainingLevel" value="{{level}}" {{#ifEquals level @root.unit.trainingLevel}}checked{{/ifEquals}} />
-                {{localize label}}
-            </label>
-            {{/each}}
+    <div class="cs2-section-title">
+        <span class="cs2-rail"></span>
+        <span>{{localize "CS.sheets.unit.trainingLevel"}}</span>
+        <em class="cs2-section-hint">{{localize "CS.sheets.unit.trainingHint"}}</em>
+    </div>
+    <div class="csv2-chip-group csv2-chip-group--band">
+        {{#each trainingChoices as |label level|}}
+        <label class="csv2-chip {{#ifEquals level @root.unit.trainingLevel}}is-selected{{/ifEquals}}">
+            <input type="radio" name="system.trainingLevel" value="{{level}}" {{#ifEquals level @root.unit.trainingLevel}}checked{{/ifEquals}} />
+            {{localize label}}
+        </label>
+        {{/each}}
+    </div>
+
+    <div class="cs2-section-title">
+        <span class="cs2-rail"></span>
+        <span>{{localize "CS.sheets.unit.statistics"}}</span>
+    </div>
+
+    <div class="cs2-columns">
+        <div class="cs2-card">
+            <div class="cs2-card-header">{{localize "CS.sheets.unit.calculatedValues"}}</div>
+
+            {{> "systems/chroniclesystem/templates/components/resource-row.hbs"
+                label=(localize "CS.sheets.unit.health")
+                note=(localize "CS.sheets.formulas.health")
+                currentName="system.health.value"
+                current=unit.health.value
+                max=unit.health.max
+                status=health.status
+                statusClass=health.statusClass }}
+
+            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+                label=(localize "CS.sheets.unit.combatDefense")
+                note=combatDefense.note
+                value=combatDefense.value
+                modifierName="system.derivedStats.combatDefense.modifier"
+                modifierValue=combatDefense.modifier
+                total=combatDefense.total }}
+
+            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+                label=(localize "CS.sheets.unit.discipline")
+                note=(localize "CS.sheets.formulas.unitDiscipline")
+                value=discipline.value
+                modifierName="system.discipline.modifier"
+                modifierValue=discipline.modifier
+                total=discipline.total }}
+
+            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+                label=(localize "CS.sheets.unit.movement")
+                note=(localize "CS.sheets.formulas.unitMovement")
+                value=movement.value
+                modifierName="system.movement.modifier"
+                modifierValue=movement.modifier
+                total=movement.total }}
+
+            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+                label=(localize "CS.sheets.unit.powerCost")
+                note=(localize "CS.sheets.formulas.unitPowerCost")
+                value=powerCost.value
+                modifierName="system.powerCost.modifier"
+                modifierValue=powerCost.modifier
+                total=powerCost.total }}
         </div>
-    </section>
 
-    <div class="cs-unit-columns">
-        <section class="csv2-card cs-unit-stats">
-            <div class="csv2-card-header">{{localize "CS.sheets.unit.calculatedValues"}}</div>
-
-            <div class="cs-unit-stat">
-                <span class="csv2-label">{{localize "CS.sheets.unit.health"}}</span>
-                <span class="cs-unit-stat-pair">
-                    <input class="is-mono cs-unit-current" type="text" name="system.health.value" value="{{unit.health.value}}" data-dtype="Number" />
-                    <span class="cs-unit-derived">/ {{unit.health.max}}</span>
-                </span>
-            </div>
-
-            <div class="cs-unit-stat">
-                <span class="csv2-label">{{localize "CS.sheets.unit.combatDefense"}}</span>
-                <span class="cs-unit-stat-pair">
-                    <span class="cs-unit-derived">{{combatDefense.value}}</span>
-                    <span class="cs-unit-operator">+</span>
-                    <input class="is-mono" type="text" name="system.derivedStats.combatDefense.modifier" value="{{combatDefense.modifier}}" data-dtype="Number" />
-                    <span class="cs-unit-operator">=</span>
-                    <span class="cs-unit-derived cs-unit-total">{{combatDefense.total}}</span>
-                </span>
-            </div>
-
-            <div class="cs-unit-stat">
-                <span class="csv2-label">{{localize "CS.sheets.unit.discipline"}}</span>
-                <span class="cs-unit-derived cs-unit-total">{{discipline}}</span>
-            </div>
-
-            <div class="cs-unit-stat">
-                <span class="csv2-label">{{localize "CS.sheets.unit.movement"}}</span>
-                {{#if hasMovement}}
-                <span class="cs-unit-stat-pair">
-                    <span class="cs-unit-derived">{{unit.movement.base}}</span>
-                    <span class="cs-unit-operator">&minus;</span>
-                    <span class="cs-unit-derived">{{unit.movement.bulk}}</span>
-                    <span class="cs-unit-operator">+</span>
-                    <input class="is-mono" type="text" name="system.movement.modifier" value="{{unit.movement.modifier}}" data-dtype="Number" />
-                    <span class="cs-unit-operator">=</span>
-                    <span class="cs-unit-derived cs-unit-total">{{unit.movement.total}}</span>
-                </span>
-                {{else}}
-                <span class="cs-unit-empty">{{localize "CS.sheets.unit.noMovement"}}</span>
-                {{/if}}
-            </div>
-
-            <div class="cs-unit-stat">
-                <span class="csv2-label">{{localize "CS.sheets.unit.powerCost"}}</span>
-                <span class="cs-unit-derived cs-unit-total">{{powerCost}}</span>
-            </div>
-        </section>
-
-        <section class="csv2-card cs-unit-equipment">
-            <div class="csv2-card-header">{{localize "CS.sheets.unit.equipment"}}</div>
+        <div class="cs2-card">
+            <div class="cs2-card-header">{{localize "CS.sheets.unit.equipment"}}</div>
             {{#if equipment}}
-            <div class="cs-unit-equipment-source">{{equipment.typeName}}</div>
+            <div class="cs-unit-equipment-source">
+                <i class="fas fa-star"></i>
+                <strong>{{equipment.typeName}}</strong>
+                <span>{{localize "CS.sheets.unit.primaryTypeLabel"}}</span>
+            </div>
 
             <div class="cs-unit-equipment-block">
-                <span class="csv2-label">{{localize "CS.sheets.unit.armor"}}</span>
-                <span class="cs-unit-armor-values">
-                    <span class="cs-unit-derived" data-tooltip="{{localize 'CS.sheets.item.fields.rating'}}">{{equipment.armor.rating}}</span>
-                    <span class="cs-unit-derived" data-tooltip="{{localize 'CS.sheets.item.fields.penalty'}}">{{equipment.armor.penalty}}</span>
-                    <span class="cs-unit-derived" data-tooltip="{{localize 'CS.sheets.item.fields.bulk'}}">{{equipment.armor.bulk}}</span>
-                </span>
-                <label class="csv2-switch cs-unit-evolve" data-tooltip="{{localize 'CS.sheets.unit.evolveHint'}}">
-                    <input type="checkbox" name="system.evolvedEquipment.armor" {{#if equipment.armorEvolved}}checked{{/if}} />
-                    <span class="csv2-switch-track"></span>
-                    <span class="cs-unit-evolve-label">{{localize "CS.sheets.unit.evolve"}}</span>
-                </label>
+                <div class="cs-unit-equipment-head">
+                    <span class="cs2-stat-label">
+                        {{localize "CS.sheets.unit.armor"}}
+                        {{#if equipment.armor.evolved}}<span class="cs2-tag">{{localize "CS.sheets.unit.evolveLevel"}}</span>{{/if}}
+                    </span>
+                    {{> "systems/chroniclesystem/templates/actors/partials/unit-evolve-controls.hbs" aspect="armor" evolved=equipment.armor.evolved }}
+                </div>
+                <div class="cs-unit-armor-grid">
+                    <div>
+                        <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.ar"}}</div>
+                        <span class="cs2-total">{{equipment.armor.rating}}</span>
+                    </div>
+                    <div>
+                        <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.penalty"}}</div>
+                        <span class="cs2-total">{{equipment.armor.penalty}}</span>
+                    </div>
+                    <div>
+                        <div class="csv2-label">{{localize "CS.sheets.unitTypeItem.bulk"}}</div>
+                        <span class="cs2-total">{{equipment.armor.bulk}}</span>
+                    </div>
+                </div>
             </div>
 
             {{#each equipment.weapons as |weapon|}}
             <div class="cs-unit-equipment-block">
-                <span class="csv2-label">{{localize weapon.label}}</span>
-                {{#if weapon.chip}}
-                {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs" id=weapon.chip.id label=weapon.chip.label}}
-                {{/if}}
-                {{#if weapon.total}}
-                <span class="cs-unit-derived cs-unit-total">{{weapon.total}}</span>
-                {{/if}}
-                <label class="csv2-switch cs-unit-evolve" data-tooltip="{{localize 'CS.sheets.unit.evolveHint'}}">
-                    <input type="checkbox" name="system.evolvedEquipment.{{weapon.key}}" {{#if weapon.evolved}}checked{{/if}} />
-                    <span class="csv2-switch-track"></span>
-                    <span class="cs-unit-evolve-label">{{localize "CS.sheets.unit.evolve"}}</span>
-                </label>
+                <div class="cs-unit-equipment-head">
+                    <span class="cs2-stat-label">
+                        {{localize weapon.label}}
+                        {{#if weapon.evolved}}<span class="cs2-tag">{{localize "CS.sheets.unit.evolveLevel"}}</span>{{/if}}
+                    </span>
+                    {{#if weapon.chip}}
+                    <span class="cs-unit-equipment-fields">
+                        {{> "systems/chroniclesystem/templates/components/rollable-chip.hbs" id=weapon.chip.id label=weapon.chip.label}}
+                        <span class="cs2-total">{{weapon.total}}</span>
+                        {{> "systems/chroniclesystem/templates/actors/partials/unit-evolve-controls.hbs" aspect=weapon.key evolved=weapon.evolved }}
+                    </span>
+                    {{else}}
+                    <em class="cs2-empty-inline">{{localize weapon.unarmed}}</em>
+                    {{/if}}
+                </div>
                 {{#if weapon.qualities.length}}
-                <span class="cs-unit-quality-chips">
+                <div class="cs2-tags">
                     {{#each weapon.qualities as |quality|}}
                     <span class="cs2-tag {{#if quality.missing}}is-missing{{/if}}" {{#if quality.description}}data-tooltip="{{quality.description}}"{{/if}}>{{quality.name}}{{#if quality.parameter}} {{quality.parameter}}{{/if}}</span>
                     {{/each}}
-                </span>
+                </div>
                 {{/if}}
             </div>
             {{/each}}
+
+            <div class="cs-unit-card-note">{{equipment.evolveSource}}</div>
             {{else}}
-            <div class="csv2-list-empty">{{localize "CS.sheets.unit.noEquipment"}}</div>
+            <div class="cs-unit-empty-block">
+                <div class="cs-unit-empty-title">{{localize "CS.sheets.unit.noEquipment"}}</div>
+                <div class="cs-unit-empty-hint">{{localize "CS.sheets.unit.noEquipmentHint"}}</div>
+            </div>
             {{/if}}
-        </section>
+        </div>
     </div>
+
+    <div class="cs-unit-footnote">{{localize "CS.sheets.unit.statsNote"}}</div>
 </div>

@@ -1,11 +1,19 @@
 /* =============================================================================
    unit-sheet-v2.css — LAYOUT ONLY for the Unit sheet (spec 025).
-   Every reusable primitive (tokens, cards, lists, labels, switches, chips,
-   buttons) comes from cs-components.css through the `.cs-sheet-v2` bridge the
-   root <div> carries, and the sheet SHELL (window frame, header, tab bar, body,
-   inputs, prose-mirror) from character-sheet-v2.css, whose selectors this spec
-   widened to `:is(.character, .unit)`. This file must never re-declare one
-   (CLAUDE.md, "Design System (v2) — SSOT, NOT per-window").
+   Every reusable primitive comes from elsewhere and is NEVER re-declared here
+   (CLAUDE.md, "Design System (v2) — SSOT, NOT per-window"):
+
+   - tokens, cards, buttons, chips, tags, lists, the eyebrow label and the
+     passive figure → cs-components.css, through the `.cs-sheet-v2` bridge the
+     root <div> carries;
+   - the sheet SHELL and the whole `cs2-*` value language (section titles,
+     cards, stat rows, totals, grids, callouts, fractions) → character-sheet-v2.css,
+     whose selectors this spec widened to `:is(.character, .unit)` so both
+     sheets speak it. The handoff's §1 rule — one visual language for values in
+     every window — only holds while that stays shared.
+
+   What remains here is the arrangement unique to this window: the equipment
+   block, the type rows, the command slots and the description split.
 
    Rules are scoped `.chroniclesystem.unit.sheet.actor .cs-unit-v2` rather than
    `.cs-unit-v2` alone, on purpose: the pre-redesign sheets (styles/global.css,
@@ -15,208 +23,284 @@
    character sheet documents as its "legacy leak fixes".
    ========================================================================== */
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-columns {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
-  align-items: start;
-}
+/* ------------------------------------------------------------ shared bits -- */
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-section {
-  margin-bottom: 12px;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-section-title {
-  margin: 0 0 8px;
-  padding-left: 8px;
-  border-left: 3px solid var(--csv2-accent, #015ea6);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-stat .csv2-label {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-stat-pair {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-stat input {
-  flex: 0 0 56px;
-  width: 56px;
-  text-align: center;
-}
-
-/* The design's "derived" language: grey field, no border, never editable. */
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-derived {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 40px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: #e6e6e8;
-  font-family: var(--csv2-font-mono);
-  font-size: 12px;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-total {
-  font-weight: 600;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-total.is-over {
-  color: #b04a4a;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-operator {
-  color: #8a8688;
-  font-family: var(--csv2-font-mono);
-  font-size: 12px;
-}
-
+/* "No House" in the header meta — a valid state, said in words. */
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-empty {
-  color: #8a8688;
+  color: var(--csv2-muted);
   font-style: italic;
 }
 
+/* A note that closes a card or a tab, stating a rule the numbers above obey. */
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-card-note {
+  padding: 8px 12px;
+  font: 400 10px/1.5 var(--csv2-font-sans);
+  font-style: italic;
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-footnote {
+  margin: 8px 2px 16px;
+  font: 400 10.5px/1.5 var(--csv2-font-sans);
+  font-style: italic;
+  color: var(--csv2-muted);
+}
+
+/* Empty states are neutral TEXT, never a drop target (handoff §11): a unit with
+   no type, no leader, no heroes or no House is in a valid state. `.is-dashed`
+   is the standalone variant that has no card around it. */
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-empty-block {
+  padding: 22px 16px;
+  text-align: center;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-empty-block.is-dashed {
+  margin-bottom: 16px;
+  border: 1px dashed var(--csv2-callout-border);
+  border-radius: 8px;
+  background: var(--csv2-bg-soft);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-empty-title {
+  margin-bottom: 4px;
+  font: 500 12.5px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-empty-hint {
+  max-width: 440px;
+  margin: 0 auto;
+  font: 400 11px/1.5 var(--csv2-font-sans);
+  font-style: italic;
+  color: var(--csv2-muted);
+  text-wrap: pretty;
+}
+
+/* ----------------------------------------------------- overview: equipment -- */
+
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-source {
-  padding: 4px 12px;
-  color: #5a5658;
-  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  background: var(--csv2-bg-soft);
+  border-bottom: 1px solid var(--csv2-border-soft);
+  font: 400 10px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-source i {
+  color: var(--csv2-primary);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-source strong {
+  font: 600 11.5px var(--csv2-font-sans);
+  color: var(--csv2-dark);
 }
 
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-block {
+  padding: 8px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  padding: 6px 12px;
-  border-top: 1px solid #eef0f4;
 }
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-block .csv2-label {
-  flex: 1 1 100%;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-armor-values {
-  display: inline-flex;
-  gap: 4px;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-evolve {
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-equipment-fields {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-evolve-label {
-  font-size: 10px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #5a5658;
+/* AR / Penalty / Bulk read as ONE armour, so they share a row and evolve
+   together (handoff §2). */
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-armor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-quality-chips {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 4px;
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-armor-grid .csv2-label {
+  display: block;
+  margin-bottom: 4px;
 }
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-row,
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-ability-row {
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-armor-grid .cs2-total {
+  display: block;
+}
+
+/* --------------------------------------------------- composition: types --- */
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-row {
+  padding: 9px 12px;
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-row.is-primary {
+  background: var(--csv2-bg-soft);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-line {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
+/* The star IS the primary switch — one click promotes a type (contract C4). */
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-primary-star {
-  flex: 0 0 auto;
-  width: 26px;
-  padding: 0;
-  border: none;
-  background: none;
-  color: #9a9698;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--csv2-border);
+  border-radius: 6px;
+  background: var(--csv2-bg);
+  color: var(--csv2-muted);
   cursor: pointer;
+  line-height: 1;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-primary-star span {
+  font: 700 8px var(--csv2-font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-primary-star.is-primary {
-  color: var(--csv2-accent, #015ea6);
+  background: var(--csv2-area);
+  border-color: var(--csv2-callout-border);
+  color: var(--csv2-primary);
 }
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-name,
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-ability-name {
-  flex: 0 0 30%;
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-name {
+  flex: 1 1 auto;
   min-width: 0;
-  font-weight: 600;
+  font: 600 13.5px var(--csv2-font-sans);
+  color: var(--csv2-dark);
   cursor: pointer;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-cost {
+  font: 700 13px var(--csv2-font-mono);
 }
 
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-type-grants {
   display: flex;
-  flex: 1 1 auto;
   flex-wrap: wrap;
-  gap: 4px;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-ability-rating {
-  flex: 0 0 56px;
-  width: 56px;
-  margin-left: auto;
-  text-align: center;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-slot {
-  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  margin-top: 7px;
 }
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-slot img {
-  flex: 0 0 auto;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 4px;
-  object-fit: cover;
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 8px 2px 18px;
+  font: 500 11px var(--csv2-font-sans);
+  color: var(--csv2-muted-2);
 }
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-name {
-  flex: 1 1 auto;
-  min-width: 0;
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-legend .fas {
+  color: var(--csv2-primary);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-legend .far {
+  color: var(--csv2-muted);
+}
+
+/* ----------------------------------------------- composition: abilities --- */
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-ability-name {
   font-weight: 600;
   cursor: pointer;
 }
 
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-role-toggle {
-  display: inline-flex;
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-ability-rating {
+  width: 42px;
+  text-align: center;
+}
+
+/* -------------------------------------------------------- command slots --- */
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-slot {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-slot.is-hero {
+  border-top: 1px solid var(--csv2-border-soft);
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-slot img {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-slot.is-hero img {
+  width: 38px;
+  height: 38px;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
+  min-width: 0;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-name {
+  font: 700 13.5px var(--csv2-font-sans);
+  color: var(--csv2-dark);
+  cursor: pointer;
+}
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-command-sub {
+  font: 500 10.5px var(--csv2-font-sans);
+  color: var(--csv2-muted);
+}
+
+/* ---------------------------------------------------------- description --- */
+
+.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-description-layout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
 }
 
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-portrait {
-  float: left;
-  margin: 0 12px 12px 0;
-}
-
-.chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-portrait .profile-img {
-  width: 160px;
-  border: none;
-  border-radius: 6px;
+  width: 150px;
+  height: 150px;
+  border: 1px solid var(--csv2-border);
+  border-radius: 7px;
+  object-fit: cover;
+  cursor: pointer;
 }
 
 .chroniclesystem.unit.sheet.actor .cs-unit-v2 .cs-unit-description-body prose-mirror {
   display: block;
   min-height: 220px;
+  padding: 4px 8px;
 }

@@ -13,21 +13,25 @@
         <div class="cs2-card">
             <div class="cs2-card-header">Intrigue</div>
 
+            {{!-- handoff §4: the two defences and Movement read
+                  `base + modifier = total`, and the two resources read
+                  `CURRENT / max` — the same language the Unit sheet speaks. The
+                  note under each label carries the REAL formula, replacing the
+                  prototype's `[código: informar fórmula]` marker. --}}
             {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
                 label="Intrigue Defense"
+                note=(localize "CS.sheets.formulas.intrigueDefense")
                 value=character.derivedStats.intrigueDefense.value
                 modifierName="system.derivedStats.intrigueDefense.modifier"
                 modifierValue=character.derivedStats.intrigueDefense.modifier
                 total=character.derivedStats.intrigueDefense.total }}
 
-            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+            {{> "systems/chroniclesystem/templates/components/resource-row.hbs"
                 label="Composure"
-                value=character.derivedStats.composure.value
-                modifierName="system.derivedStats.composure.modifier"
-                modifierValue=character.derivedStats.composure.modifier
-                total=character.derivedStats.composure.total
+                note=(localize "CS.sheets.formulas.composure")
                 currentName="system.derivedStats.composure.current"
-                current=character.derivedStats.composure.current }}
+                current=character.derivedStats.composure.current
+                max=character.derivedStats.composure.total }}
 
             <div class="cs2-track-block">
                 <div class="cs2-track-label">Frustration</div>
@@ -84,39 +88,31 @@
 
             {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
                 label="Combat Defense"
+                note=combatDefenseNote
                 value=character.derivedStats.combatDefense.value
                 modifierName="system.derivedStats.combatDefense.modifier"
                 modifierValue=character.derivedStats.combatDefense.modifier
                 total=character.derivedStats.combatDefense.total }}
 
-            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+            {{> "systems/chroniclesystem/templates/components/resource-row.hbs"
                 label="Health"
-                value=character.derivedStats.health.value
-                modifierName="system.derivedStats.health.modifier"
-                modifierValue=character.derivedStats.health.modifier
-                total=character.derivedStats.health.total
+                note=(localize "CS.sheets.formulas.health")
                 currentName="system.derivedStats.health.current"
-                current=character.derivedStats.health.current }}
+                current=character.derivedStats.health.current
+                max=character.derivedStats.health.total }}
 
             <div class="cs2-track-block">
                 <div class="cs2-track-label">Fatigue</div>
                 {{> (ratingCheckbox) max=character.derivedStats.fatigue.total currentValue=character.derivedStats.fatigue.current dataType="Fatigue" }}
             </div>
 
-            <div class="cs2-track-block">
-                <div class="cs2-track-label">Movement</div>
-                <div class="cs2-stat-fields">
-                    <input type="text" value="{{character.movement.base}}" placeholder="Base" readonly="readonly"/>
-                    <span class="cs2-op">+</span>
-                    <input type="text" value="{{character.movement.runBonus}}" placeholder="Run Bonus" readonly="readonly"/>
-                    <span class="cs2-op">&minus;</span>
-                    <input type="text" value="{{character.movement.bulk}}" placeholder="Bulk" readonly="readonly"/>
-                    <span class="cs2-op">+</span>
-                    <input name="system.movement.modifier" type="text" value="{{character.movement.modifier}}" placeholder="Modifier" data-dtype="Number"/>
-                    <span class="cs2-op">=</span>
-                    <span class="cs2-total">{{character.movement.total}}</span>
-                </div>
-            </div>
+            {{> "systems/chroniclesystem/templates/components/stat-row.hbs"
+                label="Movement"
+                note=(localize "CS.sheets.formulas.characterMovement")
+                value=movementValue
+                modifierName="system.movement.modifier"
+                modifierValue=character.movement.modifier
+                total=character.movement.total }}
 
             <div class="cs2-split">
                 <div>

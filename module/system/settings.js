@@ -191,4 +191,25 @@ export function passiveValuesVisible() {
   }
 }
 
+/**
+ * The ASoIaF armour-penalty edition rule (does the armour penalty subtract from
+ * Combat Defence?). Read here so a sheet can STATE the formula it is showing
+ * without repeating the literal key or the guard; an unregistered setting (a
+ * Vitest double, or a world opened before the setting existed) reads as `false`,
+ * the Chronicle default.
+ * @returns {boolean}
+ */
+export function asoiafDefenseStyle() {
+  try {
+    return (
+      game.settings.get(
+        CSConstants.Settings.SYSTEM_NAME,
+        CSConstants.Settings.ASOIAF_DEFENSE_STYLE
+      ) === true
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default registerSystemSettings;

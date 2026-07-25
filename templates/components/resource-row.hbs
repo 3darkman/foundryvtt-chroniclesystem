@@ -1,0 +1,22 @@
+{{!-- Shared resource row: `CURRENT [editable] / [calculated maximum, grey]` —
+      the design handoff's §1 "recurso com atual/máximo" pattern, shared by the
+      character's Composure and Health and by the unit's Health. It REPLACES the
+      old blue "current" chip that trailed the stat row (handoff §4).
+
+      Only the current value is editable; the maximum is derived, so it is a
+      SPAN, never a readonly input (v13 submits those). `status` is an optional
+      state word (unhurt / wounded / broken) whose colour comes from
+      `statusClass`. --}}
+<div class="cs2-stat-row">
+    <div class="cs2-stat-head">
+        <span class="cs2-stat-label">{{label}}</span>
+        {{#if note}}<span class="cs2-stat-note">{{note}}</span>{{/if}}
+    </div>
+    <div class="cs2-stat-fields">
+        {{#if status}}<span class="cs2-stat-status {{statusClass}}">{{status}}</span>{{/if}}
+        <span class="csv2-label">{{localize "CS.sheets.generalLabels.current"}}</span>
+        <input name="{{currentName}}" type="text" value="{{current}}" title="{{localize 'CS.sheets.generalLabels.current'}}" data-dtype="Number"/>
+        <span class="cs2-op">/</span>
+        <span class="cs2-total" title="{{localize 'CS.sheets.generalLabels.max'}}">{{max}}</span>
+    </div>
+</div>

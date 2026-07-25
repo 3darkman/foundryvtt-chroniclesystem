@@ -28,6 +28,7 @@ export const preloadHandlebarsTemplates = async function () {
     "systems/chroniclesystem/templates/actors/partials/tabs/unit-composition-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/unit-command-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/unit-description-tab.hbs",
+    "systems/chroniclesystem/templates/actors/partials/unit-evolve-controls.hbs",
 
     "systems/chroniclesystem/templates/actors/partials/tabs/resources-tab.hbs",
     "systems/chroniclesystem/templates/actors/partials/tabs/events-tab.hbs",
@@ -39,6 +40,7 @@ export const preloadHandlebarsTemplates = async function () {
     "systems/chroniclesystem/templates/components/rating-checkbox.hbs",
     "systems/chroniclesystem/templates/components/rollable-chip.hbs",
     "systems/chroniclesystem/templates/components/stat-row.hbs",
+    "systems/chroniclesystem/templates/components/resource-row.hbs",
     "systems/chroniclesystem/templates/components/house-resource-item.hbs",
     "systems/chroniclesystem/templates/components/member-list-item.hbs",
     "systems/chroniclesystem/templates/components/resource-holdings.hbs",

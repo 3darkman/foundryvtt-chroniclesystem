@@ -87,6 +87,41 @@ export function pickEffectivePrimaryType(types = [], primarySlug = "") {
   return oldest;
 }
 
+/**
+ * spec 025 (design handoff §2 "Equipamento") — the equipment a Unit actually
+ * fields, resolved ASPECT BY ASPECT: armour, fighting and marksmanship each read
+ * the primary type's Equipment Upgrades when that aspect is evolved, and its
+ * Starting Equipment otherwise. Evolving the armour therefore changes AR,
+ * Penalty and Bulk together — and, because Bulk feeds Movement, the unit's
+ * Movement follows.
+ *
+ * ONE home for that decision: the sheet renders what this returns and the
+ * modifier collector derives from the same call, so the numbers on the Overview
+ * tab and the numbers in the derivation can never disagree. Pure — data in,
+ * data out.
+ *
+ * @param {object} typeData the primary Unit Type's system data
+ * @param {{armor?: boolean, fighting?: boolean, marksmanship?: boolean}} evolved
+ * @returns {{armor: object, fighting: {damage: string, qualities: Array},
+ *   marksmanship: {damage: string, qualities: Array}}}
+ */
+export function effectiveEquipment(typeData, evolved = {}) {
+  const starting = typeData?.startingEquipment ?? {};
+  const upgraded = typeData?.upgradedEquipment ?? {};
+  const setFor = (aspect) => (evolved?.[aspect] ? upgraded : starting);
+  return {
+    armor: setFor("armor").armor ?? {},
+    fighting: {
+      damage: setFor("fighting").fightingDamage ?? "",
+      qualities: setFor("fighting").fightingQualities ?? [],
+    },
+    marksmanship: {
+      damage: setFor("marksmanship").marksmanshipDamage ?? "",
+      qualities: setFor("marksmanship").marksmanshipQualities ?? [],
+    },
+  };
+}
+
 export function movementProfileFor(bulkTotal = 0) {
   return {
     base: UNIT_BASE_MOVEMENT,

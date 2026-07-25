@@ -2,10 +2,13 @@ import { CSActorSheet } from "./csActorSheet.js";
 import { ChronicleSystem } from "../../system/ChronicleSystem.js";
 import SystemUtils from "../../utils/systemUtils.js";
 import {
+  ABILITY_BASE_RANK,
   LEADER_ROLES,
   TRAINING_LEVELS,
+  effectiveEquipment,
   unitTypeSlug,
 } from "../../vocabulary/cs-warfare.js";
+import { asoiafDefenseStyle } from "../../system/settings.js";
 import { abilityBySlug } from "../../vocabulary/cs-specialty-catalog.js";
 import { grantTypeAbilities } from "../cs-unit-type-provisioning.js";
 import { canBeHero, canBeLeader } from "../cs-unit-relations.js";
@@ -21,18 +24,39 @@ const EQUIPMENT_WEAPONS = [
   {
     key: "fighting",
     abilitySlug: "fighting",
-    damageKey: "fightingDamage",
-    qualitiesKey: "fightingQualities",
     labelKey: "CS.sheets.unit.fightingDamage",
+    unarmedKey: "CS.sheets.unit.noFightingDamage",
   },
   {
     key: "marksmanship",
     abilitySlug: "marksmanship",
-    damageKey: "marksmanshipDamage",
-    qualitiesKey: "marksmanshipQualities",
     labelKey: "CS.sheets.unit.marksmanshipDamage",
+    unarmedKey: "CS.sheets.unit.noMarksmanshipDamage",
   },
 ];
+
+const EVOLVABLE_ASPECTS = ["armor", "fighting", "marksmanship"];
+
+/** The role the leader's single toggle switches to (Commander ⇄ Sub-commander). */
+function nextLeaderRole(role) {
+  const index = LEADER_ROLES.indexOf(role);
+  return LEADER_ROLES[(index + 1) % LEADER_ROLES.length];
+}
+
+/**
+ * The Health state word the design shows beside the fraction (handoff §5,
+ * "estados de Saúde ilesa/ferida/destroçada"): at or below zero the unit is
+ * broken, below its maximum it is wounded, otherwise unhurt.
+ * @returns {{key: string, statusClass: string}} the localization key's last
+ *   segment and the class that colours it
+ */
+function healthState(value, max) {
+  const current = Number(value) || 0;
+  if (current <= 0) return { key: "broken", statusClass: "is-broken" };
+  if (current < (Number(max) || 0))
+    return { key: "wounded", statusClass: "is-wounded" };
+  return { key: "unhurt", statusClass: "is-unhurt" };
+}
 
 export class CSUnitActorSheet extends CSActorSheet {
   itemTypesPermitted = ["unitType", "ability"];
@@ -50,6 +74,8 @@ export class CSUnitActorSheet extends CSActorSheet {
     form: { submitOnChange: true },
     actions: {
       setPrimaryType: CSUnitActorSheet._onSetPrimaryType,
+      removeUnitType: CSUnitActorSheet._onRemoveUnitType,
+      setEvolved: CSUnitActorSheet._onSetEvolved,
       setLeaderRole: CSUnitActorSheet._onSetLeaderRole,
       clearLeader: CSUnitActorSheet._onClearLeader,
       removeHero: CSUnitActorSheet._onRemoveHero,
@@ -97,12 +123,34 @@ export class CSUnitActorSheet extends CSActorSheet {
       ])
     );
 
-    context.powerCost = unit.powerCost ?? 0;
-    context.discipline = unit.discipline ?? 0;
+    // Every derived block reaches the template as `{value, modifier, total}` —
+    // the shape the shared stat-row renders. `powerCost`/`discipline` are SCHEMA
+    // objects (not scalars): rendering them straight would print [object Object].
+    context.powerCost = unit.powerCost;
+    context.discipline = unit.discipline;
+    context.movement = {
+      // The handoff collapses the derivation into ONE grey "calculated" number:
+      // base minus the bulk penalty, with the formula stated in the note.
+      value:
+        (Number(unit.movement.base) || 0) - (Number(unit.movement.bulk) || 0),
+      modifier: unit.movement.modifier,
+      total: unit.movement.total,
+    };
     context.xp = unit.xp ?? { total: 0, spent: 0, free: 0 };
     context.xpOverSpent = context.xp.free < 0;
-    context.combatDefense = unit.derivedStats.combatDefense;
-    context.hasMovement = !!actor.effectivePrimaryType();
+    context.combatDefense = {
+      ...unit.derivedStats.combatDefense,
+      note: SystemUtils.localize(
+        asoiafDefenseStyle()
+          ? "CS.sheets.formulas.combatDefenseAsoiaf"
+          : "CS.sheets.formulas.combatDefense"
+      ),
+    };
+    const health = healthState(unit.health.value, unit.health.max);
+    context.health = {
+      status: SystemUtils.localize(`CS.sheets.unit.healthStates.${health.key}`),
+      statusClass: health.statusClass,
+    };
 
     await this._prepareEquipmentContext(context, actor);
     this._prepareCompositionContext(context, actor);
@@ -124,8 +172,15 @@ export class CSUnitActorSheet extends CSActorSheet {
    * spec 025 (contract unit-derivation.md C6/C9) — the Overview tab's Equipment
    * block, sourced from the EFFECTIVE PRIMARY Unit Type. Each weapon renders a
    * live roll chip (the ability test) plus the INTEGER damage total parsed from
-   * the type's `@Ability±n` formula — never the raw formula string. Phase 1 reads
-   * the STARTING equipment regardless of the evolve flags (they are inert).
+   * the type's `@Ability±n` formula — never the raw formula string.
+   *
+   * WHICH set each aspect reads — Starting Equipment or the type's Upgrades — is
+   * the shared `effectiveEquipment` decision, the same one the modifier collector
+   * derives Defence and Bulk from, so what the tab shows and what the unit's
+   * numbers say can never diverge.
+   *
+   * A weapon with no damage formula gets NO chip: it is not armed for that kind
+   * of attack, and the design states so in words instead of offering a roll.
    */
   async _prepareEquipmentContext(context, actor) {
     const primaryType = actor.effectivePrimaryType();
@@ -134,32 +189,39 @@ export class CSUnitActorSheet extends CSActorSheet {
       return;
     }
 
-    const equipment = primaryType.getCSData().startingEquipment;
+    const evolved = actor.getCSData().evolvedEquipment;
+    const equipment = effectiveEquipment(primaryType.getCSData(), evolved);
     const resolve = await qualityDefinitionResolver();
     const weapons = EQUIPMENT_WEAPONS.map((weapon) => {
       const [owned] = actor.getAbilityBySlug(weapon.abilitySlug);
       const abilityName =
         owned?.name ?? abilityBySlug(weapon.abilitySlug)?.name ?? "";
+      const { damage, qualities } = equipment[weapon.key];
+      const total = damageTotalFromFormula(actor, damage);
       return {
         key: weapon.key,
         label: weapon.labelKey,
-        chip: abilityName
-          ? ChronicleSystem.getRollChip(actor, `ability:${abilityName}`)
-          : null,
-        total: damageTotalFromFormula(actor, equipment[weapon.damageKey]),
-        evolved: actor.getCSData().evolvedEquipment[weapon.key],
+        unarmed: weapon.unarmedKey,
+        chip:
+          abilityName && total !== null
+            ? ChronicleSystem.getRollChip(actor, `ability:${abilityName}`)
+            : null,
+        total,
+        evolved: evolved[weapon.key],
         // No list path: on the Unit sheet these chips are READ-ONLY. The list is
         // authored on the Unit Type item, and a bound input here would try to
         // write the type's data into the actor's own submit.
-        qualities: qualityRefRows(equipment[weapon.qualitiesKey], resolve, ""),
+        qualities: qualityRefRows(qualities, resolve, ""),
       };
     });
 
     context.equipment = {
       typeName: primaryType.name,
-      armor: equipment.armor,
-      armorEvolved: actor.getCSData().evolvedEquipment.armor,
+      armor: { ...equipment.armor, evolved: evolved.armor },
       weapons,
+      evolveSource: SystemUtils.format("CS.sheets.unit.evolveSource", {
+        name: primaryType.name,
+      }),
     };
   }
 
@@ -191,7 +253,12 @@ export class CSUnitActorSheet extends CSActorSheet {
         id: item.id,
         name: item.name,
         rating: item.getCSData().rating,
+        // Marks a rank the unit never paid for — the design's "PADRÃO" badge.
+        isDefault: Number(item.getCSData().rating) === ABILITY_BASE_RANK,
         chip: ChronicleSystem.getRollChip(actor, `ability:${item.name}`),
+        // The SAME passive the character sheet shows (spec 023): one rule for
+        // the static equivalent of a test, so unit and character agree.
+        passive: ChronicleSystem.getActorPassiveValue(actor, item.name),
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -226,13 +293,11 @@ export class CSUnitActorSheet extends CSActorSheet {
           img: leaderActor.img,
           role: unit.leader.role,
           roleLabel: `CS.sheets.unit.leaderRoles.${unit.leader.role}`,
+          // The design shows ONE button carrying the current role; clicking it
+          // switches to the other one, so the button holds where it is going.
+          nextRole: nextLeaderRole(unit.leader.role),
         }
       : null;
-    context.leaderRoles = LEADER_ROLES.map((role) => ({
-      role,
-      label: `CS.sheets.unit.leaderRoles.${role}`,
-      selected: unit.leader.role === role,
-    }));
 
     context.attachedHeroes = (unit.attachedHeroes ?? [])
       .filter((hero) => hero.uuid && hero.uuid !== unit.leader.uuid)
@@ -439,5 +504,37 @@ export class CSUnitActorSheet extends CSActorSheet {
     );
     if (!owned) return;
     await this.actor.update({ "system.primaryTypeSlug": slug });
+  }
+
+  /**
+   * Action: take an assigned Unit Type off the unit (contract C5). Only the item
+   * is deleted here — withdrawing the abilities IT granted rides the actor's own
+   * delete hook, so the same cleanup runs however the type is removed. The
+   * primary pointer is left alone: `effectivePrimaryType` already falls back to
+   * the oldest remaining type when its slug no longer matches.
+   */
+  static async _onRemoveUnitType(event, target) {
+    event.preventDefault();
+    if (!this.actor.isOwner || !this.isEditable) return;
+    const item = this.actor.items.get(target.dataset.itemId);
+    if (item?.type !== "unitType") return;
+    await item.delete();
+  }
+
+  /**
+   * Action: evolve ONE equipment aspect, or revert it. The flag decides which of
+   * the primary type's two equipment sets that aspect reads (`effectiveEquipment`),
+   * so a single update re-derives the sheet, the Defence and the Movement.
+   * @param {Event} event
+   * @param {HTMLElement} target carries data-aspect and data-evolved
+   */
+  static async _onSetEvolved(event, target) {
+    event.preventDefault();
+    if (!this.actor.isOwner || !this.isEditable) return;
+    const aspect = target.dataset.aspect;
+    if (!EVOLVABLE_ASPECTS.includes(aspect)) return;
+    await this.actor.update({
+      [`system.evolvedEquipment.${aspect}`]: target.dataset.evolved === "true",
+    });
   }
 }
